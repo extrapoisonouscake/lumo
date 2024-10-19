@@ -106,7 +106,7 @@ export async function login(formData: LoginSchema) {
     )) {
       cookieStore.set(`myed.${name}`, value || "");
     }
-    redirect("/");
+    redirect("/grades");
   } catch (e) {
     if (isRedirectError(e)) throw e;
     console.log(e);
