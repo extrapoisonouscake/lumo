@@ -6,32 +6,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { fetchMyEdPage } from "@/helpers/fetchMyEdPage";
 
-import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import { JSDOM } from "jsdom";
-import { cookies } from "next/headers";
 export default async function Page() {
-  const myEdCookies = [...cookies()]
-    .filter(
-      ([name]) =>
-        name.startsWith("myed.") &&
-        [
-          "ApplicationGatewayAffinity",
-          "ApplicationGatewayAffinityCORS",
-          "JSESSIONID",
-          "deploymentId",
-        ]
-          .map((e) => `myed.${e}`)
-          .includes(name)
-    )
-    .map(([name, cookie]) => `${name.replace("myed.", "")}=${cookie.value}`)
-    .join("; ");
-  console.log({ myEdCookies });
-  const htmlResponse = await fetch(getEndpointUrl("grades"), {
-    headers: { Cookie: myEdCookies },
-  });
-  const html = await htmlResponse.text();
-console.log(html)
+  const html = await fetchMyEdPage("grades");
+  console.log(html);
   const dom = new JSDOM(html);
   const classesTable = dom.window.document.getElementById("dataGrid");
   if (!classesTable) return null;

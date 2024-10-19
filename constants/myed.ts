@@ -3,3 +3,9 @@ export const MYED_ENDPOINTS = {
   login: "logon.do",
   grades: "portalClassList.do",
 } as const;
+export const MYED_AUTHENTICATION_COOKIES_NAMES = [
+  "JSESSIONID",
+  "deploymentId",
+  "ApplicationGatewayAffinity",
+  "ApplicationGatewayAffinityCORS",
+];

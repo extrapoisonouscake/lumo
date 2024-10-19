@@ -1,17 +1,14 @@
 "use server";
 import { LoginSchema, loginSchema } from "@/app/login/validation";
+import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
+import { getFullCookieName } from "@/helpers/getFullCookieName";
 import * as cookie from "cookie";
 import { JSDOM } from "jsdom";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-const neededCookies = [
-  "ApplicationGatewayAffinity",
-  "ApplicationGatewayAffinityCORS",
-  "JSESSIONID",
-  "deploymentId",
-];
+
 const HTML_TOKEN_INTERNAL_NAME = "org.apache.struts.taglib.html.TOKEN";
 export async function login(formData: LoginSchema) {
   try {
@@ -40,6 +37,7 @@ export async function login(formData: LoginSchema) {
         HTML_TOKEN_INTERNAL_NAME
       )[0] as HTMLInputElement
     ).value;
+    console.log({ htmlToken });
     const loginFormData = new FormData();
     loginFormData.append(HTML_TOKEN_INTERNAL_NAME, htmlToken);
     loginFormData.append("userEvent", "930");
@@ -99,12 +97,12 @@ export async function login(formData: LoginSchema) {
     }
     console.log({ cookiesToAdd });
     const cookieStore = cookies();
-    cookieStore.set("myed.username", username);
-    cookieStore.set("myed.password", password);
+    cookiesToAdd.username = username;
+    cookiesToAdd.password = password;
     for (const [name, value] of Object.entries(cookiesToAdd).filter(([name]) =>
-      neededCookies.includes(name)
+      MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
     )) {
-      cookieStore.set(`myed.${name}`, value || "");
+      cookieStore.set(getFullCookieName(name), value || "");
     }
     redirect("/grades");
   } catch (e) {
@@ -112,4 +110,11 @@ export async function login(formData: LoginSchema) {
     console.log(e);
     return { message: "An unexpected error occurred. Try again later." };
   }
+}
+export async function logOut() {
+  const cookieStore = cookies();
+  for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
+    cookieStore.delete(getFullCookieName(name));
+  }
+  redirect("/login");
 }

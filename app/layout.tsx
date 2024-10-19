@@ -1,3 +1,4 @@
+import { LogOut } from "@/components/layout/LogOut";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
@@ -16,6 +17,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             disableTransitionOnChange
           >
             <Toaster position="bottom-center" />
+            <LogOut />
             {children}
           </ThemeProvider>
         </body>
