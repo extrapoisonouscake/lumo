@@ -1,0 +1,115 @@
+"use server";
+import { LoginSchema, loginSchema } from "@/app/login/validation";
+import { getEndpointUrl } from "@/helpers/getEndpointUrl";
+import * as cookie from "cookie";
+import { JSDOM } from "jsdom";
+import { isRedirectError } from "next/dist/client/components/redirect";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+const neededCookies = [
+  "ApplicationGatewayAffinity",
+  "ApplicationGatewayAffinityCORS",
+  "JSESSIONID",
+  "deploymentId",
+];
+const HTML_TOKEN_INTERNAL_NAME = "org.apache.struts.taglib.html.TOKEN";
+export async function login(formData: LoginSchema) {
+  try {
+    try {
+      loginSchema.parse(formData);
+    } catch {
+      return { message: "Invalid parameters." };
+    }
+    const { username, password } = formData;
+    const initialResponse = await fetch(getEndpointUrl("login"), {
+      credentials: "include",
+    });
+    console.log({ initialResponse });
+    if (!initialResponse.ok) {
+      console.log("1");
+      throw new Error("Failed"); //!
+    }
+
+    const cookiesString = initialResponse.headers.getSetCookie();
+    if (!cookiesString) throw new Error("Failed"); //!
+    let cookiesToAdd = cookie.parse(cookiesString.join("; "));
+    const html = await initialResponse.text();
+    const initialDom = new JSDOM(html);
+    const htmlToken = (
+      initialDom.window.document.getElementsByName(
+        HTML_TOKEN_INTERNAL_NAME
+      )[0] as HTMLInputElement
+    ).value;
+    const loginFormData = new FormData();
+    loginFormData.append(HTML_TOKEN_INTERNAL_NAME, htmlToken);
+    loginFormData.append("userEvent", "930");
+    loginFormData.append("deploymentId", "aspen");
+    loginFormData.append("scrollX", "0");
+    loginFormData.append("scrollY", "0");
+    loginFormData.append("mobile", "false");
+    loginFormData.append("formFocusField", "username");
+    loginFormData.append("username", username);
+    loginFormData.append("password", password);
+    loginFormData.append("districtId", "Ent");
+    loginFormData.append("idpName", "BCSC Production SSO");
+    const loginResponse = await fetch(getEndpointUrl("login"), {
+      method: "POST",
+      // redirect: "manual",
+      body: loginFormData,
+      headers: {
+        Cookie: Object.entries(cookiesToAdd)
+          .map((c) => cookie.serialize(c[0], c[1] || ""))
+          .join("; "),
+      },
+    });
+
+    const loginHtml = await loginResponse.text();
+    console.log({ loginHtml });
+    if (`${loginResponse.status}`[0] !== "3") {
+      if (!loginResponse.ok) {
+        throw new Error("Failed"); //!
+      }
+      const loginDom = new JSDOM(loginHtml);
+      if (!loginDom.window.document.getElementById("pageMenuContainer")) {
+        const errorMessageScriptContent = [
+          ...loginDom.window.document.querySelectorAll(
+            'script[language="JavaScript"]'
+          ),
+        ]
+          .filter((elem) => !elem.getAttribute("type"))
+          .map((e) => e.textContent)
+          .filter(Boolean);
+        console.log({ errorMessageScriptContent });
+        if (errorMessageScriptContent) {
+          const errorMessage = errorMessageScriptContent
+            .map(
+              (c) =>
+                (c as NonNullable<typeof c>).match(
+                  /var\s+(\w+)\s*=\s*(['"`])(.*?)\2\s*;/
+                )?.[3]
+            )
+            .filter(Boolean)[0];
+          if (errorMessage) return { message: errorMessage };
+        }
+      }
+    }
+    const cookiesStringToAdd = loginResponse.headers.get("Set-Cookie");
+    if (cookiesStringToAdd) {
+      cookiesToAdd = { ...cookiesToAdd, ...cookie.parse(cookiesStringToAdd) };
+    }
+    console.log({ cookiesToAdd });
+    const cookieStore = cookies();
+    cookieStore.set("myed.username", username);
+    cookieStore.set("myed.password", password);
+    for (const [name, value] of Object.entries(cookiesToAdd).filter(([name]) =>
+      neededCookies.includes(name)
+    )) {
+      cookieStore.set(`myed.${name}`, value || "");
+    }
+    redirect("/");
+  } catch (e) {
+    if (isRedirectError(e)) throw e;
+    console.log(e);
+    return { message: "An unexpected error occurred. Try again later." };
+  }
+}
