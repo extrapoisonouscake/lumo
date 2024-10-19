@@ -31,7 +31,7 @@ export default async function Page() {
     headers: { Cookie: myEdCookies },
   });
   const html = await htmlResponse.text();
-
+console.log(html)
   const dom = new JSDOM(html);
   const classesTable = dom.window.document.getElementById("dataGrid");
   if (!classesTable) return null;
