@@ -1,8 +1,8 @@
 import { LogOut } from "@/components/layout/LogOut";
-import { ThemeProvider } from "@/components/theme-provider";
 import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import { Providers } from "./Providers";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,16 +10,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <html lang="en" suppressHydrationWarning>
         <head />
         <body className="p-4">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+          <Providers>
             <Toaster position="bottom-center" />
             <LogOut />
             {children}
-          </ThemeProvider>
+          </Providers>
         </body>
       </html>
     </>

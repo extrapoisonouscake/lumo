@@ -1,36 +1,25 @@
-import { UseFormReturn } from "react-hook-form";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "./form";
-import { Input, InputProps } from "./input";
+import { Input, InputProps } from "@nextui-org/input";
+import { useFormContext } from "react-hook-form";
+
+import { WithRequired } from "@/types/utils";
 
 export function FormInput({
-  control,
-  label,
   name,
   ...props
-}: {
-  name: string;
-  control: UseFormReturn<any>["control"];
-  label?: string;
-} & InputProps) {
+}: WithRequired<InputProps, "placeholder" | "name">) {
+  const context = useFormContext();
+  let currentError: string | null = null;
+  if (context) {
+    currentError = context.formState.errors[name]?.message?.toString() || null; //!too complicated??
+  }
+
   return (
-    <FormField
-      control={control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
-          <FormControl>
-            <Input {...field} {...props} />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+    <Input
+      {...context?.register(name)}
+      errorMessage={currentError}
+      isInvalid={!!currentError}
+      labelPlacement="outside"
+      {...props}
     />
   );
 }
