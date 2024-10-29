@@ -1,12 +1,26 @@
-import { Input, InputProps } from "@nextui-org/input";
 import { useFormContext } from "react-hook-form";
 
-import { WithRequired } from "@/types/utils";
+import { WithRequired } from "../../types/utils";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./form";
+import { Input, InputProps } from "./input";
 
 export function FormInput({
   name,
+  description,
+  label,
   ...props
-}: WithRequired<InputProps, "placeholder" | "name">) {
+}: WithRequired<InputProps, "name" | "placeholder"> & {
+  label: string;
+  description?: string;
+}) {
+  //? resue existing types?
   const context = useFormContext();
   let currentError: string | null = null;
   if (context) {
@@ -14,12 +28,19 @@ export function FormInput({
   }
 
   return (
-    <Input
-      {...context?.register(name)}
-      errorMessage={currentError}
-      isInvalid={!!currentError}
-      labelPlacement="outside"
-      {...props}
+    <FormField
+      control={context.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          {label && <FormLabel>{label}</FormLabel>}
+          <FormControl>
+            <Input {...field} {...props} />
+          </FormControl>
+          {description && <FormDescription>{description}</FormDescription>}
+          <FormMessage />
+        </FormItem>
+      )}
     />
   );
 }

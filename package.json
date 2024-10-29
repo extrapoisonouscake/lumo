@@ -9,14 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.0",
-    "@nextui-org/button": "^2.0.38",
-    "@nextui-org/input": "^2.2.5",
-    "@nextui-org/system": "^2.2.6",
-    "@nextui-org/table": "^2.0.40",
-    "@nextui-org/theme": "^2.2.11",
+    "@heroicons/react": "^2.1.5",
+    "@hookform/resolvers": "^3.9.1",
+    "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@tanstack/react-table": "^8.20.5",
     "@types/cookie": "^0.6.0",
     "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",

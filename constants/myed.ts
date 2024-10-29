@@ -1,7 +1,7 @@
 export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen";
 export const MYED_ENDPOINTS = {
   login: "logon.do",
-  grades: "portalClassList.do",
+  subjects: "portalClassList.do",
 } as const;
 export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "JSESSIONID",

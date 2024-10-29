@@ -1,5 +1,5 @@
-import { Button, ButtonProps } from "@nextui-org/button";
 import { useFormContext } from "react-hook-form";
+import { Button, ButtonProps } from "./button";
 
 export function SubmitButton(props: ButtonProps) {
   const {
@@ -8,9 +8,8 @@ export function SubmitButton(props: ButtonProps) {
 
   return (
     <Button
-      isDisabled={!isDirty || !isValid}
+      disabled={!isDirty || !isValid}
       type="submit"
-      variant="solid"
       {...props}
       isLoading={isSubmitting}
     />

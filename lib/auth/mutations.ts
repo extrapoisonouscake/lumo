@@ -28,7 +28,7 @@ export async function login(formData: LoginSchema) {
         : "An unexpected error occurred. Try again later.",
     };
   }
-  redirect("/grades");
+  redirect("/");
 }
 export async function logOut() {
   const cookieStore = cookies();
