@@ -1,14 +1,14 @@
 "use server";
 import { LoginSchema, loginSchema } from "@/app/login/validation";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
-import { getFullCookieName } from "@/helpers/getFullCookieName";
+import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
+import { sendMyEdRequest } from "@/parsing/sendMyEdRequest";
 import { isRedirectError } from "next/dist/client/components/redirect";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
 export async function login(formData: LoginSchema) {
-  console.log("SSSS");
   try {
     try {
       loginSchema.parse(formData);
@@ -16,9 +16,16 @@ export async function login(formData: LoginSchema) {
       return { message: "Invalid parameters." };
     }
     const { username, password } = formData;
-    console.log(":sss");
-    const r = await authenticateUser(username, password);
-    console.log({ r });
+    const cookiesToSet = await authenticateUser(username, password);
+    const cookieStore = new MyEdCookieStore(cookies());
+    for (const [name, value] of Object.entries(cookiesToSet).filter(([name]) =>
+      MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
+    )) {
+      cookieStore.set(name, value || "");
+    }
+
+    cookieStore.set("username", username);
+    cookieStore.set("password", username);
   } catch (e: any) {
     if (isRedirectError(e)) throw e;
     const { message } = e;
@@ -31,9 +38,10 @@ export async function login(formData: LoginSchema) {
   redirect("/");
 }
 export async function logOut() {
-  const cookieStore = cookies();
+  const cookieStore = new MyEdCookieStore(cookies());
+  await sendMyEdRequest("logout", cookieStore);
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
-    cookieStore.delete(getFullCookieName(name));
+    cookieStore.delete(name);
   }
   redirect("/login");
 }

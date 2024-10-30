@@ -1,12 +1,16 @@
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
-import { getFullCookieName } from "@/helpers/getFullCookieName";
+import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
 import * as cookie from "cookie";
 import { JSDOM } from "jsdom";
 import { cookies } from "next/headers";
 import "server-only";
 const HTML_TOKEN_INTERNAL_NAME = "org.apache.struts.taglib.html.TOKEN";
-export async function authenticateUser(username: string, password: string) {
+export async function authenticateUser(
+  username: string,
+  password: string,
+  cookieStore: MyEdCookieStore = new MyEdCookieStore(cookies())
+) {
   const initialResponse = await fetch(getEndpointUrl("login"), {
     credentials: "include",
   });
@@ -84,12 +88,13 @@ export async function authenticateUser(username: string, password: string) {
     cookiesToAdd = { ...cookiesToAdd, ...cookie.parse(cookiesStringToAdd) };
   }
   console.log({ cookiesToAdd });
-  const cookieStore = cookies();
-  cookiesToAdd.username = username;
-  cookiesToAdd.password = password;
   for (const [name, value] of Object.entries(cookiesToAdd).filter(([name]) =>
     MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
   )) {
-    cookieStore.set(getFullCookieName(name), value || "");
+    cookieStore.set(name, value || "");
   }
+
+  cookieStore.set("username", username);
+  cookieStore.set("password", password);
+  return cookieStore;
 }

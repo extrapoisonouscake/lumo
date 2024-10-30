@@ -25,7 +25,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Subject } from "@/types/school";
+const numberFormatter = new Intl.NumberFormat("en-CA", {
+  minimumFractionDigits: 1,
 
+  maximumFractionDigits: 2,
+});
 export const columns: ColumnDef<Subject>[] = [
   {
     accessorKey: "name",
@@ -43,6 +47,11 @@ export const columns: ColumnDef<Subject>[] = [
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
+    },
+    cell: ({ row }) => {
+      const gpa = row.getValue("gpa");
+      if (!gpa) return "—";
+      return numberFormatter.format(row.getValue("gpa"));
     },
   },
   {
