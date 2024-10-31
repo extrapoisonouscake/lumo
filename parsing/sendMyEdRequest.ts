@@ -3,7 +3,6 @@ import {
   MYED_ENDPOINTS,
 } from "@/constants/myed";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
-import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
 import { headers } from "next/headers";
 import "server-only";
 
@@ -11,15 +10,18 @@ const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 export async function sendMyEdRequest(
   endpoint: keyof typeof MYED_ENDPOINTS,
-  cookieStore: MyEdCookieStore
+  authCookies: Record<
+    (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
+    string | undefined
+  >
 ) {
-  const authCookies = MYED_AUTHENTICATION_COOKIES_NAMES.map(
-    (name) => `${name}=${cookieStore.get(name)?.value || "aspen"}`
+  const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
+    (name) => `${name}=${authCookies[name] || "aspen"}`
   ).join("; ");
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
   const response = await fetch(getEndpointUrl(endpoint), {
     headers: {
-      Cookie: authCookies,
+      Cookie: cookiesString,
       "User-Agent": userAgent,
       Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
       "Accept-Encoding": "gzip, deflate, br",

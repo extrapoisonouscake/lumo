@@ -1,27 +1,20 @@
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
-import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
 import * as cookie from "cookie";
 import { JSDOM } from "jsdom";
-import { cookies } from "next/headers";
 import "server-only";
 const HTML_TOKEN_INTERNAL_NAME = "org.apache.struts.taglib.html.TOKEN";
-export async function authenticateUser(
-  username: string,
-  password: string,
-  cookieStore: MyEdCookieStore = new MyEdCookieStore(cookies())
-) {
+export async function authenticateUser(username: string, password: string) {
   const initialResponse = await fetch(getEndpointUrl("login"), {
     credentials: "include",
   });
-  console.log({ initialResponse });
   if (!initialResponse.ok) {
     throw new Error("Failed"); //!
   }
 
   const cookiesString = initialResponse.headers.getSetCookie();
   if (!cookiesString) throw new Error("Failed"); //!
-  let cookiesToAdd = cookie.parse(cookiesString.join("; "));
+  let cookiesToAdd = Object.entries(cookie.parse(cookiesString.join("; ")));
   const html = await initialResponse.text();
   const initialDom = new JSDOM(html);
   const htmlToken = (
@@ -29,7 +22,6 @@ export async function authenticateUser(
       HTML_TOKEN_INTERNAL_NAME
     )[0] as HTMLInputElement
   ).value;
-  console.log({ htmlToken });
   const loginFormData = new FormData();
   loginFormData.append(HTML_TOKEN_INTERNAL_NAME, htmlToken);
   loginFormData.append("userEvent", "930");
@@ -47,14 +39,13 @@ export async function authenticateUser(
     // redirect: "manual",
     body: loginFormData,
     headers: {
-      Cookie: Object.entries(cookiesToAdd)
+      Cookie: cookiesToAdd
         .map((c) => cookie.serialize(c[0], c[1] || ""))
         .join("; "),
     },
   });
 
   const loginHtml = await loginResponse.text();
-  console.log({ loginHtml });
   if (`${loginResponse.status}`[0] !== "3") {
     if (!loginResponse.ok) {
       throw new Error("Failed"); //!
@@ -69,7 +60,6 @@ export async function authenticateUser(
         .filter((elem) => !elem.getAttribute("type"))
         .map((e) => e.textContent)
         .filter(Boolean);
-      console.log({ errorMessageScriptContent });
       if (errorMessageScriptContent) {
         const errorMessage = errorMessageScriptContent
           .map(
@@ -83,18 +73,7 @@ export async function authenticateUser(
       }
     }
   }
-  const cookiesStringToAdd = loginResponse.headers.get("Set-Cookie");
-  if (cookiesStringToAdd) {
-    cookiesToAdd = { ...cookiesToAdd, ...cookie.parse(cookiesStringToAdd) };
-  }
-  console.log({ cookiesToAdd });
-  for (const [name, value] of Object.entries(cookiesToAdd).filter(([name]) =>
+  return cookiesToAdd.filter(([name]) =>
     MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-  )) {
-    cookieStore.set(name, value || "");
-  }
-
-  cookieStore.set("username", username);
-  cookieStore.set("password", password);
-  return cookieStore;
+  );
 }

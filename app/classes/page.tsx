@@ -7,7 +7,7 @@ export default async function Page() {
   if (!subjects) return <ErrorCard />;
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="font-bold">Grades</h2>
+      <h2 className="font-bold">Classes</h2>
       <SubjectsTable data={subjects} />
     </div>
   );

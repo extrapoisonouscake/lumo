@@ -1,9 +1,9 @@
 "use server";
 import { LoginSchema, loginSchema } from "@/app/login/validation";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
+import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/sendMyEdRequest";
-import { isRedirectError } from "next/dist/client/components/redirect";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
@@ -16,18 +16,17 @@ export async function login(formData: LoginSchema) {
       return { message: "Invalid parameters." };
     }
     const { username, password } = formData;
-    const cookiesToSet = await authenticateUser(username, password);
     const cookieStore = new MyEdCookieStore(cookies());
-    for (const [name, value] of Object.entries(cookiesToSet).filter(([name]) =>
-      MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-    )) {
-      cookieStore.set(name, value || "");
+    for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
+      cookieStore.delete(name);
     }
-
-    cookieStore.set("username", username);
-    cookieStore.set("password", username);
+    const cookiesToAdd = await authenticateUser(username, password);
+    for (const [name, value] of cookiesToAdd) {
+      cookieStore.set(name, value || "", { secure: true });
+    }
+    cookieStore.set("username", username, { secure: false });
+    cookieStore.set("password", password, { secure: false });
   } catch (e: any) {
-    if (isRedirectError(e)) throw e;
     const { message } = e;
     return {
       message: KNOWN_ERRORS.includes(message)
@@ -35,11 +34,10 @@ export async function login(formData: LoginSchema) {
         : "An unexpected error occurred. Try again later.",
     };
   }
-  redirect("/");
 }
 export async function logOut() {
   const cookieStore = new MyEdCookieStore(cookies());
-  await sendMyEdRequest("logout", cookieStore);
+  await sendMyEdRequest("logout", getAuthCookies(cookieStore));
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }

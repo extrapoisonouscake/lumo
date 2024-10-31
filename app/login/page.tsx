@@ -5,23 +5,28 @@ import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { login } from "@/lib/auth/mutations";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { loginSchema, LoginSchema } from "./validation";
 
 export default function Page() {
   const form = useFormValidation(loginSchema);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    searchParams.get("message")
+  );
+  const router = useRouter();
   async function onSubmit(data: LoginSchema) {
     if (errorMessage) setErrorMessage(null);
     const response = await login(data);
-    console.log({ response });
     const message = response?.message;
     if (message) {
       setErrorMessage(message);
       return;
     }
     toast.success("Successfully logged in.");
+    router.push("/");
   }
   return (
     <Form onSubmit={onSubmit} {...form}>

@@ -1,6 +1,7 @@
 import { MyEdFetchEndpoints } from "@/types/myed";
+import "server-only";
 import { fetchMyEdPageHTML } from "./fetchMyEdPageHTML";
-import { parseSubjects } from "./parseSubjects";
+import { parseSubjects } from "./subjects";
 const endpointToFunction = {
   subjects: parseSubjects,
 } as const satisfies Record<MyEdFetchEndpoints, (html: string) => any>;
