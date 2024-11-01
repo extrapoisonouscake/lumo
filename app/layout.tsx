@@ -2,7 +2,7 @@ import { LogOut } from "@/components/layout/log-out";
 import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
-import { Providers } from "./providers";
+import { Providers } from "./providers.tsx";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
