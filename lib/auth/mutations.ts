@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
+const COOKIE_MAX_AGE = 34560000;
 export async function login(formData: LoginSchema) {
   try {
     try {
@@ -22,10 +23,19 @@ export async function login(formData: LoginSchema) {
     }
     const cookiesToAdd = await authenticateUser(username, password);
     for (const [name, value] of cookiesToAdd) {
-      cookieStore.set(name, value || "", { secure: true });
+      cookieStore.set(name, value || "", {
+        secure: true,
+        maxAge: COOKIE_MAX_AGE,
+      });
     }
-    cookieStore.set("username", username, { secure: false });
-    cookieStore.set("password", password, { secure: false });
+    cookieStore.set("username", username, {
+      secure: false,
+      maxAge: COOKIE_MAX_AGE,
+    });
+    cookieStore.set("password", password, {
+      secure: false,
+      maxAge: COOKIE_MAX_AGE,
+    });
   } catch (e: any) {
     const { message } = e;
     return {
