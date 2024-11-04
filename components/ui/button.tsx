@@ -42,6 +42,7 @@ export interface ButtonProps
 }
 const Spinner = () => (
   <svg
+    className="animate-spin"
     xmlns="http://www.w3.org/2000/svg"
     width="24"
     height="24"
@@ -55,6 +56,7 @@ const Spinner = () => (
     <path d="M21 12a9 9 0 1 1-6.219-8.56" />
   </svg>
 );
+//* to-do: convert to client component only if willShowSpinner is true
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

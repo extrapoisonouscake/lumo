@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { Subject } from "@/types/school";
 const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
@@ -50,13 +51,16 @@ export const columns: ColumnDef<Subject>[] = [
     },
     cell: ({ row }) => {
       const gpa = row.getValue("gpa");
-      if (!gpa) return "—";
-      return numberFormatter.format(row.getValue("gpa"));
+      if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
+      return numberFormatter.format(gpa as number);
     },
   },
   {
     accessorKey: "room",
     header: "Room",
+    cell: ({ row }) => {
+      return row.getValue("room") || NULL_VALUE_DISPLAY_FALLBACK;
+    },
   },
   {
     accessorKey: "teacher",
