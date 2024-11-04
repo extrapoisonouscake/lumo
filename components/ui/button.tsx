@@ -1,3 +1,4 @@
+"use client";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
@@ -59,22 +60,38 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     {
       className,
       children,
+      onClick,
       variant,
       size,
       asChild = false,
-      isLoading,
+      isLoading: externalIsLoading = false,
       disabled,
       ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
+    const [isLoading, setIsLoading] = React.useState(externalIsLoading);
+    React.useEffect(() => {
+      setIsLoading(externalIsLoading);
+    }, [externalIsLoading]);
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         disabled={disabled || isLoading}
         {...props}
+        onClick={
+          onClick
+            ? async (e) => {
+                setIsLoading(true);
+                try {
+                  await onClick(e);
+                } catch {}
+                setIsLoading(false);
+              }
+            : undefined
+        }
       >
         {isLoading ? <Spinner /> : children}
       </Comp>

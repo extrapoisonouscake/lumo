@@ -1,5 +1,5 @@
 "use server";
-import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
+import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdFetchEndpoints } from "@/types/myed";
 import { cookies } from "next/headers";
 import { getAuthCookies } from "../helpers/getAuthCookies";

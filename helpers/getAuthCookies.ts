@@ -1,5 +1,5 @@
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
-import { MyEdCookieStore } from "./getMyEdCookieStore";
+import { MyEdCookieStore } from "./MyEdCookieStore";
 
 export function getAuthCookies(store: MyEdCookieStore) {
   const object: Record<

@@ -2,13 +2,14 @@
 import { LoginSchema, loginSchema } from "@/app/login/validation";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { MyEdCookieStore } from "@/helpers/getMyEdCookieStore";
+import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/sendMyEdRequest";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
 const COOKIE_MAX_AGE = 34560000;
+const shouldSecureCookies = process.env.NODE_ENV !== "development";
 export async function login(formData: LoginSchema) {
   try {
     try {
@@ -24,16 +25,17 @@ export async function login(formData: LoginSchema) {
     const cookiesToAdd = await authenticateUser(username, password);
     for (const [name, value] of cookiesToAdd) {
       cookieStore.set(name, value || "", {
-        secure: true,
+        secure: shouldSecureCookies,
+        httpOnly: true,
         maxAge: COOKIE_MAX_AGE,
       });
     }
     cookieStore.set("username", username, {
-      secure: false,
+      secure: shouldSecureCookies,
       maxAge: COOKIE_MAX_AGE,
     });
     cookieStore.set("password", password, {
-      secure: false,
+      secure: shouldSecureCookies,
       maxAge: COOKIE_MAX_AGE,
     });
   } catch (e: any) {
@@ -51,5 +53,7 @@ export async function logOut() {
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
+  cookieStore.delete("username");
+  cookieStore.delete("password");
   redirect("/login");
 }

@@ -1,6 +1,6 @@
 import { Subject } from "@/types/school";
 import { JSDOM } from "jsdom";
-const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z])/;
+const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
   if (!string) return null;
   const result = string.match(gpaRegex);
