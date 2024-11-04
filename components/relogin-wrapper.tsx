@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 import { getFullCookieName } from "@/helpers/getFullCookieName";
 import Cookies from "js-cookie";
-export function ReloginWrapper({ reset }: { reset: () => void }) {
+export function ReloginWrapper() {
   const router = useRouter();
   useEffect(() => {
     const username = Cookies.get(getFullCookieName("username"));
