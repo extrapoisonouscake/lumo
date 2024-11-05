@@ -64,11 +64,32 @@ export const columns: ColumnDef<Subject>[] = [
   },
   {
     accessorKey: "teacher",
-    header: "Teacher",
+    header: ({ table }) => {
+      let isSome = false;
+      let isEvery = true;
+      for (const row of table.getCoreRowModel().rows) {
+        if (row.original.teacher.includes(";")) {
+          isSome = true;
+          if (!isEvery) break;
+        } else {
+          isEvery = false;
+          if (isSome) break;
+        }
+      }
+      if (isEvery) return "Teachers";
+      if (isSome) return "Teacher(s)";
+      return "Teacher";
+    },
   },
 ];
 
-export function SubjectsTable({ data }: { data: Subject[] }) {
+export function SubjectsTable({
+  data,
+  columnsn,
+}: {
+  data: Subject[];
+  columnsn: string[];
+}) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -79,7 +100,7 @@ export function SubjectsTable({ data }: { data: Subject[] }) {
 
   const table = useReactTable({
     data,
-    columns,
+    columns: columns.filter((column) => columnsn.includes(column.header)),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),

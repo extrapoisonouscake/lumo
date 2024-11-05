@@ -12,8 +12,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body className="p-4">
           <Providers>
             <Toaster position="bottom-center" />
-            <LogOut />
-            {children}
+            <main className="flex flex-col gap-4 items-start">
+              <LogOut />
+              {children}
+            </main>
           </Providers>
         </body>
       </html>
