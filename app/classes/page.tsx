@@ -14,7 +14,7 @@ export default async function Page() {
       {subjects.teacherAdvisory && (
         <div className="flex flex-col gap-2">
           <h3 className="font-bold">TA</h3>
-          <SubjectsTable data={[subjects.teacherAdvisory]} />
+          <SubjectsTable shownColumns={["room","teacher"]} data={[subjects.teacherAdvisory]} />
         </div>
       )}
     </div>
