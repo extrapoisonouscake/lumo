@@ -100,7 +100,7 @@ export function SubjectsTable({
 
   const table = useReactTable({
     data,
-    columns: columns.filter((column) => columnsn.includes(column.header)),
+    columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
