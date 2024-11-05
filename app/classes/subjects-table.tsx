@@ -88,14 +88,14 @@ export function SubjectsTable({
   columnsn,
 }: {
   data: Subject[];
-  columnsn: string[];
+  shownColumns?: string[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
+    React.useState<VisibilityState>(shownColumns?Object.fromEntries(columns.map(column=>[column.accessorKey,shownColumns.includes(column.accessorKey)])):{});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
