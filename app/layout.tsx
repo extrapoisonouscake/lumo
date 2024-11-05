@@ -9,10 +9,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <>
       <html lang="en" suppressHydrationWarning>
         <head />
-        <body className="p-4">
+        <body>
           <Providers>
             <Toaster position="bottom-center" />
-            <main className="flex flex-col gap-4 items-start">
+            <main className="p-4 flex flex-col gap-4 items-start">
               <LogOut />
               {children}
             </main>
