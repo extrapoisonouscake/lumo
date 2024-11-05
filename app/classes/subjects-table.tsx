@@ -95,7 +95,7 @@ export function SubjectsTable({
     []
   );
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>(shownColumns?Object.fromEntries(columns.map(column=>[column.accessorKey,shownColumns.includes(column.accessorKey)])):{});
+    React.useState(shownColumns?Object.fromEntries(columns.map(column=>[column.accessorKey,shownColumns.includes(column.accessorKey)])):{});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
