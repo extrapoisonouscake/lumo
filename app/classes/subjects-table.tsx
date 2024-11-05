@@ -31,7 +31,7 @@ const numberFormatter = new Intl.NumberFormat("en-CA", {
 
   maximumFractionDigits: 2,
 });
-export const columns: ColumnDef<Subject>[] = [
+export const columns:any = [
   {
     accessorKey: "name",
     header: "Name",
