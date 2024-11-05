@@ -85,7 +85,7 @@ export const columns: ColumnDef<Subject>[] = [
 
 export function SubjectsTable({
   data,
-  columnsn,
+  shownColumns,
 }: {
   data: Subject[];
   shownColumns?: string[];
