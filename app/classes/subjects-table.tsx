@@ -4,7 +4,6 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -25,13 +24,29 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { getNullToUndefinedAccessor } from "@/helpers/getNullToUndefinedAccessor";
 import { Subject } from "@/types/school";
 const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
 
   maximumFractionDigits: 2,
 });
-export const columns:ColumnDef<Subject>[] = [
+type t = Exclude<
+  keyof ColumnDef<Subject>,
+  | "header"
+  | "id"
+  | "getUniqueValues"
+  | "footer"
+  | "cell"
+  | "meta"
+  | "enableHiding"
+  | "enablePinning"
+  | "enableColumnFilter"
+  | "filterFn"
+  | "enableGlobalFilter"
+  | "enableMultiSort"
+>;
+export const columns: ColumnDef<Subject>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -40,10 +55,7 @@ export const columns:ColumnDef<Subject>[] = [
     accessorKey: "gpa",
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting()}>
           GPA
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
@@ -54,6 +66,8 @@ export const columns:ColumnDef<Subject>[] = [
       if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
       return numberFormatter.format(gpa as number);
     },
+    sortUndefined: "last",
+    accessorFn: getNullToUndefinedAccessor("gpa"),
   },
   {
     accessorKey: "room",
@@ -94,8 +108,22 @@ export function SubjectsTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-//@ts-ignore
-  const [columnVisibility, setColumnVisibility] =React.useState(shownColumns?Object.fromEntries(columns.map(column=>[column.accessorKey,shownColumns.includes(column.accessorKey)])):{});
+  const [columnVisibility, setColumnVisibility] = React.useState(
+    shownColumns
+      ? Object.fromEntries(
+          columns.map((column) => {
+            const hasAccessorKey = "accessorKey" in column;
+            const identifier = hasAccessorKey ? column.accessorKey : column.id;
+            return [
+              identifier,
+              shownColumns.includes(
+                identifier as NonNullable<typeof identifier>
+              ),
+            ];
+          })
+        )
+      : {}
+  );
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
@@ -103,12 +131,14 @@ export function SubjectsTable({
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    enableSortingRemoval: false,
     state: {
       sorting,
       columnFilters,
