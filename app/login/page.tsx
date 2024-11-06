@@ -29,7 +29,7 @@ export default function Page() {
     router.push("/");
   }
   return (
-    <Form onSubmit={onSubmit} {...form}>
+    <Form onSubmit={onSubmit} {...form} className="flex flex-col gap-4">
       {errorMessage && <p className="text-destructive">{errorMessage}</p>}
       <FormInput placeholder="user" name="username" label="Username" />
       <FormInput

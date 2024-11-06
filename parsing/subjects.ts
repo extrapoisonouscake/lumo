@@ -4,9 +4,9 @@ import { JSDOM } from "jsdom";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
-  if (!string) return undefined;
+  if (!string) return null;
   const result = string.match(gpaRegex);
-  if (!result) return undefined;
+  if (!result) return null;
   return +result[0];
 };
 

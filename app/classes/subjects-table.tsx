@@ -28,24 +28,8 @@ import { getNullToUndefinedAccessor } from "@/helpers/getNullToUndefinedAccessor
 import { Subject } from "@/types/school";
 const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
-
   maximumFractionDigits: 2,
 });
-type t = Exclude<
-  keyof ColumnDef<Subject>,
-  | "header"
-  | "id"
-  | "getUniqueValues"
-  | "footer"
-  | "cell"
-  | "meta"
-  | "enableHiding"
-  | "enablePinning"
-  | "enableColumnFilter"
-  | "filterFn"
-  | "enableGlobalFilter"
-  | "enableMultiSort"
->;
 export const columns: ColumnDef<Subject>[] = [
   {
     accessorKey: "name",
