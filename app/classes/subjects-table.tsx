@@ -4,6 +4,7 @@ import {
   ColumnDef,
   ColumnFiltersState,
   SortingState,
+  TableOptions,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -25,12 +26,14 @@ import {
 } from "@/components/ui/table";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { getNullToUndefinedAccessor } from "@/helpers/getNullToUndefinedAccessor";
+import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { Subject } from "@/types/school";
+import { Optional } from "@/types/utils";
 const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2,
 });
-export const columns: ColumnDef<Subject>[] = [
+const columns: ColumnDef<Subject>[] = [
   {
     accessorKey: "name",
     header: "Name",
@@ -110,27 +113,57 @@ export function SubjectsTable({
   );
   const [rowSelection, setRowSelection] = React.useState({});
 
-  const table = useReactTable({
-    data,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-
+  return (
+    <SubjectsPlainTable
+      {...{
+        data,
+        columns: columns,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        onColumnVisibilityChange: setColumnVisibility,
+        onRowSelectionChange: setRowSelection,
+        enableSortingRemoval: false,
+        state: {
+          sorting,
+          columnFilters,
+          columnVisibility,
+          rowSelection,
+        },
+      }}
+    />
+  );
+}
+const mockSubjects = (length: number) =>
+  [...Array(length)].map(
+    () => ({ gpa: 0, teacher: "", name: "", room: "" } satisfies Subject)
+  );
+export function SubjectsPlainTable({
+  data = [],
+  isLoading = false,
+  ...props
+}: Optional<
+  Omit<
+    TableOptions<Subject>,
+    | "getCoreRowModel"
+    | "getPaginationRowModel"
+    | "getSortedRowModel"
+    | "getFilteredRowModel"
+    | "columns"
+  >,
+  "data"
+> & { isLoading?: boolean }) {
+  const table = useReactTable<Subject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    enableSortingRemoval: false,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
+    data: isLoading ? mockSubjects(5) : data,
+    ...props,
+    columns: isLoading
+      ? makeTableColumnsSkeletons(columns, { gpa: 4, name: 12, teacher: 12 })
+      : columns,
   });
-
+  console.log(table.getAllColumns()[0]["columnDef"]["cell"]);
   return (
     <div className="rounded-md border">
       <Table>
