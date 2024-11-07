@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <body className="flex justify-center min-h-full">
           <Providers>
             <Toaster position="bottom-center" />
-            <main className="p-4 flex flex-col gap-4 items-start">
+            <main className="p-4 flex flex-col gap-4 items-start min-w-0 w-full md:max-w-[1500px]">
               <LogOut />
               {children}
             </main>
