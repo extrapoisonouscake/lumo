@@ -2,15 +2,11 @@
 
 import { login } from "@/lib/auth/mutations";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
 import { getFullCookieName } from "@/helpers/getFullCookieName";
 import Cookies from "js-cookie";
-export function ReloginWrapper({
-  skeleton: Skeleton,
-}: {
-  skeleton: () => JSX.Element;
-}) {
+export function ReloginWrapper({ skeleton }: { skeleton: ReactNode }) {
   const router = useRouter();
   useEffect(() => {
     const username = Cookies.get(getFullCookieName("username"));
@@ -27,5 +23,5 @@ export function ReloginWrapper({
       }
     });
   }, []);
-  return <Skeleton />;
+  return skeleton;
 }

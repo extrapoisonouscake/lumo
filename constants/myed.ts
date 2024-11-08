@@ -3,7 +3,6 @@ export const MYED_ENDPOINTS = {
   login: "logon.do",
   subjects: "portalClassList.do",
   logout: "logout.do",
-  schedule: "studentScheduleMatrix.do",
 } as const;
 export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "JSESSIONID",

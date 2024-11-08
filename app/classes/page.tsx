@@ -7,7 +7,7 @@ import { SubjectsPage } from "./subjects-page";
 export default async function Page() {
   const subjects = await fetchMyEd("subjects");
   if (subjects === sessionExpiredIndicator)
-    return <ReloginWrapper skeleton={Loading} />;
+    return <ReloginWrapper skeleton={<Loading />} />;
   if (!subjects) return <ErrorCard />;
   return <SubjectsPage data={subjects} />;
 }
