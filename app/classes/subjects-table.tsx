@@ -160,10 +160,13 @@ export function SubjectsPlainTable({
     data: isLoading ? mockSubjects(5) : data,
     ...props,
     columns: isLoading
-      ? makeTableColumnsSkeletons(columns, { gpa: 4, name: 12, teacher: 12 })
+      ? makeTableColumnsSkeletons(columns, {
+          gpa: 4,
+          name: 12,
+          teacher: 12,
+        })
       : columns,
   });
-  console.log(table.getAllColumns()[0]["columnDef"]["cell"]);
   return (
     <div className="rounded-md border">
       <Table>

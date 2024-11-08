@@ -11,7 +11,7 @@ export function makeTableColumnsSkeletons<T extends RowData>(
         ...column,
         cell: ({ cell }) => (
           <Skeleton>
-            <p>{lengths?.[cell.id as keyof T] || 5}</p>
+            <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
           </Skeleton>
         ),
       } satisfies (typeof columns)[number])
