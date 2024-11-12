@@ -1,15 +1,19 @@
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdFetchEndpoints } from "@/types/myed";
+import { JSDOM } from "jsdom";
 import { cookies } from "next/headers";
 import "server-only";
+import { parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 const endpointToFunction = {
   subjects: parseSubjects,
-} as const satisfies Record<MyEdFetchEndpoints, (html: string) => any>;
+  schedule: parseSchedule,
+} as const satisfies Record<MyEdFetchEndpoints, (dom: JSDOM) => any>;
 export const sessionExpiredIndicator: unique symbol = Symbol();
-
+//* the original website appears to be using the server to store user navigation
+// * to get to some pages, an additional request has to be sent OR follow redirects
 export function isSessionExpiredResponse(
   response: any
 ): response is typeof sessionExpiredIndicator {
@@ -23,7 +27,7 @@ export async function fetchMyEd(endpoint: MyEdFetchEndpoints) {
     throw response;
   }
   const html = await response.text();
-  return endpointToFunction[endpoint](html);
+  return endpointToFunction[endpoint](new JSDOM(html));
 }
 export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
   ReturnType<(typeof endpointToFunction)[T]>,

@@ -13,15 +13,13 @@ const normalizeGPA = (string?: string) => {
 // const parseSubjectTeachersString = (string: string) => {
 //   return string.split(";").map((name) => name.split(", ").reverse().join(" "));
 // };
-function separateTAFromSubjects(array: Subject[]) {
-  const resultArray: typeof array = [];
-  let removedItem: (typeof array)[number] | null = null;
+function separateTAFromSubjects(subject: Subject[]) {
+  const resultArray: typeof subject = [];
+  let removedItem: (typeof subject)[number] | null = null;
 
-  array.forEach((item) => {
+  subject.forEach((item) => {
     if (item.name === "TA") {
-      if (removedItem === null) {
-        removedItem = item;
-      }
+      removedItem = item;
     } else {
       resultArray.push(item);
     }
@@ -32,11 +30,11 @@ function separateTAFromSubjects(array: Subject[]) {
     teacherAdvisory: removedItem,
   };
 }
-export function parseSubjects(html: string) {
-  const dom = new JSDOM(html);
-  const classesTable = dom.window.document.getElementById("dataGrid");
-  if (!classesTable) return null;
-  const data = [...classesTable.querySelectorAll(".listCell")].map((cell) => {
+export function parseSubjects(dom: JSDOM) {
+  const tableContainer = dom.window.document.getElementById("dataGrid");
+  if (!tableContainer) return null;
+  if (!!tableContainer.querySelector("listNoRecordsText")) return [];
+  const data = [...tableContainer.querySelectorAll(".listCell")].map((cell) => {
     const tds = [...cell.getElementsByTagName("td")];
     const texts = tds.map((td) => td.textContent?.trim());
     return {

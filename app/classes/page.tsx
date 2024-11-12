@@ -9,5 +9,6 @@ export default async function Page() {
   if (subjects === sessionExpiredIndicator)
     return <ReloginWrapper skeleton={<Loading />} />;
   if (!subjects) return <ErrorCard />;
+  //@ts-ignore
   return <SubjectsPage data={subjects} />;
 }
