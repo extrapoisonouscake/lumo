@@ -1,6 +1,6 @@
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { Subject } from "@/types/school";
-import { JSDOM } from "jsdom";
+import { CheerioAPI } from "cheerio";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
@@ -30,19 +30,31 @@ function separateTAFromSubjects(subject: Subject[]) {
     teacherAdvisory: removedItem,
   };
 }
-export function parseSubjects(dom: JSDOM) {
-  const tableContainer = dom.window.document.getElementById("dataGrid");
-  if (!tableContainer) return null;
-  if (!!tableContainer.querySelector("listNoRecordsText")) return [];
-  const data = [...tableContainer.querySelectorAll(".listCell")].map((cell) => {
-    const tds = [...cell.getElementsByTagName("td")];
-    const texts = tds.map((td) => td.textContent?.trim());
-    return {
-      name: prettifySubjectName(`${texts[1]}`),
-      teacher: `${texts[3]}`,
-      room: `${texts[4]}`,
-      gpa: normalizeGPA(texts[5]),
-    };
-  }) satisfies Subject[];
+export function parseSubjects($: CheerioAPI) {
+  const $tableContainer = $("#dataGrid");
+  if (!$tableContainer) return null;
+
+  if ($tableContainer.find(".listNoRecordsText").length > 0)
+    return separateTAFromSubjects([]);
+
+  $tableContainer.find(".listCell").each((i, el) => console.log($(el).text()));
+
+  const data = $tableContainer
+    .find(".listCell")
+    .toArray()
+    .map((cell) => {
+      // console.log(cell.childNodes);
+      const texts = $(cell)
+        .children("td")
+        .toArray()
+        .map((td) => $(td).text().trim());
+
+      return {
+        name: prettifySubjectName(`${texts[1]}`),
+        teachers: `${texts[3]}`.split(";"),
+        room: `${texts[4]}`,
+        gpa: normalizeGPA(texts[5]),
+      };
+    }) satisfies Subject[];
   return separateTAFromSubjects(data);
 }

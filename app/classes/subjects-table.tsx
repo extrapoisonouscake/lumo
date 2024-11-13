@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  ColumnDef,
   ColumnFiltersState,
   SortingState,
   TableOptions,
+  createColumnHelper,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -33,13 +33,13 @@ const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2,
 });
-const columns: ColumnDef<Subject>[] = [
+const columnHelper = createColumnHelper<Subject>();
+const columns = [
   {
     accessorKey: "name",
     header: "Name",
   },
-  {
-    accessorKey: "gpa",
+  columnHelper.accessor("gpa", {
     header: ({ column }) => {
       return (
         <Button variant="ghost" onClick={() => column.toggleSorting()}>
@@ -55,21 +55,19 @@ const columns: ColumnDef<Subject>[] = [
     },
     sortUndefined: "last",
     accessorFn: getNullToUndefinedAccessor("gpa"),
-  },
-  {
-    accessorKey: "room",
+  }),
+  columnHelper.accessor("room", {
     header: "Room",
-    cell: ({ row }) => {
-      return row.getValue("room") || NULL_VALUE_DISPLAY_FALLBACK;
+    cell: ({ cell }) => {
+      return cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK;
     },
-  },
-  {
-    accessorKey: "teacher",
+  }),
+  columnHelper.accessor("teachers", {
     header: ({ table }) => {
       let isSome = false;
       let isEvery = true;
       for (const row of table.getCoreRowModel().rows) {
-        if (row.original.teacher.includes(";")) {
+        if (row.original.teachers.length > 1) {
           isSome = true;
           if (!isEvery) break;
         } else {
@@ -81,7 +79,10 @@ const columns: ColumnDef<Subject>[] = [
       if (isSome) return "Teacher(s)";
       return "Teacher";
     },
-  },
+    cell: ({ cell }) => {
+      return cell.getValue().join(";");
+    },
+  }),
 ];
 
 export function SubjectsTable({
@@ -135,7 +136,7 @@ export function SubjectsTable({
 }
 const mockSubjects = (length: number) =>
   [...Array(length)].map(
-    () => ({ gpa: 0, teacher: "", name: "", room: "" } satisfies Subject)
+    () => ({ gpa: 0, teachers: [], name: "", room: "" } satisfies Subject)
   );
 export function SubjectsPlainTable({
   data = [],
@@ -163,7 +164,7 @@ export function SubjectsPlainTable({
       ? makeTableColumnsSkeletons(columns, {
           gpa: 4,
           name: 12,
-          teacher: 12,
+          teachers: 12,
         })
       : columns,
   });
