@@ -22,6 +22,8 @@ const columns = [
   columnHelper.display({
     header: "Time",
     cell: ({ row }) => {
+      //@ts-ignore
+      console.log(dayjs(row.original.startsAt)["$x"]["$timezone"]);
       return `${dayjs(row.original.startsAt).format("HH:mm A")} - ${dayjs(
         row.original.endsAt
       ).format("HH:mm A")}`;
