@@ -17,14 +17,14 @@ import { cn } from "@/lib/utils";
 import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
 const columnHelper = createColumnHelper<ScheduleSubject>();
-
+const hoursFormat = "h:mm A";
 const columns = [
   columnHelper.display({
     header: "Time",
     cell: ({ row }) => {
       return `${timezonedDayjs(row.original.startsAt).format(
-        "HH:mm A"
-      )} - ${timezonedDayjs(row.original.endsAt).format("HH:mm A")}`;
+        hoursFormat
+      )} - ${timezonedDayjs(row.original.endsAt).format(hoursFormat)}`;
     },
   }),
   columnHelper.accessor("name", { header: "Name" }),
