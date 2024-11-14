@@ -40,7 +40,7 @@ export interface ButtonProps
   asChild?: boolean;
   isLoading?: boolean;
 }
-const Spinner = () => (
+export const Spinner = () => (
   <svg
     className="animate-spin"
     xmlns="http://www.w3.org/2000/svg"

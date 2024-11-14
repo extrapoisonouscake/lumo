@@ -1,5 +1,5 @@
 import { SubjectsPage } from "./subjects-page";
 
-export default function Loading() {
+export default function SubjectsPageSkeleton() {
   return <SubjectsPage />;
 }

@@ -1,14 +1,21 @@
-import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 
 export const Skeleton = ({
   isLoading = true,
   children,
+  className,
+  ...props
 }: {
   isLoading?: boolean;
-  children: ReactNode | ReactNode[];
-}) => {
+  children?: ReactNode | ReactNode[];
+  className?: string;
+} & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>) => {
   return (
-    <div className="relative inline-block overflow-hidden">
+    <div
+      className={cn("relative inline-block overflow-hidden", className)}
+      {...props}
+    >
       {isLoading && (
         <div className="absolute inset-0 w-full h-full bg-gray-200 rounded-md animate-pulse"></div>
       )}

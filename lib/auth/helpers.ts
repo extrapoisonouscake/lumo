@@ -82,5 +82,5 @@ function parseLoginErrorMessage(html: string) {
         )?.[3]
     )
     .filter(Boolean)[0];
-  return errorMessage || null;
+  return errorMessage ?? null;
 }

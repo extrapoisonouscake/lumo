@@ -1,19 +1,20 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { AccessorKeyColumnDef, RowData } from "@tanstack/react-table";
+import {
+  AccessorKeyColumnDef,
+  DisplayColumnDef,
+  RowData,
+} from "@tanstack/react-table";
 
 export function makeTableColumnsSkeletons<T extends RowData>(
-  columns: AccessorKeyColumnDef<T, any>[],
-  lengths?: Partial<Record<keyof T, number>>
+  columns: Array<AccessorKeyColumnDef<T, any> | DisplayColumnDef<T, any>>,
+  lengths?: Partial<Record<keyof T | string, number>>
 ) {
-  return columns.map(
-    (column) =>
-      ({
-        ...column,
-        cell: ({ cell }) => (
-          <Skeleton>
-            <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
-          </Skeleton>
-        ),
-      } satisfies (typeof columns)[number])
-  ) as typeof columns;
+  return columns.map((column) => ({
+    ...column,
+    cell: ({ cell }) => (
+      <Skeleton>
+        <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
+      </Skeleton>
+    ),
+  })) as typeof columns;
 }

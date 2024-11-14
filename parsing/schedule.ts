@@ -1,10 +1,10 @@
 import * as cheerio from "cheerio";
 
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
+import dayjs from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { removeLineBreaks } from "../helpers/removeLineBreaks";
-
-export function parseSchedule($: cheerio.CheerioAPI) {
+function getTableBody($: cheerio.CheerioAPI) {
   const $contentContainer = $(
     ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"
   );
@@ -14,19 +14,42 @@ export function parseSchedule($: cheerio.CheerioAPI) {
 
   if ($tableContainer.length === 0) {
     const errorMessage = $contentContainer.prop("innerText");
-    return { knownError: errorMessage ? removeLineBreaks(errorMessage) : null }; //! ?needed?
+    if (!errorMessage) return null;
+    return { knownError: removeLineBreaks(errorMessage) }; //! ?needed?
   }
   const $tableBody = $tableContainer.find("tbody:has(> .listHeader)");
 
   if ($tableBody.length === 0) return null;
+  return $tableBody;
+}
+function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   const rawWeekdayName = $tableBody
     .find(".listHeader th:last-of-type")
     .first()
     .prop("textContent");
-  const weekday =
-    removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim() ?? null;
+  const weekday = removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim();
+  return weekday ?? null;
+}
+export function parseCurrentWeekday($: cheerio.CheerioAPI) {
+  const $tableBody = getTableBody($);
+  if (!$tableBody) return null;
+  if ("knownError" in $tableBody) return $tableBody;
+  return getWeekday($tableBody);
+}
+function getDateFromSubjectTimeString(time: string) {
+  return dayjs(time, "HH:mm A").toDate();
+}
+export function parseSchedule(
+  $: cheerio.CheerioAPI
+):
+  | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
+  | { knownError: string }
+  | null {
+  const $tableBody = getTableBody($);
+  if (!$tableBody) return null;
+  if ("knownError" in $tableBody) return $tableBody;
 
-  if ($tableBody.find(".listNoRecordsText").length > 0) return [];
+  if ($tableBody.find(".listNoRecordsText").length > 0) return null;
 
   const data = $tableBody
     .children("tr")
@@ -38,8 +61,8 @@ export function parseSchedule($: cheerio.CheerioAPI) {
       const timeString = removeLineBreaks($(timeTd).find("td").text());
       const [startsAt, endsAt] = timeString.split(" - ");
       let subject: ScheduleSubject = {
-        startsAt,
-        endsAt,
+        startsAt: getDateFromSubjectTimeString(startsAt),
+        endsAt: getDateFromSubjectTimeString(endsAt),
       };
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
       if (contentCellHTML) {
@@ -54,5 +77,6 @@ export function parseSchedule($: cheerio.CheerioAPI) {
       }
       return subject;
     }) satisfies ScheduleSubject[];
-  return { weekday, data };
+  const weekday = getWeekday($tableBody);
+  return { weekday, subjects: data };
 }

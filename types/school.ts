@@ -8,6 +8,6 @@ export interface Subject {
 export type ScheduleSubject = Partial<
   Pick<Subject, "name" | "room" | "teachers">
 > & {
-  startsAt: string;
-  endsAt: string;
+  startsAt: Date;
+  endsAt: Date;
 };

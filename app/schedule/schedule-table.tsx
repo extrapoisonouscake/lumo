@@ -8,32 +8,27 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { SortableColumn } from "@/components/ui/sortable-column";
 import { TableRenderer } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
-import { Subject } from "@/types/school";
+import dayjs from "@/instances/dayjs";
+import { cn } from "@/lib/utils";
+import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
-const numberFormatter = new Intl.NumberFormat("en-CA", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 2,
-});
-const columnHelper = createColumnHelper<Subject>();
-const columns = [
-  columnHelper.accessor("name", { header: "Name" }),
-  columnHelper.accessor("gpa", {
-    header: ({ column }) => {
-      return <SortableColumn {...column}>GPA</SortableColumn>;
-    },
+const columnHelper = createColumnHelper<ScheduleSubject>();
 
+const columns = [
+  columnHelper.display({
+    header: "Time",
     cell: ({ row }) => {
-      const gpa = row.getValue("gpa");
-      if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
-      return numberFormatter.format(gpa as number);
+      return `${dayjs(row.original.startsAt).format("HH:mm A")} - ${dayjs(
+        row.original.endsAt
+      ).format("HH:mm A")}`;
     },
-    sortUndefined: "last",
   }),
+  columnHelper.accessor("name", { header: "Name" }),
+
   columnHelper.accessor("room", {
     header: "Room",
 
@@ -46,7 +41,8 @@ const columns = [
       let isSome = false;
       let isEvery = true;
       for (const row of table.getCoreRowModel().rows) {
-        if (row.original.teachers.length > 1) {
+        const { teachers } = row.original;
+        if (teachers && teachers.length > 1) {
           isSome = true;
           if (!isEvery) break;
         } else {
@@ -59,57 +55,61 @@ const columns = [
       return "Teacher";
     },
     cell: ({ cell }) => {
-      return cell.getValue().join(";");
+      const value = cell.getValue();
+      return value ? value.join(";") : NULL_VALUE_DISPLAY_FALLBACK;
     },
   }),
 ];
 const columnsSkeletons = makeTableColumnsSkeletons(columns, {
-  gpa: 4,
+  time: 10,
   name: 12,
   teachers: 12,
 });
-const mockSubjects = (length: number) =>
+const mockScheduleSubjects = (length: number) =>
   [...Array(length)].map(
-    () => ({ gpa: 0, teachers: [], name: "", room: "" } satisfies Subject)
+    () =>
+      ({
+        startsAt: new Date(),
+        endsAt: new Date(),
+        teachers: [],
+        name: "",
+        room: "",
+      } satisfies ScheduleSubject)
   );
-export function SubjectsTable({
+export function ScheduleTable({
   data: externalData,
-  shownColumns,
   isLoading = false,
 }: {
-  shownColumns?: string[];
-  data?: Subject[];
+  data?: ScheduleSubject[];
   isLoading?: boolean;
 }) {
   const data = useMemo(
     () =>
       isLoading
-        ? mockSubjects(5)
+        ? mockScheduleSubjects(5)
         : prepareTableDataForSorting(
             externalData as NonNullable<typeof externalData>
           ),
     [isLoading, externalData]
   );
-  const columnVisibility = shownColumns
-    ? Object.fromEntries(
-        columns.map((column) => {
-          const identifier = column.accessorKey;
-          return [identifier, shownColumns.includes(identifier)];
-        })
-      )
-    : {};
-  const table = useReactTable<Subject>({
+
+  const table = useReactTable<ScheduleSubject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     enableSortingRemoval: false,
-    state: {
-      columnVisibility,
-    },
+
     data,
 
     columns: isLoading ? columnsSkeletons : columns,
+    meta: {
+      getRowClassName: (row) =>
+        cn({
+          "[&>td:first-child]:relative [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+            dayjs().isBetween(row.original.startsAt, row.original.endsAt),
+        }),
+    },
   });
   return <TableRenderer table={table} columns={columns} />;
 }

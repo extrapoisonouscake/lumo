@@ -1,7 +1,9 @@
 import {
   AccessorKeyColumnDefBase,
+  DisplayColumnDef,
   flexRender,
   IdIdentifier,
+  Row,
   Table as TableType,
 } from "@tanstack/react-table";
 
@@ -14,12 +16,19 @@ import {
   TableRow,
 } from "./table";
 
+declare module "@tanstack/table-core" {
+  interface TableMeta<TData extends unknown> {
+    getRowStyles?: (row: Row<TData>) => React.CSSProperties;
+    getRowClassName?: (row: Row<TData>) => string;
+  }
+}
+
 export function TableRenderer<T>({
   table,
   columns,
 }: {
   table: TableType<T>;
-  columns: (AccessorKeyColumnDefBase<any, any> &
+  columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
 }) {
   return (
@@ -49,6 +58,8 @@ export function TableRenderer<T>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                style={table.options.meta?.getRowStyles?.(row)}
+                className={table.options.meta?.getRowClassName?.(row)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

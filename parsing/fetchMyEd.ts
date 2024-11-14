@@ -5,12 +5,13 @@ import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
 import "server-only";
-import { parseSchedule } from "./schedule";
+import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 const endpointToFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
+  currentWeekday: parseCurrentWeekday,
 } as const satisfies Record<MyEdFetchEndpoints, (dom: CheerioAPI) => any>;
 export const sessionExpiredIndicator: unique symbol = Symbol();
 //* the original website appears to be using the server to store user navigation
@@ -20,7 +21,9 @@ export function isSessionExpiredResponse(
 ): response is typeof sessionExpiredIndicator {
   return true;
 }
-export async function fetchMyEd(endpoint: MyEdFetchEndpoints) {
+export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
+  endpoint: Endpoint
+) {
   const cookieStore = new MyEdCookieStore(cookies());
   let response = await sendMyEdRequest(endpoint, getAuthCookies(cookieStore));
   if (!response.ok) {
@@ -28,7 +31,9 @@ export async function fetchMyEd(endpoint: MyEdFetchEndpoints) {
     throw response;
   }
   const html = await response.text();
-  return endpointToFunction[endpoint](cheerio.load(html));
+  return endpointToFunction[endpoint](
+    cheerio.load(html)
+  ) as MyEdEndpointResponse<Endpoint>;
 }
 export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
   ReturnType<(typeof endpointToFunction)[T]>,
