@@ -43,7 +43,12 @@ function PagesMenu() {
     <SidebarMenu>
       {Object.entries(websitePages).map(([url, page]) => (
         <SidebarMenuItem key={page.name}>
-          <SidebarMenuButton asChild isActive={url.startsWith(pathname)}>
+          <SidebarMenuButton
+            asChild
+            isActive={
+              pathname === "/" ? pathname === url : url.startsWith(pathname)
+            }
+          >
             <Link href={url}>
               <page.icon />
               {page.name}
