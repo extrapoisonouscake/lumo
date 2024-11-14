@@ -32,18 +32,15 @@ function separateTAFromSubjects(subject: Subject[]) {
 }
 export function parseSubjects($: CheerioAPI) {
   const $tableContainer = $("#dataGrid");
-  if (!$tableContainer) return null;
+  if ($tableContainer.length === 0) return null;
 
   if ($tableContainer.find(".listNoRecordsText").length > 0)
     return separateTAFromSubjects([]);
-
-  $tableContainer.find(".listCell").each((i, el) => console.log($(el).text()));
 
   const data = $tableContainer
     .find(".listCell")
     .toArray()
     .map((cell) => {
-      // console.log(cell.childNodes);
       const texts = $(cell)
         .children("td")
         .toArray()

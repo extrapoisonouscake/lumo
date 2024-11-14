@@ -1,36 +1,32 @@
 import * as cheerio from "cheerio";
 
+import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { ScheduleSubject } from "@/types/school";
 import { removeLineBreaks } from "../helpers/removeLineBreaks";
 
 export function parseSchedule($: cheerio.CheerioAPI) {
-  const $rootContainer = $(".contentContainer");
+  const $contentContainer = $(
+    ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"
+  );
 
-  if (!$rootContainer) return null;
-  const $tableSecondLevelContainer = $rootContainer
-    .last()
-    .first()
-    .last()
-    .first();
+  if ($contentContainer.length === 0) return null;
+  const $tableContainer = $contentContainer.find(".listGridFixed");
 
-  if (!$tableSecondLevelContainer) return null;
-  const $tableContainer = $tableSecondLevelContainer.find(".listGridFixed");
-
-  if (!$tableContainer) {
-    const errorMessage = $tableSecondLevelContainer.prop("innerText");
+  if ($tableContainer.length === 0) {
+    const errorMessage = $contentContainer.prop("innerText");
     return { knownError: errorMessage ? removeLineBreaks(errorMessage) : null }; //! ?needed?
   }
-  const $tableBody = $tableContainer.find("tbody:has(> .listHeader)").first();
+  const $tableBody = $tableContainer.find("tbody:has(> .listHeader)");
 
-  if (!$tableBody) return null;
-  const weekdayName =
-    $tableBody
-      .filter(".listHeader")
-      .find("th:last-of-type")
-      .first()
-      .prop("textContent") ?? null;
+  if ($tableBody.length === 0) return null;
+  const rawWeekdayName = $tableBody
+    .find(".listHeader th:last-of-type")
+    .first()
+    .prop("textContent");
+  const weekday =
+    removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim() ?? null;
 
-  if ($tableBody.has(".listNoRecordsText").length > 0) return [];
+  if ($tableBody.find(".listNoRecordsText").length > 0) return [];
 
   const data = $tableBody
     .children("tr")
@@ -38,7 +34,7 @@ export function parseSchedule($: cheerio.CheerioAPI) {
     .toArray()
     .map((row) => {
       const [timeTd, contentTd] = $(row).children("td").toArray();
-      // $(timeTd).
+
       const timeString = removeLineBreaks($(timeTd).find("td").text());
       const [startsAt, endsAt] = timeString.split(" - ");
       let subject: ScheduleSubject = {
@@ -51,12 +47,12 @@ export function parseSchedule($: cheerio.CheerioAPI) {
           removeLineBreaks(contentCellHTML).split("<br>");
         subject = {
           ...subject,
-          name,
+          name: prettifySubjectName(name),
           teachers: teachersString.split(";"),
-          room,
+          room: room || null,
         };
       }
       return subject;
     }) satisfies ScheduleSubject[];
-  return { weekdayName, data };
+  return { weekday, data };
 }

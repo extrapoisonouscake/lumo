@@ -1,8 +1,8 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import { ColumnDef, RowData } from "@tanstack/react-table";
+import { AccessorKeyColumnDef, RowData } from "@tanstack/react-table";
 
 export function makeTableColumnsSkeletons<T extends RowData>(
-  columns: ColumnDef<T>[],
+  columns: AccessorKeyColumnDef<T, any>[],
   lengths?: Partial<Record<keyof T, number>>
 ) {
   return columns.map(
@@ -15,5 +15,5 @@ export function makeTableColumnsSkeletons<T extends RowData>(
           </Skeleton>
         ),
       } satisfies (typeof columns)[number])
-  );
+  ) as typeof columns;
 }

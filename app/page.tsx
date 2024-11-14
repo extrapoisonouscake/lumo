@@ -7,6 +7,9 @@ export default function Home() {
       <Button asChild>
         <Link href="/classes">Classes</Link>
       </Button>
+      <Button asChild>
+        <Link href="/schedule">Schedule</Link>
+      </Button>
     </div>
   );
 }

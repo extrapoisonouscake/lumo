@@ -1,63 +1,42 @@
 "use client";
-
 import {
-  ColumnFiltersState,
-  SortingState,
-  TableOptions,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
-import * as React from "react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { SortableColumn } from "@/components/ui/sortable-column";
+import { TableRenderer } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
-import { getNullToUndefinedAccessor } from "@/helpers/getNullToUndefinedAccessor";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
+import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { Subject } from "@/types/school";
-import { Optional } from "@/types/utils";
+import { useMemo } from "react";
 const numberFormatter = new Intl.NumberFormat("en-CA", {
   minimumFractionDigits: 1,
   maximumFractionDigits: 2,
 });
 const columnHelper = createColumnHelper<Subject>();
 const columns = [
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
+  columnHelper.accessor("name", { header: "Name" }),
   columnHelper.accessor("gpa", {
     header: ({ column }) => {
-      return (
-        <Button variant="ghost" onClick={() => column.toggleSorting()}>
-          GPA
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
+      return <SortableColumn {...column}>GPA</SortableColumn>;
     },
+
     cell: ({ row }) => {
       const gpa = row.getValue("gpa");
       if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
       return numberFormatter.format(gpa as number);
     },
     sortUndefined: "last",
-    accessorFn: getNullToUndefinedAccessor("gpa"),
   }),
   columnHelper.accessor("room", {
     header: "Room",
+
     cell: ({ cell }) => {
       return cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK;
     },
@@ -84,82 +63,47 @@ const columns = [
     },
   }),
 ];
-
-export function SubjectsTable({
-  data,
-  shownColumns,
-}: {
-  data: Subject[];
-  shownColumns?: string[];
-}) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] = React.useState(
-    shownColumns
-      ? Object.fromEntries(
-          columns.map((column) => {
-            const hasAccessorKey = "accessorKey" in column;
-            const identifier = hasAccessorKey ? column.accessorKey : column.id;
-            return [
-              identifier,
-              shownColumns.includes(
-                identifier as NonNullable<typeof identifier>
-              ),
-            ];
-          })
-        )
-      : {}
-  );
-  const [rowSelection, setRowSelection] = React.useState({});
-
-  return (
-    <SubjectsPlainTable
-      {...{
-        data,
-        columns: columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
-        enableSortingRemoval: false,
-        state: {
-          sorting,
-          columnFilters,
-          columnVisibility,
-          rowSelection,
-        },
-      }}
-    />
-  );
-}
 const mockSubjects = (length: number) =>
   [...Array(length)].map(
     () => ({ gpa: 0, teachers: [], name: "", room: "" } satisfies Subject)
   );
-export function SubjectsPlainTable({
-  data = [],
+export function SubjectsTable({
+  data: externalData,
+  shownColumns,
   isLoading = false,
-  ...props
-}: Optional<
-  Omit<
-    TableOptions<Subject>,
-    | "getCoreRowModel"
-    | "getPaginationRowModel"
-    | "getSortedRowModel"
-    | "getFilteredRowModel"
-    | "columns"
-  >,
-  "data"
-> & { isLoading?: boolean }) {
+}: {
+  shownColumns?: string[];
+  data?: Subject[];
+  isLoading?: boolean;
+}) {
+  const data = useMemo(
+    () =>
+      isLoading
+        ? mockSubjects(5)
+        : prepareTableDataForSorting(
+            externalData as NonNullable<typeof externalData>
+          ),
+    [isLoading, externalData]
+  );
+  const columnVisibility = shownColumns
+    ? Object.fromEntries(
+        columns.map((column) => {
+          const identifier = column.accessorKey;
+          return [identifier, shownColumns.includes(identifier)];
+        })
+      )
+    : {};
   const table = useReactTable<Subject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    data: isLoading ? mockSubjects(5) : data,
-    ...props,
+    enableSortingRemoval: false,
+    state: {
+      columnVisibility,
+    },
+    data,
+
     columns: isLoading
       ? makeTableColumnsSkeletons(columns, {
           gpa: 4,
@@ -168,50 +112,5 @@ export function SubjectsPlainTable({
         })
       : columns,
   });
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No subjects.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
-  );
+  return <TableRenderer table={table} columns={columns} />;
 }

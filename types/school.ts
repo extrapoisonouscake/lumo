@@ -1,7 +1,7 @@
 export interface Subject {
   name: string;
   teachers: string[];
-  room: string;
+  room: string | null;
   gpa: number | null;
 }
 //? name?
