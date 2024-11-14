@@ -6,6 +6,7 @@ import { SchedulePage } from "./schedule-page";
 
 export default async function Page() {
   const data = await fetchMyEd("schedule");
+  console.log({ data });
   if (data === sessionExpiredIndicator)
     return <ReloginWrapper skeleton={<SchedulePageSkeleton />} />;
   if (!data) return <ErrorCard />;
