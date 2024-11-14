@@ -1,7 +1,8 @@
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import * as cookie from "cookie";
-import { JSDOM } from "jsdom";
+
+import * as cheerio from "cheerio";
 import "server-only";
 const HTML_TOKEN_INTERNAL_NAME = "org.apache.struts.taglib.html.TOKEN";
 const loginDefaultParams = {
@@ -23,15 +24,16 @@ export async function authenticateUser(username: string, password: string) {
   }
 
   const loginTokenHTML = await loginTokenResponse.text();
-  const loginTokenDom = new JSDOM(loginTokenHTML);
-  const loginToken = (
-    loginTokenDom.window.document.getElementsByName(
-      HTML_TOKEN_INTERNAL_NAME
-    )[0] as HTMLInputElement
-  ).value;
+  const $loginTokenDOM = cheerio.load(loginTokenHTML);
+  const loginToken = $loginTokenDOM(`[name="${HTML_TOKEN_INTERNAL_NAME}"]`)
+    .first()
+    .val();
+  if (!loginToken) throw new Error("Failed"); //!
   const loginFormData = new FormData();
   const loginParams = {
-    [HTML_TOKEN_INTERNAL_NAME]: loginToken,
+    [HTML_TOKEN_INTERNAL_NAME]: Array.isArray(loginToken)
+      ? loginToken[0]
+      : loginToken,
     username,
     password,
     ...loginDefaultParams,
@@ -63,13 +65,13 @@ export async function authenticateUser(username: string, password: string) {
   );
 }
 function parseLoginErrorMessage(html: string) {
-  const dom = new JSDOM(html);
-  if (dom.window.document.getElementById("pageMenuContainer")) return null;
-  const errorMessageScriptContent = [
-    ...dom.window.document.querySelectorAll('script[language="JavaScript"]'),
-  ]
-    .filter((elem) => !elem.getAttribute("type"))
-    .map((e) => e.textContent)
+  const $ = cheerio.load(html);
+  if ($("#pageMenuContainer")) return null;
+  const errorMessageScriptContent = $(
+    'script[language="JavaScript"]:not([type])'
+  )
+    .toArray()
+    .map((e) => $(e).text())
     .filter(Boolean);
   if (!errorMessageScriptContent) return null;
   const errorMessage = errorMessageScriptContent
