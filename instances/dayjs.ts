@@ -1,6 +1,10 @@
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import isBetween from "dayjs/plugin/isBetween";
+import timezone from "dayjs/plugin/timezone";
 export default dayjs;
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
+dayjs.extend(timezone);
+export const INSTANTIATED_TIMEZONE = "America/Vancouver";
+dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);

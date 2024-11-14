@@ -13,4 +13,3 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "ApplicationGatewayAffinity",
   "ApplicationGatewayAffinityCORS",
 ];
-export const INSTANTIATED_TIMEZONE = "America/Vancouver";
