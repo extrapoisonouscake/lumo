@@ -27,7 +27,10 @@ const columns = [
       )} - ${timezonedDayjs(row.original.endsAt).format(hoursFormat)}`;
     },
   }),
-  columnHelper.accessor("name", { header: "Name" }),
+  columnHelper.accessor("name", {
+    header: "Name",
+    cell: ({ cell }) => cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK,
+  }),
 
   columnHelper.accessor("room", {
     header: "Room",
