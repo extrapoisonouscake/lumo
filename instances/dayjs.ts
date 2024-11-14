@@ -20,4 +20,4 @@ const timezonedUnix = (value: number) => {
 
 timezonedDayjs.unix = timezonedUnix;
 
-export default timezonedDayjs;
+export { dayjs, timezonedDayjs };

@@ -12,7 +12,7 @@ import { TableRenderer } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
-import dayjs from "@/instances/dayjs";
+import { timezonedDayjs } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
 import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
@@ -22,11 +22,9 @@ const columns = [
   columnHelper.display({
     header: "Time",
     cell: ({ row }) => {
-      //@ts-ignore
-      console.log(dayjs(row.original.startsAt)["$x"]["$timezone"]);
-      return `${dayjs(row.original.startsAt).format("HH:mm A")} - ${dayjs(
-        row.original.endsAt
-      ).format("HH:mm A")}`;
+      return `${timezonedDayjs(row.original.startsAt).format(
+        "HH:mm A"
+      )} - ${timezonedDayjs(row.original.endsAt).format("HH:mm A")}`;
     },
   }),
   columnHelper.accessor("name", { header: "Name" }),
@@ -109,7 +107,10 @@ export function ScheduleTable({
       getRowClassName: (row) =>
         cn({
           "[&>td:first-child]:relative [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
-            dayjs().isBetween(row.original.startsAt, row.original.endsAt),
+            timezonedDayjs().isBetween(
+              row.original.startsAt,
+              row.original.endsAt
+            ),
         }),
     },
   });

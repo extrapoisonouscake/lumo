@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
-import dayjs from "@/instances/dayjs";
+import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { removeLineBreaks } from "../helpers/removeLineBreaks";
 function getTableBody($: cheerio.CheerioAPI) {
@@ -37,10 +37,7 @@ export function parseCurrentWeekday($: cheerio.CheerioAPI) {
   return getWeekday($tableBody);
 }
 function getDateFromSubjectTimeString(time: string) {
-  const d = dayjs(time, "HH:mm A");
-  //@ts-ignore
-  console.log(d["$x"]["$timezone"]);
-  return d.toDate();
+  return dayjs(time, "HH:mm A").tz(INSTANTIATED_TIMEZONE, true).toDate();
 }
 export function parseSchedule(
   $: cheerio.CheerioAPI

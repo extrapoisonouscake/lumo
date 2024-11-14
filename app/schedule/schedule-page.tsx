@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import dayjs from "@/instances/dayjs";
+import { timezonedDayjs } from "@/instances/dayjs";
 import { MyEdEndpointResponse } from "@/parsing/fetchMyEd";
 import { ScheduleTable } from "./schedule-table";
 
@@ -18,7 +18,7 @@ export function SchedulePage({
   }
   return (
     <div className="flex flex-col gap-4">
-      {data && dayjs().day() === 5 && (
+      {data && timezonedDayjs().day() === 5 && (
         <h3>
           Today's schedule is <span className="text-bold">{data.weekday}</span>
         </h3>
