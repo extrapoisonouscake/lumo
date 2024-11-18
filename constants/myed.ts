@@ -6,7 +6,7 @@ export const MYED_ENDPOINTS = {
   schedule: ({ day }: { day: string }) =>{
 
     return `${day?'studentScheduleMatrix':'studentScheduleContextList'}.do?navkey=myInfo.sch.list${
-      day ? `&viewDate=${day}` : ""
+      day ? `&termOid=date&schoolOid=&k8Mode=&viewDate=${day}&userEvent=2000` : ""
     }`},
   currentWeekday: "studentScheduleContextList.do?navkey=myInfo.sch.list",
   logout: "logout.do",
