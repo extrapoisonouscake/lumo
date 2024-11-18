@@ -16,6 +16,7 @@ import { websitePages } from "@/constants/website";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOutButton } from "./log-out";
+import { ThemeToggle } from "./theme-toggle";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -30,6 +31,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
+          <ThemeToggle />
           <LogOutButton />
         </SidebarMenu>
       </SidebarFooter>

@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 
-import { PageHeading } from "./page-heading";
 const Inset = ({ children }: { children: ReactNode }) => (
   <SidebarInset className="p-4 flex flex-col gap-4 min-w-0">
     {children}
@@ -18,10 +17,7 @@ export function AppSidebarWrapper({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar />
-      <Inset>
-        <PageHeading />
-        {children}
-      </Inset>
+      <Inset>{children}</Inset>
     </SidebarProvider>
   );
 }

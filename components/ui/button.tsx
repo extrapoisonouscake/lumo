@@ -39,6 +39,7 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
+  shouldShowChildrenOnLoading?: boolean;
 }
 export const Spinner = () => (
   <svg
@@ -67,6 +68,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       isLoading: externalIsLoading = false,
+      shouldShowChildrenOnLoading = false,
       disabled,
       ...props
     },
@@ -95,7 +97,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : undefined
         }
       >
-        {isLoading ? <Spinner /> : children}
+        {isLoading && <Spinner />}
+        {(!isLoading || shouldShowChildrenOnLoading) && children}
       </Comp>
     );
   }

@@ -13,13 +13,14 @@ export async function sendMyEdRequest(
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
-  >
+  >,
+  params?: Record<string, string>
 ) {
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
   ).join("; ");
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
-  const response = await fetch(getEndpointUrl(endpoint), {
+  const response = await fetch(getEndpointUrl(endpoint, params), {
     headers: {
       Cookie: cookiesString,
       "User-Agent": userAgent,

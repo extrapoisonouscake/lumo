@@ -22,10 +22,15 @@ export function isSessionExpiredResponse(
   return true;
 }
 export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
-  endpoint: Endpoint
+  endpoint: Endpoint,
+  params?: Record<string, string>
 ) {
   const cookieStore = new MyEdCookieStore(cookies());
-  let response = await sendMyEdRequest(endpoint, getAuthCookies(cookieStore));
+  let response = await sendMyEdRequest(
+    endpoint,
+    getAuthCookies(cookieStore),
+    params
+  );
   if (!response.ok) {
     if (response.status === 404) return sessionExpiredIndicator;
     throw response;
