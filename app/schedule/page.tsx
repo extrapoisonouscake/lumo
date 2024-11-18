@@ -1,6 +1,6 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
-import { timezonedDayjs } from "@/instances/dayjs";
+import { dayjs } from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/fetchMyEd";
 import SchedulePageSkeleton from "./loading";
 import { SchedulePage } from "./schedule-page";
@@ -12,7 +12,7 @@ export default async function Page({
 }) {
   const params: { day?: string } = {};
   if (searchParams.day) {
-    params.day = timezonedDayjs(searchParams.day, "MM-DD-YYYY").format(
+    params.day = dayjs(searchParams.day, "MM-DD-YYYY").format(
       "DD/MM/YYYY"
     );
   }
