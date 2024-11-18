@@ -10,5 +10,5 @@ export default async function Page() {
     return <ReloginWrapper skeleton={<SubjectsPageSkeleton />} />;
   if (!subjects) return <ErrorCard />;
   //@ts-ignore
-  return <><PageHeading/><SubjectsPage data={subjects} /></>
+  return <SubjectsPage data={subjects} />
 }
