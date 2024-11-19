@@ -35,7 +35,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
       )}
       <ScheduleTable
         data={data.subjects}
-        isToday={timezonedDayJS().isSame(day, "date")}
+        isToday={dayjs().isSame(day, "date")}
       />
     </>
   );
