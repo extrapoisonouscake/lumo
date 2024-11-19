@@ -17,7 +17,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
   if (data === sessionExpiredIndicator)
     return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
   if (!data) return <ErrorCard />;
-  if (data && "knownError" in data) {
+  if ("knownError" in data) {
     //! refactor, separate reusable component??
     return (
       <Card className="p-4">
