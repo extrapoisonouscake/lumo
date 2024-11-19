@@ -121,7 +121,6 @@ const prepareTableData = (data: ScheduleSubject[]) => {
       }
     }
   }
-  console.log({ filledIntervals });
   return filledIntervals;
 };
 export function ScheduleTable({
