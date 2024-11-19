@@ -1,13 +1,13 @@
 import { MyEdEndpointResponse } from "@/parsing/fetchMyEd";
 import { SubjectsTable } from "./subjects-table";
-
+import { PageHeading } from "@/components/layout/page-heading";
 export function SubjectsPage({
   data,
 }: {
   data?: MyEdEndpointResponse<"subjects">;
 }) {
   return (
-    <div className="flex flex-col gap-4">
+    <><PageHeading/><div className="flex flex-col gap-4">
       <SubjectsTable data={data?.main} isLoading={!data} />
 
       {data?.teacherAdvisory && (
@@ -19,6 +19,6 @@ export function SubjectsPage({
           />
         </div>
       )}
-    </div>
+    </div></>
   );
 }
