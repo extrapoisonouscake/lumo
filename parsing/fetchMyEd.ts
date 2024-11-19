@@ -1,6 +1,9 @@
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
-import { MyEdFetchEndpoints } from "@/types/myed";
+import {
+  MyEdEndpointsParamsAsOptional,
+  MyEdFetchEndpoints,
+} from "@/types/myed";
 import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
@@ -21,15 +24,16 @@ export function isSessionExpiredResponse(
 ): response is typeof sessionExpiredIndicator {
   return true;
 }
+
 export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
   endpoint: Endpoint,
-  params?: Record<string, string>
+  ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
   const cookieStore = new MyEdCookieStore(cookies());
   let response = await sendMyEdRequest(
     endpoint,
     getAuthCookies(cookieStore),
-    params
+    ...rest
   );
   if (!response.ok) {
     if (response.status === 404) return sessionExpiredIndicator;

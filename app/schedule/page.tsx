@@ -1,24 +1,23 @@
-import { ErrorCard } from "@/components/misc/error-card";
-import { ReloginWrapper } from "@/components/relogin-wrapper";
-import { timezonedDayjs } from "@/instances/dayjs";
-import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/fetchMyEd";
-import SchedulePageSkeleton from "./loading";
-import { SchedulePage } from "./schedule-page";
+import { PageHeading } from "@/components/layout/page-heading";
+import { Suspense } from "react";
+import { ScheduleContent, ScheduleContentSkeleton } from "./content";
+import { ScheduleDayPicker } from "./day-picker";
 
 export default async function Page({
-  searchParams,
+  searchParams: { day },
 }: {
   searchParams: { day?: string };
 }) {
-  const params: { day?: string } = {};
-  if (searchParams.day) {
-    params.day = timezonedDayjs(searchParams.day, "MM-DD-YYYY").format(
-      "DD/MM/YYYY"
-    );
-  }
-  const data = await fetchMyEd("schedule", params);
-  if (data === sessionExpiredIndicator)
-    return <ReloginWrapper skeleton={<SchedulePageSkeleton />} />;
-  if (!data) return <ErrorCard />;
-  return <SchedulePage data={data} day={searchParams.day} />;
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center gap-2">
+        <PageHeading />
+        <ScheduleDayPicker initialDay={day} />
+      </div>
+
+      <Suspense key={day} fallback={<ScheduleContentSkeleton day={day} />}>
+        <ScheduleContent day={day} />
+      </Suspense>
+    </div>
+  );
 }

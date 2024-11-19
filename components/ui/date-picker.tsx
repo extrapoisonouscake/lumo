@@ -9,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { timezonedDayjs } from "@/instances/dayjs";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
 import { ComponentProps, useState } from "react";
 
@@ -36,15 +36,15 @@ export function DatePicker({
           shouldShowChildrenOnLoading
           variant={"outline"}
           className={cn(
-            "w-[280px] justify-start text-left font-normal",
+            "justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? timezonedDayjs(date).format("L") : <span>Pick a date</span>}
+          <CalendarIcon className="h-4 w-4" />
+          {date ? timezonedDayJS(date).format("L") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent align="end" className="w-auto p-0">
         <Calendar
           disabled={disabledModifier}
           mode="single"

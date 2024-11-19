@@ -11,7 +11,7 @@ dayjs.extend(localizedFormat);
 dayjs.extend(utc);
 export const INSTANTIATED_TIMEZONE = "America/Vancouver";
 dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);
-const timezonedDayjs = (...args: any[]) => {
+const timezonedDayJS = (...args: any[]) => {
   return dayjs(...args).tz();
 };
 
@@ -19,6 +19,6 @@ const timezonedUnix = (value: number) => {
   return dayjs.unix(value).tz();
 };
 
-timezonedDayjs.unix = timezonedUnix;
+timezonedDayJS.unix = timezonedUnix;
 
-export { dayjs, timezonedDayjs };
+export { dayjs, timezonedDayJS };

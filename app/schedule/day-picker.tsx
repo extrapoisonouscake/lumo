@@ -1,11 +1,12 @@
 "use client";
 import { DatePicker } from "@/components/ui/date-picker";
-import { timezonedDayjs } from "@/instances/dayjs";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { convertQueryDayToDate } from "./helpers";
 
-export function ScheduleDayPicker({ defaultDate }: { defaultDate: Date }) {
-  const [date, setDate] = useState<Date>();
+export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
+  const [date, setDate] = useState(convertQueryDayToDate(initialDay));
   const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();
@@ -13,7 +14,7 @@ export function ScheduleDayPicker({ defaultDate }: { defaultDate: Date }) {
   const [isPending, startTransition] = useTransition();
   useEffect(() => {
     if (!date) return;
-    const day = timezonedDayjs(date).format("MM-DD-YYYY");
+    const day = timezonedDayJS(date).format("MM-DD-YYYY");
     const updatedSearchParams = new URLSearchParams(
       currentSearchParams.toString()
     );
@@ -28,8 +29,7 @@ export function ScheduleDayPicker({ defaultDate }: { defaultDate: Date }) {
     <DatePicker
       disabledModifier={{ dayOfWeek: [0, 6] }}
       isLoading={isPending}
-      defaultDate={defaultDate}
-      date={date}
+      date={date || new Date()}
       setDate={setDate}
     />
   );
