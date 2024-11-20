@@ -10,7 +10,7 @@ import { setTimeout } from "timers/promises";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
-  await setTimeout(20000);
+  
   const params: MyEdEndpointsParams<"schedule"> = {};
   if (day) {
     params.day = dayjs(day, "MM-DD-YYYY").format("DD/MM/YYYY");
