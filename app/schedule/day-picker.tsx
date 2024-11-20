@@ -24,7 +24,6 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
       router.push(`${pathname}?${updatedSearchParams.toString()}`);
     });
   }, [date, router]);
-
   return (
     <DatePicker
       disabledModifier={{ dayOfWeek: [0, 6] }}

@@ -1,6 +1,8 @@
 "use client";
 import {
+  Cell,
   createColumnHelper,
+  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -8,14 +10,18 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { TableRenderer } from "@/components/ui/table-renderer";
+import AppleEmoji from "@/components/misc/apple-emoji";
+import { TableCell, TableRow } from "@/components/ui/table";
+import {
+  RowRendererFactory,
+  TableRenderer,
+} from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
 import { ScheduleSubject } from "@/types/school";
-import { Footprints, Utensils } from "lucide-react";
 import { useMemo } from "react";
 type ScheduleSubjectRow =
   | ScheduleSubject
@@ -40,10 +46,11 @@ const columns = [
             row.original.startsAt,
             "minutes"
           ) > 20;
-        const Icon = isLunch ? Utensils : Footprints;
+        const emojiName = isLunch ? "pizza" : "person-running";
         return (
           <div className="flex items-center gap-[6px]">
-            {isLunch ? "Lunch" : "Break"} <Icon className="size-[0.85rem]" />
+            {isLunch ? "Lunch" : "Break"}{" "}
+            <AppleEmoji name={emojiName} width={16} />
           </div>
         );
       }
@@ -123,6 +130,44 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   }
   return filledIntervals;
 };
+const renderCell = <T, H>(cell: Cell<T, H>) =>
+  flexRender(cell.column.columnDef.cell, cell.getContext());
+const getRowRenderer: RowRendererFactory<ScheduleSubjectRow> =
+  (table) => (row) => {
+    const cells = row.getVisibleCells();
+    const isBreak = "isBreak" in row.original;
+    let nameCell, timeCell;
+    if (isBreak) {
+      //!optimize?
+      timeCell = cells.find((cell) => cell.column.id === "Time");
+      nameCell = cells.find((cell) => cell.column.id === "name");
+    }
+    return (
+      <TableRow
+        key={row.id}
+        data-state={row.getIsSelected() && "selected"}
+        style={table.options.meta?.getRowStyles?.(row)}
+        className={table.options.meta?.getRowClassName?.(row)}
+      >
+        {isBreak ? (
+          <>
+            <TableCell>
+              {renderCell(timeCell as NonNullable<typeof timeCell>)}
+            </TableCell>
+            <TableCell colSpan={3}>
+              {renderCell(nameCell as NonNullable<typeof nameCell>)}
+            </TableCell>
+          </>
+        ) : (
+          cells.map((cell) => (
+            <TableCell key={cell.id}>
+              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+            </TableCell>
+          ))
+        )}
+      </TableRow>
+    );
+  };
 export function ScheduleTable({
   data: externalData,
   isLoading = false,
@@ -163,5 +208,11 @@ export function ScheduleTable({
         }),
     },
   });
-  return <TableRenderer table={table} columns={columns} />;
+  return (
+    <TableRenderer
+      table={table}
+      columns={columns}
+      rowRendererFactory={getRowRenderer}
+    />
+  );
 }

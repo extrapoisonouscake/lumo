@@ -1,4 +1,4 @@
-import { Calendar, Home, Shapes } from "lucide-react";
+import { Calendar, Home, Settings, Shapes } from "lucide-react";
 
 export const WEBSITE_TITLE = "MyEdBC Wrapper";
 export const websitePages: Record<
@@ -11,4 +11,5 @@ export const websitePages: Record<
   "/": { name: "Home", icon: Home },
   "/schedule": { name: "Schedule", icon: Calendar },
   "/classes": { name: "Classes", icon: Shapes },
+  "/settings": { name: "Settings", icon: Settings },
 };
