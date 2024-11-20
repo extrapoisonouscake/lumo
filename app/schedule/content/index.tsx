@@ -32,7 +32,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
       {data && dayjs(day).day() === 5 && (
         <h3>
           Shortened day schedule:{" "}
-          <span className="font-bold">{data.weekday}</span>
+          <span className="font-semibold">{data.weekday}</span>
         </h3>
       )}
       <ScheduleTable
@@ -51,7 +51,7 @@ export function ScheduleContentSkeleton({
         <div className="flex items-center gap-2">
           <h3>Shortened day schedule:</h3>
           <Skeleton>
-            <span className="font-bold">Friday</span>
+            <span className="font-semibold">Friday</span>
           </Skeleton>
         </div>
       )}
