@@ -42,8 +42,8 @@ const columns = [
           ) > 20;
         const Icon = isLunch ? Utensils : Footprints;
         return (
-          <div className="flex items-center gap-2">
-            {isLunch ? "Lunch" : "Break"} <Icon className="size-4" />
+          <div className="flex items-center gap-[6px]">
+            {isLunch ? "Lunch" : "Break"} <Icon className="size-[0.85rem]" />
           </div>
         );
       }

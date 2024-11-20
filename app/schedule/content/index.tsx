@@ -2,13 +2,15 @@ import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { dayjs,timezonedDayJS } from "@/instances/dayjs";
+import { dayjs } from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
+import { setTimeout } from "timers/promises";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
+  await setTimeout(20000);
   const params: MyEdEndpointsParams<"schedule"> = {};
   if (day) {
     params.day = dayjs(day, "MM-DD-YYYY").format("DD/MM/YYYY");

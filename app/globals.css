@@ -7,6 +7,14 @@ body {
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
 }
+*:not(:focus-visible) {
+  outline: none !important;
+  outline-width: 0 !important;
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
 menu,
 ol,
 ul {
