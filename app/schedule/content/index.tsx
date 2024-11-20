@@ -32,7 +32,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
       {data && dayjs(day).day() === 5 && (
         <h3>
           Shortened day schedule:{" "}
-          <span className="text-bold">{data.weekday}</span>
+          <span className="text-extrabold">{data.weekday}</span>
         </h3>
       )}
       <ScheduleTable
