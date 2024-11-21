@@ -10,7 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import AppleEmoji from "@/components/misc/apple-emoji";
+import { AppleEmoji } from "@/components/misc/apple-emoji";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
   RowRendererFactory,

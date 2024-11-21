@@ -1,6 +1,6 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
-import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/fetchMyEd";
+import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import SubjectsPageSkeleton from "./loading";
 import { SubjectsPage } from "./subjects-page";
 export default async function Page() {

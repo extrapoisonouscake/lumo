@@ -14,39 +14,36 @@ const SelectValue = SelectPrimitive.Value;
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & {
-    shouldShowChevron?: boolean;
-  }
->(
-  (
-    { className, children, shouldShowChevron = true, asChild, ...props },
-    ref
-  ) => {
-    const mergedChildren =
-      asChild || !shouldShowChevron ? (
-        children
-      ) : (
-        <>
-          {children}
-          <SelectPrimitive.Icon asChild>
-            <ChevronDown className="h-4 w-4 opacity-50" />
-          </SelectPrimitive.Icon>
-        </>
-      );
-    return (
-      <SelectPrimitive.Trigger
-        ref={ref}
-        className={cn(
-          "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
-          className
-        )}
-        {...props}
-      >
-        {mergedChildren}
-      </SelectPrimitive.Trigger>
-    );
-  }
-);
+  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
+>(({ className, children, asChild, ...props }, ref) => {
+  const mergedChildren = asChild ? (
+    children
+  ) : (
+    <>
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </SelectPrimitive.Icon>
+    </>
+  );
+  return (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      asChild={asChild}
+      className={
+        !asChild
+          ? cn(
+              "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+              className
+            )
+          : className
+      }
+      {...props}
+    >
+      {mergedChildren}
+    </SelectPrimitive.Trigger>
+  );
+});
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
 
 const SelectScrollUpButton = React.forwardRef<
