@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, ReactNode, useState } from "react";
 
 export function DatePicker({
   defaultDate,
@@ -20,15 +20,24 @@ export function DatePicker({
   disabledModifier,
   disabled,
   isLoading,
+  bottomContent,
+  open: externalOpen,
+  onOpenChange: externalOnOpenChange,
 }: {
   date?: Date;
   defaultDate?: Date;
   disabledModifier?: CalendarProps["disabled"];
   setDate: (newDate: typeof date) => void;
-} & Pick<ComponentProps<typeof Button>, "disabled" | "isLoading">) {
+  bottomContent?: ReactNode;
+} & Pick<ComponentProps<typeof Button>, "disabled" | "isLoading"> &
+  Pick<ComponentProps<typeof Popover>, "open" | "onOpenChange">) {
   const [isOpen, setIsOpen] = useState(false);
+  const onOpenChange = externalOnOpenChange || setIsOpen;
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover
+      open={typeof externalOpen === "boolean" ? externalOpen : isOpen}
+      onOpenChange={onOpenChange}
+    >
       <PopoverTrigger asChild>
         <Button
           disabled={disabled}
@@ -39,8 +48,8 @@ export function DatePicker({
             "justify-start text-left font-normal",
             !date && "text-muted-foreground"
           )}
+          leftIcon={<CalendarIcon className="h-4 w-4" />}
         >
-          <CalendarIcon className="h-4 w-4" />
           {date ? timezonedDayJS(date).format("L") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
@@ -50,11 +59,12 @@ export function DatePicker({
           mode="single"
           selected={date}
           onSelect={(date) => {
-            setIsOpen(false);
+            onOpenChange(false);
             setDate(date);
           }}
           initialFocus
         />
+        {bottomContent}
       </PopoverContent>
     </Popover>
   );

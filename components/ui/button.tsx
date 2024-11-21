@@ -40,6 +40,8 @@ export interface ButtonProps
   asChild?: boolean;
   isLoading?: boolean;
   shouldShowChildrenOnLoading?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 export const Spinner = () => (
   <svg
@@ -69,6 +71,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       asChild = false,
       isLoading: externalIsLoading = false,
       shouldShowChildrenOnLoading = false,
+      leftIcon,
+      rightIcon,
       disabled,
       ...props
     },
@@ -97,8 +101,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : undefined
         }
       >
-        {isLoading && <Spinner />}
+        {isLoading ? <Spinner /> : leftIcon}
         {(!isLoading || shouldShowChildrenOnLoading) && children}
+        {rightIcon}
       </Comp>
     );
   }
