@@ -1,15 +1,19 @@
-import { ComponentProps } from "react";
-import { Emoji } from "react-apple-emojis";
-const emojiNameToUnicode: Record<AppleEmojiProps["name"], string> = {
+import emojiSrcsSource from "@/data/apple-emojis.json";
+import { ImgHTMLAttributes } from "react";
+const emojiNameToUnicode: Record<string, string> = {
   //!replace
   "person-running": "🏃‍♂️",
   pizza: "🍕",
 };
-export type AppleEmojiProps = ComponentProps<typeof Emoji>;
-export function AppleEmojiClientComponent({ name, ...props }: AppleEmojiProps) {
+const emojiSrcs = emojiSrcsSource as Record<string, string>;
+export function AppleEmojiClientComponent({
+  name,
+  ...props
+}: { name: string } & ImgHTMLAttributes<HTMLImageElement>) {
   const isAppleDevice = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent);
   if (isAppleDevice) {
     return emojiNameToUnicode[name];
   }
-  return <Emoji name={name} {...props} />;
+  if (!(name in emojiSrcs)) return name;
+  return <img src={emojiSrcs[name]} alt={name} aria-label={name} {...props} />;
 }
