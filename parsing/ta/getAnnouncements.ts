@@ -49,7 +49,7 @@ const schoolToAnnouncementsFileURL: Record<
     const parsedDate = dayjs(date);
     const year = parsedDate.year();
     return `https://www.comoxvalleyschools.ca/mark-isfeld-secondary/wp-content/uploads/sites/44/${year}/${
-      parsedDate.month() + 1
-    }/DA-${parsedDate.format("MMM")}-${parsedDate.date() - 1}-${year}.pdf`;
+      parsedDate.month()+1
+    }/DA-${parsedDate.format("MMM")}-${parsedDate.date()}-${year}.pdf`;
   },
 };
