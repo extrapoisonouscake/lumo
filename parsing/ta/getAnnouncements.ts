@@ -1,5 +1,5 @@
 import { KnownSchools } from "@/constants/schools";
-import dayjs from "dayjs";
+import { timezonedDayJS } from "@/instances/dayjs";
 
 import { parsePageItems } from "pdf-text-reader";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.min.mjs";
@@ -9,7 +9,7 @@ import { announcementsFileParser } from "./parsers";
 await import("pdfjs-dist/build/pdf.worker.min.mjs");
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
   const url = schoolToAnnouncementsFileURL[school](date);
-  console.log({ url });
+  
   const response = await fetch(
     url,
     process.env.NODE_ENV !== "development"
@@ -46,7 +46,7 @@ const schoolToAnnouncementsFileURL: Record<
   (date?: Date) => string
 > = {
   [KnownSchools.MarkIsfeld]: (date) => {
-    const parsedDate = dayjs(date);
+    const parsedDate = timezonedDayJS(date);
     const year = parsedDate.year();
     return `https://www.comoxvalleyschools.ca/mark-isfeld-secondary/wp-content/uploads/sites/44/${year}/${
       parsedDate.month()+1
