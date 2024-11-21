@@ -11,3 +11,4 @@ export type ScheduleSubject = Partial<
   startsAt: Date;
   endsAt: Date;
 };
+export type AnnouncementSection = { heading: string; items: string[] };

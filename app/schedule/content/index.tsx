@@ -3,14 +3,12 @@ import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dayjs } from "@/instances/dayjs";
-import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/fetchMyEd";
+import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
-import { setTimeout } from "timers/promises";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
-  
   const params: MyEdEndpointsParams<"schedule"> = {};
   if (day) {
     params.day = dayjs(day, "MM-DD-YYYY").format("DD/MM/YYYY");

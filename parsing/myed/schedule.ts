@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
-import { removeLineBreaks } from "../helpers/removeLineBreaks";
+import { removeLineBreaks } from "../../helpers/removeLineBreaks";
 function getTableBody($: cheerio.CheerioAPI) {
   const $contentContainer = $(
     ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"

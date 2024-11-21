@@ -1,9 +1,6 @@
 import dynamic from "next/dynamic";
 
-const AppleEmoji = dynamic(
-  () =>
-    import("./component").then((result) => result.AppleEmojiClientComponent),
+export const AppleEmoji = dynamic(
+  () => import("./component").then((result) => result.AppleEmojiComponent),
   { ssr: false }
 );
-
-export default AppleEmoji;

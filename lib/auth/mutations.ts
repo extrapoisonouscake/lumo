@@ -3,7 +3,7 @@ import { LoginSchema, loginSchema } from "@/app/login/validation";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
-import { sendMyEdRequest } from "@/parsing/sendMyEdRequest";
+import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";

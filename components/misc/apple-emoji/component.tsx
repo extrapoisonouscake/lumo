@@ -6,7 +6,7 @@ const emojiNameToUnicode: Record<string, string> = {
   pizza: "🍕",
 };
 const emojiSrcs = emojiSrcsSource as Record<string, string>;
-export function AppleEmojiClientComponent({
+export function AppleEmojiComponent({
   name,
   ...props
 }: { name: string } & ImgHTMLAttributes<HTMLImageElement>) {

@@ -1,4 +1,12 @@
 import { PageHeading } from "@/components/layout/page-heading";
-export default function Home() {
-  return <><PageHeading/><div className=""></div></>;
+import { Announcements } from "./_components/announcements";
+export default async function Home() {
+  return (
+    <>
+      <PageHeading />
+      <div className="">
+        <Announcements />
+      </div>
+    </>
+  );
 }
