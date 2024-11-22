@@ -2,9 +2,10 @@ import { KnownSchools } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
 
 import "@ungap/with-resolvers";
-// import { parsePageItems } from "pdf-text-reader";
-import * as pdfjs from "pdfjs-dist/build/pdf.min.mjs";
+import { parsePageItems } from "pdf-text-reader";
+import { getDocument } from "pdfjs-dist";
 import type { TextItem } from "pdfjs-dist/types/src/display/api";
+import { announcementsFileParser } from "./parsers";
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
   //@ts-ignore
   await import("pdfjs-dist/build/pdf.worker.min.mjs");
@@ -21,7 +22,7 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  const doc = await pdfjs.getDocument({
+  const doc = await getDocument({
     data: new Uint8Array(arrayBuffer),
     disableFontFace: true,
   }).promise;
@@ -35,10 +36,9 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
   const items: TextItem[][] = content.map((pageContent) =>
     pageContent.items.filter((item): item is TextItem => "str" in item)
   );
-  return undefined;
-  // const lines = items.map((item) => parsePageItems(item).lines).flat();
-  // const prepareLines = announcementsFileParser[school];
-  // return prepareLines(lines);
+  const lines = items.map((item) => parsePageItems(item).lines).flat();
+  const prepareLines = announcementsFileParser[school];
+  return prepareLines(lines);
 }
 const schoolToAnnouncementsFileURL: Record<
   KnownSchools,
