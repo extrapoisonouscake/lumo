@@ -35,7 +35,7 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
   const items: TextItem[][] = content.map((pageContent) =>
     pageContent.items.filter((item): item is TextItem => "str" in item)
   );
-  return;
+  return undefined;
   // const lines = items.map((item) => parsePageItems(item).lines).flat();
   // const prepareLines = announcementsFileParser[school];
   // return prepareLines(lines);
