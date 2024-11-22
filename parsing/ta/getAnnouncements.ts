@@ -3,7 +3,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 
 import "@ungap/with-resolvers";
 import { parsePageItems } from "pdf-text-reader";
-import { getDocument } from "pdfjs-dist";
+import * as pdfjs from "pdfjs-dist/build/pdf.min.mjs";
 import type { TextItem } from "pdfjs-dist/types/src/display/api";
 import { announcementsFileParser } from "./parsers";
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
@@ -22,7 +22,7 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
   }
 
   const arrayBuffer = await response.arrayBuffer();
-  const doc = await getDocument({
+  const doc = await pdfjs.getDocument({
     data: new Uint8Array(arrayBuffer),
     disableFontFace: true,
   }).promise;
