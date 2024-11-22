@@ -8,6 +8,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { FormDescription, FormLabel } from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -68,9 +69,9 @@ export function SchoolPicker({
   }
   return (
     <div className="flex flex-col gap-2">
-      <label htmlFor={SCHOOL_COOKIE_NAME} className="text-sm">
+      <FormLabel htmlFor={SCHOOL_COOKIE_NAME} className="text-sm">
         School
-      </label>
+      </FormLabel>
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -111,6 +112,9 @@ export function SchoolPicker({
           </Command>
         </PopoverContent>
       </Popover>
+      <FormDescription>
+        Specify your school to get access to daily announcements.
+      </FormDescription>
     </div>
   );
 }
