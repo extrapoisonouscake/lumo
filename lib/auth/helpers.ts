@@ -66,14 +66,14 @@ export async function authenticateUser(username: string, password: string) {
 }
 function parseLoginErrorMessage(html: string) {
   const $ = cheerio.load(html);
-  if ($("#pageMenuContainer")) return null;
+  if ($("#pageMenuContainer").length>0) return null;
   const errorMessageScriptContent = $(
     'script[language="JavaScript"]:not([type])'
   )
     .toArray()
     .map((e) => $(e).text())
     .filter(Boolean);
-  if (!errorMessageScriptContent) return null;
+  if (errorMessageScriptContent.length===0) return null;
   const errorMessage = errorMessageScriptContent
     .map(
       (c) =>
