@@ -1,3 +1,4 @@
+"use client";
 import emojiSrcsSource from "@/data/apple-emojis.json";
 import { cn } from "@/lib/utils";
 import { ImgHTMLAttributes } from "react";
