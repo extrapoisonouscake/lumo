@@ -1,4 +1,7 @@
+import { INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import dayjs from "dayjs";
 
 export const convertQueryDayToDate = (day?: string) =>
-  day ? dayjs(day, "MM-DD-YYYY").toDate() : undefined;
+  day
+    ? dayjs(day, "MM-DD-YYYY").tz(INSTANTIATED_TIMEZONE, true).toDate()
+    : undefined;

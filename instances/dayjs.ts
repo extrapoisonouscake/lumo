@@ -12,11 +12,11 @@ dayjs.extend(utc);
 export const INSTANTIATED_TIMEZONE = "America/Vancouver";
 dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);
 const timezonedDayJS = (...args: any[]) => {
-  return dayjs(...args).tz();
+  return dayjs(...args).tz(INSTANTIATED_TIMEZONE);
 };
 
 const timezonedUnix = (value: number) => {
-  return dayjs.unix(value).tz();
+  return dayjs.unix(value).tz(INSTANTIATED_TIMEZONE);
 };
 
 timezonedDayJS.unix = timezonedUnix;

@@ -37,7 +37,9 @@ export function parseCurrentWeekday($: cheerio.CheerioAPI) {
   return getWeekday($tableBody);
 }
 function getDateFromSubjectTimeString(time: string) {
-  return dayjs(time, "HH:mm A").tz(INSTANTIATED_TIMEZONE, true).toDate();
+  const t = dayjs(time, "HH:mm A").tz(INSTANTIATED_TIMEZONE, true);
+
+  return t.toDate();
 }
 export function parseSchedule(
   $: cheerio.CheerioAPI

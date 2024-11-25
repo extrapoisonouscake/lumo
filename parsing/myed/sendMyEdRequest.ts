@@ -19,6 +19,7 @@ export async function sendMyEdRequest<Endpoint extends MyEdEndpoints>(
     (name) => `${name}=${authCookies[name] || "aspen"}`
   ).join("; ");
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
+
   const response = await fetch(getEndpointUrl(endpoint, ...rest), {
     headers: {
       Cookie: cookiesString,

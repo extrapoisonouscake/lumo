@@ -22,3 +22,4 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "ApplicationGatewayAffinity",
   "ApplicationGatewayAffinityCORS",
 ];
+export const MYED_DATE_FORMAT = "DD/MM/YYYY";

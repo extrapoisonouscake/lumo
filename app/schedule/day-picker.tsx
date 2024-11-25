@@ -1,13 +1,19 @@
 "use client";
+//* TO-DO cleanup date functions
 import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { timezonedDayJS } from "@/instances/dayjs";
+import {
+  dayjs,
+  INSTANTIATED_TIMEZONE,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
+import { correctDate } from "../../components/ui/date-picker";
 import { convertQueryDayToDate } from "./helpers";
 const formatDateToStandard = (date: Date | undefined) =>
-  timezonedDayJS(date).format("MM-DD-YYYY");
+  dayjs(date).tz(INSTANTIATED_TIMEZONE).format("MM-DD-YYYY");
 function ChevronButton(props: ButtonProps) {
   return (
     <Button
@@ -21,6 +27,7 @@ function ChevronButton(props: ButtonProps) {
 type NavigationButtonsNames = "left" | "calendar" | "right";
 export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
   const [date, setDate] = useState(convertQueryDayToDate(initialDay));
+
   const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();
@@ -36,6 +43,7 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
     const dateToSet =
       day === formatDateToStandard(new Date()) ? undefined : newDate;
     setDate(dateToSet);
+
     const updatedSearchParams = new URLSearchParams(
       currentSearchParams.toString()
     );
@@ -58,7 +66,11 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
       <ChevronButton
         onClick={() => {
           onDateChange(
-            timezonedDayJS(date).subtract(1, "day").toDate(),
+            dayjs(date)
+              .tz(INSTANTIATED_TIMEZONE)
+              .subtract(1, "day")
+              .startOf("date")
+              .toDate(),
             "left"
           );
         }}
@@ -74,7 +86,9 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
         disabledModifier={{ dayOfWeek: [0, 6] }}
         isLoading={loadingButtonName === "calendar"}
         disabled={!!(loadingButtonName && loadingButtonName !== "calendar")}
-        date={date || new Date()}
+        date={date || correctDate(timezonedDayJS().toDate())}
+        keepTimezone={!!date}
+        showWeekday
         setDate={(newDate) => onDateChange(newDate, "calendar")}
         bottomContent={
           date && (
@@ -88,7 +102,7 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
                 className="w-full"
                 leftIcon={<RotateCcw />}
               >
-                Reset
+                Go to today
               </Button>
             </div>
           )
@@ -96,7 +110,14 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
       />
       <ChevronButton
         onClick={() => {
-          onDateChange(timezonedDayJS(date).add(1, "day").toDate(), "right");
+          onDateChange(
+            dayjs(date)
+              .tz(INSTANTIATED_TIMEZONE)
+              .add(1, "day")
+              .startOf("date")
+              .toDate(),
+            "right"
+          );
         }}
         isLoading={loadingButtonName === "right"}
         disabled={!!(loadingButtonName && loadingButtonName !== "right")}

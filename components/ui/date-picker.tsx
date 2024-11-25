@@ -9,10 +9,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { timezonedDayJS } from "@/instances/dayjs";
+import {
+  dayjs,
+  INSTANTIATED_TIMEZONE,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
 import { ComponentProps, ReactNode, useState } from "react";
-
+export const correctDate = (initialDate?: Date) => {
+  const tzOffset =
+    new Date().getTimezoneOffset() + timezonedDayJS().utcOffset();
+  return dayjs(initialDate)
+    [tzOffset > 0 ? "add" : "subtract"](Math.abs(tzOffset), "minutes")
+    .toDate();
+};
 export function DatePicker({
   defaultDate,
   date = defaultDate,
@@ -21,18 +31,23 @@ export function DatePicker({
   disabled,
   isLoading,
   bottomContent,
+  showWeekday = false,
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
+  keepTimezone = false,
 }: {
   date?: Date;
   defaultDate?: Date;
   disabledModifier?: CalendarProps["disabled"];
+  showWeekday?: boolean;
   setDate: (newDate: typeof date) => void;
   bottomContent?: ReactNode;
+  keepTimezone?: boolean;
 } & Pick<ComponentProps<typeof Button>, "disabled" | "isLoading"> &
   Pick<ComponentProps<typeof Popover>, "open" | "onOpenChange">) {
   const [isOpen, setIsOpen] = useState(false);
   const onOpenChange = externalOnOpenChange || setIsOpen;
+
   return (
     <Popover
       open={typeof externalOpen === "boolean" ? externalOpen : isOpen}
@@ -50,17 +65,24 @@ export function DatePicker({
           )}
           leftIcon={<CalendarIcon className="h-4 w-4" />}
         >
-          {date ? timezonedDayJS(date).format("L") : <span>Pick a date</span>}
+          {date ? (
+            dayjs(date)
+              .tz(INSTANTIATED_TIMEZONE, keepTimezone)
+              .format(`MM/DD/YYYY${showWeekday ? ", dddd" : ""}`)
+          ) : (
+            <span>Pick a date</span>
+          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <Calendar
           disabled={disabledModifier}
           mode="single"
-          selected={date}
-          onSelect={(date) => {
+          selected={keepTimezone ? date : correctDate(date)}
+          today={correctDate()}
+          onSelect={(newDate) => {
             onOpenChange(false);
-            setDate(date);
+            setDate(dayjs(newDate).tz(INSTANTIATED_TIMEZONE, true).toDate());
           }}
           initialFocus
         />

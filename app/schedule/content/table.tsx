@@ -87,7 +87,7 @@ const columns = [
     cell: ({ cell }) => {
       const value = cell.getValue();
       return value
-        ? (value as NonNullable<ScheduleSubject["teachers"]>).join(";")
+        ? (value as NonNullable<ScheduleSubject["teachers"]>).join("; ")
         : NULL_VALUE_DISPLAY_FALLBACK;
     },
   }),

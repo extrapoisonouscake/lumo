@@ -1,7 +1,12 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
-import { dayjs } from "@/instances/dayjs";
+import { MYED_DATE_FORMAT } from "@/constants/myed";
+import {
+  dayjs,
+  INSTANTIATED_TIMEZONE,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
@@ -9,24 +14,28 @@ import { ScheduleKnownErrorCard } from "./known-error-card";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
-  const params: MyEdEndpointsParams<"schedule"> = {};
+  const params: MyEdEndpointsParams<"schedule"> = {
+    day: timezonedDayJS().format(MYED_DATE_FORMAT),
+  };
+
   if (day) {
-    params.day = dayjs(day, "MM-DD-YYYY").format("DD/MM/YYYY");
+    params.day = dayjs(day, "MM-DD-YYYY")
+      .tz(INSTANTIATED_TIMEZONE, true)
+      .format(MYED_DATE_FORMAT);
   }
   const data = await fetchMyEd("schedule", params);
   if (data === sessionExpiredIndicator)
     return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
   if (!data) return <ErrorCard />;
   if ("knownError" in data) {
-    return <ScheduleKnownErrorCard message={data.knownError} />;
+    return <ScheduleKnownErrorCard day={day} message={data.knownError} />;
   }
 
   return (
     <>
       {data && dayjs(day).day() === 5 && (
         <h3>
-          Shortened day schedule:{" "}
-          <span className="font-semibold">{data.weekday}</span>
+          Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>
       )}
       <ScheduleTable
@@ -43,7 +52,7 @@ export function ScheduleContentSkeleton({
     <>
       {dayjs(day).day() === 5 && (
         <div className="flex items-center gap-2">
-          <h3>Shortened day schedule:</h3>
+          <h3>Same as:</h3>
           <Skeleton>
             <span className="font-semibold">Friday</span>
           </Skeleton>
