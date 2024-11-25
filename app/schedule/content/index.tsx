@@ -20,11 +20,12 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
   if ("knownError" in data) {
     //! refactor, separate reusable component??
     return (
-      <Card className="p-4">
-        <p>{data.knownError}</p>
+      <Card className="p-3">
+        <p className="text-sm">{data.knownError}</p>
       </Card>
     );
   }
+
   return (
     <>
       {data && dayjs(day).day() === 5 && (

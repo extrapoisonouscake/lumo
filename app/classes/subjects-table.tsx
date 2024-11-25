@@ -108,7 +108,7 @@ export function SubjectsTable({
       columnVisibility,
     },
     data,
-
+    manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
   });
   return <TableRenderer table={table} columns={columns} />;

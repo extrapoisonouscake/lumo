@@ -1,13 +1,24 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { convertQueryDayToDate } from "./helpers";
 const formatDateToStandard = (date: Date | undefined) =>
   timezonedDayJS(date).format("MM-DD-YYYY");
+function ChevronButton(props: ButtonProps) {
+  return (
+    <Button
+      variant="outline"
+      className="size-10 bg-transparent p-0"
+      isManualLoading
+      {...props}
+    />
+  );
+}
+type NavigationButtonsNames = "left" | "calendar" | "right";
 export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
   const [date, setDate] = useState(convertQueryDayToDate(initialDay));
   const pathname = usePathname();
@@ -15,7 +26,12 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
   const currentSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const onDateChange = async (newDate: Date | undefined) => {
+  const [loadingButtonName, setLoadingButtonName] =
+    useState<NavigationButtonsNames | null>(null);
+  const onDateChange = async (
+    newDate: Date | undefined,
+    originButton: NavigationButtonsNames
+  ) => {
     const day = formatDateToStandard(newDate);
     const dateToSet =
       day === formatDateToStandard(new Date()) ? undefined : newDate;
@@ -28,36 +44,65 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
     } else {
       updatedSearchParams.delete("day");
     }
+    setLoadingButtonName(originButton);
     startTransition(() => {
       router.push(`${pathname}?${updatedSearchParams.toString()}`);
     });
   };
-  console.log({ isOpen });
+  useEffect(() => {
+    if (isPending) return;
+    setLoadingButtonName(null);
+  }, [isPending]);
   return (
-    <DatePicker
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      disabledModifier={{ dayOfWeek: [0, 6] }}
-      isLoading={isPending}
-      date={date || new Date()}
-      setDate={onDateChange}
-      bottomContent={
-        date && (
-          <div className="p-2 pt-0">
-            <Button
-              onClick={() => {
-                setIsOpen(false);
-                onDateChange(undefined);
-              }}
-              variant="outline"
-              className="w-full"
-              leftIcon={<RotateCcw />}
-            >
-              Reset
-            </Button>
-          </div>
-        )
-      }
-    />
+    <div className="flex items-center justify-between gap-2">
+      <ChevronButton
+        onClick={() => {
+          onDateChange(
+            timezonedDayJS(date).subtract(1, "day").toDate(),
+            "left"
+          );
+        }}
+        isLoading={loadingButtonName === "left"}
+        disabled={!!(loadingButtonName && loadingButtonName !== "left")}
+      >
+        <ChevronLeft className="!size-5" />
+      </ChevronButton>
+
+      <DatePicker
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        disabledModifier={{ dayOfWeek: [0, 6] }}
+        isLoading={loadingButtonName === "calendar"}
+        disabled={!!(loadingButtonName && loadingButtonName !== "calendar")}
+        date={date || new Date()}
+        setDate={(newDate) => onDateChange(newDate, "calendar")}
+        bottomContent={
+          date && (
+            <div className="p-2 pt-0">
+              <Button
+                onClick={() => {
+                  setIsOpen(false);
+                  onDateChange(undefined, "calendar");
+                }}
+                variant="outline"
+                className="w-full"
+                leftIcon={<RotateCcw />}
+              >
+                Reset
+              </Button>
+            </div>
+          )
+        }
+      />
+      <ChevronButton
+        onClick={() => {
+          onDateChange(timezonedDayJS(date).add(1, "day").toDate(), "right");
+        }}
+        isLoading={loadingButtonName === "right"}
+        disabled={!!(loadingButtonName && loadingButtonName !== "right")}
+      >
+        <ChevronRight className="!size-5" />
+      </ChevronButton>
+    </div>
   );
 }

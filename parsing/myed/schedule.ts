@@ -51,7 +51,7 @@ export function parseSchedule(
 
   if ($tableBody.find(".listNoRecordsText").length > 0) return null;
 
-  const data = $tableBody
+  const allSubjects = $tableBody
     .children("tr")
     .not(".listHeader")
     .toArray()
@@ -71,12 +71,19 @@ export function parseSchedule(
         subject = {
           ...subject,
           name: prettifySubjectName(name),
-          teachers: teachersString.split(";"),
+          teachers: teachersString.split("; "),
           room: room || null,
         };
       }
       return subject;
     }) satisfies ScheduleSubject[];
+  const occupiedSubjects = [...allSubjects];
+  for (let i = allSubjects.length - 1; i >= 0; i--) {
+    if (allSubjects[i].name) {
+      break;
+    }
+    occupiedSubjects.pop();
+  }
   const weekday = getWeekday($tableBody);
-  return { weekday, subjects: data };
+  return { weekday, subjects: occupiedSubjects };
 }

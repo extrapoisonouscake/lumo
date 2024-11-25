@@ -193,6 +193,7 @@ export function ScheduleTable({
     enableSortingRemoval: false,
 
     data,
+    manualPagination: true,
 
     columns: isLoading ? columnsSkeletons : columns,
     meta: {

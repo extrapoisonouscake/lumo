@@ -53,7 +53,7 @@ export function DatePicker({
           {date ? timezonedDayJS(date).format("L") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-auto p-0">
+      <PopoverContent className="w-auto p-0">
         <Calendar
           disabled={disabledModifier}
           mode="single"

@@ -8,7 +8,12 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { FormDescription, FormLabel } from "@/components/ui/form";
+import {
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
 import {
   Popover,
   PopoverContent,
@@ -16,16 +21,24 @@ import {
 } from "@/components/ui/popover";
 import { SCHOOL_COOKIE_NAME } from "@/constants/cookies";
 import { KnownSchools } from "@/constants/schools";
+import { useFormValidation } from "@/hooks/useFormValidation";
 import { setSchool } from "@/lib/settings/mutations";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FormProvider } from "react-hook-form";
+import { z } from "zod";
 interface SchoolVisualData {
   name: string;
   logo?: string;
 }
-
+const schema = z.object({
+  school: z
+    .enum(["other", ...(Object.values(KnownSchools) as string[])])
+    .optional(),
+});
+type FormFields = z.infer<typeof schema>;
 const schoolsVisualData: Record<KnownSchools | "other", SchoolVisualData> = {
   [KnownSchools.MarkIsfeld]: {
     name: "Mark R. Isfeld Secondary School",
@@ -41,81 +54,110 @@ export function SchoolPicker({
 }: {
   initialValue: string | undefined;
 }) {
-  const [value, setValue] = useState(
-    initialValue === "" ? "other" : initialValue || ""
-  );
-  const saveValue = async (newValue: typeof value) => {
-    setIsOpen(false);
-    setValue(newValue);
-    if (newValue === "" || newValue === value) return;
-    setIsLoading(true);
-    await setSchool(
-      newValue === "other" ? undefined : (newValue as KnownSchools)
-    );
-    setIsLoading(false);
-  };
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  let buttonContent = <>Click to select...</>;
-  if (value) {
-    const schoolData = schoolsVisualDataArray.find(
-      (school) => school.id === value
-    );
-    if (schoolData) {
-      buttonContent = (
-        <SchoolName logo={schoolData.logo}>{schoolData.name}</SchoolName>
-      );
+  const form = useFormValidation(schema, {
+    values: { school: initialValue === "" ? "other" : initialValue || "" },
+  });
+
+  const onSubmit = async ({ school }: FormFields) => {
+    setIsOpen(false);
+
+    await setSchool(school === "other" ? undefined : (school as KnownSchools));
+  };
+  const [isMounted, setIsMounted] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const watchedValues = form.watch(["school"]);
+  useEffect(() => {
+    if (!isMounted) {
+      setIsMounted(true);
+      return;
     }
-  }
+    formRef.current?.requestSubmit();
+  }, [...watchedValues]);
   return (
-    <div className="flex flex-col gap-2">
-      <FormLabel htmlFor={SCHOOL_COOKIE_NAME} className="text-sm">
-        School
-      </FormLabel>
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            isLoading={isLoading}
-            variant="outline"
-            role="combobox"
-            aria-expanded={isOpen}
-            className="justify-between max-w-[300px]"
-          >
-            {buttonContent}
-            <ChevronsUpDown className="opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="max-w-[300px] p-0">
-          <Command>
-            <CommandInput placeholder="Start typing..." />
-            <CommandList>
-              <CommandEmpty>No school found.</CommandEmpty>
-              <CommandGroup>
-                {schoolsVisualDataArray.map(({ id, name, logo }) => (
-                  <CommandItem
-                    keywords={[name]}
-                    key={id}
-                    value={id}
-                    onSelect={saveValue}
-                  >
-                    <SchoolName logo={logo}>{name}</SchoolName>
-                    <Check
-                      className={cn(
-                        "ml-auto",
-                        value === id ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-      <FormDescription>
-        Specify your school to get access to daily announcements.
-      </FormDescription>
-    </div>
+    <FormProvider {...form}>
+      <form
+        ref={formRef}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="flex flex-col gap-2"
+      >
+        <FormField
+          control={form.control}
+          name="school"
+          render={({ field, formState }) => {
+            let buttonContent = <>Click to select...</>;
+            if (field.value) {
+              const schoolData = schoolsVisualDataArray.find(
+                (school) => school.id === field.value
+              );
+              if (schoolData) {
+                buttonContent = (
+                  <SchoolName logo={schoolData.logo}>
+                    {schoolData.name}
+                  </SchoolName>
+                );
+              }
+            }
+            return (
+              <FormItem className="flex flex-col">
+                <FormLabel htmlFor={SCHOOL_COOKIE_NAME} className="text-sm">
+                  School
+                </FormLabel>
+                <Popover open={isOpen} onOpenChange={setIsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      shouldShowChildrenOnLoading
+                      isLoading={formState.isSubmitting}
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isOpen}
+                      className="justify-between max-w-[300px]"
+                    >
+                      {buttonContent}
+                      <ChevronsUpDown className="opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="max-w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Start typing..." />
+                      <CommandList>
+                        <CommandEmpty>No school found.</CommandEmpty>
+                        <CommandGroup>
+                          {schoolsVisualDataArray.map(({ id, name, logo }) => (
+                            <CommandItem
+                              keywords={[name]}
+                              key={id}
+                              value={id}
+                              onSelect={() => {
+                                form.setValue("school", id);
+                                setIsOpen(false);
+                              }}
+                            >
+                              <SchoolName logo={logo}>{name}</SchoolName>
+                              <Check
+                                className={cn(
+                                  "ml-auto",
+                                  field.value === id
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  Specify your school to get access to daily announcements.
+                </FormDescription>
+              </FormItem>
+            );
+          }}
+        />
+      </form>
+    </FormProvider>
   );
 }
 function SchoolName({
@@ -127,7 +169,7 @@ function SchoolName({
 }) {
   return (
     <div className="flex items-center gap-[6px]">
-      <p>{name}</p>
+      <p className="text-ellipsis whitespace-nowrap overflow-hidden">{name}</p>
       {logo && (
         <Image
           width={20}

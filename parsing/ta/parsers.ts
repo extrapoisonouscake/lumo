@@ -32,7 +32,6 @@ export const announcementsFileParser: Record<
   (lines: string[]) => Array<AnnouncementSection>
 > = {
   [KnownSchools.MarkIsfeld]: (lines) => {
-    console.log({ lines });
     const sectionsStartIndexes = referenceHeadings.map((heading) =>
       lines.indexOf(heading.actualName)
     );
@@ -43,11 +42,11 @@ export const announcementsFileParser: Record<
         sectionsStartIndexes[i] + 1 + ([0, 1].includes(i) ? 1 : 0),
         sectionsStartIndexes[i + 1]
       );
-      console.log({ rawItems });
+
       const items = mergeAndFilterStrings(rawItems);
       sections.push({ heading: headingData.displayName, items });
     }
-    console.log(sections[1]);
+
     return sections;
   },
 };

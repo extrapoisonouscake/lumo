@@ -28,7 +28,6 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
   }).promise;
   const pages = await Promise.all(
     [...Array(+doc.numPages)].map((_, index) => {
-      console.log({ index });
       return doc.getPage(index + 1);
     })
   ); // 1-indexed
