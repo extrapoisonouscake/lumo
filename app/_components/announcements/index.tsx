@@ -4,7 +4,7 @@ import { getAnnouncements } from "@/parsing/ta/getAnnouncements";
 import { MegaphoneOff } from "lucide-react";
 import { cookies } from "next/headers";
 import { AnnouncementsAccordions } from "./accordions";
-
+import {AppleEmoji} from "@/components/misc/apple-emoji"
 export async function Announcements() {
   const school = cookies().get("schoolId")?.value;
   if (!school || !isKnownSchool(school)) return null;
@@ -13,7 +13,11 @@ export async function Announcements() {
     return (
       <div className="w-full flex justify-center">
         <Card className="w-full max-w-[450px] p-3 gap-1">
-          <MegaphoneOff className="size-4 text-muted-foreground" />
+          <AppleEmoji
+        value="💨"
+        textClassName="text-3xl leading-8"
+        imageClassName="size-[30px]"
+      />
           <p className="text-muted-foreground text-sm">
             No announcements for today.
           </p>
