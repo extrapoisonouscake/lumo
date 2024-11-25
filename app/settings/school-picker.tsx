@@ -165,7 +165,7 @@ export function SchoolPicker({
                   </PopoverContent>
                 </Popover>
                 <FormDescription>
-                  Specify your school to get access to daily announcements.
+                  Specify your school to easily access daily announcements.
                 </FormDescription>
               </FormItem>
             );
