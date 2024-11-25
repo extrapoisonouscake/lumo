@@ -47,7 +47,10 @@ export function DatePicker({
   Pick<ComponentProps<typeof Popover>, "open" | "onOpenChange">) {
   const [isOpen, setIsOpen] = useState(false);
   const onOpenChange = externalOnOpenChange || setIsOpen;
-
+  console.log(
+    { date },
+    dayjs(date).tz(INSTANTIATED_TIMEZONE, keepTimezone).toDate()
+  );
   return (
     <Popover
       open={typeof externalOpen === "boolean" ? externalOpen : isOpen}
@@ -66,9 +69,9 @@ export function DatePicker({
           leftIcon={<CalendarIcon className="h-4 w-4" />}
         >
           {date ? (
-            dayjs(date)
-              .tz(INSTANTIATED_TIMEZONE, keepTimezone)
-              .format(`MM/DD/YYYY${showWeekday ? ", dddd" : ""}`)
+            dayjs(correctDate(date)).format(
+              `MM/DD/YYYY${showWeekday ? ", dddd" : ""}`
+            )
           ) : (
             <span>Pick a date</span>
           )}

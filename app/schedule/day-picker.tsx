@@ -2,15 +2,10 @@
 //* TO-DO cleanup date functions
 import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import {
-  dayjs,
-  INSTANTIATED_TIMEZONE,
-  timezonedDayJS,
-} from "@/instances/dayjs";
+import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { correctDate } from "../../components/ui/date-picker";
 import { convertQueryDayToDate } from "./helpers";
 const formatDateToStandard = (date: Date | undefined) =>
   dayjs(date).tz(INSTANTIATED_TIMEZONE).format("MM-DD-YYYY");
@@ -61,6 +56,7 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
     if (isPending) return;
     setLoadingButtonName(null);
   }, [isPending]);
+  // console.log({ date }, correctDate(dayjs(date).toDate()));
   return (
     <div className="flex items-center justify-between gap-2">
       <ChevronButton
@@ -86,7 +82,7 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
         disabledModifier={{ dayOfWeek: [0, 6] }}
         isLoading={loadingButtonName === "calendar"}
         disabled={!!(loadingButtonName && loadingButtonName !== "calendar")}
-        date={date || correctDate(timezonedDayJS().toDate())}
+        date={date || new Date()}
         keepTimezone={!!date}
         showWeekday
         setDate={(newDate) => onDateChange(newDate, "calendar")}

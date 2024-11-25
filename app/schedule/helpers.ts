@@ -3,5 +3,8 @@ import dayjs from "dayjs";
 
 export const convertQueryDayToDate = (day?: string) =>
   day
-    ? dayjs(day, "MM-DD-YYYY").tz(INSTANTIATED_TIMEZONE, true).toDate()
+    ? dayjs(day, "MM-DD-YYYY")
+        .tz(INSTANTIATED_TIMEZONE, true)
+        .startOf("date")
+        .toDate()
     : undefined;
