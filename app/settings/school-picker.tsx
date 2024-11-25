@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -24,11 +25,13 @@ import { KnownSchools } from "@/constants/schools";
 import { useFormValidation } from "@/hooks/useFormValidation";
 import { setSchool } from "@/lib/settings/mutations";
 import { cn } from "@/lib/utils";
+import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod";
+const defaultCmdkFilter = defaultFilter as NonNullable<typeof defaultFilter>;
 interface SchoolVisualData {
   name: string;
   logo?: string;
@@ -118,7 +121,19 @@ export function SchoolPicker({
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="max-w-[300px] p-0">
-                    <Command>
+                    <Command
+                      filter={(value, search, keywords) => {
+                        if (
+                          value === "other" &&
+                          !schoolsVisualDataArray.some(
+                            ({ name, id }) =>
+                              defaultCmdkFilter(id, search, [name]) > 0
+                          )
+                        )
+                          return 1;
+                        return defaultCmdkFilter(value, search, keywords);
+                      }}
+                    >
                       <CommandInput placeholder="Start typing..." />
                       <CommandList>
                         <CommandEmpty>No school found.</CommandEmpty>
