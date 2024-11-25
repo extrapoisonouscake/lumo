@@ -47,10 +47,6 @@ export function DatePicker({
   Pick<ComponentProps<typeof Popover>, "open" | "onOpenChange">) {
   const [isOpen, setIsOpen] = useState(false);
   const onOpenChange = externalOnOpenChange || setIsOpen;
-  console.log(
-    { date },
-    dayjs(date).tz(INSTANTIATED_TIMEZONE, keepTimezone).toDate()
-  );
   return (
     <Popover
       open={typeof externalOpen === "boolean" ? externalOpen : isOpen}

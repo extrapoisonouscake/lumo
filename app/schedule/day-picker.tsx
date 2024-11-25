@@ -56,7 +56,6 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
     if (isPending) return;
     setLoadingButtonName(null);
   }, [isPending]);
-  // console.log({ date }, correctDate(dayjs(date).toDate()));
   return (
     <div className="flex items-center justify-between gap-2">
       <ChevronButton
