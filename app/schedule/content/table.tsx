@@ -46,11 +46,11 @@ const columns = [
             row.original.startsAt,
             "minutes"
           ) > 20;
-        const emojiName = isLunch ? "pizza" : "person-running";
+        const emoji = isLunch ? "🍕" : "🏃";
         return (
           <div className="flex items-center gap-[6px]">
             {isLunch ? "Lunch" : "Break"}{" "}
-            <AppleEmoji name={emojiName} width={16} />
+            <AppleEmoji value={emoji} width={16} />
           </div>
         );
       }

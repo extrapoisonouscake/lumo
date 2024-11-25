@@ -1,19 +1,41 @@
 import emojiSrcsSource from "@/data/apple-emojis.json";
+import { cn } from "@/lib/utils";
 import { ImgHTMLAttributes } from "react";
-const emojiNameToUnicode: Record<string, string> = {
-  //!replace
-  "person-running": "🏃‍♂️",
-  pizza: "🍕",
-};
+
 const emojiSrcs = emojiSrcsSource as Record<string, string>;
 export function AppleEmojiComponent({
-  name,
+  value,
+  className: commonClassName,
+  textClassName,
+  imageClassName,
   ...props
-}: { name: string } & ImgHTMLAttributes<HTMLImageElement>) {
+}: {
+  value: string;
+  textClassName?: string;
+  imageClassName?: string;
+} & ImgHTMLAttributes<HTMLImageElement>) {
   const isAppleDevice = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent);
-  if (isAppleDevice) {
-    return emojiNameToUnicode[name];
+  const isText = isAppleDevice || !(value in emojiSrcs);
+  const className = cn(
+    commonClassName,
+    { [textClassName || ""]: isText },
+    { [imageClassName || ""]: !isText }
+  );
+
+  if (isText) {
+    return (
+      <p {...props} className={className}>
+        {value}
+      </p>
+    );
   }
-  if (!(name in emojiSrcs)) return name;
-  return <img src={emojiSrcs[name]} alt={name} aria-label={name} {...props} />;
+  return (
+    <img
+      src={emojiSrcs[value]}
+      alt={value}
+      aria-label={value}
+      {...props}
+      className={className}
+    />
+  );
 }

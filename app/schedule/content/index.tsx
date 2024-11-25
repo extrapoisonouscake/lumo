@@ -1,11 +1,11 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dayjs } from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
+import { ScheduleKnownErrorCard } from "./known-error-card";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
@@ -18,12 +18,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
     return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
   if (!data) return <ErrorCard />;
   if ("knownError" in data) {
-    //! refactor, separate reusable component??
-    return (
-      <Card className="p-3">
-        <p className="text-sm">{data.knownError}</p>
-      </Card>
-    );
+    return <ScheduleKnownErrorCard message={data.knownError} />;
   }
 
   return (
