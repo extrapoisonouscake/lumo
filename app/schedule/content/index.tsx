@@ -10,9 +10,38 @@ import {
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
-import { ScheduleKnownErrorCard } from "./known-error-card";
 import { ScheduleTable } from "./table";
+const getChristmasBreakDates = (year: number) =>
+  [
+    timezonedDayJS(`${year}-12-25`),
+    timezonedDayJS(`${year + 1}-01-05`),
+  ] as const;
 
+const visualizableErrors: Record<
+  string,
+  ({ day }: { day: string | undefined }) => [string, string]
+> = {
+  "School is not in session on that date.": ({ day }) => {
+    const dateObject = timezonedDayJS(day);
+    let message,
+      emoji = "😴";
+    const christmasDates = getChristmasBreakDates(dateObject.year());
+    if (
+      dateObject.isBetween(christmasDates[0], christmasDates[1], "date", "[]")
+    ) {
+      message = "It's Christmas!";
+      emoji = "🎄";
+    } else {
+      message = "No school ";
+      if (timezonedDayJS().isSame(dateObject, "date")) {
+        message += "today!";
+      } else {
+        message += "on this day.";
+      }
+    }
+    return [message, emoji];
+  },
+};
 export async function ScheduleContent({ day }: { day: string | undefined }) {
   const params: MyEdEndpointsParams<"schedule"> = {
     day: timezonedDayJS().format(MYED_DATE_FORMAT),
@@ -26,9 +55,20 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
   const data = await fetchMyEd("schedule", params);
   if (data === sessionExpiredIndicator)
     return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
-  if (!data) return <ErrorCard />;
-  if ("knownError" in data) {
-    return <ScheduleKnownErrorCard day={day} message={data.knownError} />;
+  const hasKnownError = "knownError" in data;
+  if (!data || hasKnownError) {
+    const errorCardProps: ComponentProps<typeof ErrorCard> = {
+      emoji: "‼️",
+      message: hasKnownError ? data.knownError : "Something went wrong.",
+    };
+    if (hasKnownError) {
+      const visualData = visualizableErrors[data.knownError]?.({ day });
+      if (visualData) {
+        errorCardProps.emoji = visualData[1];
+        errorCardProps.message = visualData[0];
+      }
+    }
+    return <ErrorCard {...errorCardProps} />;
   }
 
   return (
