@@ -8,9 +8,7 @@ import { cn } from "@/lib/utils";
 import { cva } from "class-variance-authority";
 
 const Accordion = AccordionPrimitive.Root;
-export const accordionItemVariants = cva(
-  "rounded-md border border-input px-4 py-2"
-);
+export const accordionItemVariants = cva("rounded-md border border-input");
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>
@@ -31,7 +29,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center pb-0 data-[state=open]:pb-2 justify-between font-medium transition-all [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center px-4 py-2 justify-between font-medium transition-all [&[data-state=open]>svg]:rotate-180",
         className
       )}
       {...props}
@@ -49,7 +47,7 @@ const AccordionContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <AccordionPrimitive.Content
     ref={ref}
-    className="overflow-hidden ease-in-out text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
+    className="overflow-hidden px-4 pb-2 ease-in-out text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
     <div className={cn("pt-0", className)}>{children}</div>
