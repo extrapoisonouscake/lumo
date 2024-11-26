@@ -41,7 +41,7 @@ setIsLoading(false)
         name="password"
         label="Password"
       />
-      <SubmitButton>Submit</SubmitButton>
+      <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
     </Form>
   );
 }
