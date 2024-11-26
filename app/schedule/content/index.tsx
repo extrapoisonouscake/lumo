@@ -2,7 +2,11 @@ import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
-import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
+import {
+  dayjs,
+  INSTANTIATED_TIMEZONE,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
