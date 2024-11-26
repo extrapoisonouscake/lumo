@@ -1,5 +1,5 @@
 "use server";
-import { LoginSchema } from "@/app/login/validation";
+import { loginSchema, LoginSchema } from "@/app/login/validation";
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
@@ -10,15 +10,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
-
-export async function login(formData?: LoginSchema) {
+async function performLogin(formData: LoginSchema) {
   try {
+    const { username, password } = formData;
     const cookieStore = new MyEdCookieStore(cookies());
-    const { username, password } = formData || {
-      username: cookieStore.get("username")?.value,
-      password: cookieStore.get("password")?.value,
-    };
-    if (!username || !password) return { message: "Invalid parameters." };
+
     for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
       cookieStore.delete(name);
     }
@@ -50,6 +46,30 @@ export async function login(formData?: LoginSchema) {
         : "An unexpected error occurred. Try again later.",
     };
   }
+}
+export async function login(formData: LoginSchema) {
+  try {
+    loginSchema.parse(formData);
+  } catch {
+    return { message: "Invalid parameters." };
+  }
+
+  return await performLogin(formData);
+}
+export async function relogin() {
+  const cookieStore = new MyEdCookieStore(cookies());
+  const formData = {
+    username: cookieStore.get("username")?.value,
+    password: cookieStore.get("password")?.value,
+  };
+
+  try {
+    loginSchema.parse(formData);
+  } catch {
+    return { message: "Invalid parameters." };
+  }
+
+  return await performLogin(formData as LoginSchema);
 }
 export async function logOut() {
   const cookieStore = new MyEdCookieStore(cookies());
