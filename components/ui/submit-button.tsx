@@ -10,8 +10,9 @@ export function SubmitButton(props: ButtonProps) {
     <Button
       disabled={!isDirty || !isValid}
       type="submit"
+isLoading={isSubmitting}
       {...props}
-      isLoading={isSubmitting}
+      
     />
   );
 }
