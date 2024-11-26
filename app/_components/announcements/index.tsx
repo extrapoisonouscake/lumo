@@ -19,7 +19,7 @@ export async function Announcements() {
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm">Announcements</h3>
-      {data?<AnnouncementsAccordions data={data} />:<ErrorCard emoji="💨" message="No announcements yet."/>
+      {data?<AnnouncementsAccordions data={data} />:<ErrorCard emoji="💨" message="No announcements yet."/>}
     </div>
   );
 }
