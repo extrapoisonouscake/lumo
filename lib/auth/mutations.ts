@@ -1,5 +1,6 @@
 "use server";
-import { LoginSchema, loginSchema } from "@/app/login/validation";
+import { LoginSchema } from "@/app/login/validation";
+import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
@@ -9,17 +10,15 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { authenticateUser } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
-const COOKIE_MAX_AGE = 34560000;
-const shouldSecureCookies = process.env.NODE_ENV !== "development";
-export async function login(formData: LoginSchema) {
+
+export async function login(formData?: LoginSchema) {
   try {
-    try {
-      loginSchema.parse(formData);
-    } catch {
-      return { message: "Invalid parameters." };
-    }
-    const { username, password } = formData;
     const cookieStore = new MyEdCookieStore(cookies());
+    const { username, password } = formData || {
+      username: cookieStore.get("username")?.value,
+      password: cookieStore.get("password")?.value,
+    };
+    if (!username || !password) return { message: "Invalid parameters." };
     for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
       cookieStore.delete(name);
     }
@@ -31,14 +30,18 @@ export async function login(formData: LoginSchema) {
         maxAge: COOKIE_MAX_AGE,
       });
     }
-    cookieStore.set("username", username, {
-      secure: shouldSecureCookies,
-      maxAge: COOKIE_MAX_AGE,
-    });
-    cookieStore.set("password", password, {
-      secure: shouldSecureCookies,
-      maxAge: COOKIE_MAX_AGE,
-    });
+    if (formData) {
+      cookieStore.set("username", username, {
+        secure: shouldSecureCookies,
+        maxAge: COOKIE_MAX_AGE,
+        httpOnly: true,
+      });
+      cookieStore.set("password", password, {
+        secure: shouldSecureCookies,
+        maxAge: COOKIE_MAX_AGE,
+        httpOnly: true,
+      });
+    }
   } catch (e: any) {
     const { message } = e;
     return {
