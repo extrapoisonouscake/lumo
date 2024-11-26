@@ -70,7 +70,6 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
           );
         }}
         isLoading={loadingButtonName === "left"}
-        disabled={!!(loadingButtonName && loadingButtonName !== "left")}
       >
         <ChevronLeft className="!size-5" />
       </ChevronButton>
@@ -80,7 +79,6 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
         onOpenChange={setIsOpen}
         disabledModifier={{ dayOfWeek: [0, 6] }}
         isLoading={loadingButtonName === "calendar"}
-        disabled={!!(loadingButtonName && loadingButtonName !== "calendar")}
         date={date || new Date()}
         keepTimezone={!!date}
         showWeekday
@@ -115,7 +113,6 @@ export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
           );
         }}
         isLoading={loadingButtonName === "right"}
-        disabled={!!(loadingButtonName && loadingButtonName !== "right")}
       >
         <ChevronRight className="!size-5" />
       </ChevronButton>
