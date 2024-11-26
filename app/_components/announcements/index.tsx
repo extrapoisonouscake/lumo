@@ -31,7 +31,7 @@ export async function Announcements() {
     );
   return (
     <div className="flex flex-col gap-2">
-      <h3>Announcements</h3>
+      <h3 className="text-sm">Announcements</h3>
       <AnnouncementsAccordions data={data} />
     </div>
   );
@@ -43,7 +43,7 @@ export function AnnouncementsSkeleton() {
         <Accordion type="multiple">
           <AccordionItem value={`${i}`} className="pointer-events-none">
             <AccordionTrigger>
-              <Skeleton>Wowowo</Skeleton>
+              <Skeleton>wowowowo</Skeleton>
             </AccordionTrigger>
           </AccordionItem>
         </Accordion>
