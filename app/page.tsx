@@ -1,11 +1,18 @@
 import { PageHeading } from "@/components/layout/page-heading";
-import { Announcements } from "./_components/announcements";
+import { Suspense } from "react";
+import {
+  Announcements,
+  AnnouncementsSkeleton,
+} from "./_components/announcements";
+
 export default async function Home() {
   return (
     <>
       <PageHeading />
       <div className="">
-        <Announcements />
+        <Suspense fallback={<AnnouncementsSkeleton />}>
+          <Announcements />
+        </Suspense>
       </div>
     </>
   );

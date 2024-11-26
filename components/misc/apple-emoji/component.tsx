@@ -20,7 +20,7 @@ export function AppleEmojiComponent({
   const className = cn(
     commonClassName,
     { [textClassName || ""]: isText },
-    { [imageClassName || ""]: !isText }
+    { [cn("size-5", imageClassName)]: !isText }
   );
 
   if (isText) {
