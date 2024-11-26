@@ -2,6 +2,7 @@
 import { LoginSchema, loginSchema } from "@/app/login/validation";
 import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
+import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import { cookies } from "next/headers";
@@ -49,7 +50,8 @@ export async function login(formData: LoginSchema) {
 }
 export async function logOut() {
   const cookieStore = new MyEdCookieStore(cookies());
-  await sendMyEdRequest("logout", getAuthCookies(cookieStore));
+  const url = getEndpointUrl("logout");
+  await sendMyEdRequest(url, getAuthCookies(cookieStore));
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
