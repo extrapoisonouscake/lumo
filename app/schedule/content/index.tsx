@@ -2,11 +2,7 @@ import { ErrorCard } from "@/components/misc/error-card";
 import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
-import {
-  dayjs,
-  INSTANTIATED_TIMEZONE,
-  timezonedDayJS,
-} from "@/instances/dayjs";
+import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
@@ -14,9 +10,7 @@ import { ScheduleKnownErrorCard } from "./known-error-card";
 import { ScheduleTable } from "./table";
 
 export async function ScheduleContent({ day }: { day: string | undefined }) {
-  const params: MyEdEndpointsParams<"schedule"> = {
-    day: timezonedDayJS().format(MYED_DATE_FORMAT),
-  };
+  const params: MyEdEndpointsParams<"schedule"> = {};
 
   if (day) {
     params.day = dayjs(day, "MM-DD-YYYY")

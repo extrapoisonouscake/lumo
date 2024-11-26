@@ -1,7 +1,4 @@
-import { getFullUrl } from "@/helpers/getEndpointUrl";
 import { MyEdEndpoints } from "@/types/myed";
-import * as cheerio from "cheerio";
-import dayjs from "dayjs";
 
 export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen";
 export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
@@ -23,45 +20,9 @@ export const MYED_ENDPOINTS = {
       "studentScheduleContextList.do?navkey=myInfo.sch.list",
     ];
     if (day) {
-      baseEndpoints.push((html: string) => {
-        const $ = cheerio.load(html);
-        const token = $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
-          .first()
-          .val();
-        console.log({ token });
-        const formData = new FormData();
-        const params = {
-          [MYED_HTML_TOKEN_INPUT_NAME]: `${token}`,
-          userEvent: "2000",
-          userParam: "",
-          operationId: "",
-          deploymentId: "aspen",
-          scrollX: "0",
-          scrollY: "0",
-          formFocusField: "",
-          formContents: "",
-          formContentsDirty: "",
-          maximized: "false",
-          selectedTermOid: "date",
-          matrixDate: day,
-        };
-        for (const [key, value] of Object.entries(params)) {
-          formData.append(key, value);
-        }
-        return [
-          getFullUrl("studentScheduleContextList.do"),
-          {
-            method: "POST",
-            body: formData,
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-              Referef: `https://myeducation.gov.bc.ca/aspen/studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${dayjs().format(
-                MYED_DATE_FORMAT
-              )}&userEvent=0`,
-            },
-          },
-        ];
-      });
+      baseEndpoints.push(
+        `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`
+      );
     }
     return baseEndpoints;
   },
@@ -80,4 +41,4 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "ApplicationGatewayAffinity",
   "ApplicationGatewayAffinityCORS",
 ];
-export const MYED_DATE_FORMAT = "DD/MM/YYYY";
+export const MYED_DATE_FORMAT = "MM/DD/YYYY";

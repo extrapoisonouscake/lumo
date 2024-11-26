@@ -37,8 +37,8 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
   const endpointResolvedValue = getEndpointUrl(endpoint, ...rest);
   let finalResponse;
   const authCookies = getAuthCookies(cookieStore);
+  let lastHTML = "";
   if (isArray(endpointResolvedValue)) {
-    let lastHTML = "";
     for (let i = 0; i < endpointResolvedValue.length; i++) {
       const endpointStepValue = endpointResolvedValue[i];
       let url;
@@ -48,7 +48,7 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
         url = endpointStepValue;
       }
       const response = await sendIntermediateRequest(url, authCookies);
-      console.log({ response });
+
       if (response === sessionExpiredIndicator) return response;
       lastHTML = await response.text();
       if (i === endpointResolvedValue.length - 1) {
@@ -61,12 +61,11 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
       getAuthCookies(cookieStore)
     );
     if (finalResponse === sessionExpiredIndicator) return finalResponse;
+    lastHTML = await finalResponse.text();
   }
-  const html = await (
-    finalResponse as NonNullable<typeof finalResponse>
-  ).text();
+
   return endpointToFunction[endpoint](
-    cheerio.load(html)
+    cheerio.load(lastHTML)
   ) as MyEdEndpointResponse<Endpoint>;
 }
 export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<

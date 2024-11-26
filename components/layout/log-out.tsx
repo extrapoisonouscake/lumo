@@ -10,6 +10,7 @@ export function LogOutButton() {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
+        shouldCloseSidebarOnMobile={false}
         disabled={isLoading}
         onClick={async () => {
           setIsLoading(true);

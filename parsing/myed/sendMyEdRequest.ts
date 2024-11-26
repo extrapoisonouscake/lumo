@@ -34,22 +34,6 @@ export async function sendMyEdRequest(
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "same-origin",
   };
-  console.log(
-    ...((typeof urlOrParams === "string"
-      ? [
-          urlOrParams,
-          {
-            headers: initHeaders,
-          },
-        ]
-      : [
-          urlOrParams[0],
-          {
-            ...urlOrParams[1],
-            headers: { ...initHeaders, ...urlOrParams[1]?.headers },
-          },
-        ]) as [string, RequestInit])
-  );
   const response = await fetch(
     ...((typeof urlOrParams === "string"
       ? [
