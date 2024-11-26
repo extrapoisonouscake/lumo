@@ -16,16 +16,19 @@ export default function Page() {
   const [errorMessage, setErrorMessage] = useState<string | null>(
     searchParams.get("message")
   );
+const [isLoading,setIsLoading]=useState(false)
   const router = useRouter();
   async function onSubmit(data: LoginSchema) {
+setIsLoading(true)
     if (errorMessage) setErrorMessage(null);
     const response = await login(data);
     const message = response?.message;
     if (message) {
       setErrorMessage(message);
+setIsLoading(false)
       return;
     }
-    toast.success("Successfully logged in.");
+    
     router.push("/");
   }
   return (
@@ -38,7 +41,7 @@ export default function Page() {
         name="password"
         label="Password"
       />
-      <SubmitButton>Submit</SubmitButton>
+      <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
     </Form>
   );
 }
