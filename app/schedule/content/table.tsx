@@ -50,7 +50,7 @@ const columns = [
         return (
           <div className="flex items-center gap-[6px]">
             {isLunch ? "Lunch" : "Break"}{" "}
-            <AppleEmoji value={emoji} width={16} />
+            <AppleEmoji imageClassName="size-4" value={emoji} width={16} />
           </div>
         );
       }

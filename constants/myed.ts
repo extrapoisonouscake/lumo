@@ -1,9 +1,10 @@
 import { MyEdEndpoints } from "@/types/myed";
+import * as cheerio from "cheerio";
 
 export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen";
 export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
 type EndpointArrayResolveValue = Array<
-  string | ((html: string) => Parameters<typeof fetch>)
+  EndpointReturnTypes | ((html: string) => EndpointReturnTypes)
 >;
 export type EndpointReturnTypes = string | Parameters<typeof fetch>;
 export type AllowedEndpointResolveValues = string | EndpointArrayResolveValue;
@@ -28,6 +29,32 @@ export const MYED_ENDPOINTS = {
   },
   currentWeekday: "studentScheduleContextList.do?navkey=myInfo.sch.list",
   logout: "logout.do",
+  personalDetails: [
+    "portalStudentDetail.do?navkey=myInfo.details.detail",
+    (html) => {
+      const formData = new FormData();
+      const $ = cheerio.load(html);
+      const token = $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
+        .first()
+        .val();
+      const params = {
+        [MYED_HTML_TOKEN_INPUT_NAME]: `${token}`,
+        userEvent: "2030",
+        userParam: "2",
+      };
+      for (const [key, value] of Object.entries(params)) {
+        formData.append(key, value);
+      }
+      return [
+        "portalStudentDetail.do?navkey=myInfo.details.detail",
+        {
+          method: "POST",
+          body: formData,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        },
+      ];
+    },
+  ],
 } as const satisfies Record<string, AllowedEndpointValues>;
 export type EndpointResolvedValue<T extends MyEdEndpoints> =
   T extends MyEdEndpoints

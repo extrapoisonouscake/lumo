@@ -4,6 +4,7 @@ import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
+import { ParserFunctionArguments } from "./types";
 function getTableBody($: cheerio.CheerioAPI) {
   const $contentContainer = $(
     ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"
@@ -30,7 +31,7 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   const weekday = removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim();
   return weekday ?? null;
 }
-export function parseCurrentWeekday($: cheerio.CheerioAPI) {
+export function parseCurrentWeekday(...[$]: ParserFunctionArguments) {
   const $tableBody = getTableBody($);
   if (!$tableBody) return null;
   if ("knownError" in $tableBody) return $tableBody;
@@ -42,7 +43,7 @@ function getDateFromSubjectTimeString(time: string) {
   return t.toDate();
 }
 export function parseSchedule(
-  $: cheerio.CheerioAPI
+  ...[$]: ParserFunctionArguments
 ):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string }

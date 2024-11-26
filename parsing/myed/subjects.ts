@@ -1,6 +1,6 @@
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { Subject } from "@/types/school";
-import { CheerioAPI } from "cheerio";
+import { ParserFunctionArguments } from "./types";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
@@ -30,7 +30,7 @@ function separateTAFromSubjects(subject: Subject[]) {
     teacherAdvisory: removedItem,
   };
 }
-export function parseSubjects($: CheerioAPI) {
+export function parseSubjects(...[$]: ParserFunctionArguments) {
   const $tableContainer = $("#dataGrid");
   if ($tableContainer.length === 0) return null;
 

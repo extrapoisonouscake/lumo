@@ -23,6 +23,7 @@ export function AppleEmojiComponent({
     { [cn("size-5", imageClassName)]: !isText }
   );
 
+  console.log(value, Object.keys(emojiSrcs));
   if (isText) {
     return (
       <p {...props} className={className}>

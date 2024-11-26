@@ -20,3 +20,19 @@ export type AnnouncementSection = {
     }
   | { table: string[][] }
 );
+export interface PersonalDetails {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  studentNumber: number;
+  personalEducationNumber: number;
+  taRoom?: string;
+  locker?: string;
+  schoolName: string;
+  nextSchoolName?: string;
+  graduationYear: number;
+  grade: number;
+  parkingSpaceNumber?: number;
+  licensePlateNumber?: number;
+  photoURL?: string;
+}

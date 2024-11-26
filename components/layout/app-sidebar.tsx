@@ -17,11 +17,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOutButton } from "./log-out";
 import { ThemeToggle } from "./theme-toggle";
+import { UserHeader } from "./user-header";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader></SidebarHeader>
+      <SidebarHeader>
+        <UserHeader />
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>

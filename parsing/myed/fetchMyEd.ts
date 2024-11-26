@@ -10,14 +10,20 @@ import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
 import "server-only";
+import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
+import { ParserFunctionArguments } from "./types";
 const endpointToFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
   currentWeekday: parseCurrentWeekday,
-} as const satisfies Record<MyEdFetchEndpoints, (dom: CheerioAPI) => any>;
+  personalDetails: parsePersonalDetails,
+} as const satisfies Record<
+  MyEdFetchEndpoints,
+  (...args: ParserFunctionArguments) => any
+>;
 export const sessionExpiredIndicator: unique symbol = Symbol();
 //* the original website appears to be using the server to store user navigation
 // * to get to some pages, an additional request has to be sent OR follow redirects
@@ -37,20 +43,20 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
   const endpointResolvedValue = getEndpointUrl(endpoint, ...rest);
   let finalResponse;
   const authCookies = getAuthCookies(cookieStore);
-  let lastHTML = "";
+  const htmlStrings: string[] = [];
   if (isArray(endpointResolvedValue)) {
     for (let i = 0; i < endpointResolvedValue.length; i++) {
       const endpointStepValue = endpointResolvedValue[i];
       let url;
       if (typeof endpointStepValue === "function") {
-        url = endpointStepValue(lastHTML);
+        url = endpointStepValue(htmlStrings[i - 1]);
       } else {
         url = endpointStepValue;
       }
       const response = await sendIntermediateRequest(url, authCookies);
 
       if (response === sessionExpiredIndicator) return response;
-      lastHTML = await response.text();
+      htmlStrings.push(await response.text());
       if (i === endpointResolvedValue.length - 1) {
         finalResponse = response;
       }
@@ -61,11 +67,13 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
       getAuthCookies(cookieStore)
     );
     if (finalResponse === sessionExpiredIndicator) return finalResponse;
-    lastHTML = await finalResponse.text();
+    htmlStrings.push(await finalResponse.text());
   }
-
+  const domObjects = htmlStrings.map((html) =>
+    cheerio.load(html)
+  ) as Array<CheerioAPI>;
   return endpointToFunction[endpoint](
-    cheerio.load(lastHTML)
+    ...domObjects
   ) as MyEdEndpointResponse<Endpoint>;
 }
 export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
