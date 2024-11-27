@@ -1,4 +1,4 @@
-import { EndpointReturnTypes } from "@/constants/myed";
+import { EndpointFetchParameters, EndpointReturnTypes } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
@@ -10,6 +10,7 @@ import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
 import "server-only";
+import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
@@ -27,11 +28,7 @@ const endpointToFunction = {
 export const sessionExpiredIndicator: unique symbol = Symbol();
 //* the original website appears to be using the server to store user navigation
 // * to get to some pages, an additional request has to be sent OR follow redirects
-export function isSessionExpiredResponse(
-  response: any
-): response is typeof sessionExpiredIndicator {
-  return true;
-}
+
 function isArray<T>(object: any | T[]): object is T[] {
   return Array.isArray(object);
 }
@@ -49,7 +46,15 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
       const endpointStepValue = endpointResolvedValue[i];
       let url;
       if (typeof endpointStepValue === "function") {
-        url = endpointStepValue(htmlStrings[i - 1]);
+        const rawUrlParams = endpointStepValue(htmlStrings[i - 1]);
+        if (Array.isArray(rawUrlParams)) {
+          url = [
+            getFullUrl(rawUrlParams[0]),
+            rawUrlParams[1],
+          ] as EndpointFetchParameters;
+        } else {
+          url = rawUrlParams;
+        }
       } else {
         url = endpointStepValue;
       }

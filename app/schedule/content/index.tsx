@@ -7,9 +7,10 @@ import {
   INSTANTIATED_TIMEZONE,
   timezonedDayJS,
 } from "@/instances/dayjs";
-import { fetchMyEd, sessionExpiredIndicator } from "@/parsing/myed/fetchMyEd";
+import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
+import { isSessionExpiredResponse } from "../../../helpers/isSessionExpiredResponse";
 import { ScheduleTable } from "./table";
 const getChristmasBreakDates = (year: number) =>
   [
@@ -51,7 +52,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
       .format(MYED_DATE_FORMAT);
   }
   const data = await fetchMyEd("schedule", params);
-  if (data === sessionExpiredIndicator)
+  if (isSessionExpiredResponse(data))
     return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
   const hasKnownError = "knownError" in data;
   if (!data || hasKnownError) {

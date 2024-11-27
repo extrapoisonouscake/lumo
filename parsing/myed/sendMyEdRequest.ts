@@ -34,22 +34,25 @@ export async function sendMyEdRequest(
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "same-origin",
   };
-  const response = await fetch(
-    ...((typeof urlOrParams === "string"
-      ? [
-          urlOrParams,
-          {
-            headers: initHeaders,
-          },
-        ]
-      : [
-          urlOrParams[0],
-          {
-            ...urlOrParams[1],
-            headers: { ...urlOrParams[1]?.headers, ...initHeaders },
-          },
-        ]) as [string, RequestInit])
-  );
+  let params: [string, RequestInit];
+  if (typeof urlOrParams === "string") {
+    params = [
+      urlOrParams,
+      {
+        headers: initHeaders,
+      },
+    ];
+  } else {
+    const fullHeaders = { ...initHeaders, ...urlOrParams[1]?.headers };
+    params = [
+      urlOrParams[0],
+      {
+        ...urlOrParams[1],
+        headers: fullHeaders,
+      },
+    ];
+  }
+  const response = await fetch(...params);
 
   return response;
 }

@@ -1,8 +1,9 @@
 import { isUserAuthenticated } from "@/helpers/isUserAuthenticated";
 import { cookies } from "next/headers";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
+import { UserHeader, UserHeaderSkeleton } from "./user-header";
 
 const Inset = ({ children }: { children: ReactNode }) => (
   <SidebarInset className="p-4 flex flex-col gap-4 min-w-0">
@@ -16,7 +17,13 @@ export function AppSidebarWrapper({ children }: { children: ReactNode }) {
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar />
+      <AppSidebar
+        userHeader={
+          <Suspense fallback={<UserHeaderSkeleton />}>
+            <UserHeader />
+          </Suspense>
+        }
+      />
       <Inset>{children}</Inset>
     </SidebarProvider>
   );

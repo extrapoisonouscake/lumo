@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { ReloginProvider } from "./relogin-provider";
 import { ThemeProvider } from "./theme-provider";
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -10,7 +11,7 @@ export function Providers({ children }: { children: ReactNode }) {
       defaultTheme="system"
       enableSystem
     >
-      {children}
+      <ReloginProvider>{children}</ReloginProvider>
     </ThemeProvider>
   );
 }

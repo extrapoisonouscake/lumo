@@ -1,19 +1,13 @@
 "use client";
 
-import { relogin } from "@/lib/auth/mutations";
-import { useRouter } from "next/navigation";
+import { useRelogin } from "@/app/relogin-provider";
 import { ReactNode, useEffect } from "react";
 
-export function ReloginWrapper({ skeleton }: { skeleton: ReactNode }) {
-  const router = useRouter();
+export function ReloginWrapper({ skeleton = null }: { skeleton?: ReactNode }) {
+  const { isReloggingIn, relogin } = useRelogin();
+
   useEffect(() => {
-    relogin().then((res) => {
-      if (res) {
-        router.push(`/login?message=${res.message}`);
-      } else {
-        window.location.reload();
-      }
-    });
-  }, []);
+    relogin();
+  }, [relogin]);
   return skeleton;
 }

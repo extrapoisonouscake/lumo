@@ -6,7 +6,8 @@ export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
 type EndpointArrayResolveValue = Array<
   EndpointReturnTypes | ((html: string) => EndpointReturnTypes)
 >;
-export type EndpointReturnTypes = string | Parameters<typeof fetch>;
+export type EndpointFetchParameters = [string, Parameters<typeof fetch>[1]?];
+export type EndpointReturnTypes = string | EndpointFetchParameters;
 export type AllowedEndpointResolveValues = string | EndpointArrayResolveValue;
 export type AllowedEndpointValues =
   | AllowedEndpointResolveValues
@@ -37,19 +38,16 @@ export const MYED_ENDPOINTS = {
       const token = $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
         .first()
         .val();
-      const params = {
+      const params = new URLSearchParams({
         [MYED_HTML_TOKEN_INPUT_NAME]: `${token}`,
         userEvent: "2030",
         userParam: "2",
-      };
-      for (const [key, value] of Object.entries(params)) {
-        formData.append(key, value);
-      }
+      });
       return [
         "portalStudentDetail.do?navkey=myInfo.details.detail",
         {
           method: "POST",
-          body: formData,
+          body: params,
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         },
       ];
