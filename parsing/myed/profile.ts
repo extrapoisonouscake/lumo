@@ -50,6 +50,7 @@ function parsePhotoURL($: ParserFunctionArguments[number]) {
   const url = $("#propertyValue(relStdPsnOid_psnPhoOIDPrim)-span img").prop(
     "src"
   );
+if(!url) return
 console.log(url)
   return getFullUrl(url);
 }
