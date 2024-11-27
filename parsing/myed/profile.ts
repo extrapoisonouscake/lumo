@@ -47,7 +47,7 @@ function parseMainDetails($: ParserFunctionArguments[number]) {
 }
 
 function parsePhotoURL($: ParserFunctionArguments[number]) {
-  const url = $("#propertyValue(relStdPsnOid_psnPhoOIDPrim)-span img").prop(
+  const url = $('[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img').prop(
     "src"
   );
 if(!url) return
