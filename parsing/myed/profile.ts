@@ -1,6 +1,7 @@
 import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { PersonalDetails } from "@/types/school";
 import { ParserFunctionArguments } from "./types";
+import { getFullUrl } from "../../helpers/getEndpointUrl";
 export function parsePersonalDetails(
   ...[$main, $photoRoot]: ParserFunctionArguments
 ): PersonalDetails | undefined {
@@ -49,5 +50,6 @@ function parsePhotoURL($: ParserFunctionArguments[number]) {
   const url = $("#propertyValue(relStdPsnOid_psnPhoOIDPrim)-span img").prop(
     "src"
   );
-  return url;
+console.log(url)
+  return getFullUrl(url);
 }
