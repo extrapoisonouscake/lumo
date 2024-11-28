@@ -9,6 +9,7 @@ import {
 import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import "server-only";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { parsePersonalDetails } from "./profile";
@@ -32,10 +33,9 @@ export const sessionExpiredIndicator: unique symbol = Symbol();
 function isArray<T>(object: any | T[]): object is T[] {
   return Array.isArray(object);
 }
-export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
-  endpoint: Endpoint,
-  ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
-) {
+export const fetchMyEd = cache(async function <
+  Endpoint extends MyEdFetchEndpoints
+>(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
   const cookieStore = new MyEdCookieStore(cookies());
   const endpointResolvedValue = getEndpointUrl(endpoint, ...rest);
   let finalResponse;
@@ -80,7 +80,7 @@ export async function fetchMyEd<Endpoint extends MyEdFetchEndpoints>(
   return endpointToFunction[endpoint](
     ...domObjects
   ) as MyEdEndpointResponse<Endpoint>;
-}
+});
 export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
   ReturnType<(typeof endpointToFunction)[T]>,
   null

@@ -51,3 +51,25 @@ const schoolToAnnouncementsFileURL: Record<
     }/DA-${parsedDate.format("MMM")}-${parsedDate.date()}-${year}.pdf`;
   },
 };
+// const readStream = await fetch(
+//   "https://www.comoxvalleyschools.ca/mark-isfeld-secondary/wp-content/uploads/sites/44/2024/11/DA-Nov-28-2024.pdf"
+// ).then((res) => res.body);
+// if (!readStream) {
+//   return;
+// }
+// const inputAsset = await pdfServices.upload({
+//   readStream: Readable.fromWeb(readStream as ReadableStream<Uint8Array>),
+//   mimeType: MimeType.PDF,
+// });
+// const params = new ExtractPDFParams({
+//   elementsToExtract: [ExtractElementType.TEXT, ExtractElementType.TABLES],
+// });
+
+// const job = new ExtractPDFJob({ inputAsset, params });
+// const pollingURL = await pdfServices.submit({ job });
+// const pdfServicesResponse = await pdfServices.getJobResult({
+//   pollingURL,
+//   resultType: ExtractPDFResult,
+// });
+
+// const resultAsset = pdfServicesResponse.result?.contentJSON;

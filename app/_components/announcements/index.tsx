@@ -1,11 +1,9 @@
-import { AppleEmoji } from "@/components/misc/apple-emoji";
+import { ErrorCard } from "@/components/misc/error-card";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ErrorCard } from "@/components/misc/error-card";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKnownSchool } from "@/constants/schools";
 import { getAnnouncements } from "@/parsing/ta/getAnnouncements";
@@ -14,12 +12,17 @@ import { AnnouncementsAccordions } from "./accordions";
 export async function Announcements() {
   const school = cookies().get("schoolId")?.value;
   if (!school || !isKnownSchool(school)) return null;
+
   const data = await getAnnouncements(school);
-  
+
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm">Announcements</h3>
-      {data?<AnnouncementsAccordions data={data} />:<ErrorCard emoji="💨" message="No announcements yet."/>}
+      {data ? (
+        <AnnouncementsAccordions data={data} />
+      ) : (
+        <ErrorCard emoji="💨" message="No announcements yet." />
+      )}
     </div>
   );
 }

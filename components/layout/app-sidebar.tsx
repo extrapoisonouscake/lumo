@@ -31,7 +31,7 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className="pt-1">
+        <SidebarGroup>
           <SidebarGroupContent>
             <PagesMenu />
           </SidebarGroupContent>
