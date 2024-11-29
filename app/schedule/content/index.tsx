@@ -72,7 +72,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   return (
     <>
-      {data && dayjs(day).day() === 5 && (
+      {data && timezonedDayJS(day).day() === 5 && (
         <h3>
           Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>
