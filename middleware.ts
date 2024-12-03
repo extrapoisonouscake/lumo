@@ -26,7 +26,7 @@ export async function middleware(request: NextRequest) {
           request.cookies.get(getFullCookieName(MYED_SESSION_COOKIE_NAME))
         )
       ) {
-        console.log("REFRESS");
+        
         const formData = {
           username: request.cookies.get(getFullCookieName("username"))?.value,
           password: request.cookies.get(getFullCookieName("password"))?.value,
@@ -72,10 +72,10 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 function isValidSession(session?: RequestCookie) {
-  console.log({ session });
+  
   if (!session) return false;
   const decodedToken = decodeJwt(session.value);
-  console.log(new Date(decodedToken.exp * 1000));
+  
   return !decodedToken.exp || (decodedToken.exp - 10) * 1000 > Date.now();
 }
 export const config = {
