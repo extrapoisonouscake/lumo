@@ -37,6 +37,7 @@ export const fetchMyEd = cache(async function <
   Endpoint extends MyEdFetchEndpoints
 >(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
   const cookieStore = new MyEdCookieStore(cookies());
+
   const endpointResolvedValue = getEndpointUrl(endpoint, ...rest);
   let finalResponse;
   const authCookies = getAuthCookies(cookieStore);
@@ -60,7 +61,6 @@ export const fetchMyEd = cache(async function <
       }
       const response = await sendIntermediateRequest(url, authCookies);
 
-      if (response === sessionExpiredIndicator) return response;
       htmlStrings.push(await response.text());
       if (i === endpointResolvedValue.length - 1) {
         finalResponse = response;
@@ -71,7 +71,6 @@ export const fetchMyEd = cache(async function <
       endpointResolvedValue,
       getAuthCookies(cookieStore)
     );
-    if (finalResponse === sessionExpiredIndicator) return finalResponse;
     htmlStrings.push(await finalResponse.text());
   }
   const domObjects = htmlStrings.map((html) =>
@@ -91,7 +90,6 @@ async function sendIntermediateRequest(
 ) {
   const response = await sendMyEdRequest(endpoint, authCookies);
   if (!response.ok) {
-    if (response.status === 404) return sessionExpiredIndicator;
     throw response;
   }
   return response;

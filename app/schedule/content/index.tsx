@@ -1,5 +1,4 @@
 import { ErrorCard } from "@/components/misc/error-card";
-import { ReloginWrapper } from "@/components/relogin-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import {
@@ -10,7 +9,6 @@ import {
 import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
-import { isSessionExpiredResponse } from "../../../helpers/isSessionExpiredResponse";
 import { ScheduleTable } from "./table";
 const getChristmasBreakDates = (year: number) =>
   [
@@ -52,9 +50,8 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
       .format(MYED_DATE_FORMAT);
   }
   const data = await fetchMyEd("schedule", params);
-  if (isSessionExpiredResponse(data))
-    return <ReloginWrapper skeleton={<ScheduleContentSkeleton day={day} />} />;
-  const hasKnownError = "knownError" in data;
+
+  const hasKnownError = data && "knownError" in data;
   if (!data || hasKnownError) {
     const errorCardProps: ComponentProps<typeof ErrorCard> = {
       emoji: "‼️",

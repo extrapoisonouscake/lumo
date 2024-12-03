@@ -1,44 +1,19 @@
 "use server";
 import { loginSchema, LoginSchema } from "@/app/login/validation";
-import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
-import { MYED_AUTHENTICATION_COOKIES_NAMES } from "@/constants/myed";
-import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { getEndpointUrl } from "@/helpers/getEndpointUrl";
-import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
-import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { authenticateUser } from "./helpers";
+import { deleteSessionAndLogOut, performLogin } from "./helpers";
 const KNOWN_ERRORS = ["Invalid login.", "This account has been disabled."];
-async function performLogin(formData: LoginSchema) {
-  try {
-    const { username, password } = formData;
-    const cookieStore = new MyEdCookieStore(cookies());
 
-    for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
-      cookieStore.delete(name);
-    }
-    const cookiesToAdd = await authenticateUser(username, password);
-    for (const [name, value] of cookiesToAdd) {
-      cookieStore.set(name, value || "", {
-        secure: shouldSecureCookies,
-        httpOnly: true,
-        maxAge: COOKIE_MAX_AGE,
-      });
-    }
-    if (formData) {
-      cookieStore.set("username", username, {
-        secure: shouldSecureCookies,
-        maxAge: COOKIE_MAX_AGE,
-        httpOnly: true,
-      });
-      cookieStore.set("password", password, {
-        secure: shouldSecureCookies,
-        maxAge: COOKIE_MAX_AGE,
-        httpOnly: true,
-      });
-    }
+export async function login(formData: LoginSchema) {
+  try {
+    loginSchema.parse(formData);
+  } catch {
+    return { message: "Invalid parameters." };
+  }
+
+  try {
+    await performLogin(formData);
   } catch (e: any) {
+    console.log(e);
     const { message } = e;
     return {
       message: KNOWN_ERRORS.includes(message)
@@ -47,38 +22,7 @@ async function performLogin(formData: LoginSchema) {
     };
   }
 }
-export async function login(formData: LoginSchema) {
-  try {
-    loginSchema.parse(formData);
-  } catch {
-    return { message: "Invalid parameters." };
-  }
 
-  return await performLogin(formData);
-}
-export async function relogin() {
-  const cookieStore = new MyEdCookieStore(cookies());
-  const formData = {
-    username: cookieStore.get("username")?.value,
-    password: cookieStore.get("password")?.value,
-  };
-
-  try {
-    loginSchema.parse(formData);
-  } catch {
-    return { message: "Invalid parameters." };
-  }
-
-  return await performLogin(formData as LoginSchema);
-}
 export async function logOut() {
-  const cookieStore = new MyEdCookieStore(cookies());
-  const url = getEndpointUrl("logout");
-  await sendMyEdRequest(url, getAuthCookies(cookieStore));
-  for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
-    cookieStore.delete(name);
-  }
-  cookieStore.delete("username");
-  cookieStore.delete("password");
-  redirect("/login");
+  await deleteSessionAndLogOut();
 }

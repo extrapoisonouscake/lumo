@@ -1,19 +1,15 @@
-import { isSessionExpiredResponse } from "@/helpers/isSessionExpiredResponse";
 import {
   getTextColorForBackground,
   stringToColor,
 } from "@/helpers/stringToColor";
 import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import Link from "next/link";
-import { ReloginWrapper } from "../relogin-wrapper";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { SidebarMenuButton } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 
 export async function UserHeader() {
   const data = await fetchMyEd("personalDetails");
-  if (isSessionExpiredResponse(data))
-    return <ReloginWrapper skeleton={<UserHeaderSkeleton />} />;
   if (!data) return null;
   const { firstName, middleName, lastName, grade } = data;
   const backgroundColor = stringToColor(data.firstName + data.lastName);

@@ -1,7 +1,7 @@
 import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { PersonalDetails } from "@/types/school";
-import { ParserFunctionArguments } from "./types";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
+import { ParserFunctionArguments } from "./types";
 export function parsePersonalDetails(
   ...[$main, $photoRoot]: ParserFunctionArguments
 ): PersonalDetails | undefined {
@@ -37,7 +37,6 @@ function parseMainDetails($: ParserFunctionArguments[number]) {
     });
 
   const result: any = {}; //!
-  console.log({ rawDetailsEntries });
   for (const [key, value] of rawDetailsEntries) {
     const propertyName = detailLabelsMap[key];
     if (!key) continue;
@@ -47,10 +46,9 @@ function parseMainDetails($: ParserFunctionArguments[number]) {
 }
 
 function parsePhotoURL($: ParserFunctionArguments[number]) {
-  const url = $('[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img').prop(
-    "src"
-  );
-if(!url) return
-console.log(url)
+  const url = $(
+    '[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img'
+  ).prop("src");
+  if (!url) return;
   return getFullUrl(url);
 }

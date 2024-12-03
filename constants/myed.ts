@@ -60,8 +60,9 @@ export type EndpointResolvedValue<T extends MyEdEndpoints> =
       ? R
       : (typeof MYED_ENDPOINTS)[T]
     : never;
+export const MYED_SESSION_COOKIE_NAME = "JSESSIONID";
 export const MYED_AUTHENTICATION_COOKIES_NAMES = [
-  "JSESSIONID",
+  MYED_SESSION_COOKIE_NAME,
   "deploymentId",
   "ApplicationGatewayAffinity",
   "ApplicationGatewayAffinityCORS",
