@@ -35,7 +35,6 @@ function parseMainDetails($: ParserFunctionArguments[number]) {
       const value = $row.find(".detailValue > span").text();
       return [removeLineBreaks(name), removeLineBreaks(value)];
     });
-
   const result: any = {}; //!
   for (const [key, value] of rawDetailsEntries) {
     const propertyName = detailLabelsMap[key];

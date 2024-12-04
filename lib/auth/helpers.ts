@@ -137,7 +137,10 @@ function parseLoginErrorMessage(html: string) {
 export async function deleteSession(externalStore?: PlainCookieStore) {
   const cookieStore = new MyEdCookieStore(cookies() || externalStore);
   const url = getEndpointUrl("logout");
-  await sendMyEdRequest(url, getAuthCookies(cookieStore));
+  const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
+  if (session) {
+    await sendMyEdRequest(url, session, getAuthCookies(cookieStore));
+  }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }

@@ -21,7 +21,12 @@ const numberFormatter = new Intl.NumberFormat("en-CA", {
 });
 const columnHelper = createColumnHelper<Subject>();
 const columns = [
-  columnHelper.accessor("name", { header: "Name" }),
+  columnHelper.accessor("name", {
+    header: "Name",
+    cell: ({ cell }) => (
+      <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
+    ),
+  }),
   columnHelper.accessor("gpa", {
     header: ({ column }) => {
       return <SortableColumn {...column}>GPA</SortableColumn>;

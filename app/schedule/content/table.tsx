@@ -54,7 +54,12 @@ const columns = [
           </div>
         );
       }
-      return cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK;
+      const value = cell.getValue();
+      return value ? (
+        <span dangerouslySetInnerHTML={{ __html: value }} />
+      ) : (
+        NULL_VALUE_DISPLAY_FALLBACK
+      );
     },
   }),
 

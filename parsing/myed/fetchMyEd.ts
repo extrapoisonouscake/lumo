@@ -1,4 +1,8 @@
-import { EndpointFetchParameters, EndpointReturnTypes } from "@/constants/myed";
+import {
+  EndpointFetchParameters,
+  EndpointReturnTypes,
+  MYED_SESSION_COOKIE_NAME,
+} from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
@@ -9,14 +13,17 @@ import {
 import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { cookies } from "next/headers";
+import path from "path";
 import { cache } from "react";
 import "server-only";
+import { fileURLToPath } from "url";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const endpointToFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
@@ -42,6 +49,8 @@ export const fetchMyEd = cache(async function <
   let finalResponse;
   const authCookies = getAuthCookies(cookieStore);
   const htmlStrings: string[] = [];
+  const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
+  if (!session) return;
   if (isArray(endpointResolvedValue)) {
     for (let i = 0; i < endpointResolvedValue.length; i++) {
       const endpointStepValue = endpointResolvedValue[i];
@@ -59,7 +68,7 @@ export const fetchMyEd = cache(async function <
       } else {
         url = endpointStepValue;
       }
-      const response = await sendIntermediateRequest(url, authCookies);
+      const response = await sendIntermediateRequest(url, session, authCookies);
 
       htmlStrings.push(await response.text());
       if (i === endpointResolvedValue.length - 1) {
@@ -69,6 +78,7 @@ export const fetchMyEd = cache(async function <
   } else {
     finalResponse = await sendIntermediateRequest(
       endpointResolvedValue,
+      session,
       getAuthCookies(cookieStore)
     );
     htmlStrings.push(await finalResponse.text());
@@ -86,9 +96,10 @@ export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
 >;
 async function sendIntermediateRequest(
   endpoint: EndpointReturnTypes,
+  session: string,
   authCookies: ReturnType<typeof getAuthCookies>
 ) {
-  const response = await sendMyEdRequest(endpoint, authCookies);
+  const response = await sendMyEdRequest(endpoint, session, authCookies);
   if (!response.ok) {
     throw response;
   }

@@ -9,7 +9,6 @@ function getTableBody($: cheerio.CheerioAPI) {
   const $contentContainer = $(
     ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"
   );
-
   if ($contentContainer.length === 0) return null;
   const $tableContainer = $contentContainer.find(".listGridFixed");
 
@@ -31,7 +30,10 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   const weekday = removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim();
   return weekday ?? null;
 }
-export function parseCurrentWeekday(...[$]: ParserFunctionArguments) {
+export function parseCurrentWeekday(
+  ...[$initial, $dateAdjusted]: ParserFunctionArguments
+) {
+  const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
   if (!$tableBody) return null;
   if ("knownError" in $tableBody) return $tableBody;
@@ -43,11 +45,12 @@ function getDateFromSubjectTimeString(time: string) {
   return t.toDate();
 }
 export function parseSchedule(
-  ...[$]: ParserFunctionArguments
+  ...[$initial, $dateAdjusted]: ParserFunctionArguments
 ):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string }
   | null {
+  const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
   if (!$tableBody) return null;
   if ("knownError" in $tableBody) return $tableBody;

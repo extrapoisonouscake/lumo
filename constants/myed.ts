@@ -33,7 +33,6 @@ export const MYED_ENDPOINTS = {
   personalDetails: [
     "portalStudentDetail.do?navkey=myInfo.details.detail",
     (html) => {
-      const formData = new FormData();
       const $ = cheerio.load(html);
       const token = $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
         .first()

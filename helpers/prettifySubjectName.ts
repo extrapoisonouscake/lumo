@@ -7,6 +7,7 @@ const educationAbbreviations = new Set([
   "BSc",
   "MSc",
   "UN",
+  "AP",
 ]);
 const subjectsToAbbreviation: Record<string, string> = {
   "teacher advisory": "TA",

@@ -17,7 +17,6 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
       ? { next: { revalidate: false } }
       : {}
   );
-console.log(url,response.status)
   if (!response.ok) {
     return;
   }

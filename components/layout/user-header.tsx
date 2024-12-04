@@ -53,7 +53,7 @@ export function UserHeaderSkeleton() {
       size="lg"
       className="pointer-events-none data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
     >
-      <Skeleton className="size-8 rounded-lg" />
+      <Skeleton className="size-8 min-w-8 rounded-lg" />
 
       <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
         <Skeleton className="truncate w-fit">
