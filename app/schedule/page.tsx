@@ -13,7 +13,7 @@ export default async function Page({
       <div className="flex justify-between items-start gap-2">
         <PageHeading />
       </div>
-      <ScheduleDayPicker initialDay={day} />
+      <ScheduleDayPicker day={day} />
 
       <Suspense key={day} fallback={<ScheduleContentSkeleton day={day} />}>
         <ScheduleContent day={day} />

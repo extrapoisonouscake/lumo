@@ -43,7 +43,6 @@ const visualizableErrors: Record<
 };
 export async function ScheduleContent({ day }: { day: string | undefined }) {
   const params: MyEdEndpointsParams<"schedule"> = {};
-
   if (day) {
     params.day = dayjs(day, "MM-DD-YYYY")
       .tz(INSTANTIATED_TIMEZONE, true)
@@ -55,7 +54,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
   if (!data || hasKnownError) {
     const errorCardProps: ComponentProps<typeof ErrorCard> = {
       emoji: "‼️",
-      message: hasKnownError ? data.knownError : "Something went wrong.",
+      message: "Something went wrong.",
     };
     if (hasKnownError) {
       const visualData = visualizableErrors[data.knownError]?.({ day });
@@ -69,7 +68,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   return (
     <>
-      {data && timezonedDayJS(day).day() === 5 && (
+      {data && dayjs(day).day() === 5 && (
         <h3>
           Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>

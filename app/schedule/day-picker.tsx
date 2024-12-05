@@ -20,9 +20,13 @@ function ChevronButton(props: ButtonProps) {
   );
 }
 type NavigationButtonsNames = "left" | "calendar" | "right";
-export function ScheduleDayPicker({ initialDay }: { initialDay?: string }) {
-  const [date, setDate] = useState(convertQueryDayToDate(initialDay));
-
+export function ScheduleDayPicker({ day }: { day?: string }) {
+  const [date, setDate] = useState(convertQueryDayToDate(day));
+  useEffect(() => {
+    const newDate = convertQueryDayToDate(day);
+    if (newDate?.getTime() === date?.getTime()) return;
+    setDate(newDate);
+  }, [day]);
   const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();

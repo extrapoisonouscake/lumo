@@ -2,7 +2,11 @@ import { decodeJwt, UnsecuredJWT } from "jose";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextRequest, NextResponse } from "next/server";
 import { LoginSchema, loginSchema } from "./app/login/validation";
-import { COOKIE_MAX_AGE, shouldSecureCookies } from "./constants/auth";
+import {
+  COOKIE_MAX_AGE,
+  SESSION_TTL,
+  shouldSecureCookies,
+} from "./constants/auth";
 import {
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_SESSION_COOKIE_NAME,
@@ -10,7 +14,10 @@ import {
 import { getFullCookieName } from "./helpers/getFullCookieName";
 import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
-import { deleteSessionAndLogOut, fetchAuthCookies } from "./lib/auth/helpers";
+import {
+  deleteSessionAndLogOut,
+  fetchAuthCookiesAndUserID,
+} from "./lib/auth/helpers";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
@@ -26,7 +33,6 @@ export async function middleware(request: NextRequest) {
           request.cookies.get(getFullCookieName(MYED_SESSION_COOKIE_NAME))
         )
       ) {
-        
         const formData = {
           username: request.cookies.get(getFullCookieName("username"))?.value,
           password: request.cookies.get(getFullCookieName("password"))?.value,
@@ -40,17 +46,18 @@ export async function middleware(request: NextRequest) {
             cookieStore.delete(name);
           }
 
-          const cookiesToAdd = await fetchAuthCookies(
-            formData.username,
-            formData.password
-          );
+          const { cookies: cookiesToAdd, userID } =
+            await fetchAuthCookiesAndUserID(
+              formData.username,
+              formData.password
+            );
           for (const entry of cookiesToAdd) {
             const name = entry[0];
             let value = entry[1];
             if (name === MYED_SESSION_COOKIE_NAME) {
-              value = new UnsecuredJWT({ session: value })
+              value = new UnsecuredJWT({ session: value, userID })
                 .setIssuedAt()
-                .setExpirationTime("1h")
+                .setExpirationTime(SESSION_TTL)
                 .encode();
             }
             cookieStore.set(name, value || "", {
@@ -72,10 +79,9 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 function isValidSession(session?: RequestCookie) {
-  
   if (!session) return false;
   const decodedToken = decodeJwt(session.value);
-  
+
   return !decodedToken.exp || (decodedToken.exp - 10) * 1000 > Date.now();
 }
 export const config = {

@@ -27,6 +27,7 @@ interface QueueItem<T> {
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: any) => void;
   group?: string; // Optional group identifier
+  isLastRequest?: boolean;
 }
 
 class PrioritizedRequestQueue {
@@ -37,9 +38,19 @@ class PrioritizedRequestQueue {
   /**
    * Enqueues a request, ensuring global serialization and group prioritization.
    */
-  enqueue<T>(requestFunction: RequestFunction<T>, group?: string): Promise<T> {
+  enqueue<T>(
+    requestFunction: RequestFunction<T>,
+    group?: string,
+    isLastRequest?: QueueItem<T>["isLastRequest"]
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
-      this.queue.push({ requestFunction, resolve, reject, group });
+      this.queue.push({
+        requestFunction,
+        resolve,
+        reject,
+        group,
+        isLastRequest,
+      });
       this.processQueue();
     });
   }
@@ -50,11 +61,10 @@ class PrioritizedRequestQueue {
   private async processQueue(): Promise<void> {
     if (this.isProcessing || this.queue.length === 0) return;
 
-    this.isProcessing = true;
     const nextItem = this.getNextQueueItem();
-
     if (nextItem) {
       const { requestFunction, resolve, reject, group } = nextItem;
+      this.isProcessing = true;
       this.currentGroup = group ?? null;
       try {
         const result = await requestFunction();
@@ -63,7 +73,9 @@ class PrioritizedRequestQueue {
         reject(error);
       } finally {
         this.isProcessing = false;
-        this.currentGroup = null;
+        if (this.currentGroup && nextItem.isLastRequest) {
+          this.currentGroup = null;
+        }
         this.processQueue(); // Continue processing the next item
       }
     }
@@ -84,8 +96,6 @@ class PrioritizedRequestQueue {
     if (index !== -1) {
       return this.queue.splice(index, 1)[0];
     }
-    // No more items in the current group, so reset the group and process the next item
-    return this.queue.shift();
   }
 }
 

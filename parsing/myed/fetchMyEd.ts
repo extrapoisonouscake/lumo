@@ -1,6 +1,5 @@
 import {
   EndpointFetchParameters,
-  EndpointReturnTypes,
   MYED_SESSION_COOKIE_NAME,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
@@ -8,10 +7,12 @@ import { getEndpointUrl } from "@/helpers/getEndpointUrl";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import {
   MyEdEndpointsParamsAsOptional,
+  MyEdEndpointsParamsWithUserID,
   MyEdFetchEndpoints,
 } from "@/types/myed";
 import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
+import { decodeJwt } from "jose";
 import { cookies } from "next/headers";
 import path from "path";
 import { cache } from "react";
@@ -20,7 +21,7 @@ import { fileURLToPath } from "url";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
-import { sendMyEdRequest } from "./sendMyEdRequest";
+import { sendMyEdRequest, SendMyEdRequestParameters } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -44,14 +45,18 @@ export const fetchMyEd = cache(async function <
   Endpoint extends MyEdFetchEndpoints
 >(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
   const cookieStore = new MyEdCookieStore(cookies());
-
-  const endpointResolvedValue = getEndpointUrl(endpoint, ...rest);
   let finalResponse;
   const authCookies = getAuthCookies(cookieStore);
   const htmlStrings: string[] = [];
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (!session) return;
+  const userID = decodeJwt(session).userID as string;
+  const restWithUserID = [
+    { userID, ...(rest[0] || {}) },
+  ] as MyEdEndpointsParamsWithUserID<Endpoint>; //?!
+  const endpointResolvedValue = getEndpointUrl(endpoint, ...restWithUserID);
   if (isArray(endpointResolvedValue)) {
+    const requestGroup = `${endpoint}-${Date.now()}`;
     for (let i = 0; i < endpointResolvedValue.length; i++) {
       const endpointStepValue = endpointResolvedValue[i];
       let url;
@@ -68,19 +73,26 @@ export const fetchMyEd = cache(async function <
       } else {
         url = endpointStepValue;
       }
-      const response = await sendIntermediateRequest(url, session, authCookies);
+      const isLastRequest = i === endpointResolvedValue.length - 1;
+      const response = await sendIntermediateRequest({
+        urlOrParams: url,
+        session,
+        authCookies,
+        requestGroup,
+        isLastRequest,
+      });
 
       htmlStrings.push(await response.text());
-      if (i === endpointResolvedValue.length - 1) {
+      if (isLastRequest) {
         finalResponse = response;
       }
     }
   } else {
-    finalResponse = await sendIntermediateRequest(
-      endpointResolvedValue,
+    finalResponse = await sendIntermediateRequest({
+      urlOrParams: endpointResolvedValue,
       session,
-      getAuthCookies(cookieStore)
-    );
+      authCookies: getAuthCookies(cookieStore),
+    });
     htmlStrings.push(await finalResponse.text());
   }
   const domObjects = htmlStrings.map((html) =>
@@ -94,12 +106,8 @@ export type MyEdEndpointResponse<T extends MyEdFetchEndpoints> = Exclude<
   ReturnType<(typeof endpointToFunction)[T]>,
   null
 >;
-async function sendIntermediateRequest(
-  endpoint: EndpointReturnTypes,
-  session: string,
-  authCookies: ReturnType<typeof getAuthCookies>
-) {
-  const response = await sendMyEdRequest(endpoint, session, authCookies);
+async function sendIntermediateRequest(props: SendMyEdRequestParameters) {
+  const response = await sendMyEdRequest(props);
   if (!response.ok) {
     throw response;
   }

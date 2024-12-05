@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
 const config: Config = {
   content: [
@@ -64,7 +65,7 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        blue: "colors.blue",
+        blue: colors.blue,
       },
       keyframes: {
         "accordion-down": {

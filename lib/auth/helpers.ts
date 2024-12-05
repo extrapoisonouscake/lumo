@@ -1,5 +1,9 @@
 import { LoginSchema } from "@/app/login/validation";
-import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
+import {
+  COOKIE_MAX_AGE,
+  SESSION_TTL,
+  shouldSecureCookies,
+} from "@/constants/auth";
 import {
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
@@ -36,14 +40,17 @@ export async function performLogin(
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
-  const cookiesToAdd = await fetchAuthCookies(username, password);
+  const { cookies: cookiesToAdd, userID } = await fetchAuthCookiesAndUserID(
+    username,
+    password
+  );
   for (const entry of cookiesToAdd) {
     const name = entry[0];
     let value = entry[1];
     if (name === MYED_SESSION_COOKIE_NAME) {
-      value = new jose.UnsecuredJWT({ session: value })
+      value = new jose.UnsecuredJWT({ session: value, userID })
         .setIssuedAt()
-        .setExpirationTime("1h")
+        .setExpirationTime(SESSION_TTL)
         .encode();
     }
     cookieStore.set(name, value || "", {
@@ -65,7 +72,12 @@ export async function performLogin(
     });
   }
 }
-export async function fetchAuthCookies(username: string, password: string) {
+const userIDExtractionRegex =
+  /https:\/\/myeducation\.gov\.bc\.ca\/aspen\/mobile\/([^\/#?]+)/;
+export async function fetchAuthCookiesAndUserID(
+  username: string,
+  password: string
+) {
   const loginTokenResponse = await fetch(getEndpointUrl("login"), {
     credentials: "include",
   });
@@ -110,9 +122,14 @@ export async function fetchAuthCookies(username: string, password: string) {
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
-  return cookiesToAdd.filter(([name]) =>
-    MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-  );
+  const userID = loginResponse.url.match(userIDExtractionRegex)?.[1];
+  if (!userID) throw new Error("Error");
+  return {
+    cookies: cookiesToAdd.filter(([name]) =>
+      MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
+    ),
+    userID,
+  };
 }
 function parseLoginErrorMessage(html: string) {
   const $ = cheerio.load(html);
@@ -139,7 +156,11 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
   const url = getEndpointUrl("logout");
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (session) {
-    await sendMyEdRequest(url, session, getAuthCookies(cookieStore));
+    await sendMyEdRequest({
+      urlOrParams: url,
+      session,
+      authCookies: getAuthCookies(cookieStore),
+    });
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);

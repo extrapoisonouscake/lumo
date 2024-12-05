@@ -14,7 +14,7 @@ export type AllowedEndpointValues =
   | ((params: Record<string, any>) => AllowedEndpointResolveValues);
 export const MYED_ENDPOINTS = {
   //* query parameters are mandatory to work
-  login: "logon.do",
+  login: "logon.do?mobile=1",
   subjects: "portalClassList.do?navkey=academics.classes.list",
 
   schedule: ({ day }: { day?: string }) => {

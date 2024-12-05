@@ -4,11 +4,11 @@ import {
   MYED_ENDPOINTS,
   MYED_ROOT_URL,
 } from "@/constants/myed";
-import { MyEdEndpoints, MyEdEndpointsParamsAsOptional } from "@/types/myed";
+import { MyEdEndpoints, MyEdEndpointsParamsWithUserID } from "@/types/myed";
 export const getFullUrl = (pathname: string) => `${MYED_ROOT_URL}/${pathname}`;
 export function getEndpointUrl<Endpoint extends MyEdEndpoints>(
   endpoint: Endpoint,
-  ...params: MyEdEndpointsParamsAsOptional<Endpoint>
+  ...params: MyEdEndpointsParamsWithUserID<Endpoint>
 ) {
   let value: AllowedEndpointValues = MYED_ENDPOINTS[endpoint];
   if (typeof value === "function") {

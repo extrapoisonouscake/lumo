@@ -8,15 +8,24 @@ import { clientQueueManager } from "./requests-queue";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-
-export async function sendMyEdRequest(
-  urlOrParams: EndpointReturnTypes,
-  session: string,
+export type SendMyEdRequestParameters = {
+  urlOrParams: EndpointReturnTypes;
+  session: string;
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
-  >
-) {
+  >;
+} & (
+  | { requestGroup?: never; isLastRequest?: never }
+  | { requestGroup: string; isLastRequest: boolean }
+);
+export async function sendMyEdRequest({
+  authCookies,
+  urlOrParams,
+  session,
+  isLastRequest,
+  requestGroup,
+}: SendMyEdRequestParameters) {
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
   ).join("; ");
@@ -55,7 +64,12 @@ export async function sendMyEdRequest(
     ];
   }
   const queue = clientQueueManager.getQueue(session);
-  const response = await queue.enqueue(() => fetch(...params), params[0]);
-
+  const response = await queue.enqueue(
+    async () => {
+      return fetch(...params);
+    },
+    requestGroup,
+    isLastRequest
+  );
   return response;
 }

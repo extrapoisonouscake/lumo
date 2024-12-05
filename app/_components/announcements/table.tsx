@@ -15,7 +15,7 @@ export function AnnouncementsSectionTable({
 }) {
   const [header, ...contentRows] = rows;
   return (
-    <Table>
+    <Table className="[&:*]:p-0">
       <TableHeader>
         <TableRow>
           {header.map((column) => (
