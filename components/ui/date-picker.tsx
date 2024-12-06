@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/popover";
 import {
   dayjs,
-  INSTANTIATED_TIMEZONE,
+  locallyTimezonedDayJS,
   timezonedDayJS,
 } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
@@ -81,7 +81,7 @@ export function DatePicker({
           today={correctDate()}
           onSelect={(newDate) => {
             onOpenChange(false);
-            setDate(dayjs(newDate).tz(INSTANTIATED_TIMEZONE, true).toDate());
+            setDate(locallyTimezonedDayJS(newDate).toDate());
           }}
           initialFocus
         />

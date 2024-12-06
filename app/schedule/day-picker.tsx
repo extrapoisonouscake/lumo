@@ -2,13 +2,13 @@
 //* TO-DO cleanup date functions
 import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { convertQueryDayToDate } from "./helpers";
 const formatDateToStandard = (date: Date | undefined) =>
-  dayjs(date).tz(INSTANTIATED_TIMEZONE).format("MM-DD-YYYY");
+  timezonedDayJS(date).format("MM-DD-YYYY");
 function ChevronButton(props: ButtonProps) {
   return (
     <Button
@@ -65,11 +65,7 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
       <ChevronButton
         onClick={() => {
           onDateChange(
-            dayjs(date)
-              .tz(INSTANTIATED_TIMEZONE)
-              .subtract(1, "day")
-              .startOf("date")
-              .toDate(),
+            timezonedDayJS(date).subtract(1, "day").startOf("date").toDate(),
             "left"
           );
         }}
@@ -108,11 +104,7 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
       <ChevronButton
         onClick={() => {
           onDateChange(
-            dayjs(date)
-              .tz(INSTANTIATED_TIMEZONE)
-              .add(1, "day")
-              .startOf("date")
-              .toDate(),
+            timezonedDayJS(date).add(1, "day").startOf("date").toDate(),
             "right"
           );
         }}

@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
-import { dayjs, INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
+import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
 import { ParserFunctionArguments } from "./types";
@@ -40,7 +40,7 @@ export function parseCurrentWeekday(
   return getWeekday($tableBody);
 }
 function getDateFromSubjectTimeString(time: string) {
-  const t = dayjs(time, "HH:mm A").tz(INSTANTIATED_TIMEZONE, true);
+  const t = locallyTimezonedDayJS(time, "HH:mm A");
 
   return t.toDate();
 }

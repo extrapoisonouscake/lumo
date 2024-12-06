@@ -14,11 +14,13 @@ dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);
 const timezonedDayJS = (...args: any[]) => {
   return dayjs(...args).tz(INSTANTIATED_TIMEZONE);
 };
-
+const locallyTimezonedDayJS = (...args: any[]) => {
+  return dayjs(...args).tz(INSTANTIATED_TIMEZONE, true);
+};
 const timezonedUnix = (value: number) => {
   return dayjs.unix(value).tz(INSTANTIATED_TIMEZONE);
 };
 
 timezonedDayJS.unix = timezonedUnix;
 
-export { dayjs, timezonedDayJS };
+export { dayjs, locallyTimezonedDayJS, timezonedDayJS };

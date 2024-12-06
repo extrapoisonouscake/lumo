@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import {
   dayjs,
-  INSTANTIATED_TIMEZONE,
+  locallyTimezonedDayJS,
   timezonedDayJS,
 } from "@/instances/dayjs";
 import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
@@ -44,9 +44,9 @@ const visualizableErrors: Record<
 export async function ScheduleContent({ day }: { day: string | undefined }) {
   const params: MyEdEndpointsParams<"schedule"> = {};
   if (day) {
-    params.day = dayjs(day, "MM-DD-YYYY")
-      .tz(INSTANTIATED_TIMEZONE, true)
-      .format(MYED_DATE_FORMAT);
+    params.day = locallyTimezonedDayJS(day, "MM-DD-YYYY").format(
+      MYED_DATE_FORMAT
+    );
   }
   const data = await fetchMyEd("schedule", params);
 
@@ -68,7 +68,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   return (
     <>
-      {data && dayjs(day).day() === 5 && (
+      {data && locallyTimezonedDayJS(day).day() === 5 && (
         <h3>
           Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>
@@ -85,7 +85,7 @@ export function ScheduleContentSkeleton({
 }: ComponentProps<typeof ScheduleContent>) {
   return (
     <>
-      {dayjs(day).day() === 5 && (
+      {locallyTimezonedDayJS(day).day() === 5 && (
         <div className="flex items-center gap-2">
           <h3>Same as:</h3>
           <Skeleton>
