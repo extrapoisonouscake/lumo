@@ -80,9 +80,13 @@ export async function middleware(request: NextRequest) {
 }
 function isValidSession(session?: RequestCookie) {
   if (!session) return false;
-  const decodedToken = decodeJwt(session.value);
+  try {
+    const decodedToken = decodeJwt(session.value);
 
-  return !decodedToken.exp || (decodedToken.exp - 10) * 1000 > Date.now();
+    return !decodedToken.exp || (decodedToken.exp - 10) * 1000 > Date.now();
+  } catch {
+    return false;
+  }
 }
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],

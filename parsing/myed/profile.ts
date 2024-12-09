@@ -2,8 +2,10 @@ import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { PersonalDetails } from "@/types/school";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { ParserFunctionArguments } from "./types";
+type PersonalDetailsParserArguments =
+  ParserFunctionArguments<"personalDetails">;
 export function parsePersonalDetails(
-  ...[$main, $photoRoot]: ParserFunctionArguments
+  ...[_, $main, $photoRoot]: PersonalDetailsParserArguments
 ): PersonalDetails | undefined {
   const mainDetails = parseMainDetails($main);
   if (!mainDetails) return;
@@ -26,7 +28,7 @@ const detailLabelsMap: Record<string, keyof PersonalDetails> = {
   "Parking Space": "parkingSpaceNumber",
   "License Plate #": "licensePlateNumber",
 };
-function parseMainDetails($: ParserFunctionArguments[number]) {
+function parseMainDetails($: PersonalDetailsParserArguments[1]) {
   const rawDetailsEntries = $('tr[id^="Property|"]')
     .toArray()
     .map((el) => {
@@ -44,7 +46,7 @@ function parseMainDetails($: ParserFunctionArguments[number]) {
   return result as Omit<PersonalDetails, "photoURL">;
 }
 
-function parsePhotoURL($: ParserFunctionArguments[number]) {
+function parsePhotoURL($: PersonalDetailsParserArguments[2]) {
   const url = $(
     '[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img'
   ).prop("src");

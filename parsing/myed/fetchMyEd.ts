@@ -14,26 +14,22 @@ import * as cheerio from "cheerio";
 import { CheerioAPI } from "cheerio";
 import { decodeJwt } from "jose";
 import { cookies } from "next/headers";
-import path from "path";
 import { cache } from "react";
 import "server-only";
-import { fileURLToPath } from "url";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
 import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest, SendMyEdRequestParameters } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const endpointToFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
   currentWeekday: parseCurrentWeekday,
   personalDetails: parsePersonalDetails,
-} as const satisfies Record<
-  MyEdFetchEndpoints,
-  (...args: ParserFunctionArguments) => any
->;
+} as const satisfies {
+  [K in MyEdFetchEndpoints]: (...args: ParserFunctionArguments<K>) => any
+};
 export const sessionExpiredIndicator: unique symbol = Symbol();
 //* the original website appears to be using the server to store user navigation
 // * to get to some pages, an additional request has to be sent OR follow redirects
@@ -99,6 +95,7 @@ export const fetchMyEd = cache(async function <
     cheerio.load(html)
   ) as Array<CheerioAPI>;
   return endpointToFunction[endpoint](
+    rest[0],
     ...domObjects
   ) as MyEdEndpointResponse<Endpoint>;
 });

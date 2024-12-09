@@ -201,23 +201,18 @@ export function ScheduleTable({
     manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
     meta: {
-      getRowStyles: (row) =>
-        isToday &&
-        timezonedDayJS()
-          .add(5, "hour")
-          .isBetween(row.original.startsAt, row.original.endsAt)
-          ? {}
-          : {},
-      getRowClassName: (row) =>
-        cn({
-          "sticky bottom-4 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+      getRowClassName: (row) =>{
+        console.log(row.original);
+        return cn({
+          "sticky [&>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
             isToday &&
             timezonedDayJS().isBetween(
               row.original.startsAt,
               row.original.endsAt
             ),
           "[&>td]:py-2": "isBreak" in row.original,
-        }),
+        });
+      },
     },
   });
   return (

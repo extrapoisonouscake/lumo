@@ -30,7 +30,7 @@ function separateTAFromSubjects(subject: Subject[]) {
     teacherAdvisory: removedItem,
   };
 }
-export function parseSubjects(...[$]: ParserFunctionArguments) {
+export function parseSubjects(...[_, $]: ParserFunctionArguments<"subjects">) {
   const $tableContainer = $("#dataGrid");
   if ($tableContainer.length === 0) return null;
 

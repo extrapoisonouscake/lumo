@@ -31,7 +31,7 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   return weekday ?? null;
 }
 export function parseCurrentWeekday(
-  ...[$initial, $dateAdjusted]: ParserFunctionArguments
+  ...[_, $initial, $dateAdjusted]: ParserFunctionArguments<"currentWeekday">
 ) {
   const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
@@ -39,13 +39,14 @@ export function parseCurrentWeekday(
   if ("knownError" in $tableBody) return $tableBody;
   return getWeekday($tableBody);
 }
-function getDateFromSubjectTimeString(time: string) {
-  const t = locallyTimezonedDayJS(time, "HH:mm A");
+const getDateFromSubjectTimeString = (day:string)=>(time: string) => {
+  console.log(`${day} ${time}`)
+  const t = locallyTimezonedDayJS(`${day} ${time}`, "YYYY-MM-DD HH:mm A");
 
   return t.toDate();
 }
 export function parseSchedule(
-  ...[$initial, $dateAdjusted]: ParserFunctionArguments
+  ...[initialParams, $initial, $dateAdjusted]: ParserFunctionArguments<"schedule">
 ):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string }
@@ -66,9 +67,11 @@ export function parseSchedule(
 
       const timeString = removeLineBreaks($(timeTd).find("td").text());
       const [startsAt, endsAt] = timeString.split(" - ");
+      console.log(initialParams.day)
+      const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(initialParams.day)
       let subject: ScheduleSubject = {
-        startsAt: getDateFromSubjectTimeString(startsAt),
-        endsAt: getDateFromSubjectTimeString(endsAt),
+        startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
+        endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
       };
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
       if (contentCellHTML) {
