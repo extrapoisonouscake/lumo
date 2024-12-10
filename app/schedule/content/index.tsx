@@ -1,11 +1,7 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
-import {
-  dayjs,
-  locallyTimezonedDayJS,
-  timezonedDayJS,
-} from "@/instances/dayjs";
+import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
@@ -73,10 +69,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
           Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>
       )}
-      <ScheduleTable
-        data={data.subjects}
-        isToday={dayjs().isSame(day, "date")}
-      />
+      <ScheduleTable data={data.subjects} />
     </>
   );
 }

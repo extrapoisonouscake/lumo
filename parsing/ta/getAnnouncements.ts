@@ -5,7 +5,7 @@ import "@ungap/with-resolvers";
 import { parsePageItems } from "pdf-text-reader";
 import { getDocument } from "pdfjs-dist";
 import type { TextItem } from "pdfjs-dist/types/src/display/api";
-import { announcementsFileParser } from "./parsers";
+import { dailyAnnouncementsFileParser } from "./parsers";
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
   //@ts-ignore
   await import("pdfjs-dist/build/pdf.worker.min.mjs");
@@ -36,7 +36,7 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
     pageContent.items.filter((item): item is TextItem => "str" in item)
   );
   const lines = items.map((item) => parsePageItems(item).lines).flat();
-  const prepareLines = announcementsFileParser[school];
+  const prepareLines = dailyAnnouncementsFileParser[school];
   return prepareLines(lines);
 }
 const schoolToAnnouncementsFileURL: Record<

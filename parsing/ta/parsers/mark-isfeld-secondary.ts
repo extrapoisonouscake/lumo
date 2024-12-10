@@ -1,5 +1,5 @@
-import { KnownSchools } from "@/constants/schools";
 import { AnnouncementSection } from "@/types/school";
+import { DailyAnnouncementsParsingFunction } from "./types";
 const MEETINGS_AND_PRACTICES_ACTUAL_HEADING = "MEETINGS AND PRACTICES TODAY";
 const referenceHeadings: Array<{
   displayName: string;
@@ -38,11 +38,8 @@ const referenceHeadings: Array<{
   },
 ];
 
-export const announcementsFileParser: Record<
-  KnownSchools,
-  (lines: string[]) => Array<AnnouncementSection>
-> = {
-  [KnownSchools.MarkIsfeld]: (lines) => {
+export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsingFunction =
+  (lines) => {
     const sectionsStartIndexes = referenceHeadings.map((heading) =>
       lines.indexOf(heading.actualName)
     );
@@ -78,8 +75,7 @@ export const announcementsFileParser: Record<
     }
 
     return sections;
-  },
-};
+  };
 const mergeAndFilterStrings = (strings: string[]) => {
   const result: typeof strings = [];
   const accumulatedStrings: typeof strings = [];
@@ -154,3 +150,41 @@ const parseRowString = (string: string) => {
     reversedPurposeWords.toReversed().join(" "),
   ];
 };
+
+// const sections = [];
+
+// const firstHeadingIndex = elements.findIndex(
+//   (el) => el.Text?.trim() === firstHeadingActualName
+// );
+// if (firstHeadingIndex === -1) return;
+// let currentSectionIndex = 0;
+
+// let currentSectionContent: {
+//   items?: Extract<AnnouncementSection, { items: any }>["items"];
+//   table?: Extract<AnnouncementSection, { table: any }>["table"];
+// } = { items: [] };
+// let nextHeadingActualName =
+//   referenceHeadings[currentSectionIndex + 1].actualName;
+// for (let i = firstHeadingIndex + 1; i < elements.length; i++) {
+//   const element = elements[i];
+//   if (element.Text?.trim() === nextHeadingActualName) {
+//     const headingData = referenceHeadings[currentSectionIndex];
+//     sections.push({
+//       heading: headingData.displayName,
+//       emoji: headingData.emoji,
+//       ...currentSectionContent,
+//     } as AnnouncementSection);
+//     currentSectionIndex += 1;
+//     console.log(currentSectionIndex, referenceHeadings.length);
+//     if (currentSectionIndex === referenceHeadings.length - 1) break;
+//     currentSectionContent = { items: [] };
+//     nextHeadingActualName =
+//       referenceHeadings[currentSectionIndex + 1].actualName;
+//     continue;
+//   }
+//   const textToAdd = element.Text?.trim();
+//   if (!textToAdd) continue;
+//   currentSectionContent.items.push(textToAdd);
+// }
+// console.log(sections);
+// return sections;

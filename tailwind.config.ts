@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import colors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
+const accordionTimingFunction = "cubic-bezier(0.68, -0.55, 0.265, 1.55)";
 const config: Config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +13,10 @@ const config: Config = {
       boxShadow: {
         "table-row-border": "0 -1px 0 #000, 0 1px 0 #000",
       },
+      transitionTimingFunction: {
+        accordion: "cubic-bezier(0.87, 0, 0.13, 1)",
+      },
+
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -89,8 +94,8 @@ const config: Config = {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
+        "accordion-down": `accordion-down 500ms ${accordionTimingFunction}`,
+        "accordion-up": `accordion-up 500ms ${accordionTimingFunction}`,
       },
     },
   },

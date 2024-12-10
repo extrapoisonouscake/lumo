@@ -17,7 +17,7 @@ export const MYED_ENDPOINTS = {
   login: "logon.do?mobile=1",
   subjects: "portalClassList.do?navkey=academics.classes.list",
 
-  schedule: ({ day }: { day?: MyEdDateString }) => {
+  schedule: ({ day }: { day?: string }) => {
     const baseEndpoints: EndpointArrayResolveValue = [
       "studentScheduleContextList.do?navkey=myInfo.sch.list",
     ];
@@ -67,4 +67,3 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "ApplicationGatewayAffinityCORS",
 ];
 export const MYED_DATE_FORMAT = "YYYY-MM-DD";
-export type MyEdDateString = `${string}-${string}-${string}`;

@@ -28,7 +28,7 @@ const endpointToFunction = {
   currentWeekday: parseCurrentWeekday,
   personalDetails: parsePersonalDetails,
 } as const satisfies {
-  [K in MyEdFetchEndpoints]: (...args: ParserFunctionArguments<K>) => any
+  [K in MyEdFetchEndpoints]: (...args: ParserFunctionArguments<K>) => any;
 };
 export const sessionExpiredIndicator: unique symbol = Symbol();
 //* the original website appears to be using the server to store user navigation
@@ -94,6 +94,7 @@ export const fetchMyEd = cache(async function <
   const domObjects = htmlStrings.map((html) =>
     cheerio.load(html)
   ) as Array<CheerioAPI>;
+  console.log(endpoint, { d: rest });
   return endpointToFunction[endpoint](
     rest[0],
     ...domObjects
