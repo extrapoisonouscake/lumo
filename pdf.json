@@ -1,0 +1,668 @@
+[
+  {
+    "type": "Image",
+    "element_id": "20ccf448e9ab95bd28c7e25781a3f800",
+    "text": "9",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "a70c2ce76fcbdb6a1315d96a83e9aa84",
+    "text": "Dec 11, 2024",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "4f7014d1bf9468760b137e56a1186eb7",
+    "text": "December",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Image",
+    "element_id": "1260dd8000642773717041bbd5e51347",
+    "text": "&",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "dd39be5c80851e1ffb73796cc8e9f9bf",
+    "text": "MARK ISFELD ANNOUNCEMENTS",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "2596f8852f8d06df0d4d6d7ca9922fa7",
+    "text": "TODAY’S BLOCKS: Day 3 BADC THIS FRIDAY: Day 2 GHEF Flex",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "5fee209a5ab053d0726c0b867416e376",
+    "text": "NEW!",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "c8e6a67b3e7332ac81afa8f01094be1d",
+    "text": "For important but “previously run” current events and reminders, be sure to check the re-runs and items below:",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "5cc38079a55ce7cb7f886e6ba392d4e0",
+    "text": "\"10 Ways To Survive The Zombie Apocalypse\" – tomorrow, December 12th, come out at 7 pm to learn how to survive a zombie apocalypse. This year’s award winning entry into the North Island Drama Festival will be performed at 7pm on Thursday Dec 12th. \"10 Ways To Survive The Zombie Apocalypse,\" this student directed show will have you laughing and learning at the same time. Doors open at 6:30; entry by donation at the door.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "b0b6f4f8c866987d1c2cfde5d5ccf263",
+    "text": "Grade 8 girls basketball - practice 5:15 today.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "544d1c26aa0bc8f3c466a6aab14c96d9",
+    "text": "All this years (2nd semester) dual credit students must attend an important info meeting this Friday. Second block in Portable 4.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "128f006ba71203eaa33977f95993e232",
+    "text": "Grad Executives - could all grad execs please be at the lunch meeting today for some important discussion topics, room 106.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "625fe11fcf803c708a0b4dd9e383963d",
+    "text": "Pizza sales – at the canteen at lunch. $3/slice, or 2 for $5.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "3e4dedfd41652761508951e89bd809e8",
+    "text": "Bake sale – there will be baked goods for sale today in the front foyer. Also tomorrow, there will be a music bake sale.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "86f5b7cf4d171bc57c9e99f14632bec1",
+    "text": "Senior Jazz Band - yes there is a rehearsal tomorrow morning.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "63ac6ea76139ea9fb5f613fd5eb6e0ea",
+    "text": "Leadership 8-11 - meeting is postponed until THURSDAY (no meeting today). Also meeting Friday at Flex.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "faa12d86de5d466e1a5739b81ca72cd2",
+    "text": "All choir members - we will meet Thursday after school and will change lunch hour carolling to Tuesday to accommodate the French dinner.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "7d7c7c9965c3013fa423ac1823448980",
+    "text": "Art club – meeting today at lunch in Room 510. New member and all levels of ability welcome.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "3c545b5b358f6057ab7d2ad9668dfbc1",
+    "text": "Gr 8-11 Student Leadership – meeting today at lunch in Room 100.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "834a9feeee6b0dcc57cd240b175279db",
+    "text": "Ski and Board Team - your forms and fees are due this week. Please pay Brittany in the office today. Brief meeting today RM 205 to discuss schedule, fees, forms and contact information on the hill. Ms. Courage, Mr. Roy, and Mr. Graham.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "21e4eb1ee8b78647345dbbbd9dd800f6",
+    "text": "Germany Cultural Exchange - just a reminder that the application deadline for the Germany cultural exchange is end of day this Friday, December 13th. Please see https://www.comoxvalleyschools.ca/mark-isfeld- secondary/isfeld-student-exchange-germany-2026/ for more information, or pop by the office to talk with Ms. Martens. Danke!",
+    "metadata": {
+      "links": [
+        {
+          "text": "https",
+          "url": "https://www.comoxvalleyschools.ca/mark-isfeld-secondary/isfeld-student-exchange-germany-2026/",
+          "start_index": 162
+        },
+        {
+          "text": "secondary / isfeld - student - exchange - germany - 2026 /",
+          "url": "https://www.comoxvalleyschools.ca/mark-isfeld-secondary/isfeld-student-exchange-germany-2026/",
+          "start_index": 209
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "ff93328c201a479df05925189f1fb653",
+    "text": "All International students - are invited to room 403 during Flex on Friday for hot chocolate and treats. We will host a goodbye party for our December departures on Wednesday, December 18th in room 403 at lunch. Also, please notify your teachers of your early departures or late returns for the holidays.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "e57eee46126ce8a367ee6dfc9182dbd2",
+    "text": "Grads – Interested in Univ of Alberta? They are now accepting applications for U of A Getaway 2025! New this year — students can apply to attend the event at our Augustana Campus (900+ students) in Camrose. Their adventure will include transportation reimbursement, accommodations, meals and a jam-packed schedule of events. They will become familiar with campus, learn about programs, experience what sets U of A student life apart and meet other amazing students from all across Canada. Plus, we’ll give them a taste of the city surrounding campus. May 9-11, 2025 at UofA, Camrose, AB. Students can apply on our U of A Getaway web page e by January 31, 2025.",
+    "metadata": {
+      "links": [
+        {
+          "text": "Augustana Campus",
+          "url": "https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmx.technolutions.net%2Fss%2Fc%2Fu001.-JLG6By4-20xZllkVwUz4cW8vzY6QozNlcfn_i000SfS6ZtsIkn39IfYzQO5b9TSfEo-0dFzLQ2goaeT5CqhSFQldt7PngVLoXrMDmlI2JjmRprjsQUGvb1qekKOuhZP2xkrMhJHq6TSjMdKSVsIWQ%2F4c6%2FGrEckoVYRXanaCvH5r-I2g%2Fh1%2Fh001.VsVbUK52MktxjLx-rA7H_wT8Mm140OVrnvkB9xWSLYQ&data=05%7C02%7CJulie.Schweigel%40sd71.bc.ca%7C30ea6d53117045f442b608dd19616167%7C8a33c0abdc5a486195746c1f01277d1c%7C0%7C0%7C638694628250695540%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=cRUzVleB7W4DAM0Hu6dLTt9%2B0seMydby1XvpU%2Fljz6s%3D&reserved=0",
+          "start_index": 164
+        },
+        {
+          "text": "U of A Getaway web page e",
+          "url": "https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmx.technolutions.net%2Fss%2Fc%2Fu001.jxaZRujEt1lhE0WEp4QewJu3mZ8TiHLhI49uwtJvS6rm7Zu9qV7H5wC7iyDI3PV3C2986kk-wOOyg-bUIIWzA2CnRWzQHeI0n3vK0Ios-Wk%2F4c6%2FGrEckoVYRXanaCvH5r-I2g%2Fh2%2Fh001.i-VFs_9UdUC-g595idAEQEPWLD1ITeAoc1FPGWYwHTc&data=05%7C02%7CJulie.Schweigel%40sd71.bc.ca%7C30ea6d53117045f442b608dd19616167%7C8a33c0abdc5a486195746c1f01277d1c%7C0%7C0%7C638694628250722948%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ftdijy2e3C3CN9oNX0Vwen6V6SEnRHPEvvuan9%2FOraE%3D&reserved=0",
+          "start_index": 622
+        },
+        {
+          "text": "U of A Getaway web page",
+          "url": "https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fmx.technolutions.net%2Fss%2Fc%2Fu001.jxaZRujEt1lhE0WEp4QewJu3mZ8TiHLhI49uwtJvS6rm7Zu9qV7H5wC7iyDI3PV3C2986kk-wOOyg-bUIIWzA2CnRWzQHeI0n3vK0Ios-Wk%2F4c6%2FGrEckoVYRXanaCvH5r-I2g%2Fh2%2Fh001.i-VFs_9UdUC-g595idAEQEPWLD1ITeAoc1FPGWYwHTc&data=05%7C02%7CJulie.Schweigel%40sd71.bc.ca%7C30ea6d53117045f442b608dd19616167%7C8a33c0abdc5a486195746c1f01277d1c%7C0%7C0%7C638694628250722948%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=ftdijy2e3C3CN9oNX0Vwen6V6SEnRHPEvvuan9%2FOraE%3D&reserved=0",
+          "start_index": 622
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "db83a6ff089314f39631e28176c29211",
+    "text": "Grad Photos – happening Jan 6-10. The booking site is now open, go here to book an appointment. See Grad section below for more details, or see the slider on our website.",
+    "metadata": {
+      "links": [
+        {
+          "text": "here",
+          "url": "https://prestigeportraits.ca/get-inspired/prestige-college-scholarships/?utm_source=ExactTarget&utm_medium=email&utm_campaign=PRS_GY24_HOST_SCH_1_CA",
+          "start_index": 68
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "5fee209a5ab053d0726c0b867416e376",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "b74cfc95cf296d770d3b8fed40f3fbf3",
+    "text": "MEETINGS AND PRACTICES TODAY",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "2198aa80e2e880591608d9ce6d5c5190",
+    "text": "[—Tve | GRouP/ACTvITV/eveNT | piAcE | ReAsoN",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "d5cb8323c653b53e1757a11ecd60047d",
+    "text": "PLACE",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "2198aa80e2e880591608d9ce6d5c5190",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "172e3f0bf05cc4d1903e60019444da91",
+    "text": "REASON",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 1,
+      "parent_id": "2198aa80e2e880591608d9ce6d5c5190",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Table",
+    "element_id": "ab4a4ec9528f44dc96e0256061c2f019",
+    "text": "Lunch Pizza sales Concession Pizza sales Lunch Art Club Room 510 Meeting Lunch Gr 8-11 Student Leadership Room 100 Meeting 5:15 Gr 8 girls basketball Gym Practice Lunch Grad Execs Room 106 Meeting Lunch Ski & Board team Room 205 Meeting",
+    "metadata": {
+      "text_as_html": "<table><thead><tr><th>Lunch</th><th>Pizza sales</th><th>Concession</th><th>Pizza sales</th></tr></thead><tbody><tr><td>Lunch</td><td>Art Club</td><td>Room 510</td><td>Meeting</td></tr><tr><td>Lunch</td><td>Gr 8-11 Student Leadership</td><td>Room 100</td><td>Meeting</td></tr><tr><td>5:15</td><td>Gr 8 girls basketball</td><td>Gym</td><td>Practice</td></tr><tr><td>Lunch</td><td>Grad Execs</td><td>Room 106</td><td>Meeting</td></tr><tr><td>Lunch</td><td>Ski &amp; Board team</td><td>Room 205</td><td>Meeting \n | e</td></tr></tbody></table>",
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "2198aa80e2e880591608d9ce6d5c5190",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "51d74a05f846867ee7f49ac0a9a2ddb0",
+    "text": "RE- RUNS",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "cf71c4597e5ab360f18f7c19cdbeed9f",
+    "text": "Lost and Found – clothing has been washed and hung up in the front foyer. Please check to see if that sweater, shirt or jacket that you lost this school year is there. Anything not claimed will be donated to charity on Dec 20.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "51d74a05f846867ee7f49ac0a9a2ddb0",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "f8e0512c2d537dcc88d0588935647faa",
+    "text": "Next Wednesday, Dec 18 is our annual French Immersion Winter Feast. We need some more helpers during the day. If you are interested, please see Mme. Keys at lunch or after school.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "51d74a05f846867ee7f49ac0a9a2ddb0",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "2f26fcc05e2f4947a602c11924cdaff1",
+    "text": "CAREER CENTRE/ WORK EXPERIENCE/VOLUNTEERING",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "b1336255e593472550b956afe32194c5",
+    "text": "First Aid Certificate Opportunity - Careers department will be offering a First Aid certification on Jan 8th 2025. You must be at least 16 years old. Cost is $60. If you would like to register, please come to the Careers office.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "2f26fcc05e2f4947a602c11924cdaff1",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "0884e73eebb0a140e754ed21c297f9b3",
+    "text": "Calling all grade 11’s who might be interested in doing a Dual credit course(s) or program in your grade 12 year, we are now accepting applications for 2025 -2026 school year. Please come to the Careers office for information.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "2f26fcc05e2f4947a602c11924cdaff1",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "6bf73c94519aa06b729ab105af44b335",
+    "text": "Attention any students in grades 10-12 who are interested in getting into the Trades, we have two programs that are perfect for you. STEP and the Trade Samplers. Please come to the Career’s office and find out more.",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "2f26fcc05e2f4947a602c11924cdaff1",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "ee8fad70aef85eaffba4251cb984c3b1",
+    "text": "BURSARIES/SCHOLARSHIPS",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "UncategorizedText",
+    "element_id": "599624ac0593f0df6f0d3222d0c986b6",
+    "text": "|",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "ee8fad70aef85eaffba4251cb984c3b1",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "Title",
+    "element_id": "0c996aa2324d41d17d3c3ea92f579e62",
+    "text": "GRADS",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "ff3c234ce47f54a6eba7a84642cde285",
+    "text": "Grad Photography Dates: January 6th - 10th, 2025",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "0c996aa2324d41d17d3c3ea92f579e62",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "ba51432728165bfb92ea70deb420fcaf",
+    "text": "The sessions will be 20 minutes, and we will do formal cap/gown photos as well as casual photos. (ex. Jeans/Tshirt, Sports uniform, etc). We highly suggest Grads bring a dress shirt and tie for formal photos and/or wear v-neck or scoop neck top for formal photos. Unfortunately, we will not have shirts and ties for graduates to use. The booking link is https://prestigeportraits.ca/. Please note, there is no 8-digit code, students/parents can search by Province and City.",
+    "metadata": {
+      "links": [
+        {
+          "text": "https :// prestigeportraits . ca /.",
+          "url": "https://can01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fprestigeportraits.ca%2F&data=05%7C02%7CJulie.Schweigel%40sd71.bc.ca%7C560a1d6716194d74321808dd19591eb2%7C8a33c0abdc5a486195746c1f01277d1c%7C0%7C0%7C638694593004896890%7CUnknown%7CTWFpbGZsb3d8eyJFbXB0eU1hcGkiOnRydWUsIlYiOiIwLjAuMDAwMCIsIlAiOiJXaW4zMiIsIkFOIjoiTWFpbCIsIldUIjoyfQ%3D%3D%7C0%7C%7C%7C&sdata=izaknjGzOmaU3b62VTr1wHEEerpOO9QOgOcIoT3ILIg%3D&reserved=0",
+          "start_index": 409
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "0c996aa2324d41d17d3c3ea92f579e62",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "231062a634fefb637ecd17909d743c58",
+    "text": "Gr 12s - a gentle reminder to check the Scholarship Deadline Calendar frequently (under Grad Tab on Isfeld webpage) for links to numerous Scholarship offerings. Don't miss out on these opportunities to access FREE$$$$$!",
+    "metadata": {
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "0c996aa2324d41d17d3c3ea92f579e62",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "4b9bb154c862f06e2d45a4ab7abb5c09",
+    "text": "The Grad Attire program welcomes all grade 12 students in Comox Valley Schools to have the opportunity to wear a gown or suit on graduation day without the financial burden of purchasing a brand-new outfit for their milestone event.",
+    "metadata": {
+      "links": [
+        {
+          "text": "Grad Attire program",
+          "url": "https://www.comoxvalleyschools.ca/grad-attire-program/",
+          "start_index": 4
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "0c996aa2324d41d17d3c3ea92f579e62",
+      "filename": "filename.pdf"
+    }
+  },
+  {
+    "type": "NarrativeText",
+    "element_id": "f2566c3d79d2699f1d41cc302be8b773",
+    "text": "The Grad Attire program will operate out of Comox Valley Dodge at 278 North Island Highway (Old Canadian Tire building) on the following Saturdays from 10:00am-3:00pm: January 18th, February 8th, March 8th, April 12th and May 10th. You can book a fitting appointment using the following https://www.comoxvalleyschools.ca/grad-attire- program/",
+    "metadata": {
+      "links": [
+        {
+          "text": "https :// www . comoxvalleyschools . ca / grad - attire -",
+          "url": "https://www.comoxvalleyschools.ca/grad-attire-program/",
+          "start_index": 528
+        },
+        {
+          "text": "program /",
+          "url": "https://www.comoxvalleyschools.ca/grad-attire-program/",
+          "start_index": 575
+        }
+      ],
+      "filetype": "application/pdf",
+      "languages": [
+        "eng"
+      ],
+      "page_number": 2,
+      "parent_id": "0c996aa2324d41d17d3c3ea92f579e62",
+      "filename": "filename.pdf"
+    }
+  }
+]

@@ -1,43 +1,91 @@
 import { KnownSchools } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
+import { unstructuredIO } from "@/instances/unstructured-io";
 
 import "@ungap/with-resolvers";
-import { parsePageItems } from "pdf-text-reader";
-import { getDocument } from "pdfjs-dist";
-import type { TextItem } from "pdfjs-dist/types/src/display/api";
-import { dailyAnnouncementsFileParser } from "./parsers";
-export async function getAnnouncements(school: KnownSchools, date?: Date) {
-  //@ts-ignore
-  await import("pdfjs-dist/build/pdf.worker.min.mjs");
-  const url = schoolToAnnouncementsFileURL[school](date);
 
-  const response = await fetch(
-    url,
-    process.env.NODE_ENV !== "development"
-      ? { next: { revalidate: false } }
-      : {}
-  );
+import * as fs from "fs";
+import { PartitionResponse } from "unstructured-client/sdk/models/operations";
+import { Strategy } from "unstructured-client/sdk/models/shared";
+const extractTextWithLinks = async (pdfUrl: string) => {
+  // Fetch the PDF data from the URL
+  const response = await fetch(pdfUrl);
   if (!response.ok) {
-    return;
+    throw new Error(`Failed to fetch PDF: ${response.statusText}`);
   }
+  const data = await response.arrayBuffer();
 
-  const arrayBuffer = await response.arrayBuffer();
-  const doc = await getDocument({
-    data: new Uint8Array(arrayBuffer),
-    disableFontFace: true,
-  }).promise;
-  const pages = await Promise.all(
-    [...Array(+doc.numPages)].map((_, index) => {
-      return doc.getPage(index + 1);
+  unstructuredIO.general
+    .partition({
+      partitionParameters: {
+        files: {
+          content: data,
+          fileName: "announcements-.pdf",
+        },
+        strategy: Strategy.HiRes,
+        pdfInferTableStructure: true,
+        splitPdfPage: true,
+        splitPdfAllowFailed: true,
+        splitPdfConcurrencyLevel: 15,
+        languages: ["eng"],
+      },
     })
-  ); // 1-indexed
-  const content = await Promise.all(pages.map((page) => page.getTextContent()));
-  const items: TextItem[][] = content.map((pageContent) =>
-    pageContent.items.filter((item): item is TextItem => "str" in item)
-  );
-  const lines = items.map((item) => parsePageItems(item).lines).flat();
-  const prepareLines = dailyAnnouncementsFileParser[school];
-  return prepareLines(lines);
+    .then((res: PartitionResponse) => {
+      console.log(res);
+      if (res.statusCode == 200) {
+        // Print the processed data's first element only.
+        console.log(res.elements?.[0]);
+
+        // Write the processed data to a local file.
+        const jsonElements = JSON.stringify(res.elements, null, 2);
+
+        fs.writeFileSync("./pdf.json", jsonElements);
+      }
+    })
+    .catch((e) => {
+      if (e.statusCode) {
+        console.log(e.statusCode);
+        console.log(e.body);
+      } else {
+        console.log(e);
+      }
+    });
+
+  return undefined;
+};
+export async function getAnnouncements(school: KnownSchools, date?: Date) {
+  const url = schoolToAnnouncementsFileURL[school](date);
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch PDF: ${response.statusText}`);
+  }
+  const data = await response.arrayBuffer();
+  return undefined;
+  // try {
+  //   const response = await unstructuredIO.general.partition({
+  //     partitionParameters: {
+  //       files: {
+  //         content: data,
+  //         fileName: "announcements-.pdf",
+  //       },
+  //       strategy: Strategy.HiRes,
+  //       pdfInferTableStructure: true,
+  //       splitPdfPage: true,
+  //       splitPdfAllowFailed: true,
+  //       splitPdfConcurrencyLevel: 15,
+  //       languages: ["eng"],
+  //     },
+  //   });
+
+  //   if (response.statusCode !== 200 || !response.elements) return;
+  //   // Print the processed data's first element only.
+
+  //   // Write the processed data to a local file.
+  //   const prepareLines = dailyAnnouncementsFileParser[school];
+  //   return prepareLines(response.elements as PDFParsingPartitionElement[]);
+  // } catch {
+  //   return undefined;
+  // }
 }
 const schoolToAnnouncementsFileURL: Record<
   KnownSchools,
