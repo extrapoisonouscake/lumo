@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKnownSchool } from "@/constants/schools";
-import { getAnnouncements } from "@/parsing/ta/getAnnouncements";
+import { getAnnouncements } from "@/parsing/announcements/getAnnouncements";
 import { cookies } from "next/headers";
 import { AnnouncementsAccordions } from "./accordions";
 export async function Announcements() {
@@ -14,7 +14,7 @@ export async function Announcements() {
   if (!school || !isKnownSchool(school)) return null;
 
   const data = await getAnnouncements(school);
-
+  console.log({ data });
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm">Announcements</h3>
