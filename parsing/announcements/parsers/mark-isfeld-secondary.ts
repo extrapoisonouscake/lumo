@@ -47,14 +47,12 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
         element.type === "Title" && element.text === firstHeadingValue
     );
     if (firstHeadingIndex === -1) return;
-    let tableHeadingIndex = -1;
     let nextHeadingIndex = 1;
     let nextHeadingValue = referenceHeadings[nextHeadingIndex].actualName;
     const sections: AnnouncementSection[] = [];
     let accumulatedElements = [];
     for (let i = firstHeadingIndex + 1; i < elements.length; i++) {
       const element = elements[i];
-      console.log({ element });
       if (element.type === "Title" && element.text === nextHeadingValue) {
         sections.push({
           heading: referenceHeadings[nextHeadingIndex - 1].displayName,
@@ -62,7 +60,6 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
           items: accumulatedElements,
         });
         accumulatedElements = [];
-        console.log("b", nextHeadingIndex);
         nextHeadingIndex += 1;
         if (nextHeadingValue === MEETINGS_AND_PRACTICES_ACTUAL_HEADING) {
           i++;
@@ -79,24 +76,15 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
           if (tableElement) {
             const html = tableElement.metadata.text_as_html;
             const $table = cheerio.load(html);
-
-            // Initialize the 2D array
             const tableData: string[][] = [meetingsAndClubsColumns];
-
-            // Select all rows (both <thead> and <tbody>)
             $table("table tr").each((_, row) => {
               const rowData: string[] = [];
 
-              // Select all cells (both <th> and <td>) in the current row
-              $table(row)
-                .find("th, td")
-                .each((_, cell) => {
-                  // Extract and clean the text
-                  const cellText = $table(cell).text().trim().split("\n")[0];
-                  rowData.push(cellText);
-                });
-
-              // Push the current row's data to the tableData array
+              for (const cell of $table(row).find("th, td").toArray()) {
+                const cellText = $table(cell).text().trim().split("\n")[0];
+                if (cellText.includes("|")) break;
+                rowData.push(cellText);
+              }
               if (rowData.length > 0) {
                 tableData.push(rowData);
               }
@@ -109,13 +97,22 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
           }
           nextHeadingIndex += 1;
         }
-        console.log("a", nextHeadingIndex);
         if (nextHeadingIndex >= referenceHeadings.length - 1) break;
         nextHeadingValue = referenceHeadings[nextHeadingIndex].actualName;
 
         continue;
       }
-      accumulatedElements.push(element.text);
+      let { text } = element;
+      const { links } = element.metadata;
+      if (links) {
+        for (const link of links) {
+          text =
+            text.substring(0, link.start_index) +
+            `[${link.text}](${link.url})` +
+            text.substring(link.start_index + link.text.length);
+        }
+      }
+      accumulatedElements.push(`- ${text}`);
     }
 
     return sections;
