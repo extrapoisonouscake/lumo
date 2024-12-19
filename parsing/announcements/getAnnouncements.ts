@@ -6,8 +6,12 @@ import { unstructuredIO } from "@/instances/unstructured-io";
 import { PDFParsingPartitionElement } from "@/instances/unstructured-io/types";
 import { AnnouncementSection } from "@/types/school";
 import { waitUntil } from "@vercel/functions";
+import { writeFileSync } from "fs";
+import path from "path";
 import { Strategy } from "unstructured-client/sdk/models/shared";
+import { fileURLToPath } from "url";
 import { dailyAnnouncementsFileParser } from "./parsers";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const getAnnouncementsRedisKey = (school: KnownSchools, date?: Date) =>
   `announcements:${school}:${timezonedDayJS(date).format(DATE_FORMAT)}`;
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
@@ -71,6 +75,7 @@ export async function parseAndCacheAnnouncements(
     });
     const { statusCode, elements } = response;
     if (statusCode !== 200 || !elements) throw new Error("Failed to parse PDF");
+    writeFileSync(__dirname + "/s.json", JSON.stringify(elements));
     const parseElements = dailyAnnouncementsFileParser[school];
     preparedData =
       parseElements(elements as PDFParsingPartitionElement[]) || [];

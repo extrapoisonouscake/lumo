@@ -77,15 +77,16 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
             const html = tableElement.metadata.text_as_html;
             const $table = cheerio.load(html);
             const tableData: string[][] = [meetingsAndClubsColumns];
-            $table("table tr").each((_, row) => {
+            $table("table tr").each((i, row) => {
+              if (i === 0) return;
               const rowData: string[] = [];
 
               for (const cell of $table(row).find("th, td").toArray()) {
                 const cellText = $table(cell).text().trim().split("\n")[0];
-                if (cellText.includes("|")) break;
-                rowData.push(cellText);
+
+                rowData.push(cellText.replaceAll("|", ""));
               }
-              if (rowData.length > 0) {
+              if (rowData.length === 4) {
                 tableData.push(rowData);
               }
             });
@@ -102,17 +103,8 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
 
         continue;
       }
-      let { text } = element;
-      const { links } = element.metadata;
-      if (links) {
-        for (const link of links) {
-          text =
-            text.substring(0, link.start_index) +
-            `[${link.text}](${link.url})` +
-            text.substring(link.start_index + link.text.length);
-        }
-      }
-      accumulatedElements.push(`- ${text}`);
+
+      accumulatedElements.push(element.text);
     }
 
     return sections;

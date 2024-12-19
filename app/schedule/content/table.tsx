@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -22,7 +23,7 @@ import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting
 import { timezonedDayJS } from "@/instances/dayjs";
 import { cn } from "@/lib/utils";
 import { ScheduleSubject } from "@/types/school";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 type ScheduleSubjectRow =
   | ScheduleSubject
   | ({ isBreak: true } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
@@ -187,7 +188,42 @@ export function ScheduleTable({
         : prepareTableData(externalData as NonNullable<typeof externalData>),
     [isLoading, externalData]
   );
-
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
+  const [dataKey, setDataKey] = useState(Date.now());
+  useEffect(() => {
+    if (isLoading) return;
+    const now = timezonedDayJS();
+    const currentSubjectIndex = data.findIndex((subject) =>
+      now.isBetween(subject.startsAt, subject.endsAt)
+    );
+    console.log({ currentSubjectIndex });
+    if (currentSubjectIndex === data.length - 1) return;
+    const secondsToNextSubject = timezonedDayJS(
+      data[currentSubjectIndex + 1].startsAt
+    ).diff(now, "milliseconds");
+    console.log(secondsToNextSubject);
+    if (timeoutId) clearTimeout(timeoutId);
+    const newTimeoutId = setTimeout(() => {
+      setDataKey(Date.now());
+    }, secondsToNextSubject);
+    setTimeoutId(newTimeoutId);
+    return () => clearTimeout(newTimeoutId);
+  }, [isLoading]);
+  const meta = useMemo(
+    () => ({
+      getRowClassName: (row: Row<ScheduleSubject>) => {
+        return cn({
+          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+            timezonedDayJS().isBetween(
+              row.original.startsAt,
+              row.original.endsAt
+            ),
+          "[&>td]:py-2": "isBreak" in row.original,
+        });
+      },
+    }),
+    [dataKey]
+  );
   const table = useReactTable<ScheduleSubject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -198,18 +234,7 @@ export function ScheduleTable({
     data,
     manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
-    meta: {
-      getRowClassName: (row) => {
-        return cn({
-          "hover:bg-background sticky [&>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
-            timezonedDayJS().isBetween(
-              row.original.startsAt,
-              row.original.endsAt
-            ),
-          "[&>td]:py-2": "isBreak" in row.original,
-        });
-      },
-    },
+    meta,
   });
   return (
     <TableRenderer
