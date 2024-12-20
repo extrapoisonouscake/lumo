@@ -42,7 +42,7 @@ export function parseCurrentWeekday(
 }
 const getDateFromSubjectTimeString = (initialDate: Dayjs) => (time: string) => {
   const t = locallyTimezonedDayJS(time, "HH:mm A");
-  return initialDate.set("h", t.get("h")).set("minute", t.get("m")).set("seconds",0).toDate();
+  return initialDate.set("h", t.get("h")).set("minute", t.get("m")).startOf("minute").toDate();
 };
 export function parseSchedule(
   ...[
