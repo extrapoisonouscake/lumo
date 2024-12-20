@@ -36,6 +36,7 @@ export function TableRenderer<T>({
     Partial<IdIdentifier<any, any>>)[];
   rowRendererFactory?: RowRendererFactory<T>;
 }) {
+  console.log("No");
   return (
     <div className="rounded-md border">
       <Table>

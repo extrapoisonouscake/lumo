@@ -64,11 +64,12 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   return (
     <>
-      {data && locallyTimezonedDayJS(day).day() === 5 && (
-        <h3>
-          Same as: <span className="font-semibold">{data.weekday}</span>
-        </h3>
-      )}
+      {data &&
+        (day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day() === 5 && (
+          <h3>
+            Same as: <span className="font-semibold">{data.weekday}</span>
+          </h3>
+        )}
       <ScheduleTable data={data.subjects} />
     </>
   );
@@ -78,7 +79,7 @@ export function ScheduleContentSkeleton({
 }: ComponentProps<typeof ScheduleContent>) {
   return (
     <>
-      {locallyTimezonedDayJS(day).day() === 5 && (
+      {(day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day() === 5 && (
         <div className="flex items-center gap-2">
           <h3>Same as:</h3>
           <Skeleton>
