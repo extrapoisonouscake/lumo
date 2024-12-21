@@ -17,7 +17,7 @@ const visualizableErrors: Record<
   ({ day }: { day: string | undefined }) => [string, string]
 > = {
   "School is not in session on that date.": ({ day }) => {
-    const dateObject = timezonedDayJS(day);
+    const dateObject = locallyTimezonedDayJS(day);
     let message,
       emoji = "😴";
     const christmasDates = getChristmasBreakDates(dateObject.year());
