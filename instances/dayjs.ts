@@ -4,11 +4,13 @@ import isBetween from "dayjs/plugin/isBetween";
 import localizedFormat from "dayjs/plugin/localizedFormat"; // ES 2015
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import weekday from "dayjs/plugin/weekday";
 dayjs.extend(customParseFormat);
 dayjs.extend(isBetween);
 dayjs.extend(timezone);
 dayjs.extend(localizedFormat);
 dayjs.extend(utc);
+dayjs.extend(weekday)
 export const INSTANTIATED_TIMEZONE = "America/Vancouver";
 dayjs.tz.setDefault(INSTANTIATED_TIMEZONE);
 const timezonedDayJS = (...args: any[]) => {

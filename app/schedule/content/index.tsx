@@ -6,35 +6,65 @@ import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
 import { ScheduleTable } from "./table";
-const getChristmasBreakDates = (year: number) =>
-  [
-    timezonedDayJS(`${year}-12-25`),
-    timezonedDayJS(`${year + 1}-01-05`),
-  ] as const;
-
+import { Dayjs } from "dayjs";
+const getWinterBreakDates = (date:Dayjs) =>{
+  const month=date.month()
+  const currentYear=date.year()
+  let year
+  if(month === 0){
+year=currentYear-1
+  }else{
+    year=currentYear
+  }
+  const december31 = timezonedDayJS(`${year}-12-31`);
+  const lastMonday = december31.day(1);
+  
+  const secondToLastMonday = lastMonday.subtract(1, 'week');
+  const january1 = timezonedDayJS(`${year + 1}-01-01`);
+  const firstFriday = january1.day(5);
+  return [secondToLastMonday,firstFriday] as const;
+  }
+const getSpringBreakDates = (year:number)=>{
+  const march31 = timezonedDayJS(`${year}-03-31`);
+  
+  const lastMonday = march31.day(1);
+  
+  const thirdToLastMonday = lastMonday.subtract(2, 'week');
+  const april1 = timezonedDayJS(`${year}-04-01`);
+  const firstFriday = april1.day(5);
+  const secondFriday = firstFriday.add(1,'week')
+  return [thirdToLastMonday,secondFriday] as const
+}
+const isDayjsObjectBetweenDates=(dateObject:Dayjs,date1:Dayjs,date2:Dayjs)=>dateObject.isBetween(date1, date2, "date", "[]")
 const visualizableErrors: Record<
   string,
-  ({ day }: { day: string | undefined }) => [string, string]
+  ({ day }: { day: string | undefined }) => {message:string, emoji:string}
 > = {
   "School is not in session on that date.": ({ day }) => {
     const dateObject = locallyTimezonedDayJS(day);
     let message,
       emoji = "😴";
-    const christmasDates = getChristmasBreakDates(dateObject.year());
+    const winterBreakDates = getWinterBreakDates(dateObject);
+    const springBreakDates = getSpringBreakDates(dateObject.year());
     if (
-      dateObject.isBetween(christmasDates[0], christmasDates[1], "date", "[]")
+      isDayjsObjectBetweenDates(dateObject,...winterBreakDates)
     ) {
-      message = "It's Christmas!";
-      emoji = "🎄";
+      message = "Happy Holidays!";
+      emoji = "☃️";
+    } else if(isDayjsObjectBetweenDates(dateObject,...springBreakDates)){
+      message = "It's Spring Break.";
+      emoji = "🌷";
     } else {
-      message = "No school ";
+      let messagePortion
       if (timezonedDayJS().isSame(dateObject, "date")) {
-        message += "today!";
+        messagePortion = "today";
       } else {
-        message += "on this day.";
+        messagePortion = "on this day";
       }
+      
+      message = `No school ${messagePortion}.`;
     }
-    return [message, emoji];
+    return {message, emoji};
   },
 };
 export async function ScheduleContent({ day }: { day: string | undefined }) {
@@ -48,15 +78,12 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   const hasKnownError = data && "knownError" in data;
   if (!data || hasKnownError) {
-    const errorCardProps: ComponentProps<typeof ErrorCard> = {
-      emoji: "‼️",
-      message: "Something went wrong.",
+    let errorCardProps: ComponentProps<typeof ErrorCard> = {
     };
     if (hasKnownError) {
       const visualData = visualizableErrors[data.knownError]?.({ day });
       if (visualData) {
-        errorCardProps.emoji = visualData[1];
-        errorCardProps.message = visualData[0];
+        errorCardProps= visualData;
       }
     }
     return <ErrorCard {...errorCardProps} />;
@@ -64,7 +91,7 @@ export async function ScheduleContent({ day }: { day: string | undefined }) {
 
   return (
     <>
-      {data &&
+      {
         (day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day() === 5 && (
           <h3>
             Same as: <span className="font-semibold">{data.weekday}</span>

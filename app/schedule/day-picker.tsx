@@ -95,7 +95,7 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
                 className="w-full"
                 leftIcon={<RotateCcw />}
               >
-                Go to today
+                Back to today
               </Button>
             </div>
           )
