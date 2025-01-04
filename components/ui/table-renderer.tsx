@@ -14,6 +14,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
+  TableProps,
   TableRow,
 } from "./table";
 
@@ -30,16 +31,16 @@ export function TableRenderer<T>({
   table,
   columns,
   rowRendererFactory,
+  ...props
 }: {
   table: TableType<T>;
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
   rowRendererFactory?: RowRendererFactory<T>;
-}) {
-  console.log("No");
+}&TableProps) {
   return (
     <div className="rounded-md border">
-      <Table>
+      <Table {...props}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

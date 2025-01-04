@@ -21,11 +21,11 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/cn";
 import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
-import { CountdownTimer } from "./CountdownTimer";
-import { useTableRefreshKey } from "./useTableRefreshKey";
+import { CountdownTimer } from "./countdown-timer";
+import { useTableRefreshKey } from "./use-table-refresh-key";
 type ScheduleSubjectRow =
   | ScheduleSubject
   | ({ isBreak: true } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
@@ -152,6 +152,7 @@ const getRowRenderer: RowRendererFactory<ScheduleSubjectRow> =
     }
     return (
       <TableRow
+      
         key={row.id}
         data-state={row.getIsSelected() && "selected"}
         style={table.options.meta?.getRowStyles?.(row)}
@@ -199,10 +200,10 @@ export function ScheduleTable({
     () => (row: Row<ScheduleSubject>) => {
       return cn({
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
-          timezonedDayJS().isBetween(
-            row.original.startsAt,
-            row.original.endsAt
-          ),
+        timezonedDayJS().isBetween(
+          row.original.startsAt,
+          row.original.endsAt
+        ),
         "[&>td]:py-2": "isBreak" in row.original,
       });
     },
@@ -221,11 +222,11 @@ export function ScheduleTable({
     columns: isLoading ? columnsSkeletons : columns,
     meta: { getRowClassName },
   });
-  console.log({ timeToNextSubject });
   return (
     <>
       <CountdownTimer timeToNextSubject={timeToNextSubject} />
       <TableRenderer
+      containerClassName="overflow-clip"
         table={table}
         columns={columns}
         rowRendererFactory={getRowRenderer}

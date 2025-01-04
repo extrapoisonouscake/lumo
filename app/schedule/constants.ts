@@ -1,0 +1,2 @@
+
+export const SCHEDULE_QUERY_DATE_FORMAT="MM-DD-YYYY"

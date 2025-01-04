@@ -3,7 +3,7 @@
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { useFormValidation } from "@/hooks/useFormValidation";
+import { useFormValidation } from "@/hooks/use-form-validation";
 import { login } from "@/lib/auth/mutations";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";

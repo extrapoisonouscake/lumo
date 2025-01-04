@@ -1,6 +1,6 @@
 import { Calendar, Home, Settings, Shapes } from "lucide-react";
 
-export const WEBSITE_TITLE = "MyEdBC Wrapper";
+export const WEBSITE_TITLE = "MyEdBC";
 
 export const websitePages: Record<
   string,

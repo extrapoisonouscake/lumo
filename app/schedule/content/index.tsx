@@ -7,6 +7,7 @@ import { MyEdEndpointsParams } from "@/types/myed";
 import { ComponentProps } from "react";
 import { ScheduleTable } from "./table";
 import { Dayjs } from "dayjs";
+import { SCHEDULE_QUERY_DATE_FORMAT } from "../constants";
 const getWinterBreakDates = (date:Dayjs) =>{
   const month=date.month()
   const currentYear=date.year()
@@ -50,7 +51,7 @@ const visualizableErrors: Record<
       isDayjsObjectBetweenDates(dateObject,...winterBreakDates)
     ) {
       message = "Happy Holidays!";
-      emoji = "☃️";
+      emoji = "❄️";
     } else if(isDayjsObjectBetweenDates(dateObject,...springBreakDates)){
       message = "It's Spring Break.";
       emoji = "🌷";
@@ -70,7 +71,7 @@ const visualizableErrors: Record<
 export async function ScheduleContent({ day }: { day: string | undefined }) {
   const params: MyEdEndpointsParams<"schedule"> = {};
   if (day) {
-    params.day = locallyTimezonedDayJS(day, "MM-DD-YYYY").format(
+    params.day = locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT).format(
       MYED_DATE_FORMAT
     );
   }

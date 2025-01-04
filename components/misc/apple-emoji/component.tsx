@@ -1,6 +1,6 @@
 "use client";
 import emojiSrcsSource from "@/data/apple-emojis.json";
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/cn";
 import { ImgHTMLAttributes } from "react";
 
 const emojiSrcs = emojiSrcsSource as Record<string, string>;

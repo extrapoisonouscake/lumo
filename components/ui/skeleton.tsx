@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/cn";
 import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 
 export const Skeleton = ({

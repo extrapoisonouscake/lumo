@@ -30,8 +30,8 @@ export function AppSidebar({
           <SidebarMenuItem>{userHeader}</SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="py-1">
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <PagesMenu />
           </SidebarGroupContent>

@@ -14,7 +14,7 @@ import {
   locallyTimezonedDayJS,
   timezonedDayJS,
 } from "@/instances/dayjs";
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/cn";
 import { ComponentProps, ReactNode, useState } from "react";
 export const correctDate = (initialDate?: Date) => {
   const tzOffset =

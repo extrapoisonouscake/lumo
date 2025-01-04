@@ -22,9 +22,9 @@ import {
 } from "@/components/ui/popover";
 import { SCHOOL_COOKIE_NAME } from "@/constants/cookies";
 import { KnownSchools } from "@/constants/schools";
-import { useFormValidation } from "@/hooks/useFormValidation";
+import { useFormValidation } from "@/hooks/use-form-validation";
 import { setSchool } from "@/lib/settings/mutations";
-import { cn } from "@/lib/utils";
+import { cn } from "@/helpers/cn";
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";

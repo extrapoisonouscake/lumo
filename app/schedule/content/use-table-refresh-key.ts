@@ -14,11 +14,8 @@ export function useTableRefreshKey({
   const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>(
     null
   );
-  console.log({ timeToNextSubject });
   useEffect(() => {
-    console.log("RERENDER");
     const intervalId = setInterval(() => {
-      console.log({ timeToNextSubject, isLoading });
       if (!isLoading && timeToNextSubject !== null) {
         setTimeToNextSubject((prev) => (prev !== null ? prev - 1000 : null));
       }
@@ -53,11 +50,9 @@ export function useTableRefreshKey({
         refresh();
       }, millisecondsToNextSubject);
       setTimeoutId(newTimeoutId);
-      console.log({ newTimeoutId });
     };
     refresh();
     return () => {
-      console.log("CLE", newTimeoutId);
       clearTimeout(newTimeoutId);
       clearInterval(intervalId);
     };
