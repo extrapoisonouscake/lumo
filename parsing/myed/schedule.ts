@@ -81,6 +81,7 @@ export function parseSchedule(
       if (contentCellHTML) {
         const [subjectId, name, teachersString, room] =
           removeLineBreaks(contentCellHTML).split("<br>");
+if(!name) return
         subject = {
           ...subject,
           name: prettifySubjectName(name),
@@ -89,15 +90,9 @@ export function parseSchedule(
         };
       }
       return subject;
-    }) satisfies ScheduleSubject[];
-  const occupiedSubjects = [...allSubjects];
-  for (let i = allSubjects.length - 1; i >= 0; i--) {
-    if (allSubjects[i].name) {
-      break;
-    }
-    occupiedSubjects.pop();
-  }
-console.log(occupiedSubjects)
+    }).filter(Boolean) as ScheduleSubject[] satisfies (ScheduleSubject|undefined)[];
+  
+console.log(allSubjects)
   const weekday = getWeekday($tableBody);
-  return { weekday, subjects: occupiedSubjects };
+  return { weekday, subjects:allSubjects };
 }
