@@ -45,15 +45,11 @@ const columns = [
     header: "Name",
     cell: ({ row, cell }) => {
       if ("isBreak" in row.original) {
-        const isLunch =
-          timezonedDayJS(row.original.endsAt).diff(
-            row.original.startsAt,
-            "minutes"
-          ) > 20;
-        const emoji = isLunch ? "🍕" : "🏃";
+        
+        const emoji = row.original.isLunch ? "🍕" : "🏃";
         return (
           <div className="flex items-center gap-[6px]">
-            {isLunch ? "Lunch" : "Break"}{" "}
+            {row.original.isLunch ? "Lunch" : "Break"}{" "}
             <AppleEmoji imageClassName="size-4" value={emoji} width={16} />
           </div>
         );
@@ -122,15 +118,22 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   const filledIntervals: ScheduleSubjectRow[] = [];
 
   for (let i = 0; i < preparedData.length; i++) {
-    filledIntervals.push(preparedData[i]);
+const currentElement=preparedData[i]
+    filledIntervals.push(currentElement);
 
     if (i < preparedData.length - 1) {
-      const currentEnd = preparedData[i].endsAt;
+      const currentEnd = currentElement.endsAt;
       const nextStart = preparedData[i + 1].startsAt;
 
       if (currentEnd < nextStart) {
+const isLunch =
+          timezonedDayJS(nextStart).diff(
+            currentEnd,
+            "minutes"
+          ) > 20;
         filledIntervals.push({
           isBreak: true,
+isLunch,
           startsAt: currentEnd,
           endsAt: nextStart,
         });
