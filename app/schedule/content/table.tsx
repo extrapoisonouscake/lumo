@@ -116,7 +116,7 @@ const mockScheduleSubjects = (length: number) =>
 const prepareTableData = (data: ScheduleSubject[]) => {
   const preparedData = prepareTableDataForSorting(data);
   const filledIntervals: ScheduleSubjectRow[] = [];
-
+let wasLunchFound=false
   for (let i = 0; i < preparedData.length; i++) {
 const currentElement=preparedData[i]
     filledIntervals.push(currentElement);
@@ -127,10 +127,11 @@ const currentElement=preparedData[i]
 
       if (currentEnd < nextStart) {
 const isLunch =
-          timezonedDayJS(nextStart).diff(
+          !wasLunchFound&&timezonedDayJS(nextStart).diff(
             currentEnd,
             "minutes"
           ) > 20;
+if(isLunch) wasLunchFound=true
         filledIntervals.push({
           isBreak: true,
 isLunch,
