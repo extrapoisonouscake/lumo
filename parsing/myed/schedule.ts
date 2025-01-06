@@ -73,22 +73,19 @@ export function parseSchedule(
       const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(
         locallyTimezonedDayJS(initialParams.day)
       );
-      let subject: ScheduleSubject = {
-        startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
-        endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
-      };
+      
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
-      if (contentCellHTML) {
+      if (!contentCellHTML) return
         const [subjectId, name, teachersString, room] =
           removeLineBreaks(contentCellHTML).split("<br>");
-if(!name) return
-        subject = {
-          ...subject,
+        const subject = {
+        startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
+        endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
           name: prettifySubjectName(name),
           teachers: teachersString.split("; "),
           room: room || null,
         };
-      }
+      if(!subject.name) return
       return subject;
     }).filter(Boolean) as ScheduleSubject[] satisfies (ScheduleSubject|undefined)[];
   
