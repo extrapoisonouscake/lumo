@@ -97,6 +97,7 @@ export function parseSchedule(
     }
     occupiedSubjects.pop();
   }
+console.log(occupiedSubjects)
   const weekday = getWeekday($tableBody);
   return { weekday, subjects: occupiedSubjects };
 }
