@@ -1,23 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+const pad = (num: number) => `${num}`.padStart(2, "0");
+const MAX_MINUTES = 90;
 export function CountdownTimer({
   timeToNextSubject,
 }: {
   timeToNextSubject: number | null;
 }) {
-  if (!timeToNextSubject || timeToNextSubject > 1000 * 60 * 60) return null;
-  const [key, setKey] = useState(Date.now());
-  useEffect(() => {
-    setKey(Date.now());
-  }, [timeToNextSubject]);
-  
-  const seconds = useMemo(
-    () => Math.max(Math.floor(timeToNextSubject / 1000), 0),
-    [key]
+  if (!timeToNextSubject || timeToNextSubject > 1000 * 60 * MAX_MINUTES)
+    return null;
+
+  const hours = Math.floor(timeToNextSubject / (1000 * 60 * 60));
+  const minutes = Math.floor(
+    (timeToNextSubject % (1000 * 60 * 60)) / (1000 * 60)
   );
-  const minutes = Math.max(Math.floor(seconds / 60), 0);
+  const seconds = Math.floor((timeToNextSubject % (1000 * 60)) / 1000);
   return (
-    <p>
-      {`${minutes}`.padStart(2, "0")}:{`${seconds % 60}`.padStart(2, "0")} left
+    <p className="row-start-1 col-start-1 flex items-center">
+      {pad(hours)}:{pad(minutes)}:{pad(seconds)} left
     </p>
   );
 }

@@ -11,13 +11,13 @@ export function useTableRefreshKey({
 }) {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
   const [dataKey, setDataKey] = useState(Date.now());
-  const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>(
-    null
-  );
+  const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>();
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (!isLoading && timeToNextSubject !== null) {
-        setTimeToNextSubject((prev) => (prev !== null ? prev - 1000 : null));
+        setTimeToNextSubject((prev) =>
+          typeof prev === "number" ? prev - 1000 : null
+        );
       }
     }, 1000);
     let newTimeoutId: NodeJS.Timeout;
@@ -31,6 +31,7 @@ export function useTableRefreshKey({
         currentSubjectIndex === -1 &&
         !dayjs(data[0]?.startsAt).isAfter(new Date())
       ) {
+        setTimeToNextSubject(null);
         return;
       }
       const nextSubjectTime = timezonedDayJS(
@@ -52,9 +53,16 @@ export function useTableRefreshKey({
       setTimeoutId(newTimeoutId);
     };
     refresh();
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        refresh();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       clearTimeout(newTimeoutId);
       clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [isLoading, data, !!timeToNextSubject]);
 

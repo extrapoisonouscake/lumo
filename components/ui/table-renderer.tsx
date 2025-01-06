@@ -7,6 +7,7 @@ import {
   Table as TableType,
 } from "@tanstack/react-table";
 
+import { cn } from "@/helpers/cn";
 import { ReactNode } from "react";
 import {
   Table,
@@ -31,16 +32,21 @@ export function TableRenderer<T>({
   table,
   columns,
   rowRendererFactory,
+  containerClassName,
+  tableContainerClassName,
   ...props
 }: {
   table: TableType<T>;
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
   rowRendererFactory?: RowRendererFactory<T>;
-}&TableProps) {
+} & {
+  tableContainerClassName?: TableProps["containerClassName"];
+  containerClassName?: string;
+}) {
   return (
-    <div className="rounded-md border">
-      <Table {...props}>
+    <div className={cn("rounded-md border", containerClassName)}>
+      <Table {...props} containerClassName={tableContainerClassName}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

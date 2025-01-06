@@ -9,12 +9,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/helpers/cn";
 import {
   dayjs,
   locallyTimezonedDayJS,
   timezonedDayJS,
 } from "@/instances/dayjs";
-import { cn } from "@/helpers/cn";
 import { ComponentProps, ReactNode, useState } from "react";
 export const correctDate = (initialDate?: Date) => {
   const tzOffset =
@@ -66,7 +66,7 @@ export function DatePicker({
         >
           {date ? (
             dayjs(correctDate(date)).format(
-              `MM/DD/YYYY${showWeekday ? ", dddd" : ""}`
+              `${showWeekday ? "dddd, " : ""}MM/DD/YYYY`
             )
           ) : (
             <span>Pick a date</span>
