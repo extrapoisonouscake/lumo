@@ -29,7 +29,7 @@ import { CountdownTimer } from "./countdown-timer";
 import { useTableRefreshKey } from "./use-table-refresh-key";
 type ScheduleSubjectRow =
   | ScheduleSubject
-  | ({ isBreak: true } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
+  | ({ isBreak: true,isLunch:boolean } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
 const columnHelper = createColumnHelper<ScheduleSubjectRow>();
 const hoursFormat = "h:mm A";
 const columns = [
