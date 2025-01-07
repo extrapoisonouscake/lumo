@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
 import { ParserFunctionArguments } from "./types";
 function getTableBody($: cheerio.CheerioAPI) {
@@ -73,23 +73,45 @@ export function parseSchedule(
       const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(
         locallyTimezonedDayJS(initialParams.day).startOf("minute")
       );
-      
+
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
-      if (!contentCellHTML) return
-        const [subjectId, name, teachersString, room] =
-          removeLineBreaks(contentCellHTML).split("<br>");
-        const subject = {
+      if (!contentCellHTML) return;
+      const [subjectId, name, teachersString, room] =
+        removeLineBreaks(contentCellHTML).split("<br>");
+      const subject = {
         startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
         endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
-          name: prettifySubjectName(name),
-          teachers: teachersString.split("; "),
-          room: room || null,
-        };
-      if(!subject.name) return
+        name: prettifySubjectName(name),
+        teachers: teachersString.split("; "),
+        room: room || null,
+      };
+      if (!subject.name) return;
       return subject;
-    }).filter(Boolean) as ScheduleSubject[] satisfies (ScheduleSubject|undefined)[];
-  
-console.log(allSubjects)
+    })
+    .filter(Boolean) as ScheduleSubject[] satisfies (
+    | ScheduleSubject
+    | undefined
+  )[];
+
+  console.log(allSubjects);
   const weekday = getWeekday($tableBody);
-  return { weekday, subjects:allSubjects };
+  return {
+    weekday,
+    subjects: [
+      {
+        startsAt: dayjs().subtract(1, "minute").toDate(),
+        endsAt: dayjs().add(5, "seconds").toDate(),
+        name: "Social Studies 10",
+        teachers: ["Mather, Alissa"],
+        room: "404",
+      },
+      {
+        startsAt: dayjs().add(10, "seconds").toDate(),
+        endsAt: dayjs().add(15, "seconds").toDate(),
+        name: "SocialesddfsdfssStudies 10",
+        teachers: ["Matsdfsher, Alissa"],
+        room: "4sdss04",
+      },
+    ],
+  };
 }

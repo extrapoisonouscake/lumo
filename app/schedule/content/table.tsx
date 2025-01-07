@@ -26,10 +26,13 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
 import { CountdownTimer } from "./countdown-timer";
-import { useTableRefreshKey } from "./use-table-refresh-key";
+import { useTTNextSubject } from "./use-tt-next-subject";
 type ScheduleSubjectRow =
   | ScheduleSubject
-  | ({ isBreak: true,isLunch:boolean } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
+  | ({ isBreak: true; isLunch: boolean } & Pick<
+      ScheduleSubject,
+      "startsAt" | "endsAt"
+    >);
 const columnHelper = createColumnHelper<ScheduleSubjectRow>();
 const hoursFormat = "h:mm A";
 const columns = [
@@ -45,7 +48,6 @@ const columns = [
     header: "Name",
     cell: ({ row, cell }) => {
       if ("isBreak" in row.original) {
-        
         const emoji = row.original.isLunch ? "🍕" : "🏃";
         return (
           <div className="flex items-center gap-[6px]">
@@ -116,9 +118,9 @@ const mockScheduleSubjects = (length: number) =>
 const prepareTableData = (data: ScheduleSubject[]) => {
   const preparedData = prepareTableDataForSorting(data);
   const filledIntervals: ScheduleSubjectRow[] = [];
-let wasLunchFound=false
+  let wasLunchFound = false;
   for (let i = 0; i < preparedData.length; i++) {
-const currentElement=preparedData[i]
+    const currentElement = preparedData[i];
     filledIntervals.push(currentElement);
 
     if (i < preparedData.length - 1) {
@@ -126,15 +128,13 @@ const currentElement=preparedData[i]
       const nextStart = preparedData[i + 1].startsAt;
 
       if (currentEnd < nextStart) {
-const isLunch =
-          !wasLunchFound&&timezonedDayJS(nextStart).diff(
-            currentEnd,
-            "minutes"
-          ) > 20;
-if(isLunch) wasLunchFound=true
+        const isLunch =
+          !wasLunchFound &&
+          timezonedDayJS(nextStart).diff(currentEnd, "minutes") > 20;
+        if (isLunch) wasLunchFound = true;
         filledIntervals.push({
           isBreak: true,
-isLunch,
+          isLunch,
           startsAt: currentEnd,
           endsAt: nextStart,
         });
@@ -197,7 +197,7 @@ export function ScheduleTable({
         : prepareTableData(externalData as NonNullable<typeof externalData>),
     [isLoading, externalData]
   );
-  const { dataKey, timeToNextSubject } = useTableRefreshKey({
+  const { currentSubjectIndex, timeToNextSubject } = useTTNextSubject({
     isLoading,
     data,
   });
@@ -214,7 +214,7 @@ export function ScheduleTable({
       });
     },
 
-    [dataKey]
+    [currentSubjectIndex]
   );
   const table = useReactTable<ScheduleSubject>({
     getCoreRowModel: getCoreRowModel(),
@@ -228,10 +228,6 @@ export function ScheduleTable({
     columns: isLoading ? columnsSkeletons : columns,
     meta: { getRowClassName },
   });
-  console.log(
-    { timeToNextSubject, isWeekdayShown },
-    timeToNextSubject !== null
-  );
   return (
     <>
       {isLoading || typeof timeToNextSubject === "undefined" ? (
@@ -239,7 +235,12 @@ export function ScheduleTable({
           <p>10:00:00</p>
         </Skeleton>
       ) : (
-        <CountdownTimer timeToNextSubject={timeToNextSubject} />
+        <CountdownTimer
+          timeToNextSubject={timeToNextSubject}
+          isBreak={
+            !!(currentSubjectIndex && "isBreak" in data[currentSubjectIndex])
+          }
+        />
       )}
       <TableRenderer
         containerClassName={cn("col-span-2", {

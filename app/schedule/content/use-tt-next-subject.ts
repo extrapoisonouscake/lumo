@@ -2,7 +2,7 @@ import { dayjs, timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { useEffect, useState } from "react";
 
-export function useTableRefreshKey({
+export function useTTNextSubject({
   isLoading,
   data,
 }: {
@@ -10,8 +10,10 @@ export function useTableRefreshKey({
   data: ScheduleSubject[];
 }) {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
-  const [dataKey, setDataKey] = useState(Date.now());
   const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>();
+  const [currentSubjectIndex, setCurrentSubjectIndex] = useState<
+    number | null
+  >();
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (!isLoading && timeToNextSubject !== null) {
@@ -24,20 +26,22 @@ export function useTableRefreshKey({
     const refresh = () => {
       if (isLoading) return;
       const now = timezonedDayJS();
-      const currentSubjectIndex = data.findIndex((subject) =>
+      const newCurrentSubjectIndex = data.findIndex((subject) =>
         now.isBetween(subject.startsAt, subject.endsAt)
       );
       if (
-        currentSubjectIndex === -1 &&
+        newCurrentSubjectIndex === -1 &&
         !dayjs(data[0]?.startsAt).isAfter(new Date())
       ) {
         setTimeToNextSubject(null);
+        setCurrentSubjectIndex(null);
         return;
       }
+      setCurrentSubjectIndex(newCurrentSubjectIndex);
       const nextSubjectTime = timezonedDayJS(
-        currentSubjectIndex === data.length - 1
-          ? data[currentSubjectIndex].endsAt
-          : data[currentSubjectIndex + 1].startsAt
+        newCurrentSubjectIndex === data.length - 1
+          ? data[newCurrentSubjectIndex].endsAt
+          : data[newCurrentSubjectIndex + 1].startsAt
       );
       const millisecondsToNextSubject = nextSubjectTime.diff(
         now,
@@ -47,7 +51,6 @@ export function useTableRefreshKey({
 
       if (timeoutId) clearTimeout(timeoutId);
       newTimeoutId = setTimeout(() => {
-        setDataKey(Date.now());
         refresh();
       }, millisecondsToNextSubject);
       setTimeoutId(newTimeoutId);
@@ -66,5 +69,5 @@ export function useTableRefreshKey({
     };
   }, [isLoading, data, !!timeToNextSubject]);
 
-  return { dataKey, timeToNextSubject };
+  return { timeToNextSubject, currentSubjectIndex };
 }
