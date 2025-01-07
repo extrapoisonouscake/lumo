@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-table";
 
 import { cn } from "@/helpers/cn";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ declare module "@tanstack/table-core" {
 export type RowRendererFactory<T> = (
   table: TableType<T>
 ) => (row: Row<T>) => ReactNode;
-export function TableRenderer<T>({
+function TableRendererComponent<T>({
   table,
   columns,
   rowRendererFactory,
@@ -101,3 +101,6 @@ export function TableRenderer<T>({
     </div>
   );
 }
+export const TableRenderer = memo(
+  TableRendererComponent
+) as typeof TableRendererComponent;

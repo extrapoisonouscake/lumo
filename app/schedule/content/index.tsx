@@ -2,6 +2,7 @@ import { ErrorCard } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
+import { getUserSettings } from "@/lib/settings/queries";
 import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { Dayjs } from "dayjs";
@@ -82,7 +83,10 @@ export async function ScheduleContent({ day }: Props) {
       MYED_DATE_FORMAT
     );
   }
-  const data = await fetchMyEd("schedule", params);
+  const [userSettings, data] = await Promise.all([
+    getUserSettings(),
+    fetchMyEd("schedule", params),
+  ]);
 
   const hasKnownError = data && "knownError" in data;
   if (!data || hasKnownError) {
@@ -103,7 +107,11 @@ export async function ScheduleContent({ day }: Props) {
           Same as: <span className="font-semibold">{data.weekday}</span>
         </h3>
       )}
-      <ScheduleTable isWeekdayShown={shouldShowWeekday} data={data.subjects} />
+      <ScheduleTable
+        shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
+        isWeekdayShown={shouldShowWeekday}
+        data={data.subjects}
+      />
     </GridLayout>
   );
 }

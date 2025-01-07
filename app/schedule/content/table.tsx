@@ -185,10 +185,12 @@ export function ScheduleTable({
   data: externalData,
   isLoading = false,
   isWeekdayShown,
+  shouldShowTimer,
 }: {
   data?: ScheduleSubject[];
   isLoading?: boolean;
   isWeekdayShown?: boolean;
+  shouldShowTimer?: boolean;
 }) {
   const data = useMemo(
     () =>
@@ -197,11 +199,10 @@ export function ScheduleTable({
         : prepareTableData(externalData as NonNullable<typeof externalData>),
     [isLoading, externalData]
   );
-  const { currentSubjectIndex, timeToNextSubject } = useTTNextSubject({
+  const { currentRowIndex, timeToNextSubject } = useTTNextSubject({
     isLoading,
     data,
   });
-
   const getRowClassName = useMemo(
     () => (row: Row<ScheduleSubject>) => {
       return cn({
@@ -214,7 +215,7 @@ export function ScheduleTable({
       });
     },
 
-    [currentSubjectIndex]
+    [currentRowIndex]
   );
   const table = useReactTable<ScheduleSubject>({
     getCoreRowModel: getCoreRowModel(),
@@ -230,22 +231,22 @@ export function ScheduleTable({
   });
   return (
     <>
-      {isLoading || typeof timeToNextSubject === "undefined" ? (
-        <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
-          <p>10:00:00</p>
-        </Skeleton>
-      ) : (
-        <CountdownTimer
-          timeToNextSubject={timeToNextSubject}
-          isBreak={
-            !!(currentSubjectIndex && "isBreak" in data[currentSubjectIndex])
-          }
-        />
-      )}
+      {shouldShowTimer &&
+        (isLoading || typeof timeToNextSubject === "undefined" ? (
+          <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
+            <p>10:00:00</p>
+          </Skeleton>
+        ) : (
+          <CountdownTimer
+            timeToNextSubject={timeToNextSubject}
+            isBreak={!!(currentRowIndex && "isBreak" in data[currentRowIndex])}
+          />
+        ))}
       <TableRenderer
         containerClassName={cn("col-span-2", {
           "row-start-2": timeToNextSubject !== null || isWeekdayShown,
         })}
+        key={currentRowIndex}
         tableContainerClassName="overflow-clip"
         table={table}
         columns={columns}

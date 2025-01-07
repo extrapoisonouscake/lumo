@@ -44,9 +44,9 @@ export interface ButtonProps
   rightIcon?: React.ReactNode;
   isManualLoading?: boolean;
 }
-export const Spinner = () => (
+export const Spinner = ({ className }: { className?: string }) => (
   <svg
-    className="animate-spin"
+    className={cn("animate-spin", className)}
     xmlns="http://www.w3.org/2000/svg"
     width="24"
     height="24"

@@ -11,9 +11,7 @@ export function useTTNextSubject({
 }) {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
   const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>();
-  const [currentSubjectIndex, setCurrentSubjectIndex] = useState<
-    number | null
-  >();
+  const [currentRowIndex, setCurrentRowIndex] = useState<number | null>();
   useEffect(() => {
     const intervalId = setInterval(() => {
       if (!isLoading && timeToNextSubject !== null) {
@@ -34,10 +32,10 @@ export function useTTNextSubject({
         !dayjs(data[0]?.startsAt).isAfter(new Date())
       ) {
         setTimeToNextSubject(null);
-        setCurrentSubjectIndex(null);
+        setCurrentRowIndex(null);
         return;
       }
-      setCurrentSubjectIndex(newCurrentSubjectIndex);
+      setCurrentRowIndex(newCurrentSubjectIndex);
       const nextSubjectTime = timezonedDayJS(
         newCurrentSubjectIndex === data.length - 1
           ? data[newCurrentSubjectIndex].endsAt
@@ -69,5 +67,5 @@ export function useTTNextSubject({
     };
   }, [isLoading, data, !!timeToNextSubject]);
 
-  return { timeToNextSubject, currentSubjectIndex };
+  return { timeToNextSubject, currentRowIndex };
 }

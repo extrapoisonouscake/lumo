@@ -20,11 +20,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SCHOOL_COOKIE_NAME } from "@/constants/cookies";
 import { KnownSchools } from "@/constants/schools";
-import { useFormValidation } from "@/hooks/use-form-validation";
-import { setSchool } from "@/lib/settings/mutations";
 import { cn } from "@/helpers/cn";
+import { useFormValidation } from "@/hooks/use-form-validation";
+import { setUserSetting } from "@/lib/settings/mutations";
+import { UserSetting } from "@/types/core";
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Image from "next/image";
@@ -65,7 +65,10 @@ export function SchoolPicker({
   const onSubmit = async ({ school }: FormFields) => {
     setIsOpen(false);
 
-    await setSchool(school === "other" ? undefined : (school as KnownSchools));
+    await setUserSetting(
+      "schoolId",
+      school === "other" ? undefined : (school as KnownSchools)
+    );
   };
   const [isMounted, setIsMounted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -103,7 +106,10 @@ export function SchoolPicker({
             }
             return (
               <FormItem className="flex flex-col">
-                <FormLabel htmlFor={SCHOOL_COOKIE_NAME} className="text-sm">
+                <FormLabel
+                  htmlFor={"schoolId" satisfies UserSetting}
+                  className="text-sm"
+                >
                   School
                 </FormLabel>
                 <Popover open={isOpen} onOpenChange={setIsOpen}>

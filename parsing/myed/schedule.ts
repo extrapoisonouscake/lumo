@@ -3,7 +3,7 @@ import * as cheerio from "cheerio";
 import { prettifySubjectName } from "@/helpers/prettifySubjectName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
-import dayjs, { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
 import { ParserFunctionArguments } from "./types";
 function getTableBody($: cheerio.CheerioAPI) {
@@ -61,7 +61,7 @@ export function parseSchedule(
 
   if ($tableBody.find(".listNoRecordsText").length > 0) return null;
 
-  const allSubjects = $tableBody
+  const subjects = $tableBody
     .children("tr")
     .not(".listHeader")
     .toArray()
@@ -93,25 +93,6 @@ export function parseSchedule(
     | undefined
   )[];
 
-  console.log(allSubjects);
   const weekday = getWeekday($tableBody);
-  return {
-    weekday,
-    subjects: [
-      {
-        startsAt: dayjs().subtract(1, "minute").toDate(),
-        endsAt: dayjs().add(5, "seconds").toDate(),
-        name: "Social Studies 10",
-        teachers: ["Mather, Alissa"],
-        room: "404",
-      },
-      {
-        startsAt: dayjs().add(10, "seconds").toDate(),
-        endsAt: dayjs().add(15, "seconds").toDate(),
-        name: "SocialesddfsdfssStudies 10",
-        teachers: ["Matsdfsher, Alissa"],
-        room: "4sdss04",
-      },
-    ],
-  };
+  return { weekday, subjects };
 }
