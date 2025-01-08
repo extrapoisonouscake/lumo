@@ -49,7 +49,7 @@ const columns = [
     header: "Name",
     cell: ({ row, cell }) => {
       if ("isBreak" in row.original) {
-        const emoji = row.original.isLunch ? "🍕" : "🏃";
+        const emoji = row.original.isLunch ? "🥪" : "🏃";
         return (
           <div className="flex items-center gap-[6px]">
             {row.original.isLunch ? "Lunch" : "Break"}{" "}
