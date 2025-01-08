@@ -236,7 +236,7 @@ export function ScheduleTable({
     <>
       {isLoading || typeof timeToNextSubject === "undefined" ? (
         <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
-          <p className="text-sm">00:00</p>
+          <p className="text-sm">00:00 left</p>
         </Skeleton>
       ) : (
         shouldShowTimer && (
