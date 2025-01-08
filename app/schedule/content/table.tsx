@@ -260,6 +260,7 @@ export function ScheduleTable({
         key={currentRowIndex}
         tableContainerClassName="overflow-clip"
         table={table}
+emptyText="No classes."
         columns={columns}
         rowRendererFactory={getRowRenderer}
       />
