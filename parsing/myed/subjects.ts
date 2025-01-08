@@ -1,4 +1,7 @@
-import { prettifySubjectName } from "@/helpers/prettifySubjectName";
+import {
+  prettifySubjectName,
+  TEACHER_ADVISORY_ABBREVIATION,
+} from "@/helpers/prettifySubjectName";
 import { Subject } from "@/types/school";
 import { ParserFunctionArguments } from "./types";
 
@@ -18,7 +21,7 @@ function separateTAFromSubjects(subject: Subject[]) {
   let removedItem: (typeof subject)[number] | null = null;
 
   subject.forEach((item) => {
-    if (item.name === "TA") {
+    if (item.name === TEACHER_ADVISORY_ABBREVIATION) {
       removedItem = item;
     } else {
       resultArray.push(item);

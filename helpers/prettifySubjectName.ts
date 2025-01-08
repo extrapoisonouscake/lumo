@@ -9,8 +9,9 @@ const educationAbbreviations = new Set([
   "UN",
   "AP",
 ]);
+export const TEACHER_ADVISORY_ABBREVIATION = "TA";
 const subjectsToAbbreviation: Record<string, string> = {
-  "teacher advisory": "TA",
+  "teacher advisory": TEACHER_ADVISORY_ABBREVIATION,
 };
 const smallWords = new Set([
   "a",

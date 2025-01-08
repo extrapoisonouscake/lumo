@@ -4,12 +4,27 @@ import {
   USER_SETTINGS_COOKIE_PREFIX,
   USER_SETTINGS_KEYS,
 } from "../../constants/core";
-
+const userSettingsDefaultValues: Partial<Record<UserSetting, any>> = {
+  shouldShowNextSubjectTimer: true,
+};
 export async function getUserSettings(): Promise<PartialUserSettings> {
   const store = cookies();
   const settings: Partial<Record<UserSetting, any>> = {}; //? workaround?
   for (const key of USER_SETTINGS_KEYS) {
-    settings[key] = store.get(`${USER_SETTINGS_COOKIE_PREFIX}.${key}`)?.value;
+    let value: any = store.get(`${USER_SETTINGS_COOKIE_PREFIX}.${key}`)?.value;
+    if (value) {
+      const valueAsNumber = +value;
+      if (!isNaN(valueAsNumber)) {
+        value = valueAsNumber;
+      } else if (value === "true") {
+        value = true;
+      } else if (value === "false") {
+        value = false;
+      }
+    } else {
+      value = userSettingsDefaultValues[key];
+    }
+    settings[key] = value;
   }
   return settings;
 }

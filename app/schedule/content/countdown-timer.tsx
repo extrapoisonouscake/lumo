@@ -24,7 +24,7 @@ export function CountdownTimer({
     countdown = "00:00";
   }
   return (
-    <p className="row-start-1 col-start-1 flex items-center">
+    <p className="row-start-1 col-start-1 flex items-center text-sm">
       {isBreak ? `Next class in ${countdown}` : `${countdown} left`}
     </p>
   );

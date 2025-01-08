@@ -1,4 +1,5 @@
-import { dayjs, timezonedDayJS } from "@/instances/dayjs";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { useEffect, useState } from "react";
 
@@ -23,29 +24,54 @@ export function useTTNextSubject({
     let newTimeoutId: NodeJS.Timeout;
     const refresh = () => {
       if (isLoading) return;
-      const now = timezonedDayJS();
-      const newCurrentSubjectIndex = data.findIndex((subject) =>
-        now.isBetween(subject.startsAt, subject.endsAt)
-      );
-      if (
-        newCurrentSubjectIndex === -1 &&
-        !dayjs(data[0]?.startsAt).isAfter(new Date())
-      ) {
+      const setNullValues = () => {
         setTimeToNextSubject(null);
         setCurrentRowIndex(null);
+      };
+      const now = timezonedDayJS();
+      if (
+        data.length === 0 ||
+        !now.isBetween(data[0].startsAt, data.at(-1)?.endsAt)
+      ) {
+        setNullValues();
         return;
       }
-      setCurrentRowIndex(newCurrentSubjectIndex);
-      const nextSubjectTime = timezonedDayJS(
-        newCurrentSubjectIndex === data.length - 1
-          ? data[newCurrentSubjectIndex].endsAt
-          : data[newCurrentSubjectIndex + 1].startsAt
+      const newCurrentRowIndex = data.findIndex((subject) =>
+        now.isBetween(subject.startsAt, subject.endsAt)
       );
-      const millisecondsToNextSubject = nextSubjectTime.diff(
+
+      if (newCurrentRowIndex === -1) {
+        setNullValues();
+        return;
+      }
+      setCurrentRowIndex(newCurrentRowIndex);
+      let nextRowStartingTimestamp, visibleNextRowStartingTimestamp;
+      const currentRow = data[newCurrentRowIndex];
+      const nextRow = data[newCurrentRowIndex + 1];
+      if (newCurrentRowIndex === data.length - 1) {
+        nextRowStartingTimestamp = currentRow.endsAt;
+        visibleNextRowStartingTimestamp = nextRowStartingTimestamp;
+      } else {
+        let rowsToSkip = 1;
+        if (nextRow.name === TEACHER_ADVISORY_ABBREVIATION) {
+          rowsToSkip = 3;
+        } else if (currentRow.name === TEACHER_ADVISORY_ABBREVIATION) {
+          rowsToSkip = 2;
+        }
+        nextRowStartingTimestamp = nextRow.startsAt;
+        visibleNextRowStartingTimestamp =
+          data[newCurrentRowIndex + rowsToSkip].startsAt; //TA is never the last class, no need to check for undefined
+      }
+      const timeToNextRow = timezonedDayJS(nextRowStartingTimestamp);
+      const visibleTimeToNextRow = timezonedDayJS(
+        visibleNextRowStartingTimestamp
+      );
+      const millisecondsToNextSubject = timeToNextRow.diff(now, "milliseconds");
+      const visibleMillisecondsToNextSubject = visibleTimeToNextRow.diff(
         now,
         "milliseconds"
       );
-      setTimeToNextSubject(millisecondsToNextSubject);
+      setTimeToNextSubject(visibleMillisecondsToNextSubject);
 
       if (timeoutId) clearTimeout(timeoutId);
       newTimeoutId = setTimeout(() => {

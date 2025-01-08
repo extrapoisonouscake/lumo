@@ -22,6 +22,7 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { useMemo } from "react";
@@ -211,7 +212,9 @@ export function ScheduleTable({
             row.original.startsAt,
             row.original.endsAt
           ),
-        "[&>td]:py-2": "isBreak" in row.original,
+        "[&>td]:py-2":
+          "isBreak" in row.original ||
+          row.original.name === TEACHER_ADVISORY_ABBREVIATION,
       });
     },
 
@@ -231,20 +234,28 @@ export function ScheduleTable({
   });
   return (
     <>
-      {shouldShowTimer &&
-        (isLoading || typeof timeToNextSubject === "undefined" ? (
-          <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
-            <p>10:00:00</p>
-          </Skeleton>
-        ) : (
+      {isLoading || typeof timeToNextSubject === "undefined" ? (
+        <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
+          <p className="text-sm">00:00</p>
+        </Skeleton>
+      ) : (
+        shouldShowTimer && (
           <CountdownTimer
             timeToNextSubject={timeToNextSubject}
-            isBreak={!!(currentRowIndex && "isBreak" in data[currentRowIndex])}
+            isBreak={
+              !!(
+                typeof currentRowIndex === "number" &&
+                ("isBreak" in data[currentRowIndex] ||
+                  data[currentRowIndex].name === TEACHER_ADVISORY_ABBREVIATION)
+              )
+            }
           />
-        ))}
+        )
+      )}
       <TableRenderer
         containerClassName={cn("col-span-2", {
-          "row-start-2": timeToNextSubject !== null || isWeekdayShown,
+          "row-start-2":
+            (shouldShowTimer && timeToNextSubject !== null) || isWeekdayShown,
         })}
         key={currentRowIndex}
         tableContainerClassName="overflow-clip"
