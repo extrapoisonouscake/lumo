@@ -34,6 +34,7 @@ function TableRendererComponent<T>({
   rowRendererFactory,
   containerClassName,
   tableContainerClassName,
+emptyText,
   ...props
 }: {
   table: TableType<T>;
@@ -43,6 +44,7 @@ function TableRendererComponent<T>({
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
+emptyText?:string
 }) {
   return (
     <div className={cn("rounded-md border", containerClassName)}>
@@ -91,8 +93,8 @@ function TableRendererComponent<T>({
             )
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No subjects.
+              <TableCell colSpan={columns.length} className="h-16 text-center">
+                {emptyText||"No content."}
               </TableCell>
             </TableRow>
           )}
