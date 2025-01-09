@@ -36,6 +36,7 @@ function TableRendererComponent<T>({
   containerClassName,
   tableContainerClassName,
   rowRendererFactoryProps,
+emptyText,
   ...props
 }: {
   table: TableType<T>;
