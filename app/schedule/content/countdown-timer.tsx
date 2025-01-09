@@ -1,3 +1,5 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
 const pad = (num: number) => `${num}`.padStart(2, "0");
 const MAX_MINUTES = 90;
 export function CountdownTimer({
@@ -27,5 +29,12 @@ export function CountdownTimer({
     <p className="row-start-1 col-start-1 flex items-center text-sm">
       {isBreak ? `Next class in ${countdown}` : `${countdown} left`}
     </p>
+  );
+}
+export function CountdownTimerSkeleton() {
+  return (
+    <Skeleton className="row-start-1 col-start-1 h-5 w-fit">
+      <p className="text-sm">00:00</p>
+    </Skeleton>
   );
 }

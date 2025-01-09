@@ -16,3 +16,4 @@ export const websitePages: Record<
   "/settings": { name: "Settings", icon: Settings },
   "/profile": { name: "Profile", isHiddenInSidebar: true },
 };
+export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";

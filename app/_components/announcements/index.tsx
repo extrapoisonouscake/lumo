@@ -6,15 +6,15 @@ import {
 } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKnownSchool } from "@/constants/schools";
+import { getUserSettings } from "@/lib/settings/queries";
 import { getAnnouncements } from "@/parsing/announcements/getAnnouncements";
-import { cookies } from "next/headers";
 import { AnnouncementsAccordions } from "./accordions";
 export const maxDuration = 60;
 export async function Announcements() {
-  const school = cookies().get("schoolId")?.value;
-  if (!school || !isKnownSchool(school)) return null;
+  const { schoolId } = await getUserSettings();
+  if (!schoolId || !isKnownSchool(schoolId)) return null;
 
-  const data = await getAnnouncements(school);
+  const data = await getAnnouncements(schoolId);
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm">Announcements</h3>

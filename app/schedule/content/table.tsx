@@ -12,7 +12,6 @@ import {
 } from "@tanstack/react-table";
 
 import { AppleEmoji } from "@/components/misc/apple-emoji";
-import { Skeleton } from "@/components/ui/skeleton";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
   RowRendererFactory,
@@ -24,9 +23,11 @@ import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { ScheduleSubject } from "@/types/school";
+import { ScheduleSubject, Subject } from "@/types/school";
+import { useRouter } from "next/navigation";
+import { Router } from "next/router";
 import { useMemo } from "react";
-import { CountdownTimer } from "./countdown-timer";
+import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
 type ScheduleSubjectRow =
   | ScheduleSubject
@@ -146,42 +147,56 @@ const prepareTableData = (data: ScheduleSubject[]) => {
 };
 const renderCell = <T, H>(cell: Cell<T, H>) =>
   flexRender(cell.column.columnDef.cell, cell.getContext());
-const getRowRenderer: RowRendererFactory<ScheduleSubjectRow> =
-  (table) => (row) => {
-    const cells = row.getVisibleCells();
-    const isBreak = "isBreak" in row.original;
-    let nameCell, timeCell;
-    if (isBreak) {
-      //!optimize?
-      timeCell = cells.find((cell) => cell.column.id === "Time");
-      nameCell = cells.find((cell) => cell.column.id === "name");
-    }
-    return (
-      <TableRow
-        key={row.id}
-        data-state={row.getIsSelected() && "selected"}
-        style={table.options.meta?.getRowStyles?.(row)}
-        className={table.options.meta?.getRowClassName?.(row)}
-      >
-        {isBreak ? (
-          <>
-            <TableCell>
-              {renderCell(timeCell as NonNullable<typeof timeCell>)}
-            </TableCell>
-            <TableCell colSpan={3}>
-              {renderCell(nameCell as NonNullable<typeof nameCell>)}
-            </TableCell>
-          </>
-        ) : (
-          cells.map((cell) => (
-            <TableCell key={cell.id}>
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </TableCell>
-          ))
-        )}
-      </TableRow>
-    );
-  };
+const getRowRenderer: RowRendererFactory<
+  ScheduleSubjectRow,
+  [Router["push"]]
+> = (table, push) => (row) => {
+  const cells = row.getVisibleCells();
+  const isBreak = "isBreak" in row.original;
+  let nameCell, timeCell;
+  if (isBreak) {
+    //!optimize?
+    timeCell = cells.find((cell) => cell.column.id === "Time");
+    nameCell = cells.find((cell) => cell.column.id === "name");
+  }
+  return (
+    <TableRow
+      onClick={
+        !isBreak
+          ? () =>
+              push(
+                `/classes/${(
+                  row.original as unknown as Subject
+                ).actualName.replaceAll(" ", "_")}`
+              )
+          : undefined //!
+      }
+      key={row.id}
+      data-state={row.getIsSelected() && "selected"}
+      style={table.options.meta?.getRowStyles?.(row)}
+      className={cn(table.options.meta?.getRowClassName?.(row), {
+        "cursor-pointer": !isBreak,
+      })}
+    >
+      {isBreak ? (
+        <>
+          <TableCell>
+            {renderCell(timeCell as NonNullable<typeof timeCell>)}
+          </TableCell>
+          <TableCell colSpan={3}>
+            {renderCell(nameCell as NonNullable<typeof nameCell>)}
+          </TableCell>
+        </>
+      ) : (
+        cells.map((cell) => (
+          <TableCell key={cell.id}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </TableCell>
+        ))
+      )}
+    </TableRow>
+  );
+};
 export function ScheduleTable({
   data: externalData,
   isLoading = false,
@@ -220,6 +235,7 @@ export function ScheduleTable({
 
     [currentRowIndex]
   );
+  const router = useRouter();
   const table = useReactTable<ScheduleSubject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -234,12 +250,10 @@ export function ScheduleTable({
   });
   return (
     <>
-      {isLoading || typeof timeToNextSubject === "undefined" ? (
-        <Skeleton className="row-start-1 col-start-1 h-6 w-fit">
-          <p className="text-sm">00:00</p>
-        </Skeleton>
-      ) : (
-        shouldShowTimer && (
+      {shouldShowTimer &&
+        (isLoading || typeof timeToNextSubject === "undefined" ? (
+          <CountdownTimerSkeleton />
+        ) : (
           <CountdownTimer
             timeToNextSubject={timeToNextSubject}
             isBreak={
@@ -250,8 +264,7 @@ export function ScheduleTable({
               )
             }
           />
-        )
-      )}
+        ))}
       <TableRenderer
         containerClassName={cn("col-span-2", {
           "row-start-2":
@@ -262,6 +275,7 @@ export function ScheduleTable({
         table={table}
         columns={columns}
         rowRendererFactory={getRowRenderer}
+        rowRendererFactoryProps={[router.push]}
       />
     </>
   );

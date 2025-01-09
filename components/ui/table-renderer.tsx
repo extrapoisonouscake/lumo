@@ -25,8 +25,9 @@ declare module "@tanstack/table-core" {
     getRowClassName?: (row: Row<TData>) => string;
   }
 }
-export type RowRendererFactory<T> = (
-  table: TableType<T>
+export type RowRendererFactory<T, Props extends any[] = any[]> = (
+  table: TableType<T>,
+  ...props: Props
 ) => (row: Row<T>) => ReactNode;
 function TableRendererComponent<T>({
   table,
@@ -34,12 +35,14 @@ function TableRendererComponent<T>({
   rowRendererFactory,
   containerClassName,
   tableContainerClassName,
+  rowRendererFactoryProps,
   ...props
 }: {
   table: TableType<T>;
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
   rowRendererFactory?: RowRendererFactory<T>;
+  rowRendererFactoryProps?: any[];
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
@@ -68,7 +71,7 @@ function TableRendererComponent<T>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map(
-              rowRendererFactory?.(table) ||
+              rowRendererFactory?.(table, ...(rowRendererFactoryProps || [])) ||
                 function (row) {
                   return (
                     <TableRow

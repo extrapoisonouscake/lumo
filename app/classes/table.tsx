@@ -75,7 +75,14 @@ const columnsSkeletons = makeTableColumnsSkeletons(columns, {
 });
 const mockSubjects = (length: number) =>
   [...Array(length)].map(
-    () => ({ gpa: 0, teachers: [], name: "", room: "" } satisfies Subject)
+    () =>
+      ({
+        gpa: 0,
+        teachers: [],
+        name: "",
+        room: "",
+        actualName: "",
+      } satisfies Subject)
   );
 export function SubjectsTable({
   data: externalData,

@@ -16,7 +16,53 @@ export const MYED_ENDPOINTS = {
   //* query parameters are mandatory to work
   login: "logon.do?mobile=1",
   subjects: "portalClassList.do?navkey=academics.classes.list",
+  subjectAssignments: ({ name }: { name?: string }) => [
+    "portalClassList.do?navkey=academics.classes.list",
+    (html) => {
+      const $ = cheerio.load(html);
+      const token = $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
+        .first()
+        .val();
+      const $tableContainer = $("#dataGrid");
+      if ($tableContainer.length === 0) throw new Error("");
 
+      if ($tableContainer.find(".listNoRecordsText").length > 0)
+        throw new Error("");
+
+      const foundSubject = $tableContainer
+        .find(".listCell")
+        .toArray()
+        .find((cell) => {
+          const texts = $(cell)
+            .children("td")
+            .toArray()
+            .map((td) => $(td).text().trim());
+          const actualName = texts[1];
+          return actualName === name;
+        });
+      if (!foundSubject) throw new Error("");
+
+      const subjectId = $(foundSubject)
+        .children("td:nth-child(2)")
+        .first()
+        .attr("id");
+      if (!subjectId) throw new Error("");
+      const params = new URLSearchParams({
+        [MYED_HTML_TOKEN_INPUT_NAME]: `${token}`,
+        userEvent: "2100",
+        userParam: subjectId,
+      });
+      return [
+        "portalClassList.do",
+        {
+          method: "POST",
+          body: params,
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        },
+      ];
+    },
+    "portalAssignmentList.do?navkey=academics.classes.list.gcd",
+  ],
   schedule: ({ day }: { day?: string }) => {
     const baseEndpoints: EndpointArrayResolveValue = [
       "studentScheduleContextList.do?navkey=myInfo.sch.list",

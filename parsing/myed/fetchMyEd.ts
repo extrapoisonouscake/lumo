@@ -17,6 +17,7 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import "server-only";
 import { getFullUrl } from "../../helpers/getEndpointUrl";
+import { parseSubjectAssignments } from "./assignments";
 import { parsePersonalDetails } from "./profile";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest, SendMyEdRequestParameters } from "./sendMyEdRequest";
@@ -27,6 +28,7 @@ const endpointToFunction = {
   schedule: parseSchedule,
   currentWeekday: parseCurrentWeekday,
   personalDetails: parsePersonalDetails,
+  subjectAssignments: parseSubjectAssignments,
 } as const satisfies {
   [K in MyEdFetchEndpoints]: (...args: ParserFunctionArguments<K>) => any;
 };

@@ -8,10 +8,15 @@ const fields: Array<
   }
 > = [
   { custom: SchoolPicker, key: "schoolId" },
-  { label: "Show Timer on Schedule", key: "shouldShowNextSubjectTimer" },
+  { label: "Show timer on schedule", key: "shouldShowNextSubjectTimer" },
+  {
+    label: "Show percentage for assignment score",
+    key: "shouldShowAssignmentScorePercentage",
+  },
 ];
 export async function SettingsContent() {
   const userSettings = await getUserSettings();
+  console.log({ userSettings });
   return fields.map((field) => {
     const initialValue = userSettings[field.key];
     if ("custom" in field) {

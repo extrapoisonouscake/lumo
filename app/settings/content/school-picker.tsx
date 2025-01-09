@@ -65,10 +65,7 @@ export function SchoolPicker({
   const onSubmit = async ({ school }: FormFields) => {
     setIsOpen(false);
 
-    await setUserSetting(
-      "schoolId",
-      school === "other" ? undefined : (school as KnownSchools)
-    );
+    await setUserSetting("schoolId", school as KnownSchools | "other");
   };
   const [isMounted, setIsMounted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);

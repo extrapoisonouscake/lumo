@@ -2,11 +2,10 @@ import { PartialUserSettings, UserSetting } from "@/types/core";
 import { cookies } from "next/headers";
 import {
   USER_SETTINGS_COOKIE_PREFIX,
+  USER_SETTINGS_DEFAULT_VALUES,
   USER_SETTINGS_KEYS,
 } from "../../constants/core";
-const userSettingsDefaultValues: Partial<Record<UserSetting, any>> = {
-  shouldShowNextSubjectTimer: true,
-};
+
 export async function getUserSettings(): Promise<PartialUserSettings> {
   const store = cookies();
   const settings: Partial<Record<UserSetting, any>> = {}; //? workaround?
@@ -22,7 +21,7 @@ export async function getUserSettings(): Promise<PartialUserSettings> {
         value = false;
       }
     } else {
-      value = userSettingsDefaultValues[key];
+      value = USER_SETTINGS_DEFAULT_VALUES[key];
     }
     settings[key] = value;
   }

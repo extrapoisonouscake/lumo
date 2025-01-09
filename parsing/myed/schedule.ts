@@ -82,6 +82,7 @@ export function parseSchedule(
         startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
         endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
         name: prettifySubjectName(name),
+        actualName: name,
         teachers: teachersString.split("; "),
         room: room || null,
       };

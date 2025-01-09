@@ -3,10 +3,11 @@ export interface Subject {
   teachers: string[];
   room: string | null;
   gpa: number | null;
+  actualName: string;
 }
 //? name?
 export type ScheduleSubject = Partial<
-  Pick<Subject, "name" | "room" | "teachers">
+  Pick<Subject, "name" | "room" | "teachers" | "actualName">
 > & {
   startsAt: Date;
   endsAt: Date;
@@ -35,4 +36,10 @@ export interface PersonalDetails {
   parkingSpaceNumber?: number;
   licensePlateNumber?: number;
   photoURL?: string;
+}
+export interface Assignment {
+  name: string;
+  dueDate: Date;
+  score: number | null;
+  maxScore: number | null;
 }

@@ -118,10 +118,14 @@ export async function ScheduleContent({ day }: Props) {
 export function ScheduleContentSkeleton({
   day,
 }: ComponentProps<typeof ScheduleContent>) {
+  const shouldShowTimer = timezonedDayJS().isSame(
+    locallyTimezonedDayJS(day),
+    "date"
+  );
   return (
     <GridLayout>
       {getActualWeekdayIndex(day) === 5 && (
-        <div className="row-start-1 col-start-2 w-full flex justify-end">
+        <div className="row-start-1 col-start-2 w-full flex justify-end [&:not(:has(+p))]:col-start-1 [&:not(:has(+p))]:justify-start">
           <div className="flex items-center gap-2">
             <h3 className="text-sm">Same as:</h3>
             <Skeleton>
@@ -131,7 +135,7 @@ export function ScheduleContentSkeleton({
         </div>
       )}
 
-      <ScheduleTable isLoading />
+      <ScheduleTable isLoading shouldShowTimer={shouldShowTimer} />
     </GridLayout>
   );
 }

@@ -1,4 +1,4 @@
-import { DATE_FORMAT } from "@/constants/core";
+import { INTERNAL_DATE_FORMAT } from "@/constants/core";
 import { KnownSchools } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
@@ -13,7 +13,9 @@ import { fileURLToPath } from "url";
 import { dailyAnnouncementsFileParser } from "./parsers";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const getAnnouncementsRedisKey = (school: KnownSchools, date?: Date) =>
-  `announcements:${school}:${timezonedDayJS(date).format(DATE_FORMAT)}`;
+  `announcements:${school}:${timezonedDayJS(date).format(
+    INTERNAL_DATE_FORMAT
+  )}`;
 export async function getAnnouncements(school: KnownSchools, date?: Date) {
   const redisKey = getAnnouncementsRedisKey(school, date);
   const cachedData = await redis.get(redisKey);

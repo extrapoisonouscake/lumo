@@ -48,12 +48,13 @@ export function parseSubjects(...[_, $]: ParserFunctionArguments<"subjects">) {
         .children("td")
         .toArray()
         .map((td) => $(td).text().trim());
-
+      const actualName = texts[1];
       return {
-        name: prettifySubjectName(`${texts[1]}`),
+        name: prettifySubjectName(`${actualName}`),
         teachers: `${texts[3]}`.split(";"),
         room: `${texts[4]}`,
         gpa: normalizeGPA(texts[5]),
+        actualName,
       };
     }) satisfies Subject[];
   return separateTAFromSubjects(data);
