@@ -52,11 +52,11 @@ const getColumns = (
     cell: ({ row }) => {
       const { score, maxScore } = row.original;
       if (!score || !maxScore) return NULL_VALUE_DISPLAY_FALLBACK;
-      return `${numberFormatter.format(score)} / ${numberFormatter.format(
+      return `${score} / ${
         maxScore
-      )}${
+      }${
         shouldShowAssignmentScorePercentage
-          ? ` (${numberFormatter.format(score / (maxScore / 100))}%)`
+          ? ` (${+((score / (maxScore / 100)).toFixed(2))}%)`
           : ""
       }`;
     },
