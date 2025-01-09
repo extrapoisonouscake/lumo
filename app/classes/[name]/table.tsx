@@ -44,6 +44,7 @@ const getColumns = (
       if (!value) return NULL_VALUE_DISPLAY_FALLBACK;
       return timezonedDayJS(value).format(VISIBLE_DATE_FORMAT);
     },
+sortDescFirst:true,
     sortUndefined: "last",
   }),
   columnHelper.display({
