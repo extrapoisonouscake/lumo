@@ -1,8 +1,6 @@
 "use client";
 import {
-  Cell,
   createColumnHelper,
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -12,7 +10,11 @@ import {
 } from "@tanstack/react-table";
 
 import { AppleEmoji } from "@/components/misc/apple-emoji";
-import { TableCell, TableRow } from "@/components/ui/table";
+import {
+  TableCell,
+  TableCellWithRedirectIcon,
+  TableRow,
+} from "@/components/ui/table";
 import {
   RowRendererFactory,
   TableRenderer,
@@ -22,6 +24,7 @@ import { cn } from "@/helpers/cn";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
+import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject, Subject } from "@/types/school";
 import { useRouter } from "next/navigation";
@@ -145,8 +148,7 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   }
   return filledIntervals;
 };
-const renderCell = <T, H>(cell: Cell<T, H>) =>
-  flexRender(cell.column.columnDef.cell, cell.getContext());
+
 const getRowRenderer: RowRendererFactory<
   ScheduleSubjectRow,
   [Router["push"]]
@@ -174,25 +176,29 @@ const getRowRenderer: RowRendererFactory<
       key={row.id}
       data-state={row.getIsSelected() && "selected"}
       style={table.options.meta?.getRowStyles?.(row)}
-      className={cn(table.options.meta?.getRowClassName?.(row), {
-        "cursor-pointer": !isBreak,
-      })}
+      className={table.options.meta?.getRowClassName?.(row)}
     >
       {isBreak ? (
         <>
           <TableCell>
-            {renderCell(timeCell as NonNullable<typeof timeCell>)}
+            {renderTableCell(timeCell as NonNullable<typeof timeCell>)}
           </TableCell>
           <TableCell colSpan={3}>
-            {renderCell(nameCell as NonNullable<typeof nameCell>)}
+            {renderTableCell(nameCell as NonNullable<typeof nameCell>)}
           </TableCell>
         </>
       ) : (
-        cells.map((cell) => (
-          <TableCell key={cell.id}>
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </TableCell>
-        ))
+        cells.map((cell, i) => {
+          const content = renderTableCell(cell);
+          const isLast = i === cells.length - 1;
+          return isLast ? (
+            <TableCellWithRedirectIcon key={cell.id}>
+              {content}
+            </TableCellWithRedirectIcon>
+          ) : (
+            <TableCell key={cell.id}>{content}</TableCell>
+          );
+        })
       )}
     </TableRow>
   );
@@ -227,6 +233,7 @@ export function ScheduleTable({
             row.original.startsAt,
             row.original.endsAt
           ),
+        "cursor-pointer": !("isBreak" in row.original),
         "[&>td]:py-2":
           "isBreak" in row.original ||
           row.original.name === TEACHER_ADVISORY_ABBREVIATION,

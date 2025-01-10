@@ -4,7 +4,6 @@ import {
   Announcements,
   AnnouncementsSkeleton,
 } from "./_components/announcements";
-
 export default async function Home() {
   return (
     <>

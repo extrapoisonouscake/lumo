@@ -6,6 +6,7 @@ import { unstructuredIO } from "@/instances/unstructured-io";
 import { PDFParsingPartitionElement } from "@/instances/unstructured-io/types";
 import { AnnouncementSection } from "@/types/school";
 import { waitUntil } from "@vercel/functions";
+import * as cheerio from "cheerio";
 import { writeFileSync } from "fs";
 import path from "path";
 import { Strategy } from "unstructured-client/sdk/models/shared";
@@ -23,16 +24,20 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
     const parsedData = JSON.parse(cachedData as string);
     return parsedData as AnnouncementSection[];
   }
-  const fetchBuffer = fetchFunctionsBySchool[school];
-  let buffer;
-  try {
-    buffer = await fetchBuffer(date);
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
-  const result = await parseAndCacheAnnouncements(buffer, school, redisKey);
-  return result;
+  waitUntil(
+    (async () => {
+      const fetchBuffer = fetchFunctionsBySchool[school];
+      let buffer;
+      try {
+        buffer = await fetchBuffer(date);
+      } catch (e) {
+        console.log(e);
+        return [];
+      }
+      await parseAndCacheAnnouncements(buffer, school, redisKey);
+    })()
+  );
+  return [];
 }
 const fetchFunctionsBySchool: Record<
   KnownSchools,
@@ -42,9 +47,26 @@ const fetchFunctionsBySchool: Record<
     //TODO Add email files check
     const parsedDate = timezonedDayJS(date);
     const year = parsedDate.year();
-    const directURL = `https://www.comoxvalleyschools.ca/mark-isfeld-secondary/wp-content/uploads/sites/44/${year}/${
-      parsedDate.month() + 1
-    }/DA-${parsedDate.format("MMM")}-${parsedDate.date()}-${year}.pdf`;
+    const homePageResponse = await fetch(
+      "https://www.comoxvalleyschools.ca/mark-isfeld-secondary"
+    );
+    if (!homePageResponse.ok) throw new Error("Failed to fetch home page");
+    const html = await homePageResponse.text();
+    const $ = cheerio.load(html);
+    console.log(
+      $(
+        `p:has(a:contains("Daily Announcements")) + p a:contains("${parsedDate.format(
+          "MMMM D, YYYY"
+        )}")`
+      ).prop("innerHTML")
+    );
+    const directURL = $(
+      `p:has(a:contains("Daily Announcements")) + p a:contains("${parsedDate.format(
+        "MMMM D, YYYY"
+      )}")`
+    ).prop("href");
+    if (!directURL) throw new Error("PDF link element not found");
+
     const response = await fetch(directURL);
     if (!response.ok) {
       throw new Error("Failed to fetch file directly");
@@ -81,7 +103,8 @@ export async function parseAndCacheAnnouncements(
     const parseElements = dailyAnnouncementsFileParser[school];
     preparedData =
       parseElements(elements as PDFParsingPartitionElement[]) || [];
-  } catch {
+  } catch (e) {
+    console.log(e);
     preparedData = [];
   }
   const now = timezonedDayJS();

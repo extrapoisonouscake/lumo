@@ -13,10 +13,13 @@ const fields: Array<
     label: "Show percentage for assignment score",
     key: "shouldShowAssignmentScorePercentage",
   },
+  {
+    label: "Highlight missing assignments",
+    key: "shouldHighlightMissingAssignments",
+  },
 ];
 export async function SettingsContent() {
   const userSettings = await getUserSettings();
-  console.log({ userSettings });
   return fields.map((field) => {
     const initialValue = userSettings[field.key];
     if ("custom" in field) {

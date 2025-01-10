@@ -1,6 +1,7 @@
 import * as React from "react";
 
 import { cn } from "@/helpers/cn";
+import { ArrowUpRight } from "lucide-react";
 export type TableProps = React.HTMLAttributes<HTMLTableElement> & {
   containerClassName?: string;
 };
@@ -10,7 +11,7 @@ const Table = React.forwardRef<HTMLTableElement, TableProps>(
       <table
         ref={ref}
         className={cn(
-          "w-full caption-bottom text-sm border-separate border-spacing-0",
+          "size-full caption-bottom text-sm border-separate border-spacing-0",
           className
         )}
         {...props}
@@ -92,6 +93,18 @@ const TableCell = React.forwardRef<
   />
 ));
 TableCell.displayName = "TableCell";
+
+export const TableCellWithRedirectIcon = React.forwardRef<
+  HTMLTableCellElement,
+  React.TdHTMLAttributes<HTMLTableCellElement>
+>(({ className, children, ...props }, ref) => (
+  <TableCell ref={ref} className="p-2 relative" {...props}>
+    <div className="flex gap-2 size-full justify-between">
+      <div className="p-2 pr-0 h-fit self-center">{children}</div>
+      <ArrowUpRight className="size-4 min-w-4 text-neutral-500" />
+    </div>
+  </TableCell>
+));
 
 const TableCaption = React.forwardRef<
   HTMLTableCaptionElement,

@@ -9,16 +9,26 @@ import {
 } from "@tanstack/react-table";
 
 import { SortableColumn } from "@/components/ui/sortable-column";
-import { TableRenderer } from "@/components/ui/table-renderer";
+import {
+  TableCell,
+  TableCellWithRedirectIcon,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  RowRendererFactory,
+  TableRenderer,
+} from "@/components/ui/table-renderer";
+import { fractionFormatter } from "@/constants/intl";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { cn } from "@/helpers/cn";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
+import { renderTableCell } from "@/helpers/tables";
 import { Subject } from "@/types/school";
+import { useRouter } from "next/navigation";
+import { Router } from "next/router";
 import { useMemo } from "react";
-const numberFormatter = new Intl.NumberFormat("en-CA", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 2,
-});
+
 const columnHelper = createColumnHelper<Subject>();
 const columns = [
   columnHelper.accessor("name", {
@@ -35,7 +45,7 @@ const columns = [
     cell: ({ row }) => {
       const gpa = row.getValue("gpa");
       if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
-      return numberFormatter.format(gpa as number);
+      return fractionFormatter.format(gpa as number);
     },
     sortUndefined: "last",
   }),
@@ -110,6 +120,42 @@ export function SubjectsTable({
         })
       )
     : {};
+  const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
+    (table, push) => (row) => {
+      const cells = row.getVisibleCells();
+
+      return (
+        <TableRow
+          onClick={() =>
+            push(
+              `/classes/${(
+                row.original as unknown as Subject
+              ).actualName.replaceAll(" ", "_")}`
+            )
+          }
+          key={row.id}
+          data-state={row.getIsSelected() && "selected"}
+          style={table.options.meta?.getRowStyles?.(row)}
+          className={cn(
+            table.options.meta?.getRowClassName?.(row),
+            "cursor-pointer"
+          )}
+        >
+          {cells.map((cell, i) => {
+            const content = renderTableCell(cell);
+            const isLast = i === cells.length - 1;
+            return isLast ? (
+              <TableCellWithRedirectIcon key={cell.id}>
+                {content}
+              </TableCellWithRedirectIcon>
+            ) : (
+              <TableCell key={cell.id}>{content}</TableCell>
+            );
+          })}
+        </TableRow>
+      );
+    };
+
   const table = useReactTable<Subject>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -123,5 +169,13 @@ export function SubjectsTable({
     manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
   });
-  return <TableRenderer table={table} columns={columns} />;
+  const router = useRouter();
+  return (
+    <TableRenderer
+      rowRendererFactory={getRowRenderer}
+      rowRendererFactoryProps={[router.push]}
+      table={table}
+      columns={columns}
+    />
+  );
 }

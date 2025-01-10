@@ -6,8 +6,10 @@ export const USER_SETTINGS_KEYS = [
   "schoolId",
   "shouldShowNextSubjectTimer",
   "shouldShowAssignmentScorePercentage",
+  "shouldHighlightMissingAssignments",
 ] as const satisfies Array<keyof PartialUserSettings>;
 export const USER_SETTINGS_DEFAULT_VALUES: Partial<Record<UserSetting, any>> = {
   shouldShowNextSubjectTimer: true,
   shouldShowAssignmentScorePercentage: true,
+  shouldHighlightMissingAssignments: true,
 };

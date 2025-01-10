@@ -1,12 +1,13 @@
 "use client";
-import { websitePages } from "@/constants/website";
-import { usePathname } from "next/navigation";
+import { getWebsitePageData } from "@/constants/website";
+import { useParams, usePathname } from "next/navigation";
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 
 export function PageHeading() {
   const pathname = usePathname();
-  const pageData = websitePages[pathname];
+  const params = useParams();
+  const pageData = getWebsitePageData(pathname, params);
 
   return (
     <div className="flex items-center gap-2">

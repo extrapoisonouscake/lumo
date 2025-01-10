@@ -37,9 +37,20 @@ export interface PersonalDetails {
   licensePlateNumber?: number;
   photoURL?: string;
 }
+export enum AssignmentStatus {
+  Unknown,
+  Ungraded,
+  Graded,
+  Missing,
+  Exempt,
+}
 export interface Assignment {
   name: string;
-  dueDate: Date;
+  dueAt: Date;
+  assignedAt: Date;
+  weight?: number;
+  feedback: string | null;
+  status: AssignmentStatus;
   score: number | null;
   maxScore: number | null;
 }

@@ -59,7 +59,12 @@ export const fetchMyEd = cache(async function <
       const endpointStepValue = endpointResolvedValue[i];
       let url;
       if (typeof endpointStepValue === "function") {
-        const rawUrlParams = endpointStepValue(htmlStrings[i - 1]);
+        let rawUrlParams;
+        try {
+          rawUrlParams = endpointStepValue(htmlStrings[i - 1]);
+        } catch {
+          return;
+        }
         if (Array.isArray(rawUrlParams)) {
           url = [
             getFullUrl(rawUrlParams[0]),
