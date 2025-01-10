@@ -103,7 +103,7 @@ export async function ScheduleContent({ day }: Props) {
   return (
     <GridLayout>
       {shouldShowWeekday && (
-        <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+p))]:col-start-1 [&:not(:has(+p))]:text-left">
+        <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
           Same as <span className="font-semibold">{data.weekday}</span>
         </h3>
       )}
@@ -125,7 +125,7 @@ export function ScheduleContentSkeleton({
   return (
     <GridLayout>
       {getActualWeekdayIndex(day) === 5 && (
-        <div className="row-start-1 col-start-2 w-full flex justify-end [&:not(:has(+p))]:col-start-1 [&:not(:has(+p))]:justify-start">
+        <div className="row-start-1 col-start-2 w-full flex justify-end [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:justify-start">
           <div className="flex items-center gap-2">
             <h3 className="text-sm">Same as</h3>
             <Skeleton>
