@@ -126,10 +126,10 @@ export function SubjectAssignmentsTable({
   data?: Assignment[];
   isLoading?: boolean;
   shouldShowAssignmentScorePercentage?: UserSettings["shouldShowAssignmentScorePercentage"];
-} & Pick<
+} & Partial<Pick<
   UserSettings,
   "shouldShowAssignmentScorePercentage" | "shouldHighlightMissingAssignments"
->) {
+>>) {
   const data = useMemo(
     () =>
       isLoading
