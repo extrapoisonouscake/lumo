@@ -26,14 +26,14 @@ export function CountdownTimer({
     countdown = "00:00";
   }
   return (
-    <p className="schedule-countdown row-start-1 col-start-1 flex items-center text-sm">
+    <p id="schedule-countdown" className="row-start-1 col-start-1 flex items-center text-sm">
       {isBreak ? `Next class in ${countdown}` : `${countdown} left`}
     </p>
   );
 }
 export function CountdownTimerSkeleton() {
   return (
-    <Skeleton className="schedule-countdown row-start-1 col-start-1 h-5 w-fit">
+    <Skeleton id="schedule-countdown" className="row-start-1 col-start-1 h-5 w-fit">
       <p className="text-sm">00:00</p>
     </Skeleton>
   );
