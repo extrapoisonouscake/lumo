@@ -8,7 +8,7 @@ export function parseSubjectAssignments(
   const $tableContainer = $("#dataGrid");
   if ($tableContainer.length === 0) return null;
 
-  if ($tableContainer.find(".listNoRecordsText").length > 0) return null;
+  if ($tableContainer.find(".listNoRecordsText").length > 0) return [];
   const data = $tableContainer
     .find(".listCell")
     .toArray()
