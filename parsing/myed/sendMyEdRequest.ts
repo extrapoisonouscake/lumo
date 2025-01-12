@@ -1,7 +1,9 @@
 import {
-  EndpointReturnTypes,
+  FlatParsingRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
+  MYED_HTML_TOKEN_INPUT_NAME,
 } from "@/constants/myed";
+import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
 import { headers } from "next/headers";
 import "server-only";
 import { clientQueueManager } from "./requests-queue";
@@ -9,7 +11,7 @@ import { clientQueueManager } from "./requests-queue";
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 export type SendMyEdRequestParameters = {
-  urlOrParams: EndpointReturnTypes;
+  step: FlatParsingRouteStep;
   session: string;
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
@@ -19,9 +21,13 @@ export type SendMyEdRequestParameters = {
   | { requestGroup?: never; isLastRequest?: never }
   | { requestGroup: string; isLastRequest: boolean }
 );
+const getUserAgent = () => {
+  const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
+  return userAgent;
+};
 export async function sendMyEdRequest({
   authCookies,
-  urlOrParams,
+  step,
   session,
   isLastRequest,
   requestGroup,
@@ -29,7 +35,7 @@ export async function sendMyEdRequest({
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
   ).join("; ");
-  const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
+  const userAgent = getUserAgent();
   const initHeaders = {
     Cookie: cookiesString,
     "User-Agent": userAgent,
@@ -45,29 +51,36 @@ export async function sendMyEdRequest({
     "Sec-Fetch-Mode": "navigate",
     "Sec-Fetch-Site": "same-origin",
   };
-  let params: [string, RequestInit];
-  if (typeof urlOrParams === "string") {
-    params = [
-      urlOrParams,
-      {
-        headers: initHeaders,
+  let params: RequestInit = { method: step.method, headers: initHeaders };
+  if (step.method === "POST") {
+    params = {
+      ...params,
+
+      headers: {
+        ...params.headers,
+        "Content-Type": step.contentType,
       },
-    ];
-  } else {
-    const fullHeaders = { ...initHeaders, ...urlOrParams[1]?.headers };
-    params = [
-      urlOrParams[0],
-      {
-        ...urlOrParams[1],
-        headers: fullHeaders,
-      },
-    ];
+    };
+    if (step.contentType === "application/x-www-form-urlencoded") {
+      params.body = new URLSearchParams({
+        ...step.body,
+        [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken,
+      });
+    } else if (step.contentType === "form-data") {
+      const formData = new FormData();
+      for (const [key, value] of Object.entries(step.body)) {
+        formData.append(key, value);
+      }
+      formData.append(MYED_HTML_TOKEN_INPUT_NAME, step.htmlToken);
+      params.body = formData;
+    }
   }
+  const args: [string, RequestInit] = [getFullMyEdUrl(step.path), params];
+
   const queue = clientQueueManager.getQueue(session);
+
   const response = await queue.enqueue(
-    async () => {
-      return fetch(...params);
-    },
+    () => fetch(...args),
     requestGroup,
     isLastRequest
   );

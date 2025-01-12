@@ -7,10 +7,12 @@ import {
 import {
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
+  MYED_ROUTES,
   MYED_SESSION_COOKIE_NAME,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { getEndpointUrl } from "@/helpers/getEndpointUrl";
+import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
+
 import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
@@ -78,7 +80,7 @@ export async function fetchAuthCookiesAndUserID(
   username: string,
   password: string
 ) {
-  const loginTokenResponse = await fetch(getEndpointUrl("login"), {
+  const loginTokenResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
     credentials: "include",
   });
   if (!loginTokenResponse.ok) {
@@ -106,7 +108,7 @@ export async function fetchAuthCookiesAndUserID(
   const cookiesString = loginTokenResponse.headers.getSetCookie();
   if (!cookiesString) throw new Error("Failed"); //!
   const cookiesToAdd = Object.entries(cookie.parse(cookiesString.join("; ")));
-  const loginResponse = await fetch(getEndpointUrl("login"), {
+  const loginResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
     method: "POST",
     body: loginFormData,
     headers: {
@@ -153,11 +155,11 @@ function parseLoginErrorMessage(html: string) {
 }
 export async function deleteSession(externalStore?: PlainCookieStore) {
   const cookieStore = new MyEdCookieStore(cookies() || externalStore);
-  const url = getEndpointUrl("logout");
+  const step = MYED_ROUTES.logout({})[Symbol.iterator]().next().value;
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (session) {
     await sendMyEdRequest({
-      urlOrParams: url,
+      step: step as Exclude<typeof step, void>,
       session,
       authCookies: getAuthCookies(cookieStore),
     });

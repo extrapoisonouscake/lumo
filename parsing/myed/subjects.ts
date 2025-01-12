@@ -18,7 +18,7 @@ const normalizeGPA = (string?: string) => {
 // };
 function separateTAFromSubjects(subject: Subject[]) {
   const resultArray: typeof subject = [];
-  let removedItem: (typeof subject)[number] | null = null;
+  let removedItem;
 
   subject.forEach((item) => {
     if (item.name === TEACHER_ADVISORY_ABBREVIATION) {
@@ -30,7 +30,7 @@ function separateTAFromSubjects(subject: Subject[]) {
 
   return {
     main: resultArray,
-    teacherAdvisory: removedItem,
+    teacherAdvisory: (removedItem as unknown as Subject) ?? null,
   };
 }
 export function parseSubjects(...[_, $]: ParserFunctionArguments<"subjects">) {
