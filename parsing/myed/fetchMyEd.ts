@@ -72,7 +72,7 @@ export const fetchMyEd = cache(async function <
   ) as MyEdEndpointResponse<Endpoint>;
 });
 
-type MyEdEndpointResponse<T extends MyEdParsingRoute> = Exclude<
+export type MyEdEndpointResponse<T extends MyEdParsingRoute> = Exclude<
   ReturnType<(typeof endpointToFunction)[T]>,
   null
 >;
