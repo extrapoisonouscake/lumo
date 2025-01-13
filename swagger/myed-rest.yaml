@@ -1,0 +1,515 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger MyEd REST API
+servers:
+  - url: https://myeducation.bc.gov.ca/aspen/rest
+paths:
+  /users/currentUser:
+    get:
+      summary: Get the current user
+      operationId: getCurrentUser
+      tags:
+        - users
+      responses:
+        200:
+          description: The current user
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/User"
+  /users/students:
+    get:
+      summary: Get all students associated with the current user
+      operationId: getStudents
+      tags:
+        - users
+      responses:
+        200:
+          description: The list of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+  /users/currentUserPreferences:
+    get:
+      summary: Get the current user preferences
+      operationId: getCurrentUserPreferences
+      tags:
+        - users
+      responses:
+        200:
+          description: The current user preferences
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - selectedLocale
+                  - emailPrimary
+                  - emailPrimaryDisabled
+                  - selectedSecurityQuestion
+                  - securityAnswer
+                  - passwordRequirement
+                  - errorsPasswordValidation #can be empty
+                  - errorsSaveData #can be empty
+                  - localeName
+                  - securityQuestion
+                  - minPassLength
+                  - disabledLanguages #can be empty
+                properties:
+                  selectedLocale:
+                    type: string
+                    enum:
+                      - "Canada"
+                      - "French (Canada)"
+                      - US
+                  emailPrimary:
+                    type: string
+                  emailPrimaryDisabled:
+                    type: boolean
+                  emailAlternate:
+                    type: string
+                  emailAlternateDisabled:
+                    type: boolean
+                  emailGoogleDoc:
+                    type: string
+                  emailGoogleDocDisabled:
+                    type: boolean
+                  portalPhonePrimary:
+                    type: string
+                  portalPhonePrimaryLabel:
+                    type: string
+                  portalPhoneValidationExpression:
+                    type: string
+                  hidePortalPhonePrimary:
+                    type: boolean
+                  selectedSecurityQuestion:
+                    type: string
+                  securityAnswer:
+                    type: string
+                    format: hash
+                  password:
+                    type: string
+                  passwordRequirement:
+                    type: array
+                    items:
+                      type: string
+                  errorsPasswordValidation:
+                    type: array
+                    items:
+                      type: string
+                  errorsSaveData:
+                    type: array
+                    items:
+                      type: string
+                  localeName:
+                    type: array
+                    items:
+                      type: string
+                  securityQuestion:
+                    type: array
+                    items:
+                      type: string
+                  minPassLength:
+                    type: integer
+                  disabledLanguages:
+                    type: array
+                    items:
+                      type: string
+  /workflows/enabled:
+    get:
+      summary: Determine if the workflows are enabled
+      operationId: getAreWorkflowsEnabled
+      tags:
+        - workflows
+      responses:
+        200:
+          description: A boolean value indicating if the workflows are enabled
+          content:
+            text/plain:
+              schema:
+                type: boolean
+  /pages/homepage:
+    get:
+      summary: Get the homepage data
+      operationId: getHomepage
+      tags:
+        - pages
+      responses:
+        200:
+          description: The homepage
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Page"
+  /resources:
+    get:
+      summary: Get the data of the "Group Resources" section on the homepage
+      operationId: getGroupResourcesData
+      tags:
+        - resources
+      responses:
+        200:
+          description: The list of group resources
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - name
+                    - id
+                    - type
+                  properties:
+                    name:
+                      type: string
+                    id:
+                      type: string
+                    type:
+                      type: string
+                      enum:
+                        - "cttWebLink    "
+  /students/STD00000L0HTGY/tasks:
+    get:
+      summary: Get the tasks for a student
+      operationId: getStudentTasks
+      tags:
+        - students
+      responses:
+        200:
+          description: The list of tasks
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - submissions
+                  - todaysTasks
+                  - tomorrowsTasks
+                  - longTermTasks
+                  - overdueTasks
+                properties:
+                  submissions:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentTask"
+                  todaysTasks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentTask"
+                  tomorrowsTasks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentTask"
+                  longTermTasks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentTask"
+                  overdueTasks: #can't be trusted
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StudentTask"
+components:
+  schemas:
+    BooleanAsString:
+      type: string
+      enum:
+        - true
+        - false
+    NumberAsString:
+      type: string
+      format: int32
+    WeekDay:
+      type: integer
+      #starts from Sunday
+      enum:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+    User:
+      required:
+        - clLicense
+        - dateFormat
+        - districtName
+        - firstName
+        - googleApi
+        - locale
+        - menuAccess
+        - nameView
+        - notificationsEnabled
+        - personOid
+        - saclLicense
+        - timeoutInSeconds
+        - userType
+      properties:
+        clLicense:
+          $ref: "#/components/schemas/BooleanAsString"
+        dateFormat:
+          type: string
+        districtName:
+          type: string
+        firstName:
+          type: string
+        googleApi:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+        locale:
+          $ref: "#/components/schemas/Locale"
+        menuAccess:
+          type: object
+          properties:
+            conduct:
+              type: boolean
+            assignment:
+              type: boolean
+            payment:
+              type: boolean
+            attendance:
+              type: boolean
+        nameView:
+          type: string
+        notificationsEnabled:
+          $ref: "#/components/schemas/BooleanAsString"
+        personOid:
+          type: string
+        photoPath:
+          type: string
+        saclLicense:
+          $ref: "#/components/schemas/BooleanAsString"
+        schoolImgPath:
+          type: string
+        staffOid:
+          type: string
+        timeoutInSeconds:
+          $ref: "#/components/schemas/NumberAsString"
+        userType:
+          $ref: "#/components/schemas/UserType"
+    Locale:
+      type: string
+      enum:
+        - en_US
+        - en_CA
+        - fr_CA
+    UserType:
+      type: string
+      enum:
+        - STUDENT
+        - STAFF
+        - FAMILY
+    Student:
+      required:
+        - name
+        - studentOid
+        - userOid
+        - currentWeekAttendance
+      properties:
+        name:
+          type: string
+        photo:
+          type: string
+        studentOid:
+          type: string
+        userOid:
+          type: string
+          enum:
+            - ""
+        currentWeekAttendance:
+          type: array
+          items:
+            $ref: "#/components/schemas/AttendanceEntry"
+    AttendanceEntry:
+      required:
+        - date
+        - absent
+        - weekDay
+        - tardy
+        - excused
+        - inSession
+        - dismissed
+      properties:
+        date:
+          type: number
+          format: int64
+        absent:
+          type: boolean
+        weekDay:
+          $ref: "#/components/schemas/WeekDay"
+        tardy:
+          type: boolean
+        excused:
+          type: boolean
+        inSession:
+          type: boolean
+        dismissed:
+          type: boolean
+    Page:
+      type: object
+      required:
+        - id
+        - title
+        - icon
+        - category
+        - tabs
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        icon:
+          type: string
+        category:
+          type: string
+        tabs:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - title
+              - widgets
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              widgets:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - widgetId
+                    - title
+                    - position
+                    - order
+                  properties:
+                    id:
+                      type: string
+                    widgetId:
+                      type: string
+                    title:
+                      type: string
+                    position:
+                      type: string
+                      enum:
+                        - left
+                        - right
+                        - top
+                        - bottom
+                    order:
+                      type: integer
+    StudentTask:
+      type: object
+      required:
+        - name
+        - description
+        - classDescription
+        - attachments
+        - oid
+        - dateDue
+        - staffGoogleDriveAccessConfigured
+        - categoryOid
+        - classAverage
+        - onlineSubmissionEnabled
+        - scoreElements
+        - totalPoints
+        - term
+        - category
+        - columnCode
+        - hideFromGradeInput
+        - assignedDate
+        - dueDate
+        - isUngradedAssignment
+        - hasStudentEditableGoogleDriveFile
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          description: "The description for the task, can be empty"
+        classDescription:
+          type: string
+        attachments:
+          type: array
+          items: {}
+        oid:
+          type: string
+        dateDue:
+          type: number
+          format: int64
+        staffGoogleDriveAccessConfigured:
+          type: boolean
+        categoryOid:
+          type: string
+        classAverage:
+          $ref: "#/components/schemas/NumberAsString"
+          description: "The class average for the task, can be empty"
+        onlineSubmissionEnabled:
+          type: boolean
+        remark:
+          type: string
+        scoreElements:
+          type: array
+          items:
+            type: object
+            properties:
+              specialCode:
+                type: boolean
+              score:
+                type: string
+              scoreLabel:
+                type: string
+              gradebookColumnDefinitionOid:
+                type: string
+              gradebookScore:
+                type: string
+              assignmentRepositoryItemOid:
+                type: string
+              questionSetInstanceOid:
+                type: string
+              gradedQuizReviewIndicator:
+                type: boolean
+              scorePercent:
+                type: string
+              scoreMessage:
+                type: string
+              scoreOverride:
+                type: string
+              scoreDescription:
+                type: string
+              pointMax:
+                type: string
+              standardBased:
+                type: boolean
+        totalPoints:
+          type: number
+        term:
+          type: string
+        category:
+          type: string
+        gradeScale:
+          type: string
+        columnCode:
+          type: string
+        hideFromGradeInput:
+          type: boolean
+        assignedDate:
+          type: number
+          format: int64
+        dueDate:
+          type: number
+          format: int64
+        isUngradedAssignment:
+          type: boolean
+        hasStudentEditableGoogleDriveFile:
+          type: boolean
