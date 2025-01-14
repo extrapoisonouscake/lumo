@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: Swagger MyEd REST API
 servers:
-  - url: https://myeducation.bc.gov.ca/aspen/rest
+  - url: https://myeducation.gov.bc.ca/aspen/rest
 paths:
   /users/currentUser:
     get:
@@ -173,12 +173,18 @@ paths:
                       type: string
                       enum:
                         - "cttWebLink    "
-  /students/STD00000L0HTGY/tasks:
+  /students/{studentOid}/tasks:
     get:
       summary: Get the tasks for a student
       operationId: getStudentTasks
       tags:
         - students
+      parameters:
+        - name: studentOid
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: The list of tasks
@@ -196,25 +202,390 @@ paths:
                   submissions:
                     type: array
                     items:
-                      $ref: "#/components/schemas/StudentTask"
+                      $ref: "#/components/schemas/StudentAssignment"
                   todaysTasks:
                     type: array
                     items:
-                      $ref: "#/components/schemas/StudentTask"
+                      $ref: "#/components/schemas/StudentAssignment"
                   tomorrowsTasks:
                     type: array
                     items:
-                      $ref: "#/components/schemas/StudentTask"
+                      $ref: "#/components/schemas/StudentAssignment"
                   longTermTasks:
                     type: array
                     items:
-                      $ref: "#/components/schemas/StudentTask"
+                      $ref: "#/components/schemas/StudentAssignment"
                   overdueTasks: #can't be trusted
                     type: array
                     items:
-                      $ref: "#/components/schemas/StudentTask"
+                      $ref: "#/components/schemas/StudentAssignment"
+  /lists/academics.classes.list:
+    get:
+      summary: Get the list of classes for a student
+      operationId: getStudentClasses
+      parameters:
+        - name: count
+          in: query
+          schema:
+            type: integer
+        - name: customParams
+          in: query
+          schema:
+            type: string
+        - name: fieldSetOid
+          in: query
+          schema:
+            type: string
+        - name: filter
+          in: query
+          description: "can be ###all"
+          schema:
+            type: string
+        - name: offset
+          in: query
+          schema:
+            type: integer
+        - name: selectedStudent
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: unique
+          in: query
+          schema:
+            type: boolean
+      tags:
+        - lists
+      responses:
+        200:
+          description: The list of classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    oid:
+                      type: string
+                    relSscMstOid_mstDescription:
+                      type: string
+                    relSscMstOid_mstStaffView:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          email:
+                            type: string
+                    relSscMstOid_relMstCskOid_cskGrdInpHide:
+                      type: boolean
+                    cfTermAverage:
+                      $ref: "#/components/schemas/NumberAsString"
+  /lists/academics.classes.list/studentGradeTerms:
+    get:
+      summary: Get the grade terms for a student
+      operationId: getStudentGradeTerms
+      tags:
+        - lists
+      parameters:
+        - name: selectedStudent
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - current
+              - '??'
+        - name: term
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - current
+              - '??'
+      responses:
+        200:
+          description: The list of grade terms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GradeTerm"
+  /studentSchedule/{subjectOid}/academics:
+    get:
+      summary: Get the student academics
+      operationId: getStudentAcademics
+      tags:
+        - students
+      parameters:
+        - name: subjectOid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: selectedStudent
+          in: query
+          schema:
+            type: string
+        - name: properties
+          in: query
+          description: "additional properties for the \"section\" object, e.g. relSscMstOid.mstDescription adds as relSscMstOid_mstDescription"
+          schema:
+            type: string
+      responses:
+        200:
+          description: The student academics
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - section
+                  - terms
+                  - hideFromGradeInput
+                  - adjustedIconTitle
+                  - averageSummary
+                  - attendanceSummary
+                  - cumulativeAverageLabel
+                  - currentGradeTermIndex
+                properties:
+                  section:
+                    type: object
+                    required:
+                      - oid
+                    properties:
+                      oid:
+                        type: string
+                      relSscMstOid_mstDescription:
+                        type: string
+                      relSscMstOid_mstCourseView:
+                        type: string
+                  terms:
+                    type: array
+                    items:
+                      type: string
+                  hideFromGradeInput:
+                    type: boolean
+                  adjustedIconTitle:
+                    type: string
+                  averageSummary:
+                    type: array
+                    description: "The average summary for the subjects, each includes percentages for all terms as string-number and percentage{TERM} properties with a percent symbol included"
+                    items:
+                      type: object
+                      required:
+                        - categoryOid
+                        - overall
+                        - category
+                      properties:
+                        categoryOid:
+                          type: string
+                        overall:
+                          $ref: "#/components/schemas/NumberAsString"
+                        category:
+                          type: string
+                  attendanceSummary:
+                    type: array
+                    description: "The attendance summary for the subjects, each item includes properties for the number of absences for each term, with term id as key"
+                    items:
+                      type: object
+                      required:
+                        - total
+                        - type
+                      properties:
+                        total:
+                          type: integer
+                        type:
+                          type: string
+                          enum:
+                            - Absent
+                            - Tardy
+                            - Dismissed
+                  cumulativeAverageLabel:
+                    type: string
+                  currentGradeTermIndex:
+                    type: string
+                  postedSummary:
+                    type: array
+                    description: "The posted summary for the subjects, each item includes properties for each term with the term id as key"
+                    items:
+                      type: object
+                      required:
+                        - overall
+                        - category
+                      properties:
+                        overall:
+                          $ref: "#/components/schemas/NumberAsString"
+                        category:
+                          type: string
+                  standardSummary:
+                    type: array
+                    description: "The standard summary for the subjects, each item includes properties for each term with the term id as key"
+                    items:
+                      $ref: "#/components/schemas/AnyValue"
+                  teacherEmail:
+                    type: array
+                    items:
+                      type: string
+                  gradeRunningTotals:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AnyValue"
+                  gradeRunningTotalsDisplay:
+                    type: boolean
+                  displayCategoryRunningAverageOnly:
+                    type: boolean
+                  overallCumulativeAvgDisplay:
+                    type: boolean
+                  overallCumulativeAvg:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - runningTotal
+                      properties:
+                        runningTotal:
+                          $ref: "#/components/schemas/NumberAsString"
+                  portalNotes:
+                    type: string
+                  standardsAverageLabel:
+                    type: string
+                  displayLettersOnly:
+                    type: boolean
+                  showRunningAverages:
+                    type: boolean
+                  hideFromAttendance:
+                    type: boolean
+  /studentSchedule/{subjectOid}/gradeTerms:
+    get:
+      summary: Get the grade terms for a subject
+      operationId: getSubjectGradeTerms
+      tags:
+        - students
+      parameters:
+        - name: subjectOid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: selectedStudent
+          in: query
+          schema:
+            type: string
+        - name: properties
+          in: query
+          description: "additional properties"
+          schema:
+            type: string
+      responses:
+        200:
+          description: The list of grade terms
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - currentTerm
+                  - terms
+                properties:
+                  currentTerm:
+                    $ref: "#/components/schemas/GradeTerm"
+                  terms:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/GradeTerm"
+                  currentTermIndex:
+                    type: integer
+  /studentSchedule/{subjectOid}/categoryDetails/pastDue:
+    get:
+      summary: Get the past due assignments for a subject
+      operationId: getPastDueAssignments
+      tags:
+        - students
+      parameters:
+        - name: subjectOid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: categoryOid
+          in: query
+          schema:
+            type: string
+        - name: gradeTermOid
+          in: query
+          schema:
+            type: string
+        - name: selectedStudent
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: The past due assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StudentAssignment"
+  /studentSchedule/{subjectOid}/categoryDetails/upcoming:
+    get:
+      summary: Get the upcoming assignments for a subject
+      operationId: getUpcomingAssignments
+      tags:
+        - students
+      parameters:
+        - name: subjectOid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: categoryOid
+          in: query
+          schema:
+            type: string
+        - name: gradeTermOid
+          in: query
+          schema:
+            type: string
+        - name: selectedStudent
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: integer
+      responses:
+        200:
+          description: The upcoming assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StudentAssignment"
 components:
   schemas:
+    AnyValue: {}
     BooleanAsString:
       type: string
       enum:
@@ -408,7 +779,7 @@ components:
                         - bottom
                     order:
                       type: integer
-    StudentTask:
+    StudentAssignment:
       type: object
       required:
         - name
@@ -441,7 +812,8 @@ components:
           type: string
         attachments:
           type: array
-          items: {}
+          items:
+            $ref: "#/components/schemas/AnyValue"
         oid:
           type: string
         dateDue:
@@ -513,3 +885,46 @@ components:
           type: boolean
         hasStudentEditableGoogleDriveFile:
           type: boolean
+    GradeTerm:
+      type: object
+      required:
+        - gradeTermId
+        - oid
+      properties:
+        gradeTermId:
+          type: string
+        oid:
+          type: string
+  securitySchemes:
+    cookieAuth: 
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+    cookieAffinity:
+      type: apiKey
+      in: cookie
+      name: ApplicationGatewayAffinity
+    cookieAffinityCORS:
+      type: apiKey
+      in: cookie
+      name: ApplicationGatewayAffinityCORS
+  responses:
+    NotAuthorized:
+      description: The requester is unauthorized.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: string
+                enum:
+                  - "-1"
+              message:
+                type: string
+                enum:
+                  - "You are not authorized to access this resource."
+security:
+  - cookieAuth: []
+  - cookieAffinity: []
+  - cookieAffinityCORS: []
