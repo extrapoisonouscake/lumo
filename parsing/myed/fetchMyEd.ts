@@ -29,23 +29,18 @@ const endpointToFunction = {
 } as const satisfies {
   [K in MyEdParsingRoute]: (...args: ParserFunctionArguments<K>) => any;
 };
-
-export const sessionExpiredIndicator: unique symbol = Symbol();
-//* the original website appears to be using the server to store user navigation
-// * to get to some pages, an additional request has to be sent OR follow redirects
-
 export const fetchMyEd = cache(async function <
   Endpoint extends MyEdParsingRoute
 >(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
   const cookieStore = new MyEdCookieStore(cookies());
-  let finalResponse;
+
   const authCookies = getAuthCookies(cookieStore);
 
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (!session) return;
   const userID = decodeJwt(session).userID as string;
   const restWithUserID = [
-    { userID, ...rest[0] },
+    { userID, ...(rest[0] || {}) },
   ] as MyEdEndpointsParamsWithUserID<Endpoint>; //?!
   const steps = MYED_ROUTES[endpoint](...restWithUserID);
 
@@ -61,9 +56,6 @@ export const fetchMyEd = cache(async function <
     });
 
     steps.addDocument(cheerio.load(await response.text()));
-    if (isLastRequest) {
-      finalResponse = response;
-    }
   }
 
   return endpointToFunction[endpoint](
