@@ -12,15 +12,15 @@ const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 export type SendMyEdRequestParameters = {
   step: FlatParsingRouteStep;
-  session: string;
+  session?: string;
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
   >;
 } & (
-  | { requestGroup?: never; isLastRequest?: never }
-  | { requestGroup: string; isLastRequest: boolean }
-);
+    | { requestGroup?: never; isLastRequest?: never }
+    | { requestGroup: string; isLastRequest: boolean }
+  );
 const getUserAgent = () => {
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
   return userAgent;
@@ -76,13 +76,19 @@ export async function sendMyEdRequest({
     }
   }
   const args: [string, RequestInit] = [getFullMyEdUrl(step.path), params];
+  let response: Response
+  const promise = fetch(...args)
+  if (session) {
+    const queue = clientQueueManager.getQueue(session);
 
-  const queue = clientQueueManager.getQueue(session);
-
-  const response = await queue.enqueue(
-    () => fetch(...args),
-    requestGroup,
-    isLastRequest
-  );
+    response = await queue.enqueue(
+      () => promise,
+      requestGroup,
+      isLastRequest
+    );
+  } else {
+    response = await promise
+  }
+  console.log({ step })
   return response;
 }

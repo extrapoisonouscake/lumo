@@ -1,3 +1,4 @@
+import { paths } from "@/types/myed-rest";
 import CallableInstance from "callable-instance";
 import * as cheerio from "cheerio";
 
@@ -175,20 +176,59 @@ export const myEdParsingRoutes = {
     path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
   }),
 
-  // personalDetails: new ParsingRoute()
-  //   .step({
-  //     method: "GET",
-  //     path: "portalStudentDetail.do?navkey=myInfo.details.detail",
-  //   })
-  //   .step({
-  //     method: "POST",
-  //     path: "portalStudentDetail.do?navkey=myInfo.details.detail",
-  //     body: {
-  //       userEvent: "2030",
-  //       userParam: "2",
-  //     },
-  //     contentType: "application/x-www-form-urlencoded",
-  //   }),
+  personalDetails: new ParsingRoute()
+    .step({
+      method: "GET",
+      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+    })
+    .step({
+      method: "POST",
+      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      body: {
+        userEvent: "2030",
+        userParam: "2",
+      },
+      contentType: "application/x-www-form-urlencoded",
+    }),
 };
 export type MyEdParsingRoutes = typeof myEdParsingRoutes;
 export type MyEdParsingRoute = keyof MyEdParsingRoutes;
+
+
+export type MyEdRestEndpointURL = keyof paths;
+type MyEdRestEndpointStep = {
+  
+  path: MyEdRestEndpointURL;
+  body?: Record<string, any>;
+} & ({
+  method: "GET";
+  contentType?: never;
+  htmlToken?: never;
+} | {
+  method: "POST" | "PUT" | "DELETE";
+  contentType: "application/x-www-form-urlencoded" | "form-data"|"application/json";
+  htmlToken: string;
+});
+type MyEdRestEndpointFlatInstruction = MyEdRestEndpointStep | MyEdRestEndpointStep[];
+type MyEdRestEndpointInstruction = (params:Record<string,any>)=>MyEdRestEndpointFlatInstruction;
+export const myEdRestEndpoints = {
+  'test':()=>{
+    return {
+      method:"GET",
+      path:"/lists/academics.classes.list"
+    }
+  }
+} satisfies Record<string, MyEdRestEndpointInstruction>;
+
+
+export type MyEdRestEndpoints = typeof myEdRestEndpoints;
+export type MyEdRestEndpoint = keyof MyEdRestEndpoints;
+export type ResolvedMyEdRestEndpoint<Endpoint extends MyEdRestEndpoint> = ReturnType<MyEdRestEndpoints[Endpoint]>
+
+
+export const ENDPOINTS = {
+  ...myEdParsingRoutes,
+  ...myEdRestEndpoints,
+} satisfies Record<MyEdEndpoint, any>;
+export type MyEdEndpoints = typeof ENDPOINTS;
+export type MyEdEndpoint = MyEdParsingRoute | MyEdRestEndpoint;

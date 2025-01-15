@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "openapi:generate-ts:myed-rest": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true --path-params-as-types true",
+    "openapi:generate-ts:myed-rest": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
     "postinstall": "npm run openapi:generate-ts:myed-rest"
   },
   "dependencies": {
