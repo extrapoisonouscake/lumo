@@ -5,9 +5,9 @@ import {
   shouldSecureCookies,
 } from "@/constants/auth";
 import {
+  FlatParsingRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
-  MYED_ROUTES,
   MYED_SESSION_COOKIE_NAME,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
@@ -153,13 +153,17 @@ function parseLoginErrorMessage(html: string) {
     .filter(Boolean)[0];
   return errorMessage ?? null;
 }
+const logoutStep: FlatParsingRouteStep = {
+  method: "GET",
+  path: "logout.do",
+};
 export async function deleteSession(externalStore?: PlainCookieStore) {
   const cookieStore = new MyEdCookieStore(cookies() || externalStore);
-  const step = MYED_ROUTES.logout({})[Symbol.iterator]().next().value;
+
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (session) {
     await sendMyEdRequest({
-      step: step as Exclude<typeof step, void>,
+      step: logoutStep,
       session,
       authCookies: getAuthCookies(cookieStore),
     });

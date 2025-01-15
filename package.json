@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "openapi:generate-ts:myed-rest": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true --path-params-as-types true",
+    "postinstall": "npm run openapi:generate-ts:myed-rest"
   },
   "dependencies": {
     "@adobe/pdfservices-node-sdk": "^4.1.0",
@@ -44,6 +46,7 @@
     "motion": "^11.11.15",
     "next": "14.2.15",
     "next-themes": "^0.3.0",
+    "openapi-fetch": "^0.13.4",
     "pdf-text-reader": "^5.1.0",
     "pdfjs-dist": "^4.8.69",
     "react": "^18",
@@ -61,13 +64,18 @@
     "@types/adobe__pdfservices-node-sdk": "^2.2.3",
     "@types/axios": "^0.14.0",
     "@types/js-cookie": "^3.0.6",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/swagger-ui": "^3.52.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.15",
     "ioredis": "^5.4.1",
+    "js-yaml": "^4.1.0",
+    "openapi-typescript": "^7.5.2",
     "postcss": "^8",
+    "swagger-ui": "^5.18.2",
     "tailwindcss": "^3.4.1",
     "typescript": "^5"
   }

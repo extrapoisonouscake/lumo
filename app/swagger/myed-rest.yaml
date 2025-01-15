@@ -3,7 +3,7 @@ info:
   version: 1.0.0
   title: Swagger MyEd REST API
 servers:
-  - url: https://myeducation.gov.bc.ca/aspen/rest
+  - url: http://localhost:3000/swagger/proxy
 paths:
   /users/currentUser:
     get:
@@ -15,7 +15,7 @@ paths:
         200:
           description: The current user
           content:
-            application/json:    
+            application/json:
               schema:
                 $ref: "#/components/schemas/User"
   /users/students:
@@ -306,7 +306,7 @@ paths:
             type: string
             enum:
               - current
-              - '??'
+              - "??"
         - name: term
           in: query
           required: true
@@ -314,7 +314,7 @@ paths:
             type: string
             enum:
               - current
-              - '??'
+              - "??"
       responses:
         200:
           description: The list of grade terms
@@ -342,7 +342,7 @@ paths:
             type: string
         - name: properties
           in: query
-          description: "additional properties for the \"section\" object, e.g. relSscMstOid.mstDescription adds as relSscMstOid_mstDescription"
+          description: 'additional properties for the "section" object, e.g. relSscMstOid.mstDescription adds as relSscMstOid_mstDescription'
           schema:
             type: string
       responses:
@@ -559,6 +559,7 @@ paths:
           schema:
             type: string
         - name: categoryOid
+          description: "E.g., tests, quizzes, assignments, etc."
           in: query
           schema:
             type: string
@@ -895,19 +896,6 @@ components:
           type: string
         oid:
           type: string
-  securitySchemes:
-    cookieAuth: 
-      type: apiKey
-      in: cookie
-      name: JSESSIONID
-    cookieAffinity:
-      type: apiKey
-      in: cookie
-      name: ApplicationGatewayAffinity
-    cookieAffinityCORS:
-      type: apiKey
-      in: cookie
-      name: ApplicationGatewayAffinityCORS
   responses:
     NotAuthorized:
       description: The requester is unauthorized.
@@ -924,7 +912,11 @@ components:
                 type: string
                 enum:
                   - "You are not authorized to access this resource."
+  securitySchemes:
+    customCookieAuth:
+      type: apiKey
+      in: header
+      name: Custom-Cookie
+      description: "Combined cookies: JSESSIONID, ApplicationGatewayAffinity, ApplicationGatewayAffinityCORS"
 security:
-  - cookieAuth: []
-  - cookieAffinity: []
-  - cookieAffinityCORS: []
+  - customCookieAuth: []

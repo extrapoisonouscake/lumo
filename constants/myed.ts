@@ -33,7 +33,7 @@ export type FlatParsingRouteStep = {
 );
 type ParsingRouteParams = Record<string, any>;
 type ParsingRouteStep<Params extends ParsingRouteParams> =
-  | FlatParsingRouteStep
+  | Omit<FlatParsingRouteStep, "htmlToken">
   | ((props: {
       $documents: cheerio.CheerioAPI[];
       params: Params;
@@ -58,16 +58,17 @@ class ResolvedParsingRoute<Params extends ParsingRouteParams> {
     for (let i = 0; i < this.steps.length; i++) {
       let nextStep = this.steps[i];
       if (typeof nextStep === "function") {
-        const resolvedStep = nextStep({
+        nextStep = nextStep({
           $documents: this.$documents,
           params: this.params,
-        }) as FlatParsingRouteStep;
-        if (resolvedStep.method === "POST") {
-          resolvedStep.htmlToken = getHTMLToken(this.$documents[0]);
-        }
-        nextStep = resolvedStep;
+        });
       }
-      yield { ...nextStep, index: i };
+      if (nextStep.method === "POST") {
+        (nextStep as FlatParsingRouteStep).htmlToken = getHTMLToken(
+          this.$documents[0]
+        );
+      }
+      yield { ...(nextStep as FlatParsingRouteStep), index: i };
     }
   }
 }
@@ -75,8 +76,11 @@ type ParsingRouteStepPredicate<Params extends ParsingRouteParams> = (
   params: Params
 ) => boolean;
 export class ParsingRoute<
-  Params extends ParsingRouteParams
-> extends CallableInstance<[Params], ResolvedParsingRoute<Params>> {
+  Params extends ParsingRouteParams = Record<string, never>
+> extends CallableInstance<
+  Params extends Record<string, never> ? [] : [Params],
+  ResolvedParsingRoute<Params>
+> {
   steps: Array<ParsingRouteStep<Params>>;
   predicates: Record<number, ParsingRouteStepPredicate<Params>> = {};
   constructor() {
@@ -92,7 +96,7 @@ export class ParsingRoute<
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
-  private call(params: Params) {
+  call(...[params]: [Params]) {
     const filteredSteps = this.steps.filter((_, index) => {
       const predicate = this.predicates[index];
       if (!predicate) return true;
@@ -102,9 +106,9 @@ export class ParsingRoute<
   }
 }
 
-export const MYED_ROUTES = {
+export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
-  login: new ParsingRoute().step({ method: "GET", path: "logon.do?mobile=1" }),
+
   subjects: new ParsingRoute().step({
     method: "GET",
     path: "portalClassList.do?navkey=academics.classes.list",
@@ -170,25 +174,21 @@ export const MYED_ROUTES = {
     method: "GET",
     path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
   }),
-  logout: new ParsingRoute().step({ method: "GET", path: "logout.do" }),
-  personalDetails: new ParsingRoute()
-    .step({
-      method: "GET",
-      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
-    })
-    .step(({ $documents: [$] }) => {
-      const params = {
-        userEvent: "2030",
-        userParam: "2",
-      };
-      return {
-        method: "POST",
-        path: "portalStudentDetail.do?navkey=myInfo.details.detail",
-        body: params,
-        contentType: "application/x-www-form-urlencoded",
-      };
-    }),
+
+  // personalDetails: new ParsingRoute()
+  //   .step({
+  //     method: "GET",
+  //     path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+  //   })
+  //   .step({
+  //     method: "POST",
+  //     path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+  //     body: {
+  //       userEvent: "2030",
+  //       userParam: "2",
+  //     },
+  //     contentType: "application/x-www-form-urlencoded",
+  //   }),
 };
-export type MyEdRoutes = typeof MYED_ROUTES;
-export type MyEdRoute = keyof MyEdRoutes;
-export type MyEdParsingRoute = Exclude<MyEdRoute, "login" | "logout">;
+export type MyEdParsingRoutes = typeof myEdParsingRoutes;
+export type MyEdParsingRoute = keyof MyEdParsingRoutes;
