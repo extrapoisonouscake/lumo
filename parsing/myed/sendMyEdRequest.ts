@@ -13,6 +13,7 @@ const USER_AGENT_FALLBACK =
 export type SendMyEdRequestParameters = {
   step: FlatParsingRouteStep;
   session?: string;
+  isRestRequest: boolean
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
@@ -31,6 +32,7 @@ export async function sendMyEdRequest({
   session,
   isLastRequest,
   requestGroup,
+  isRestRequest
 }: SendMyEdRequestParameters) {
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
@@ -39,17 +41,7 @@ export async function sendMyEdRequest({
   const initHeaders = {
     Cookie: cookiesString,
     "User-Agent": userAgent,
-    Accept:
-      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "en-CA,en-US;q=0.9,en;q=0.8",
-    Connection: "keep-alive",
 
-    Priority: "u=0, i",
-    Referer: "https://myeducation.gov.bc.ca/aspen/home.do",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "same-origin",
   };
   let params: RequestInit = { method: step.method, headers: initHeaders };
   if (step.method === "POST") {
@@ -61,11 +53,23 @@ export async function sendMyEdRequest({
         "Content-Type": step.contentType,
       },
     };
-    if (step.contentType === "application/x-www-form-urlencoded") {
-      params.body = new URLSearchParams({
+
+  }
+
+
+  if (step.body) {
+
+    if (step.contentType === "application/x-www-form-urlencoded" || step.method === 'GET') {
+      const queryString = new URLSearchParams({
         ...step.body,
-        [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken,
+        ...(step.htmlToken ? { [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken } : {})
       });
+      if (step.contentType === "application/x-www-form-urlencoded") {
+        params.body = queryString
+      } else {
+        step.path += `?${queryString}`
+        step.body = undefined
+      }
     } else if (step.contentType === "form-data") {
       const formData = new FormData();
       for (const [key, value] of Object.entries(step.body)) {
@@ -75,20 +79,20 @@ export async function sendMyEdRequest({
       params.body = formData;
     }
   }
-  const args: [string, RequestInit] = [getFullMyEdUrl(step.path), params];
+  console.log({ step })
+  const args: [string, RequestInit] = [getFullMyEdUrl(step.path, isRestRequest), params];
   let response: Response
-  const promise = fetch(...args)
+  const executeRequest = () => fetch(...args)
   if (session) {
     const queue = clientQueueManager.getQueue(session);
 
     response = await queue.enqueue(
-      () => promise,
+      executeRequest,
       requestGroup,
       isLastRequest
     );
   } else {
-    response = await promise
+    response = await executeRequest()
   }
-  console.log({ step })
   return response;
 }

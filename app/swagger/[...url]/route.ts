@@ -16,10 +16,11 @@ export async function GET(request: NextRequest) {
   }
 
   const url = new URL(request.url);
-  const targetPath = url.pathname.replace("/swagger/proxy", "");
+  const targetPath = url.pathname.replace("/swagger/proxy", "") + url.search;
   const targetUrl = getTargetUrl(targetPath);
 
   try {
+    console.log({ targetUrl })
     const response = await fetch(targetUrl, {
       method: request.method,
       headers: {

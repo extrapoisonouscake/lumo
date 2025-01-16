@@ -4,13 +4,13 @@ import {
   MyEdEndpoint,
   MyEdParsingRoute,
   MyEdRestEndpoint,
-  myEdRestEndpoints,
-  ResolvedMyEdRestEndpoint
+  myEdRestEndpoints
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
+import * as jose from 'jose';
 import { cookies } from "next/headers";
 import { cache } from "react";
 import "server-only";
@@ -27,9 +27,8 @@ const endpointToParsingFunction = {
   currentWeekday: parseCurrentWeekday,
   subjectAssignments: parseSubjectAssignments,
   personalDetails: parsePersonalDetails,
-  test: (e: any, ...p: any[]) => { }
 } satisfies {
-  [K in MyEdParsingRoute | MyEdRestEndpoint]: (...args: K extends MyEdRestEndpoint ? ResolvedMyEdRestEndpoint<K> extends any[] ? [params: Record<string, any> | undefined, ...ResolvedMyEdRestEndpoint<K>] : [params: Record<string, any> | undefined, ResolvedMyEdRestEndpoint<K>] : ParserFunctionArguments<K>) => any
+  [K in MyEdParsingRoute | MyEdRestEndpoint]: (...args: K extends MyEdRestEndpoint ? any[]/*!*/ : ParserFunctionArguments<K>) => any
 };
 const isRestEndpoint = (endpoint: MyEdEndpoint): endpoint is MyEdRestEndpoint => {
   return endpoint in myEdRestEndpoints;
@@ -44,12 +43,16 @@ export const fetchMyEd = cache(async function <
 
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (!session) return;
+  const { payload: parsedSession } = jose.UnsecuredJWT.decode<{ session: string, studentID: string }>(session)
   if (isRestEndpoint(endpoint)) {
-    const steps = myEdRestEndpoints[endpoint](...rest as MyEdEndpointsParamsAsOptional<MyEdRestEndpoint>);
+    console.log("rest")
+    const steps = myEdRestEndpoints[endpoint]({ params: rest[0], studentID: parsedSession.studentID });
     const stepsArray = Array.isArray(steps) ? steps : [steps]
-    const responses = await Promise.all(stepsArray.map(step => sendMyEdRequest({ step, authCookies }).then(response => response.json())))
+    console.log({ stepsArray })
+    const responses = await Promise.all(stepsArray.map(step => sendMyEdRequest({ step, authCookies, isRestRequest: true }).then(response => response.json())))
+    console.log({ responses: responses[0] })
     return endpointToParsingFunction[endpoint](
-      rest[0],
+      rest[0] as any,
       ...responses
     ) as MyEdEndpointResponse<Endpoint>;
   }
@@ -59,10 +62,13 @@ export const fetchMyEd = cache(async function <
   const requestGroup = `${endpoint}-${Date.now()}`;
   for (const step of steps) {
     const isLastRequest = step.index === steps.length - 1;
+
+    console.log(requestGroup)
     const response = await sendMyEdRequest({
       step,
       session,
       authCookies,
+      isRestRequest: false,
       requestGroup,
       isLastRequest,
     });
@@ -71,7 +77,7 @@ export const fetchMyEd = cache(async function <
   }
 
   return endpointToParsingFunction[endpoint](
-    rest[0] ?? {},
+    rest[0] as any,
     ...steps.$documents
   ) as MyEdEndpointResponse<Endpoint>;
 });

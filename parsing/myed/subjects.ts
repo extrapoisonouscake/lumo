@@ -2,6 +2,7 @@ import {
   prettifySubjectName,
   TEACHER_ADVISORY_ABBREVIATION,
 } from "@/helpers/prettifySubjectName";
+import { paths } from "@/types/myed-rest";
 import { Subject } from "@/types/school";
 import { ParserFunctionArguments } from "./types";
 
@@ -33,29 +34,11 @@ function separateTAFromSubjects(subject: Subject[]) {
     teacherAdvisory: (removedItem as unknown as Subject) ?? null,
   };
 }
-export function parseSubjects(...[_, $]: ParserFunctionArguments<"subjects">) {
-  const $tableContainer = $("#dataGrid");
-  if ($tableContainer.length === 0) return null;
 
-  if ($tableContainer.find(".listNoRecordsText").length > 0)
-    return separateTAFromSubjects([]);
-
-  const data = $tableContainer
-    .find(".listCell")
-    .toArray()
-    .map((cell) => {
-      const texts = $(cell)
-        .children("td")
-        .toArray()
-        .map((td) => $(td).text().trim());
-      const actualName = texts[1];
-      return {
-        name: prettifySubjectName(`${actualName}`),
-        teachers: `${texts[3]}`.split(";"),
-        room: `${texts[4]}`,
-        gpa: normalizeGPA(texts[5]),
-        actualName,
-      };
-    }) satisfies Subject[];
-  return separateTAFromSubjects(data);
+export function parseSubjects(...p: ParserFunctionArguments<'subjects'>) {
+  console.log(p)
+  const [, data] = p
+  console.log({ data })
+  const preparedData = (data as paths['/lists/academics.classes.list']['get']['responses']['200']['content']['application/json']).map(({ relSscMstOid_mstDescription, relSscMstOid_mstStaffView, cfTermAverage, relSscMstOid_mstRoomView }) => ({ name: prettifySubjectName(relSscMstOid_mstDescription), teachers: relSscMstOid_mstStaffView.map(item => item.name), room: relSscMstOid_mstRoomView ?? null, gpa: normalizeGPA(cfTermAverage), actualName: relSscMstOid_mstDescription }))
+  return separateTAFromSubjects(preparedData);
 }

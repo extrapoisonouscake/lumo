@@ -269,15 +269,29 @@ paths:
                 type: array
                 items:
                   type: object
+                  required:
+                    - oid
+                    - relSscMstOid_mstDescription
+                    - relSscMstOid_mstStaffView
+                    - relSscMstOid_relMstCskOid_cskGrdInpHide
+                    - cfTermAverage
                   properties:
                     oid:
                       type: string
                     relSscMstOid_mstDescription:
                       type: string
+                    relSscMstOid_mstCourseView:
+                      type: string
+                      description: e.g., MCMPR11-11, appears only if fieldSetOid is set to a non-existent value
+                    relSscStdOid_stdViewName:
+                      type: string
+                      description: student name, appears only if fieldSetOid is set to a non-existent value
                     relSscMstOid_mstStaffView:
                       type: array
                       items:
                         type: object
+                        required:
+                          - name
                         properties:
                           name:
                             type: string
@@ -287,6 +301,35 @@ paths:
                       type: boolean
                     cfTermAverage:
                       $ref: "#/components/schemas/NumberAsString"
+                    relSscMstOid_mstRoomView:
+                      type: string
+                      description: Room
+                    sscTermView:
+                      type: string
+                      description: Term
+  /lists/academics.classes.list/fieldSets:
+    get:
+      summary: Get the list of classes table field sets
+      operationId: getStudentClassesFieldSets
+      tags:
+        - lists
+      responses:
+        200:
+          description: The list of classes table field sets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - oid
+                    - name
+                  properties:
+                    oid:
+                      type: string
+                    name:
+                      type: string
   /lists/academics.classes.list/studentGradeTerms:
     get:
       summary: Get the grade terms for a student

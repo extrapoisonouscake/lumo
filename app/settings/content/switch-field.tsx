@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { setUserSetting } from "@/lib/settings/mutations";
 import { UserSetting } from "@/types/core";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 
 export function SwitchField({
   label,

@@ -16,7 +16,7 @@ import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
 import {
   deleteSessionAndLogOut,
-  fetchAuthCookiesAndUserID,
+  fetchAuthCookiesAndStudentID,
 } from "./lib/auth/helpers";
 
 export async function middleware(request: NextRequest) {
@@ -46,8 +46,8 @@ export async function middleware(request: NextRequest) {
             cookieStore.delete(name);
           }
 
-          const { cookies: cookiesToAdd, userID } =
-            await fetchAuthCookiesAndUserID(
+          const { cookies: cookiesToAdd, studentID } =
+            await fetchAuthCookiesAndStudentID(
               formData.username,
               formData.password
             );
@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
             const name = entry[0];
             let value = entry[1];
             if (name === MYED_SESSION_COOKIE_NAME) {
-              value = new UnsecuredJWT({ session: value, userID })
+              value = new UnsecuredJWT({ session: value, studentID })
                 .setIssuedAt()
                 .setExpirationTime(SESSION_TTL)
                 .encode();

@@ -23,6 +23,7 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { renderTableCell } from "@/helpers/tables";
 import { Subject } from "@/types/school";
 import { useRouter } from "next/navigation";
@@ -123,16 +124,16 @@ export function SubjectsTable({
   const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
     (table, push) => (row) => {
       const cells = row.getVisibleCells();
-
+      const isTA=row.original.name===TEACHER_ADVISORY_ABBREVIATION
       return (
         <TableRow
-          onClick={() =>
+          onClick={!isTA?() =>
             push(
               `/classes/${(
                 row.original as unknown as Subject
               ).actualName.replaceAll(" ", "_")}`
             )
-          }
+          :undefined}
           key={row.id}
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
@@ -143,8 +144,8 @@ export function SubjectsTable({
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const isLast = i === cells.length - 1;
-            return isLast ? (
+            const showArrow= i === cells.length - 1&&!isTA;
+            return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}
               </TableCellWithRedirectIcon>

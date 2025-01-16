@@ -33,7 +33,7 @@ import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
 type ScheduleSubjectRow =
-  | ScheduleSubject
+  | ({isBreak?:never,isLunch?:never}&ScheduleSubject)
   | ({ isBreak: true; isLunch: boolean } & Pick<
       ScheduleSubject,
       "startsAt" | "endsAt"
@@ -161,10 +161,11 @@ const getRowRenderer: RowRendererFactory<
     timeCell = cells.find((cell) => cell.column.id === "Time");
     nameCell = cells.find((cell) => cell.column.id === "name");
   }
+  const isTA=!('isBreak' in row.original) &&row.original.name===TEACHER_ADVISORY_ABBREVIATION
   return (
     <TableRow
       onClick={
-        !isBreak
+        !isBreak&&!isTA
           ? () =>
               push(
                 `/classes/${(
@@ -190,8 +191,8 @@ const getRowRenderer: RowRendererFactory<
       ) : (
         cells.map((cell, i) => {
           const content = renderTableCell(cell);
-          const isLast = i === cells.length - 1;
-          return isLast ? (
+          const showArrow = i === cells.length - 1&&!isTA;
+          return showArrow? (
             <TableCellWithRedirectIcon key={cell.id}>
               {content}
             </TableCellWithRedirectIcon>
@@ -228,7 +229,7 @@ export function ScheduleTable({
   const getRowClassName = useMemo(
     () => (row: Row<ScheduleSubject>) => {
       return cn({
-        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-600 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
           timezonedDayJS().isBetween(
             row.original.startsAt,
             row.original.endsAt

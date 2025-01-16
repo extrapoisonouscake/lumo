@@ -1,10 +1,10 @@
 import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
+import { Toaster } from "@/components/ui/sonner";
+import { WEBSITE_TITLE } from "@/constants/website";
+import { Metadata } from "next";
 import { ReactNode } from "react";
-import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Metadata } from "next";
-import { WEBSITE_TITLE } from "@/constants/website";
 export const metadata:Metadata={
   title:{
     default:WEBSITE_TITLE,
@@ -22,7 +22,7 @@ export default async function RootLayout({
         <head />
         <body className="flex justify-center min-h-full">
           <Providers>
-            <Toaster position="bottom-center" />
+            <Toaster/>
             <AppSidebarWrapper>{children}</AppSidebarWrapper>
           </Providers>
         </body>

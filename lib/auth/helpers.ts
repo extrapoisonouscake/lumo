@@ -14,6 +14,7 @@ import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
 
 import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
+import { myEdRestAPIClient } from "@/instances/myed-rest-fetch";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
 import * as cookie from "cookie";
@@ -42,7 +43,7 @@ export async function performLogin(
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
-  const { cookies: cookiesToAdd, userID } = await fetchAuthCookiesAndUserID(
+  const { cookies: cookiesToAdd, studentID } = await fetchAuthCookiesAndStudentID(
     username,
     password
   );
@@ -50,7 +51,7 @@ export async function performLogin(
     const name = entry[0];
     let value = entry[1];
     if (name === MYED_SESSION_COOKIE_NAME) {
-      value = new jose.UnsecuredJWT({ session: value, userID })
+      value = new jose.UnsecuredJWT({ session: value, studentID })
         .setIssuedAt()
         .setExpirationTime(SESSION_TTL)
         .encode();
@@ -76,7 +77,7 @@ export async function performLogin(
 }
 const userIDExtractionRegex =
   /https:\/\/myeducation\.gov\.bc\.ca\/aspen\/mobile\/([^\/#?]+)/;
-export async function fetchAuthCookiesAndUserID(
+export async function fetchAuthCookiesAndStudentID(
   username: string,
   password: string
 ) {
@@ -124,13 +125,15 @@ export async function fetchAuthCookiesAndUserID(
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
-  const userID = loginResponse.url.match(userIDExtractionRegex)?.[1];
-  if (!userID) throw new Error("Error");
+  const studentsRequest = await myEdRestAPIClient.GET('/users/students', { headers: { Cookie: cookiesString } })
+  if (studentsRequest.error) throw new Error('Error')
+  const studentID = studentsRequest.data[0].studentOid
+
   return {
     cookies: cookiesToAdd.filter(([name]) =>
       MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
     ),
-    userID,
+    studentID,
   };
 }
 function parseLoginErrorMessage(html: string) {

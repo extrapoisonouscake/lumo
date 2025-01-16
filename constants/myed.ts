@@ -18,27 +18,26 @@ const getHTMLToken = ($: cheerio.CheerioAPI) =>
 export type FlatParsingRouteStep = {
   path: string;
   headers?: Record<string, string>;
+  body?: Record<string, any>;
 } & (
-  | {
+    | {
       method: "GET";
-      body?: never;
       contentType?: never;
       htmlToken?: never;
     }
-  | {
+    | {
       method: "POST";
-      body: Record<string, any>;
-      contentType: "application/x-www-form-urlencoded" | "form-data";
+      contentType: "application/x-www-form-urlencoded" | "form-data" | "applicatiob/json";
       htmlToken: string;
     }
-);
+  );
 type ParsingRouteParams = Record<string, any>;
 type ParsingRouteStep<Params extends ParsingRouteParams> =
   | Omit<FlatParsingRouteStep, "htmlToken">
   | ((props: {
-      $documents: cheerio.CheerioAPI[];
-      params: Params;
-    }) => Omit<FlatParsingRouteStep, "htmlToken">);
+    $documents: cheerio.CheerioAPI[];
+    params: Params;
+  }) => Omit<FlatParsingRouteStep, "htmlToken">);
 
 class ResolvedParsingRoute<Params extends ParsingRouteParams> {
   params: Params;
@@ -196,26 +195,16 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 
 export type MyEdRestEndpointURL = keyof paths;
-type MyEdRestEndpointStep = {
-  
-  path: MyEdRestEndpointURL;
-  body?: Record<string, any>;
-} & ({
-  method: "GET";
-  contentType?: never;
-  htmlToken?: never;
-} | {
-  method: "POST" | "PUT" | "DELETE";
-  contentType: "application/x-www-form-urlencoded" | "form-data"|"application/json";
-  htmlToken: string;
-});
-type MyEdRestEndpointFlatInstruction = MyEdRestEndpointStep | MyEdRestEndpointStep[];
-type MyEdRestEndpointInstruction = (params:Record<string,any>)=>MyEdRestEndpointFlatInstruction;
+
+type MyEdRestEndpointFlatInstruction = FlatParsingRouteStep | FlatParsingRouteStep[];
+type MyEdRestEndpointInstruction = (props: { params: Record<string, any> | undefined, studentID: string }) => MyEdRestEndpointFlatInstruction;
 export const myEdRestEndpoints = {
-  'test':()=>{
+  'subjects': ({ studentID }) => {
+    console.log({ studentID })
     return {
-      method:"GET",
-      path:"/lists/academics.classes.list"
+      method: "GET",
+      path: `/lists/academics.classes.list`,
+      body: { selectedStudent: studentID, fieldSetOid: 'fsnX2Cls' }
     }
   }
 } satisfies Record<string, MyEdRestEndpointInstruction>;
