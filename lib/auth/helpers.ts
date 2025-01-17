@@ -22,6 +22,7 @@ import * as jose from "jose";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import "server-only";
+import { LoginError } from "./public";
 const loginDefaultParams = {
   userEvent: "930",
   deploymentId: "aspen",
@@ -75,8 +76,6 @@ export async function performLogin(
     });
   }
 }
-const userIDExtractionRegex =
-  /https:\/\/myeducation\.gov\.bc\.ca\/aspen\/mobile\/([^\/#?]+)/;
 export async function fetchAuthCookiesAndStudentID(
   username: string,
   password: string
@@ -106,16 +105,18 @@ export async function fetchAuthCookiesAndStudentID(
   for (const [key, value] of Object.entries(loginParams)) {
     loginFormData.append(key, value);
   }
-  const cookiesString = loginTokenResponse.headers.getSetCookie();
-  if (!cookiesString) throw new Error("Failed"); //!
-  const cookiesToAdd = Object.entries(cookie.parse(cookiesString.join("; ")));
+  const cookiesPairs = loginTokenResponse.headers.getSetCookie();
+  if (!cookiesPairs) throw new Error("Failed"); //!
+  const rawCookiesString = cookiesPairs.join("; ");
+  const cookiesToAdd = Object.entries(cookie.parse(rawCookiesString)).filter(([name]) =>
+    MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
+  );
+  const cookiesString = cookiesToAdd.map(([name, value]) => cookie.serialize(name, value || "")).join("; ");
   const loginResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
     method: "POST",
     body: loginFormData,
     headers: {
-      Cookie: cookiesToAdd
-        .map((c) => cookie.serialize(c[0], c[1] || ""))
-        .join("; "),
+      Cookie: cookiesString
     },
   });
 
@@ -136,25 +137,14 @@ export async function fetchAuthCookiesAndStudentID(
     studentID,
   };
 }
+const rawErrorMessageToIDMap: Record<string, LoginError> = {
+  "This account has been disabled.": "account-disabled",
+  "Invalid login.": "invalid-auth",
+}
 function parseLoginErrorMessage(html: string) {
   const $ = cheerio.load(html);
-  if ($("#pageMenuContainer").length > 0) return null;
-  const errorMessageScriptContent = $(
-    'script[language="JavaScript"]:not([type])'
-  )
-    .toArray()
-    .map((e) => $(e).text())
-    .filter(Boolean);
-  if (errorMessageScriptContent.length === 0) return null;
-  const errorMessage = errorMessageScriptContent
-    .map(
-      (c) =>
-        (c as NonNullable<typeof c>).match(
-          /var\s+(\w+)\s*=\s*(['"`])(.*?)\2\s*;/
-        )?.[3]
-    )
-    .filter(Boolean)[0];
-  return errorMessage ?? null;
+  const rawErrorMessage = $('.panel div[style="color:red"]').text().trim().replace(/\n/g, " ");
+  return rawErrorMessageToIDMap[rawErrorMessage] ?? 'unexpected-error';
 }
 const logoutStep: FlatParsingRouteStep = {
   method: "GET",
@@ -169,6 +159,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
       step: logoutStep,
       session,
       authCookies: getAuthCookies(cookieStore),
+      isRestRequest: false
     });
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
