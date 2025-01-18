@@ -5,7 +5,7 @@ import { getFullCookieName } from "./getFullCookieName";
 export type PlainCookieStore = ReturnType<typeof cookies> | ResponseCookies;
 export class MyEdCookieStore {
   store: PlainCookieStore;
-  constructor(plainStore: PlainCookieStore) {
+  constructor(plainStore: PlainCookieStore=cookies()) {
     this.store = plainStore;
   }
   get: PlainCookieStore["get"] = (name: string) => {

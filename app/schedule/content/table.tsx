@@ -32,7 +32,9 @@ import { Router } from "next/router";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
-type ScheduleSubjectRow =
+import { prepareStringForURI } from "@/helpers/prepareStringForURI";
+import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
+export type ScheduleSubjectRow =
   | ({isBreak?:never,isLunch?:never}&ScheduleSubject)
   | ({ isBreak: true; isLunch: boolean } & Pick<
       ScheduleSubject,
@@ -113,6 +115,7 @@ const mockScheduleSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
       ({
+        id: "",
         startsAt: new Date(),
         endsAt: new Date(),
         teachers: [],
@@ -148,29 +151,28 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   }
   return filledIntervals;
 };
-
+export const isRowScheduleSubject = (row: ScheduleSubjectRow): row is ScheduleSubject=> !("isBreak" in row)
 const getRowRenderer: RowRendererFactory<
   ScheduleSubjectRow,
   [Router["push"]]
 > = (table, push) => (row) => {
   const cells = row.getVisibleCells();
-  const isBreak = "isBreak" in row.original;
+  const rowOriginal = row.original;
+  const isSubject = isRowScheduleSubject(rowOriginal);
   let nameCell, timeCell;
-  if (isBreak) {
+  if (!isSubject) {
     //!optimize?
     timeCell = cells.find((cell) => cell.column.id === "Time");
     nameCell = cells.find((cell) => cell.column.id === "name");
   }
-  const isTA=!('isBreak' in row.original) &&row.original.name===TEACHER_ADVISORY_ABBREVIATION
+  const isTA=isSubject &&rowOriginal.name===TEACHER_ADVISORY_ABBREVIATION
   return (
     <TableRow
       onClick={
-        !isBreak&&!isTA
+        isSubject&&!isTA
           ? () =>
               push(
-                `/classes/${(
-                  row.original as unknown as Subject
-                ).actualName.replaceAll(" ", "_")}`
+                 getSubjectPageURL(rowOriginal)
               )
           : undefined //!
       }
@@ -179,16 +181,7 @@ const getRowRenderer: RowRendererFactory<
       style={table.options.meta?.getRowStyles?.(row)}
       className={table.options.meta?.getRowClassName?.(row)}
     >
-      {isBreak ? (
-        <>
-          <TableCell>
-            {renderTableCell(timeCell as NonNullable<typeof timeCell>)}
-          </TableCell>
-          <TableCell colSpan={3}>
-            {renderTableCell(nameCell as NonNullable<typeof nameCell>)}
-          </TableCell>
-        </>
-      ) : (
+      {isSubject ?(
         cells.map((cell, i) => {
           const content = renderTableCell(cell);
           const showArrow = i === cells.length - 1&&!isTA;
@@ -200,6 +193,15 @@ const getRowRenderer: RowRendererFactory<
             <TableCell key={cell.id}>{content}</TableCell>
           );
         })
+      ): (
+        <>
+          <TableCell>
+            {renderTableCell(timeCell as NonNullable<typeof timeCell>)}
+          </TableCell>
+          <TableCell colSpan={3}>
+            {renderTableCell(nameCell as NonNullable<typeof nameCell>)}
+          </TableCell>
+        </>
       )}
     </TableRow>
   );
@@ -227,7 +229,7 @@ export function ScheduleTable({
     data,
   });
   const getRowClassName = useMemo(
-    () => (row: Row<ScheduleSubject>) => {
+    () => (row: Row<ScheduleSubjectRow>) => {
       return cn({
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-blue-500 [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
           timezonedDayJS().isBetween(
@@ -244,7 +246,7 @@ export function ScheduleTable({
     [currentRowIndex]
   );
   const router = useRouter();
-  const table = useReactTable<ScheduleSubject>({
+  const table = useReactTable<ScheduleSubjectRow>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),

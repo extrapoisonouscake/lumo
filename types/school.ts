@@ -1,14 +1,14 @@
 export interface Subject {
+  id: string;
   name: string;
   teachers: string[];
   room: string | null;
   gpa: number | null;
-  actualName: string;
 }
 //? name?
-export type ScheduleSubject = Partial<
-  Pick<Subject, "name" | "room" | "teachers" | "actualName">
-> & {
+export type ScheduleSubject = 
+  Omit<Subject,"gpa">
+& {
   startsAt: Date;
   endsAt: Date;
 };
@@ -53,4 +53,5 @@ export interface Assignment {
   status: AssignmentStatus;
   score: number | null;
   maxScore: number | null;
+  classAverage: number | null;
 }

@@ -108,56 +108,6 @@ export class ParsingRoute<
 
 export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
-
-  subjects: new ParsingRoute().step({
-    method: "GET",
-    path: "portalClassList.do?navkey=academics.classes.list",
-  }),
-  subjectAssignments: new ParsingRoute<{ name?: string }>()
-    .step({
-      method: "GET",
-      path: "portalClassList.do?navkey=academics.classes.list",
-    })
-    .step(({ $documents: [$], params: { name } }) => {
-      const $tableContainer = $("#dataGrid");
-      if ($tableContainer.length === 0) throw new Error("");
-
-      if ($tableContainer.find(".listNoRecordsText").length > 0)
-        throw new Error("");
-
-      const foundSubject = $tableContainer
-        .find(".listCell")
-        .toArray()
-        .find((cell) => {
-          const texts = $(cell)
-            .children("td")
-            .toArray()
-            .map((td) => $(td).text().trim());
-          const actualName = texts[1];
-          return actualName === name;
-        });
-      if (!foundSubject) throw new Error("");
-
-      const subjectId = $(foundSubject)
-        .children("td:nth-child(2)")
-        .first()
-        .attr("id");
-      if (!subjectId) throw new Error("");
-      const params = {
-        userEvent: "2100",
-        userParam: subjectId,
-      };
-      return {
-        method: "POST",
-        path: "portalClassList.do",
-        body: params,
-        contentType: "application/x-www-form-urlencoded",
-      };
-    })
-    .step({
-      method: "GET",
-      path: "portalAssignmentList.do?navkey=academics.classes.list.gcd",
-    }),
   schedule: new ParsingRoute<{ day?: string }>()
     .step({
       method: "GET",
@@ -197,15 +147,25 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 export type MyEdRestEndpointURL = keyof paths;
 
 type MyEdRestEndpointFlatInstruction = FlatParsingRouteStep | FlatParsingRouteStep[];
-type MyEdRestEndpointInstruction = (props: { params: Record<string, any> | undefined, studentID: string }) => MyEdRestEndpointFlatInstruction;
+type MyEdRestEndpointInstruction = (props: { params: any, studentID: string }) => MyEdRestEndpointFlatInstruction;
 export const myEdRestEndpoints = {
   'subjects': ({ studentID }) => {
-    console.log({ studentID })
     return {
       method: "GET",
-      path: `/lists/academics.classes.list`,
+      path: `lists/academics.classes.list`,
       body: { selectedStudent: studentID, fieldSetOid: 'fsnX2Cls' }
     }
+  },
+  'subjectAssignments':({params:{subjectID}}:{params:{subjectID:string},studentID:string})=>{
+    return [{
+      method: "GET",
+      path: `studentSchedule/${subjectID}/categoryDetails/pastDue`,
+      
+    },{
+      method: "GET",
+      path: `studentSchedule/${subjectID}/categoryDetails/upcoming`,
+      
+    }]
   }
 } satisfies Record<string, MyEdRestEndpointInstruction>;
 

@@ -17,7 +17,7 @@ export const Skeleton = ({
       {...props}
     >
       {isLoading && (
-        <div className="absolute inset-0 w-full h-full bg-accent rounded-md animate-pulse"></div>
+        <div className="absolute inset-0 w-full h-full bg-accent rounded-lg r animate-pulse"></div>
       )}
       <div
         className={isLoading ? "invisible flex [&>*]:leading-none" : "visible"}

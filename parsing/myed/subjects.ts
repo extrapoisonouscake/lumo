@@ -4,7 +4,8 @@ import {
 } from "@/helpers/prettifySubjectName";
 import { paths } from "@/types/myed-rest";
 import { Subject } from "@/types/school";
-import { ParserFunctionArguments } from "./types";
+import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
+import { DeepWithRequired } from "@/types/utils";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
@@ -35,10 +36,7 @@ function separateTAFromSubjects(subject: Subject[]) {
   };
 }
 
-export function parseSubjects(...p: ParserFunctionArguments<'subjects'>) {
-  console.log(p)
-  const [, data] = p
-  console.log({ data })
-  const preparedData = (data as paths['/lists/academics.classes.list']['get']['responses']['200']['content']['application/json']).map(({ relSscMstOid_mstDescription, relSscMstOid_mstStaffView, cfTermAverage, relSscMstOid_mstRoomView }) => ({ name: prettifySubjectName(relSscMstOid_mstDescription), teachers: relSscMstOid_mstStaffView.map(item => item.name), room: relSscMstOid_mstRoomView ?? null, gpa: normalizeGPA(cfTermAverage), actualName: relSscMstOid_mstDescription }))
+export function parseSubjects(...[_,data]: ParserFunctionArguments<'subjects',[DeepWithRequired<OpenAPI200JSONResponse<'/lists/academics.classes.list'>,'relSscMstOid_mstDescription'|'relSscMstOid_mstStaffView'|'cfTermAverage'|'relSscMstOid_mstRoomView'>]>) {
+  const preparedData = data.map(({ relSscMstOid_mstDescription, relSscMstOid_mstStaffView, cfTermAverage, relSscMstOid_mstRoomView,oid }) => ({id:oid, name: prettifySubjectName(relSscMstOid_mstDescription), teachers: relSscMstOid_mstStaffView.map(item => item.name), room: relSscMstOid_mstRoomView ?? null, gpa: normalizeGPA(cfTermAverage) }))
   return separateTAFromSubjects(preparedData);
 }

@@ -4,20 +4,20 @@ import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
 import { convertPathParameterToSubjectName } from "./helpers";
 import { SubjectAssignmentsTable } from "./table";
 interface Props {
-  params: { name: string };
+  params: { name: string,id:string };
 }
 
 export async function generateMetadata({ params }: Props) {
   return { title: convertPathParameterToSubjectName(params.name) };
 }
 export default async function Page({ params }: Props) {
-  const subjectName = params.name.replaceAll("_", " ");
+  
   const [
     { shouldShowAssignmentScorePercentage, shouldHighlightMissingAssignments },
     data,
   ] = await Promise.all([
     getUserSettings(),
-    fetchMyEd("subjectAssignments", { name: subjectName }),
+    fetchMyEd("subjectAssignments", { params: { subjectID: params.id }, }),
   ]);
   if (!data) return <ErrorCard />;
   return (

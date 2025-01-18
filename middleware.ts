@@ -15,13 +15,14 @@ import { getFullCookieName } from "./helpers/getFullCookieName";
 import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
 import {
+  deleteSession,
   deleteSessionAndLogOut,
   fetchAuthCookiesAndStudentID,
 } from "./lib/auth/helpers";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  const cookieStore = new MyEdCookieStore(response.cookies);
+  const redirectResponse = Response.redirect(new URL("/login", request.url));
   const isAuthenticated = isUserAuthenticated(request.cookies);
   const isOnLoginPage = request.nextUrl.pathname.startsWith("/login");
   if (isAuthenticated) {
@@ -67,13 +68,14 @@ export async function middleware(request: NextRequest) {
             });
           }
         } catch (e) {
-          await deleteSessionAndLogOut(response.cookies);
+          await deleteSession(response.cookies);
+          return redirectResponse;
         }
       }
     }
   } else {
     if (!isOnLoginPage) {
-      return Response.redirect(new URL("/login", request.url));
+      return redirectResponse;
     }
   }
   return response;

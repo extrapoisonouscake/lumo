@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
   const targetUrl = getTargetUrl(targetPath);
 
   try {
-    console.log({ targetUrl })
     const response = await fetch(targetUrl, {
       method: request.method,
       headers: {

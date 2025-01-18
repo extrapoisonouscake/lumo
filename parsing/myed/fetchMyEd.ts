@@ -37,33 +37,31 @@ type NarrowedParsingRoute<Endpoint extends MyEdEndpoint> = Exclude<Endpoint, MyE
 export const fetchMyEd = cache(async function <
   Endpoint extends MyEdEndpoint
 >(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
-  const cookieStore = new MyEdCookieStore(cookies());
+  const cookieStore = new MyEdCookieStore();
 
   const authCookies = getAuthCookies(cookieStore);
 
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (!session) return;
   const { payload: parsedSession } = jose.UnsecuredJWT.decode<{ session: string, studentID: string }>(session)
-  if (isRestEndpoint(endpoint)) {
-    console.log("rest")
+  
+  const requestGroup = `${endpoint}-${Date.now()}`;
+  try{if (isRestEndpoint(endpoint)) {
     const steps = myEdRestEndpoints[endpoint]({ params: rest[0], studentID: parsedSession.studentID });
     const stepsArray = Array.isArray(steps) ? steps : [steps]
-    console.log({ stepsArray })
-    const responses = await Promise.all(stepsArray.map(step => sendMyEdRequest({ step, authCookies, isRestRequest: true }).then(response => response.json())))
-    console.log({ responses: responses[0] })
+    const responses = await sendMyEdRequest({ step: stepsArray, authCookies, session, isRestRequest: true, requestGroup, isLastRequest: true }).then(response => Promise.all(response.map(r => r.json())))
     return endpointToParsingFunction[endpoint](
       rest[0] as any,
+      //@ts-expect-error Spreading responses is intentional as endpoint functions expect tuple parameters
       ...responses
     ) as MyEdEndpointResponse<Endpoint>;
   }
   type NarrowedRoute = NarrowedParsingRoute<Endpoint>
   const steps = ENDPOINTS[endpoint as NarrowedRoute](...rest as any);//!
 
-  const requestGroup = `${endpoint}-${Date.now()}`;
   for (const step of steps) {
     const isLastRequest = step.index === steps.length - 1;
 
-    console.log(requestGroup)
     const response = await sendMyEdRequest({
       step,
       session,
@@ -78,8 +76,12 @@ export const fetchMyEd = cache(async function <
 
   return endpointToParsingFunction[endpoint](
     rest[0] as any,
+    //@ts-expect-error Spreading responses is intentional as endpoint functions expect tuple parameters
     ...steps.$documents
-  ) as MyEdEndpointResponse<Endpoint>;
+  ) as MyEdEndpointResponse<Endpoint>;}catch(e){
+    console.error(e)
+    return undefined
+  }
 });
 
 export type MyEdEndpointResponse<T extends MyEdEndpoint> = Exclude<

@@ -39,7 +39,7 @@ export async function performLogin(
   store?: PlainCookieStore
 ) {
   const { username, password } = formData;
-  const cookieStore = new MyEdCookieStore(cookies() || store);
+  const cookieStore = new MyEdCookieStore(store);
 
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
@@ -119,7 +119,6 @@ export async function fetchAuthCookiesAndStudentID(
       Cookie: cookiesString
     },
   });
-
   if (!loginResponse.ok) {
     throw new Error("Failed"); //!
   }
@@ -144,14 +143,14 @@ const rawErrorMessageToIDMap: Record<string, LoginError> = {
 function parseLoginErrorMessage(html: string) {
   const $ = cheerio.load(html);
   const rawErrorMessage = $('.panel div[style="color:red"]').text().trim().replace(/\n/g, " ");
-  return rawErrorMessageToIDMap[rawErrorMessage] ?? 'unexpected-error';
+  return rawErrorMessage ? rawErrorMessageToIDMap[rawErrorMessage] ?? 'unexpected-error' : undefined;
 }
 const logoutStep: FlatParsingRouteStep = {
   method: "GET",
   path: "logout.do",
 };
 export async function deleteSession(externalStore?: PlainCookieStore) {
-  const cookieStore = new MyEdCookieStore(cookies() || externalStore);
+  const cookieStore = new MyEdCookieStore(externalStore);
 
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (session) {
@@ -170,7 +169,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
 }
 export async function deleteSessionAndLogOut(
   cookieStore?: PlainCookieStore
-): Promise<never> {
+){
   await deleteSession(cookieStore);
   redirect("/login");
 }

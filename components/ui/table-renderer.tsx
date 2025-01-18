@@ -50,7 +50,7 @@ emptyText,
   emptyText?: string;
 }) {
   return (
-    <div className={cn("rounded-md border", containerClassName)}>
+    <div className={cn("rounded-lg r border", containerClassName)}>
       <Table {...props} containerClassName={tableContainerClassName}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

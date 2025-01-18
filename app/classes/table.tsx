@@ -29,6 +29,7 @@ import { Subject } from "@/types/school";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import { useMemo } from "react";
+import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 
 const columnHelper = createColumnHelper<Subject>();
 const columns = [
@@ -92,7 +93,7 @@ const mockSubjects = (length: number) =>
         teachers: [],
         name: "",
         room: "",
-        actualName: "",
+        id: "",
       } satisfies Subject)
   );
 export function SubjectsTable({
@@ -129,9 +130,7 @@ export function SubjectsTable({
         <TableRow
           onClick={!isTA?() =>
             push(
-              `/classes/${(
-                row.original as unknown as Subject
-              ).actualName.replaceAll(" ", "_")}`
+             getSubjectPageURL(row.original)
             )
           :undefined}
           key={row.id}

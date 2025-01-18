@@ -268,45 +268,15 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
-                  required:
-                    - oid
-                    - relSscMstOid_mstDescription
-                    - relSscMstOid_mstStaffView
-                    - relSscMstOid_relMstCskOid_cskGrdInpHide
-                    - cfTermAverage
-                  properties:
-                    oid:
-                      type: string
-                    relSscMstOid_mstDescription:
-                      type: string
-                    relSscMstOid_mstCourseView:
-                      type: string
-                      description: e.g., MCMPR11-11, appears only if fieldSetOid is set to a non-existent value
-                    relSscStdOid_stdViewName:
-                      type: string
-                      description: student name, appears only if fieldSetOid is set to a non-existent value
-                    relSscMstOid_mstStaffView:
-                      type: array
-                      items:
-                        type: object
-                        required:
-                          - name
-                        properties:
-                          name:
-                            type: string
-                          email:
-                            type: string
-                    relSscMstOid_relMstCskOid_cskGrdInpHide:
-                      type: boolean
-                    cfTermAverage:
-                      $ref: "#/components/schemas/NumberAsString"
-                    relSscMstOid_mstRoomView:
-                      type: string
-                      description: Room
-                    sscTermView:
-                      type: string
-                      description: Term
+                  allOf:
+                    - $ref: "#/components/schemas/Subject"
+                    - type: object
+                      properties:
+                        cfTermAverage:
+                          $ref: "#/components/schemas/NumberAsString"
+                        sscTermView:
+                          type: string
+                          description: Term
   /lists/academics.classes.list/fieldSets:
     get:
       summary: Get the list of classes table field sets
@@ -823,6 +793,37 @@ components:
                         - bottom
                     order:
                       type: integer
+    Subject:
+      type: object
+      required:
+        - oid
+      properties:
+        oid:
+          type: string
+        relSscMstOid_mstDescription:
+          type: string
+        relSscMstOid_mstCourseView:
+          type: string
+          description: e.g., MCMPR11-11, appears only if fieldSetOid is set to a non-existent value
+        relSscStdOid_stdViewName:
+          type: string
+          description: student name, appears only if fieldSetOid is set to a non-existent value
+        relSscMstOid_mstStaffView:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+        relSscMstOid_relMstCskOid_cskGrdInpHide:
+          type: boolean
+        relSscMstOid_mstRoomView:
+          type: string
+          description: Room
     StudentAssignment:
       type: object
       required:
