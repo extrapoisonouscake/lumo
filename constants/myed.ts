@@ -15,10 +15,13 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
 export const MYED_DATE_FORMAT = "YYYY-MM-DD";
 const getHTMLToken = ($: cheerio.CheerioAPI) =>
   $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`).first().val() as string;
-export type FlatParsingRouteStep = {
+
+
+export type FlatRouteStep = {
   path: string;
   headers?: Record<string, string>;
   body?: Record<string, any>;
+  expect: 'json' | 'html'
 } & (
     | {
       method: "GET";
@@ -31,25 +34,43 @@ export type FlatParsingRouteStep = {
       htmlToken: string;
     }
   );
-type ParsingRouteParams = Record<string, any>;
-type ParsingRouteStep<Params extends ParsingRouteParams> =
-  | Omit<FlatParsingRouteStep, "htmlToken">
+type RouteParams = Record<string, any>;
+type RouteResponse = cheerio.CheerioAPI | Record<string, any> | Record<string, any>[]
+type RouteStep<Params extends RouteParams> =
+  | Omit<FlatRouteStep, "htmlToken"> | Omit<FlatRouteStep, "htmlToken">[]
   | ((props: {
-    $documents: cheerio.CheerioAPI[];
+    responses: RouteResponse[];
     params: Params;
-  }) => Omit<FlatParsingRouteStep, "htmlToken">);
+    studentID: string;
+  }) => Omit<FlatRouteStep, "htmlToken"> | Omit<FlatRouteStep, "htmlToken">[]);
 
-class ResolvedParsingRoute<Params extends ParsingRouteParams> {
+const processStep = <Params extends RouteParams>(self: ResolvedRoute<Params>, step: Omit<FlatRouteStep, "htmlToken">) => {
+  if (step.method === "POST") {
+    const htmlTokenIndex = self.resolvedSteps.findIndex(step => Array.isArray(step) ? step.every(s => s.expect === 'html') : step.expect === 'html')
+    if (htmlTokenIndex === -1) throw new Error('No html token found')
+
+    const htmlTokenResponse = self.responses[htmlTokenIndex];
+    ((step as FlatRouteStep).htmlToken = getHTMLToken(//!
+      Array.isArray(htmlTokenResponse) ? htmlTokenResponse[0] : htmlTokenResponse as cheerio.CheerioAPI
+    ));
+  }
+}
+
+class ResolvedRoute<Params extends RouteParams> {
+  studentID: string;
   params: Params;
-  steps: Array<ParsingRouteStep<Params>> = [];
-  $documents: cheerio.CheerioAPI[];
-  constructor(params: Params, steps: Array<ParsingRouteStep<Params>>) {
+  steps: Array<RouteStep<Params>> = [];
+  resolvedSteps: Array<FlatRouteStep | FlatRouteStep[]> = [];
+  responses: (RouteResponse | RouteResponse[])[] = [];
+  constructor(studentID: string, params: Params, steps: typeof this.steps) {
+    this.studentID = studentID;
     this.params = params;
     this.steps = steps;
-    this.$documents = [];
+    this.resolvedSteps = [];
+    this.responses = [];
   }
-  addDocument($document: cheerio.CheerioAPI) {
-    this.$documents.push($document);
+  addResponse(response: typeof this.responses[number]) {
+    this.responses.push(response);
   }
   get length() {
     return this.steps.length;
@@ -59,76 +80,106 @@ class ResolvedParsingRoute<Params extends ParsingRouteParams> {
       let nextStep = this.steps[i];
       if (typeof nextStep === "function") {
         nextStep = nextStep({
-          $documents: this.$documents,
+          responses: this.responses,
           params: this.params,
+          studentID: this.studentID
         });
       }
-      if (nextStep.method === "POST") {
-        (nextStep as FlatParsingRouteStep).htmlToken = getHTMLToken(
-          this.$documents[0]
-        );
+      if (Array.isArray(nextStep)) {
+        for (let i = 0; i < nextStep.length; i++) {
+          const step = nextStep[i];
+          processStep(this, step)
+
+        }
+      } else {
+        processStep(this, nextStep)
       }
-      yield { ...(nextStep as FlatParsingRouteStep), index: i };
+      const nextStepWithType = nextStep as FlatRouteStep[] | FlatRouteStep
+      this.resolvedSteps.push(nextStepWithType);//!
+      yield { value: nextStepWithType, index: i };//!
+
     }
   }
 }
-type ParsingRouteStepPredicate<Params extends ParsingRouteParams> = (
+type RouteStepPredicate<Params extends RouteParams> = (
   params: Params
 ) => boolean;
-export class ParsingRoute<
-  Params extends ParsingRouteParams = Record<string, never>
+export class Route<
+  Params extends RouteParams = Record<string, never>
 > extends CallableInstance<
   Params extends Record<string, never> ? [] : [Params],
-  ResolvedParsingRoute<Params>
+  ResolvedRoute<Params>
 > {
-  steps: Array<ParsingRouteStep<Params>>;
-  predicates: Record<number, ParsingRouteStepPredicate<Params>> = {};
+  steps: Array<RouteStep<Params>>;
+  predicates: Record<number, RouteStepPredicate<Params>> = {};
   constructor() {
     super("call");
     this.steps = [];
     this.predicates = {};
   }
   step(
-    step: (typeof this)["steps"][number],
-    predicate?: ParsingRouteStepPredicate<Params>
+    step: Omit<FlatRouteStep, "htmlToken">
+      | ((props: {
+        responses: RouteResponse[];
+        params: Params;
+        studentID: string;
+      }) => Omit<FlatRouteStep, "htmlToken">),
+    predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(step);
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
-  call(...[params]: [Params]) {
+  multiple(
+    multipleSteps: Omit<FlatRouteStep, "htmlToken">[]
+      | ((props: {
+        responses: RouteResponse[];
+        params: Params;
+        studentID: string;
+      }) => Omit<FlatRouteStep, "htmlToken">[]),
+    predicate?: RouteStepPredicate<Params>
+  ) {
+    this.steps.push(multipleSteps);
+    if (predicate) this.predicates[this.steps.length - 1] = predicate;
+    return this;
+  }
+  call(...[studentID, params]: [string, Params]) {
     const filteredSteps = this.steps.filter((_, index) => {
       const predicate = this.predicates[index];
       if (!predicate) return true;
       return predicate(params);
     });
-    return new ResolvedParsingRoute(params, filteredSteps);
+    return new ResolvedRoute(studentID, params, filteredSteps);
   }
 }
 
 export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
-  schedule: new ParsingRoute<{ day?: string }>()
+  schedule: new Route<{ day?: string }>()
     .step({
       method: "GET",
       path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
+      expect: 'html'
     })
     .step(
       ({ params: { day } }) => ({
         method: "GET",
         path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
+        expect: 'html'
       }),
       ({ day }) => !!day
     ),
-  currentWeekday: new ParsingRoute().step({
+  currentWeekday: new Route().step({
     method: "GET",
     path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
+    expect: 'html'
   }),
 
-  personalDetails: new ParsingRoute()
+  personalDetails: new Route()
     .step({
       method: "GET",
       path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      expect: 'html'
     })
     .step({
       method: "POST",
@@ -138,6 +189,7 @@ export const myEdParsingRoutes = {
         userParam: "2",
       },
       contentType: "application/x-www-form-urlencoded",
+      expect: 'html'
     }),
 };
 export type MyEdParsingRoutes = typeof myEdParsingRoutes;
@@ -146,28 +198,27 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 export type MyEdRestEndpointURL = keyof paths;
 
-type MyEdRestEndpointFlatInstruction = FlatParsingRouteStep | FlatParsingRouteStep[];
+type MyEdRestEndpointFlatInstruction = FlatRouteStep | FlatRouteStep[];
 type MyEdRestEndpointInstruction = (props: { params: any, studentID: string }) => MyEdRestEndpointFlatInstruction;
 export const myEdRestEndpoints = {
-  'subjects': ({ studentID }) => {
-    return {
-      method: "GET",
-      path: `lists/academics.classes.list`,
-      body: { selectedStudent: studentID, fieldSetOid: 'fsnX2Cls' }
-    }
-  },
-  'subjectAssignments':({params:{subjectID}}:{params:{subjectID:string},studentID:string})=>{
-    return [{
-      method: "GET",
-      path: `studentSchedule/${subjectID}/categoryDetails/pastDue`,
-      
-    },{
-      method: "GET",
-      path: `studentSchedule/${subjectID}/categoryDetails/upcoming`,
-      
-    }]
-  }
-} satisfies Record<string, MyEdRestEndpointInstruction>;
+  'subjects': new Route().step(({ studentID }) => ({
+    method: "GET",
+    path: `rest/lists/academics.classes.list`,
+    body: { selectedStudent: studentID, fieldSetOid: 'fsnX2Cls' },
+    expect: 'json'
+  })),
+  'subjectAssignments': new Route().multiple(({ params: { subjectID }, studentID }) => [{
+    method: "GET",
+    path: `rest/studentSchedule/${subjectID}/categoryDetails/pastDue`,
+    expect: 'json'
+
+  }, {
+    method: "GET",
+    path: `rest/studentSchedule/${subjectID}/categoryDetails/upcoming`,
+    expect: 'json'
+
+  }]),
+}
 
 
 export type MyEdRestEndpoints = typeof myEdRestEndpoints;

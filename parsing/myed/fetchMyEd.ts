@@ -1,17 +1,16 @@
 import {
   ENDPOINTS,
+  FlatRouteStep,
   MYED_SESSION_COOKIE_NAME,
   MyEdEndpoint,
   MyEdParsingRoute,
-  MyEdRestEndpoint,
-  myEdRestEndpoints
+  MyEdRestEndpoint
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
 import * as jose from 'jose';
-import { cookies } from "next/headers";
 import { cache } from "react";
 import "server-only";
 import { parseSubjectAssignments } from "./assignments";
@@ -30,10 +29,9 @@ const endpointToParsingFunction = {
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (...args: K extends MyEdRestEndpoint ? any[]/*!*/ : ParserFunctionArguments<K>) => any
 };
-const isRestEndpoint = (endpoint: MyEdEndpoint): endpoint is MyEdRestEndpoint => {
-  return endpoint in myEdRestEndpoints;
-};
-type NarrowedParsingRoute<Endpoint extends MyEdEndpoint> = Exclude<Endpoint, MyEdRestEndpoint>
+const processResponse = async (response: Response, value: FlatRouteStep) => {
+  return value.expect === 'html' ? cheerio.load(await response.text()) : await response.json()
+}
 export const fetchMyEd = cache(async function <
   Endpoint extends MyEdEndpoint
 >(endpoint: Endpoint, ...rest: MyEdEndpointsParamsAsOptional<Endpoint>) {
@@ -44,41 +42,44 @@ export const fetchMyEd = cache(async function <
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (!session) return;
   const { payload: parsedSession } = jose.UnsecuredJWT.decode<{ session: string, studentID: string }>(session)
-  
+
   const requestGroup = `${endpoint}-${Date.now()}`;
-  try{if (isRestEndpoint(endpoint)) {
-    const steps = myEdRestEndpoints[endpoint]({ params: rest[0], studentID: parsedSession.studentID });
-    const stepsArray = Array.isArray(steps) ? steps : [steps]
-    const responses = await sendMyEdRequest({ step: stepsArray, authCookies, session, isRestRequest: true, requestGroup, isLastRequest: true }).then(response => Promise.all(response.map(r => r.json())))
+  //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
+  const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...(rest as any));//!
+  try {
+    for (const step of steps) {
+      const isLastRequest = step.index === steps.length - 1;
+      const value = step.value
+      const response = await sendMyEdRequest({
+        //@ts-expect-error FIX THIS
+        step: value,
+        session,
+        authCookies,
+        isRestRequest: false,
+        requestGroup,
+        isLastRequest,
+      });
+      console.log(response)
+      const responses = []
+      const isArray = Array.isArray(response) && Array.isArray(value)
+      console.log({ isArray })
+      if (isArray) {
+        for (let i = 0; i < response.length; i++) {
+          const r = response[i]
+          responses.push(await processResponse(r, value[i]))
+        }
+      } else {
+        //@ts-expect-error FIX THIS
+        responses.push(await processResponse(response, value as FlatRouteStep))
+      }
+      steps.addResponse(isArray ? responses : responses[0])
+    }
+    console.log(steps.responses)
     return endpointToParsingFunction[endpoint](
-      rest[0] as any,
-      //@ts-expect-error Spreading responses is intentional as endpoint functions expect tuple parameters
-      ...responses
+      rest[0] as unknown as any,
+      ...(steps.responses as any)
     ) as MyEdEndpointResponse<Endpoint>;
-  }
-  type NarrowedRoute = NarrowedParsingRoute<Endpoint>
-  const steps = ENDPOINTS[endpoint as NarrowedRoute](...rest as any);//!
-
-  for (const step of steps) {
-    const isLastRequest = step.index === steps.length - 1;
-
-    const response = await sendMyEdRequest({
-      step,
-      session,
-      authCookies,
-      isRestRequest: false,
-      requestGroup,
-      isLastRequest,
-    });
-
-    steps.addDocument(cheerio.load(await response.text()));
-  }
-
-  return endpointToParsingFunction[endpoint](
-    rest[0] as any,
-    //@ts-expect-error Spreading responses is intentional as endpoint functions expect tuple parameters
-    ...steps.$documents
-  ) as MyEdEndpointResponse<Endpoint>;}catch(e){
+  } catch (e) {
     console.error(e)
     return undefined
   }

@@ -59,24 +59,20 @@ class PrioritizedRequestQueue {
    * Processes the queue, respecting group prioritization.
    */
   private async processQueue(): Promise<void> {
-    if (this.isProcessing || this.queue.length === 0){ console.log("queue is empty or processing"); return; }
-    console.log("processing queue")
+    if (this.isProcessing || this.queue.length === 0) { return; }
+
     const nextItem = this.getNextQueueItem();
-    console.log({nextItem})
     if (nextItem) {
       const { requestFunction, resolve, reject, group } = nextItem;
       this.isProcessing = true;
       this.currentGroup = group ?? null;
       try {
         const result = await requestFunction();
-        console.log({result})
         resolve(result);
       } catch (error) {
         reject(error);
       } finally {
         this.isProcessing = false;
-        console.log("finished processing queue",nextItem.group)
-        console.log({currentGroup:this.currentGroup})
         if (this.currentGroup && nextItem.isLastRequest) {
           this.currentGroup = null;
         }

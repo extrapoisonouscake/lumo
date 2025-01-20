@@ -1,5 +1,5 @@
 import {
-  FlatParsingRouteStep,
+  FlatRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
 } from "@/constants/myed";
@@ -10,7 +10,7 @@ import { clientQueueManager } from "./requests-queue";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-export type SendMyEdRequestParameters<Steps extends FlatParsingRouteStep | FlatParsingRouteStep[]> = {
+export type SendMyEdRequestParameters<Steps extends FlatRouteStep | FlatRouteStep[]> = {
   step: Steps;
   session: string;
   isRestRequest: boolean
@@ -26,13 +26,13 @@ const getUserAgent = () => {
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
   return userAgent;
 };
-export async function sendMyEdRequest<Steps extends FlatParsingRouteStep[]>(
+export async function sendMyEdRequest<Steps extends FlatRouteStep[]>(
   params: SendMyEdRequestParameters<Steps>
 ): Promise<Response[]>;
-export async function sendMyEdRequest<Steps extends FlatParsingRouteStep>(
+export async function sendMyEdRequest<Steps extends FlatRouteStep>(
   params: SendMyEdRequestParameters<Steps>
 ): Promise<Response>;
-export async function sendMyEdRequest<Steps extends FlatParsingRouteStep | FlatParsingRouteStep[]>({
+export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteStep[]>({
   authCookies,
   step: stepOrSteps,
   session,
@@ -51,7 +51,7 @@ export async function sendMyEdRequest<Steps extends FlatParsingRouteStep | FlatP
   };
   const argumentsArray: [string, RequestInit][] = []
   const isMultipleSteps = Array.isArray(stepOrSteps)
-  const stepsArray:FlatParsingRouteStep[] = isMultipleSteps ? stepOrSteps : [stepOrSteps]
+  const stepsArray: FlatRouteStep[] = isMultipleSteps ? stepOrSteps : [stepOrSteps]
   for (const step of stepsArray) {
     let params: RequestInit = { method: step.method, headers: initHeaders };
     if (step.method === "POST") {
@@ -89,19 +89,19 @@ export async function sendMyEdRequest<Steps extends FlatParsingRouteStep | FlatP
         params.body = formData;
       }
     }
-      const args: [string, RequestInit] = [getFullMyEdUrl(step.path, isRestRequest), params];
-      argumentsArray.push(args)
-    
+    const args: [string, RequestInit] = [getFullMyEdUrl(step.path, isRestRequest), params];
+    argumentsArray.push(args)
+
   }
 
 
-    const queue = clientQueueManager.getQueue(session);
-    console.log({stepOrSteps,stepsArray,argumentsArray})
-    const response = await queue.enqueue<Response | Response[]>(
-      (isMultipleSteps ? () => Promise.all(argumentsArray.map(args => fetch(...args))) : () => fetch(...argumentsArray[0])),
-      requestGroup,
-      isLastRequest
-    );
- 
+  const queue = clientQueueManager.getQueue(session);
+  console.log({ stepOrSteps, stepsArray, argumentsArray })
+  const response = await queue.enqueue<Response | Response[]>(
+    (isMultipleSteps ? () => Promise.all(argumentsArray.map(args => fetch(...args))) : () => fetch(...argumentsArray[0])),
+    requestGroup,
+    isLastRequest
+  );
+
   return response;
 }
