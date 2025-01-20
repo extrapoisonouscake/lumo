@@ -110,6 +110,7 @@ const mockAssignments = (length: number) =>
         assignedAt: new Date(),
         feedback: "",
         status: AssignmentStatus.Unknown,
+classAverage:0
       } satisfies Assignment)
   );
 export function SubjectAssignmentsTable({
