@@ -5,7 +5,7 @@ import {
   shouldSecureCookies,
 } from "@/constants/auth";
 import {
-  FlatParsingRouteStep,
+  FlatRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
   MYED_SESSION_COOKIE_NAME,
@@ -19,7 +19,6 @@ import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
 import * as cookie from "cookie";
 import * as jose from "jose";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import "server-only";
 import { LoginError } from "./public";
@@ -44,10 +43,8 @@ export async function performLogin(
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
-  const { cookies: cookiesToAdd, studentID } = await fetchAuthCookiesAndStudentID(
-    username,
-    password
-  );
+  const { cookies: cookiesToAdd, studentID } =
+    await fetchAuthCookiesAndStudentID(username, password);
   for (const entry of cookiesToAdd) {
     const name = entry[0];
     let value = entry[1];
@@ -108,15 +105,17 @@ export async function fetchAuthCookiesAndStudentID(
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
   if (!cookiesPairs) throw new Error("Failed"); //!
   const rawCookiesString = cookiesPairs.join("; ");
-  const cookiesToAdd = Object.entries(cookie.parse(rawCookiesString)).filter(([name]) =>
-    MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
+  const cookiesToAdd = Object.entries(cookie.parse(rawCookiesString)).filter(
+    ([name]) => MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
   );
-  const cookiesString = cookiesToAdd.map(([name, value]) => cookie.serialize(name, value || "")).join("; ");
+  const cookiesString = cookiesToAdd
+    .map(([name, value]) => cookie.serialize(name, value || ""))
+    .join("; ");
   const loginResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
     method: "POST",
     body: loginFormData,
     headers: {
-      Cookie: cookiesString
+      Cookie: cookiesString,
     },
   });
   if (!loginResponse.ok) {
@@ -125,9 +124,11 @@ export async function fetchAuthCookiesAndStudentID(
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
-  const studentsRequest = await myEdRestAPIClient.GET('/users/students', { headers: { Cookie: cookiesString } })
-  if (studentsRequest.error) throw new Error('Error')
-  const studentID = studentsRequest.data[0].studentOid
+  const studentsRequest = await myEdRestAPIClient.GET("/users/students", {
+    headers: { Cookie: cookiesString },
+  });
+  if (studentsRequest.error) throw new Error("Error");
+  const studentID = studentsRequest.data[0].studentOid;
 
   return {
     cookies: cookiesToAdd.filter(([name]) =>
@@ -139,15 +140,21 @@ export async function fetchAuthCookiesAndStudentID(
 const rawErrorMessageToIDMap: Record<string, LoginError> = {
   "This account has been disabled.": "account-disabled",
   "Invalid login.": "invalid-auth",
-}
+};
 function parseLoginErrorMessage(html: string) {
   const $ = cheerio.load(html);
-  const rawErrorMessage = $('.panel div[style="color:red"]').text().trim().replace(/\n/g, " ");
-  return rawErrorMessage ? rawErrorMessageToIDMap[rawErrorMessage] ?? 'unexpected-error' : undefined;
+  const rawErrorMessage = $('.panel div[style="color:red"]')
+    .text()
+    .trim()
+    .replace(/\n/g, " ");
+  return rawErrorMessage
+    ? rawErrorMessageToIDMap[rawErrorMessage] ?? "unexpected-error"
+    : undefined;
 }
-const logoutStep: FlatParsingRouteStep = {
+const logoutStep: FlatRouteStep = {
   method: "GET",
   path: "logout.do",
+  expect: "html",
 };
 export async function deleteSession(externalStore?: PlainCookieStore) {
   const cookieStore = new MyEdCookieStore(externalStore);
@@ -158,7 +165,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
       step: logoutStep,
       session,
       authCookies: getAuthCookies(cookieStore),
-      isRestRequest: false
+      isRestRequest: false,
     });
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
@@ -167,9 +174,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
   cookieStore.delete("username");
   cookieStore.delete("password");
 }
-export async function deleteSessionAndLogOut(
-  cookieStore?: PlainCookieStore
-){
+export async function deleteSessionAndLogOut(cookieStore?: PlainCookieStore) {
   await deleteSession(cookieStore);
   redirect("/login");
 }
