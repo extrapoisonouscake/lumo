@@ -1,4 +1,4 @@
-import { convertPathParameterToSubjectName } from "@/app/classes/[name]/[id]/helpers";
+import { convertPathParameterToSubjectName } from "@/app/classes/[name]/helpers";
 import { Calendar, Home, Settings, Shapes } from "lucide-react";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 

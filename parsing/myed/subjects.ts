@@ -2,10 +2,9 @@ import {
   prettifySubjectName,
   TEACHER_ADVISORY_ABBREVIATION,
 } from "@/helpers/prettifySubjectName";
-import { paths } from "@/types/myed-rest";
 import { Subject } from "@/types/school";
-import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 import { DeepWithRequired } from "@/types/utils";
+import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeGPA = (string?: string) => {
@@ -36,7 +35,35 @@ function separateTAFromSubjects(subject: Subject[]) {
   };
 }
 
-export function parseSubjects(...[_,data]: ParserFunctionArguments<'subjects',[DeepWithRequired<OpenAPI200JSONResponse<'/lists/academics.classes.list'>,'relSscMstOid_mstDescription'|'relSscMstOid_mstStaffView'|'cfTermAverage'|'relSscMstOid_mstRoomView'>]>) {
-  const preparedData = data.map(({ relSscMstOid_mstDescription, relSscMstOid_mstStaffView, cfTermAverage, relSscMstOid_mstRoomView,oid }) => ({id:oid, name: prettifySubjectName(relSscMstOid_mstDescription), teachers: relSscMstOid_mstStaffView.map(item => item.name), room: relSscMstOid_mstRoomView ?? null, gpa: normalizeGPA(cfTermAverage) }))
+export function parseSubjects(
+  ...[_, data]: ParserFunctionArguments<
+    "subjects",
+    [
+      DeepWithRequired<
+        OpenAPI200JSONResponse<"/lists/academics.classes.list">,
+        | "relSscMstOid_mstDescription"
+        | "relSscMstOid_mstStaffView"
+        | "cfTermAverage"
+        | "relSscMstOid_mstRoomView"
+      >
+    ]
+  >
+) {
+  const preparedData = data.map(
+    ({
+      relSscMstOid_mstDescription,
+      relSscMstOid_mstStaffView,
+      cfTermAverage,
+      relSscMstOid_mstRoomView,
+      oid,
+    }) => ({
+      id: oid,
+      actualName: relSscMstOid_mstDescription,
+      name: prettifySubjectName(relSscMstOid_mstDescription),
+      teachers: relSscMstOid_mstStaffView.map((item) => item.name),
+      room: relSscMstOid_mstRoomView ?? null,
+      gpa: normalizeGPA(cfTermAverage),
+    })
+  );
   return separateTAFromSubjects(preparedData);
 }

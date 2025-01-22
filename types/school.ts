@@ -3,12 +3,11 @@ export interface Subject {
   name: string;
   teachers: string[];
   room: string | null;
+  actualName: string;
   gpa: number | null;
 }
 //? name?
-export type ScheduleSubject = 
-  Omit<Subject,"gpa">
-& {
+export type ScheduleSubject = Omit<Subject, "gpa" | "id"> & {
   startsAt: Date;
   endsAt: Date;
 };

@@ -21,21 +21,20 @@ import {
 } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
+import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { ScheduleSubject, Subject } from "@/types/school";
+import { ScheduleSubject } from "@/types/school";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
-import { prepareStringForURI } from "@/helpers/prepareStringForURI";
-import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 export type ScheduleSubjectRow =
-  | ({isBreak?:never,isLunch?:never}&ScheduleSubject)
+  | ({ isBreak?: never; isLunch?: never } & ScheduleSubject)
   | ({ isBreak: true; isLunch: boolean } & Pick<
       ScheduleSubject,
       "startsAt" | "endsAt"
@@ -115,10 +114,10 @@ const mockScheduleSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
       ({
-        id: "",
         startsAt: new Date(),
         endsAt: new Date(),
         teachers: [],
+        actualName: "",
         name: "",
         room: "",
       } satisfies ScheduleSubject)
@@ -151,7 +150,9 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   }
   return filledIntervals;
 };
-export const isRowScheduleSubject = (row: ScheduleSubjectRow): row is ScheduleSubject=> !("isBreak" in row)
+export const isRowScheduleSubject = (
+  row: ScheduleSubjectRow
+): row is ScheduleSubject => !("isBreak" in row);
 const getRowRenderer: RowRendererFactory<
   ScheduleSubjectRow,
   [Router["push"]]
@@ -165,15 +166,12 @@ const getRowRenderer: RowRendererFactory<
     timeCell = cells.find((cell) => cell.column.id === "Time");
     nameCell = cells.find((cell) => cell.column.id === "name");
   }
-  const isTA=isSubject &&rowOriginal.name===TEACHER_ADVISORY_ABBREVIATION
+  const isTA = isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
   return (
     <TableRow
       onClick={
-        isSubject&&!isTA
-          ? () =>
-              push(
-                 getSubjectPageURL(rowOriginal)
-              )
+        isSubject && !isTA
+          ? () => push(getSubjectPageURL(rowOriginal))
           : undefined //!
       }
       key={row.id}
@@ -181,11 +179,11 @@ const getRowRenderer: RowRendererFactory<
       style={table.options.meta?.getRowStyles?.(row)}
       className={table.options.meta?.getRowClassName?.(row)}
     >
-      {isSubject ?(
+      {isSubject ? (
         cells.map((cell, i) => {
           const content = renderTableCell(cell);
-          const showArrow = i === cells.length - 1&&!isTA;
-          return showArrow? (
+          const showArrow = i === cells.length - 1 && !isTA;
+          return showArrow ? (
             <TableCellWithRedirectIcon key={cell.id}>
               {content}
             </TableCellWithRedirectIcon>
@@ -193,7 +191,7 @@ const getRowRenderer: RowRendererFactory<
             <TableCell key={cell.id}>{content}</TableCell>
           );
         })
-      ): (
+      ) : (
         <>
           <TableCell>
             {renderTableCell(timeCell as NonNullable<typeof timeCell>)}

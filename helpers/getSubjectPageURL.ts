@@ -1,6 +1,5 @@
-import { Subject } from "@/types/school"
-import { prepareStringForURI } from "./prepareStringForURI"
+import { Subject } from "@/types/school";
 
-export const getSubjectPageURL=(subject:Pick<Subject,"name"|"id">)=>{
-  return `/classes/${prepareStringForURI(subject.name)}/${subject.id}`
-}
+export const getSubjectPageURL = (subject: Pick<Subject, "actualName">) => {
+  return `/classes/${subject.actualName.replaceAll(" ", "_")}`;
+};
