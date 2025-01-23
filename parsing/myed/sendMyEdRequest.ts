@@ -13,7 +13,6 @@ const USER_AGENT_FALLBACK =
 export type SendMyEdRequestParameters<Steps extends FlatRouteStep | FlatRouteStep[]> = {
   step: Steps;
   session: string;
-  isRestRequest: boolean
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
@@ -38,7 +37,6 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteSte
   session,
   isLastRequest,
   requestGroup,
-  isRestRequest
 }: SendMyEdRequestParameters<Steps>) {
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
@@ -89,16 +87,15 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteSte
         params.body = formData;
       }
     }
-    const args: [string, RequestInit] = [getFullMyEdUrl(step.path, isRestRequest), params];
+    const args: [string, RequestInit] = [getFullMyEdUrl(step.path), params];
     argumentsArray.push(args)
 
   }
 
-
+  console.log(argumentsArray)
   const queue = clientQueueManager.getQueue(session);
-  console.log({ stepOrSteps, stepsArray, argumentsArray })
   const response = await queue.enqueue<Response | Response[]>(
-    (isMultipleSteps ? () => Promise.all(argumentsArray.map(args => fetch(...args))) : () => fetch(...argumentsArray[0])),
+    (isMultipleSteps ? async () => { console.log(argumentsArray[0][0], Date.now()); const r = await Promise.all(argumentsArray.map(args => fetch(...args))); console.log(argumentsArray[0][0], 'f', Date.now()); return r } : async () => { console.log(argumentsArray[0][0], Date.now()); const r = await fetch(...argumentsArray[0]); console.log(argumentsArray[0][0], 'f', Date.now()); return r }),
     requestGroup,
     isLastRequest
   );

@@ -34,22 +34,24 @@ export default function Page() {
     router.push("/");
   }
   return (
-    <Form onSubmit={onSubmit} {...form} className="flex flex-col gap-3">
-      {errorID && <Alert variant={errorID === 'account-disabled' ? "destructive" : "default"}>
-        <TriangleAlert className="size-4 !text-red-500" />
-        <AlertTitle className="text-red-500">Error</AlertTitle>
-        <AlertDescription className="text-red-500">
-          {loginErrorIDToMessageMap[errorID]}
-        </AlertDescription>
-      </Alert>}
-      <FormInput placeholder="user" name="username" label="Username" />
-      <FormInput
-        placeholder="******"
-        type="password"
-        name="password"
-        label="Password"
-      />
-      <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
-    </Form>
+    <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
+      <Form onSubmit={onSubmit} {...form} className="flex flex-col gap-3 w-full">
+        {errorID && <Alert variant={errorID === 'account-disabled' ? "destructive" : "default"}>
+          <TriangleAlert className="size-4 !text-red-500" />
+          <AlertTitle className="text-red-500">Error</AlertTitle>
+          <AlertDescription className="text-red-500">
+            {loginErrorIDToMessageMap[errorID]}
+          </AlertDescription>
+        </Alert>}
+        <FormInput placeholder="user" name="username" label="Username" />
+        <FormInput
+          placeholder="******"
+          type="password"
+          name="password"
+          label="Password"
+        />
+        <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
+      </Form>
+    </div>
   );
 }

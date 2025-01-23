@@ -21,6 +21,7 @@ import {
 import { fractionFormatter } from "@/constants/intl";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
+import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
@@ -29,7 +30,6 @@ import { Subject } from "@/types/school";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
 import { useMemo } from "react";
-import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 
 const columnHelper = createColumnHelper<Subject>();
 const columns = [
@@ -88,13 +88,14 @@ const columnsSkeletons = makeTableColumnsSkeletons(columns, {
 const mockSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
-      ({
-        gpa: 0,
-        teachers: [],
-        name: "",
-        room: "",
-        id: "",
-      } satisfies Subject)
+    ({
+      gpa: 0,
+      teachers: [],
+      name: "",
+      room: "",
+      id: "",
+      actualName: "",
+    } satisfies Subject)
   );
 export function SubjectsTable({
   data: externalData,
@@ -110,29 +111,29 @@ export function SubjectsTable({
       isLoading
         ? mockSubjects(5)
         : prepareTableDataForSorting(
-            externalData as NonNullable<typeof externalData>
-          ),
+          externalData as NonNullable<typeof externalData>
+        ),
     [isLoading, externalData]
   );
   const columnVisibility = shownColumns
     ? Object.fromEntries(
-        columns.map((column) => {
-          const identifier = column.accessorKey;
-          return [identifier, shownColumns.includes(identifier)];
-        })
-      )
+      columns.map((column) => {
+        const identifier = column.accessorKey;
+        return [identifier, shownColumns.includes(identifier)];
+      })
+    )
     : {};
   const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
     (table, push) => (row) => {
       const cells = row.getVisibleCells();
-      const isTA=row.original.name===TEACHER_ADVISORY_ABBREVIATION
+      const isTA = row.original.name === TEACHER_ADVISORY_ABBREVIATION
       return (
         <TableRow
-          onClick={!isTA?() =>
+          onClick={!isTA ? () =>
             push(
-             getSubjectPageURL(row.original)
+              getSubjectPageURL(row.original)
             )
-          :undefined}
+            : undefined}
           key={row.id}
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
@@ -143,7 +144,7 @@ export function SubjectsTable({
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow= i === cells.length - 1&&!isTA;
+            const showArrow = i === cells.length - 1 && !isTA;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}

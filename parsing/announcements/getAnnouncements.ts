@@ -31,7 +31,6 @@ export async function getAnnouncements(school: KnownSchools, date?: Date) {
       try {
         buffer = await fetchBuffer(date);
       } catch (e) {
-        console.log(e);
         return [];
       }
       await parseAndCacheAnnouncements(buffer, school, redisKey);
@@ -53,13 +52,7 @@ const fetchFunctionsBySchool: Record<
     if (!homePageResponse.ok) throw new Error("Failed to fetch home page");
     const html = await homePageResponse.text();
     const $ = cheerio.load(html);
-    console.log(
-      $(
-        `p:has(a:contains("Daily Announcements")) + p a:contains("${parsedDate.format(
-          "MMMM D, YYYY"
-        )}")`
-      ).prop("innerHTML")
-    );
+
     const directURL = $(
       `p:has(a:contains("Daily Announcements")) + p a:contains("${parsedDate.format(
         "MMMM D, YYYY"
@@ -104,7 +97,6 @@ export async function parseAndCacheAnnouncements(
     preparedData =
       parseElements(elements as PDFParsingPartitionElement[]) || [];
   } catch (e) {
-    console.log(e);
     preparedData = [];
   }
   const now = timezonedDayJS();

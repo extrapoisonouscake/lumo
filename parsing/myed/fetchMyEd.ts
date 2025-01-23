@@ -55,24 +55,23 @@ export const fetchMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
 
   const requestGroup = `${endpoint}-${Date.now()}`;
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
-  const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...(rest as any)); //!
+  const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...rest); //!
   try {
+    let lastRequestType: 'parsing' | 'rest'
     for (const step of steps) {
       const isLastRequest = step.index === steps.length - 1;
       const value = step.value;
+
       const response = await sendMyEdRequest({
         //@ts-expect-error FIX THIS
         step: value,
         session,
         authCookies,
-        isRestRequest: false,
         requestGroup,
         isLastRequest,
       });
-      console.log(response);
       const responses = [];
       const isArray = Array.isArray(response) && Array.isArray(value);
-      console.log({ isArray });
       if (isArray) {
         for (let i = 0; i < response.length; i++) {
           const r = response[i];
@@ -84,7 +83,6 @@ export const fetchMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       }
       steps.addResponse(isArray ? responses : responses[0]);
     }
-    console.log(steps.responses);
     return endpointToParsingFunction[endpoint](
       rest[0] as unknown as any,
       ...(steps.responses as any)

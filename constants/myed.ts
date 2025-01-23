@@ -23,20 +23,20 @@ export type FlatRouteStep = {
   body?: Record<string, any>;
   expect: "json" | "html";
 } & (
-  | {
+    | {
       method: "GET";
       contentType?: never;
       htmlToken?: never;
     }
-  | {
+    | {
       method: "POST";
       contentType:
-        | "application/x-www-form-urlencoded"
-        | "form-data"
-        | "applicatiob/json";
+      | "application/x-www-form-urlencoded"
+      | "form-data"
+      | "applicatiob/json";
       htmlToken: string;
     }
-);
+  );
 type RouteParams = Record<string, any>;
 type RouteResponse =
   | cheerio.CheerioAPI
@@ -46,12 +46,12 @@ type RouteStep<Params extends RouteParams> =
   | Omit<FlatRouteStep, "htmlToken">
   | Omit<FlatRouteStep, "htmlToken">[]
   | ((props: {
-      responses: RouteResponse[];
-      params: Params;
-      studentID: string;
-    }) =>
-      | Omit<FlatRouteStep, "htmlToken">
-      | Omit<FlatRouteStep, "htmlToken">[]);
+    responses: RouteResponse[];
+    params: Params;
+    studentID: string;
+  }) =>
+    | Omit<FlatRouteStep, "htmlToken">
+    | Omit<FlatRouteStep, "htmlToken">[]);
 
 const processStep = <Params extends RouteParams>(
   self: ResolvedRoute<Params>,
@@ -138,10 +138,10 @@ export class Route<
     step:
       | Omit<FlatRouteStep, "htmlToken">
       | ((props: {
-          responses: RouteResponse[];
-          params: Params;
-          studentID: string;
-        }) => Omit<FlatRouteStep, "htmlToken">),
+        responses: RouteResponse[];
+        params: Params;
+        studentID: string;
+      }) => Omit<FlatRouteStep, "htmlToken">),
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(step);
@@ -152,10 +152,10 @@ export class Route<
     multipleSteps:
       | Omit<FlatRouteStep, "htmlToken">[]
       | ((props: {
-          responses: RouteResponse[];
-          params: Params;
-          studentID: string;
-        }) => Omit<FlatRouteStep, "htmlToken">[]),
+        responses: RouteResponse[];
+        params: Params;
+        studentID: string;
+      }) => Omit<FlatRouteStep, "htmlToken">[]),
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(multipleSteps);
@@ -229,21 +229,23 @@ export const myEdRestEndpoints = {
     expect: "json",
   })),
   //TODO add ability to reuse steps in other steps
-  subjectAssignments: new Route()
+  subjectAssignments: new Route<{ subjectName: string, subjectId?: string }>()
     .step(({ studentID }) => ({
       method: "GET",
       path: `rest/lists/academics.classes.list`,
       body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls" },
       expect: "json",
-    }))
-    .multiple(({ params: { subjectName }, responses }) => {
-      console.log(responses[0], subjectName);
-      const subjectId = (
-        responses[0] as OpenAPI200JSONResponse<"/lists/academics.classes.list">
-      ).find(
-        (subject) => subject.relSscMstOid_mstDescription === subjectName
-      )?.oid;
-      console.log({ subjectId });
+    }), ({ subjectId }) => !subjectId)
+    .multiple(({ params: { subjectName, subjectId: externalSubjectId }, responses }) => {
+      let subjectId = externalSubjectId;
+      if (!subjectId) {
+        subjectId = (
+          responses[0] as OpenAPI200JSONResponse<"/lists/academics.classes.list">
+        ).find(
+          (subject) => subject.relSscMstOid_mstDescription === subjectName
+        )?.oid;
+        if (!subjectId) throw new Error("Subject not found");
+      }
       return [
         {
           method: "GET",

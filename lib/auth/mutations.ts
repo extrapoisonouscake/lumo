@@ -12,7 +12,6 @@ export async function login(formData: LoginSchema) {
   try {
     await performLogin(formData);
   } catch (e: any) {
-    console.log(e);
     return {
       errorID: e.message
         || "An unexpected error occurred. Try again later.",
