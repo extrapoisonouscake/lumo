@@ -13,12 +13,13 @@ export async function login(formData: LoginSchema) {
   }
   try {
     await performLogin(formData);
-    redirect("/");
+    
   } catch (e: any) {
     const message =
       e.message || "An unexpected error occurred. Try again later.";
     redirectToLoginWithError(message);
   }
+redirect("/");
 }
 
 export async function logOut() {
