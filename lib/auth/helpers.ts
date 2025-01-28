@@ -125,7 +125,7 @@ export async function fetchAuthCookiesAndStudentID(
   const cookiesString = cookiesToAdd
     .map(([name, value]) => cookie.serialize(name, value || ""))
     .join("; ");
-console.log({cookiesString})
+console.log({cookiesString,cookiesToAdd,cookiesPairs})
   const studentsRequest = await myEdRestAPIClient.GET("/users/students", {
     headers: { Cookie: cookiesString },
   });
