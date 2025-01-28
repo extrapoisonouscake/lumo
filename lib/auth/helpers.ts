@@ -165,7 +165,6 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
       step: logoutStep,
       session,
       authCookies: getAuthCookies(cookieStore),
-      isRestRequest: false,
     });
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
