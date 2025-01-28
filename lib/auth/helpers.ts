@@ -119,7 +119,7 @@ export async function fetchAuthCookiesAndStudentID(
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
-  const cookiesToAdd = cookiesPairs.map(pair=>pair.split('=')).filter(([name]) =>
+  const cookiesToAdd = cookiesPairs.map(pair=>pair.split(';')[0].split('=')).filter(([name]) =>
     MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
   );
   const cookiesString = cookiesToAdd
