@@ -102,20 +102,15 @@ export async function fetchAuthCookiesAndStudentID(
   for (const [key, value] of Object.entries(loginParams)) {
     loginFormData.append(key, value);
   }
+
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
   if (!cookiesPairs) throw new Error("Failed"); //!
   const rawCookiesString = cookiesPairs.join("; ");
-  const cookiesToAdd = Object.entries(cookie.parse(rawCookiesString)).filter(
-    ([name]) => MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-  );
-  const cookiesString = cookiesToAdd
-    .map(([name, value]) => cookie.serialize(name, value || ""))
-    .join("; ");
   const loginResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
     method: "POST",
     body: loginFormData,
     headers: {
-      Cookie: cookiesString,
+      Cookie: rawCookiesString,
     },
   });
   if (!loginResponse.ok) {
@@ -124,6 +119,12 @@ export async function fetchAuthCookiesAndStudentID(
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
+  const cookiesToAdd = cookiesPairs.filter(([name]) =>
+    MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
+  );
+  const cookiesString = cookiesToAdd
+    .map(([name, value]) => cookie.serialize(name, value || ""))
+    .join("; ");
   const studentsRequest = await myEdRestAPIClient.GET("/users/students", {
     headers: { Cookie: cookiesString },
   });

@@ -11,7 +11,6 @@ export async function login(formData: LoginSchema) {
   } catch {
     redirectToLoginWithError("invalid-parameters");
   }
-
   try {
     await performLogin(formData);
     redirect("/");
