@@ -1,7 +1,7 @@
 import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { PersonalDetails } from "@/types/school";
 
-import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
+import { getCORSProxyURL } from "@/helpers/getCORSProxyURL";
 import { ParserFunctionArguments } from "./types";
 type PersonalDetailsParserArguments =
   ParserFunctionArguments<"personalDetails">;
@@ -52,5 +52,5 @@ function parsePhotoURL($: PersonalDetailsParserArguments[2]) {
     '[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img'
   ).prop("src");
   if (!url) return;
-  return getFullMyEdUrl(url);
+  return getCORSProxyURL(url);
 }

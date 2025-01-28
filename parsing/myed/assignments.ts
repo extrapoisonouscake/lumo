@@ -8,11 +8,8 @@ const scoreLabelToStatus: Record<string, AssignmentStatus> = {
 };
 
 export function parseSubjectAssignments(
-  ...[, ...responses]: ParserFunctionArguments<
-    "subjectAssignments"
-  >
+  ...[, ...responses]: ParserFunctionArguments<"subjectAssignments">
 ): Assignment[] | null {
-  console.log(responses)
   const [pastDue, upcoming] = responses.at(-1) as [
     OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/pastDue">,
     OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
@@ -22,7 +19,7 @@ export function parseSubjectAssignments(
     ({ name, dueDate, assignedDate, classAverage, scoreElements, remark }) => {
       const { scoreLabel, score, pointMax } = scoreElements[0];
       let status = AssignmentStatus.Unknown;
-      if (score && score !== 'NaN') {
+      if (score && score !== "NaN") {
         status = AssignmentStatus.Graded;
       }
       if (status === AssignmentStatus.Unknown && scoreLabel) {

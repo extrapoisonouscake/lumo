@@ -8,41 +8,36 @@ import { useFormValidation } from "@/hooks/use-form-validation";
 import { login } from "@/lib/auth/mutations";
 import { LoginError, loginErrorIDToMessageMap } from "@/lib/auth/public";
 import { TriangleAlert } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { loginSchema, LoginSchema } from "./validation";
-
+const isLoginError = (error: string): error is LoginError => {
+  return Object.keys(loginErrorIDToMessageMap).includes(error as LoginError);
+};
 export default function Page() {
   const form = useFormValidation(loginSchema);
   const searchParams = useSearchParams();
-  const [errorID, setErrorID] = useState<LoginError | null>(
-    null
-  );
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter();
+  const errorMessage = searchParams.get("error");
   async function onSubmit(data: LoginSchema) {
-    setIsLoading(true)
-    if (errorID) setErrorID(null);
-    const response = await login(data);
-    const error = response?.errorID;
-    if (error) {
-      setErrorID(error);
-      setIsLoading(false)
-      return;
-    }
-
-    router.push("/");
+    await login(data);
   }
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
-      <Form onSubmit={onSubmit} {...form} className="flex flex-col gap-3 w-full">
-        {errorID && <Alert variant={errorID === 'account-disabled' ? "destructive" : "default"}>
-          <TriangleAlert className="size-4 !text-red-500" />
-          <AlertTitle className="text-red-500">Error</AlertTitle>
-          <AlertDescription className="text-red-500">
-            {loginErrorIDToMessageMap[errorID]}
-          </AlertDescription>
-        </Alert>}
+      <Form
+        onSubmit={onSubmit}
+        {...form}
+        className="flex flex-col gap-3 w-full"
+      >
+        {errorMessage && (
+          <Alert variant="destructive">
+            <TriangleAlert className="size-4 !text-red-500" />
+            <AlertTitle className="text-red-500">Error</AlertTitle>
+            <AlertDescription className="text-red-500">
+              {isLoginError(errorMessage)
+                ? loginErrorIDToMessageMap[errorMessage]
+                : errorMessage}
+            </AlertDescription>
+          </Alert>
+        )}
         <FormInput placeholder="user" name="username" label="Username" />
         <FormInput
           placeholder="******"
@@ -50,7 +45,9 @@ export default function Page() {
           name="password"
           label="Password"
         />
-        <SubmitButton isLoading={isLoading}>Submit</SubmitButton>
+        <SubmitButton isLoading={form.formState.isSubmitting}>
+          Submit
+        </SubmitButton>
       </Form>
     </div>
   );

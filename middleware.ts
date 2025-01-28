@@ -16,13 +16,12 @@ import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
 import {
   deleteSession,
-  deleteSessionAndLogOut,
   fetchAuthCookiesAndStudentID,
 } from "./lib/auth/helpers";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
-  const redirectResponse = Response.redirect(new URL("/login", request.url));
+
   const isAuthenticated = isUserAuthenticated(request.cookies);
   const isOnLoginPage = request.nextUrl.pathname.startsWith("/login");
   if (isAuthenticated) {
@@ -67,15 +66,19 @@ export async function middleware(request: NextRequest) {
               maxAge: COOKIE_MAX_AGE,
             });
           }
-        } catch (e) {
-          await deleteSession(response.cookies);
+        } catch (e: any) {
+          const redirectResponse = NextResponse.redirect(
+            new URL(`/login?error=${e.message}`, request.url)
+          );
+          await deleteSession(redirectResponse.cookies);
+
           return redirectResponse;
         }
       }
     }
   } else {
     if (!isOnLoginPage) {
-      return redirectResponse;
+      return NextResponse.redirect(new URL("/login", request.url));
     }
   }
   return response;
