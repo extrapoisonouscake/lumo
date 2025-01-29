@@ -101,7 +101,7 @@ export const TableCellWithRedirectIcon = React.forwardRef<
   <TableCell ref={ref} className="p-2 relative" {...props}>
     <div className="flex gap-2 size-full justify-between">
       <div className="p-2 pr-0 h-fit self-center">{children}</div>
-      <ArrowUpRight className="size-4 min-w-4 text-black" />
+      <ArrowUpRight className="size-4 min-w-4 text-accent-foreground" />
     </div>
   </TableCell>
 ));
