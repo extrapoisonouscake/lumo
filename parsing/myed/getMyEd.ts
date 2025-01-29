@@ -38,7 +38,7 @@ const processResponse = async (response: Response, value: FlatRouteStep) => {
     ? cheerio.load(await response.text())
     : await response.json();
 };
-export const fetchMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
+export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   endpoint: Endpoint,
   ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
@@ -57,7 +57,7 @@ export const fetchMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
   const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...rest); //!
   try {
-    let lastRequestType: 'parsing' | 'rest'
+    let lastRequestType: "parsing" | "rest";
     for (const step of steps) {
       const isLastRequest = step.index === steps.length - 1;
       const value = step.value;

@@ -6,3 +6,6 @@ export const loginErrorIDToMessageMap = {
   "unexpected-error": "An unexpected error occurred. Try again later.",
 };
 export type LoginError = keyof typeof loginErrorIDToMessageMap;
+export const isKnownLoginError = (error: string): error is LoginError => {
+  return Object.keys(loginErrorIDToMessageMap).includes(error as LoginError);
+};

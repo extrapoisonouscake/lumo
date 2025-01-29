@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { getUserSettings } from "@/lib/settings/queries";
-import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
 import { Dayjs } from "dayjs";
 import { ComponentProps, ReactNode } from "react";
@@ -85,7 +85,7 @@ export async function ScheduleContent({ day }: Props) {
   }
   const [userSettings, data] = await Promise.all([
     getUserSettings(),
-    fetchMyEd("schedule", params),
+    getMyEd("schedule", params),
   ]);
 
   const hasKnownError = data && "knownError" in data;

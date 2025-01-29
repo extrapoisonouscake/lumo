@@ -18,6 +18,7 @@ import {
   deleteSession,
   fetchAuthCookiesAndStudentID,
 } from "./lib/auth/helpers";
+import { isKnownLoginError, LoginError } from "./lib/auth/public";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
@@ -67,8 +68,13 @@ export async function middleware(request: NextRequest) {
             });
           }
         } catch (e: any) {
+          const { message } = e;
+          console.log("errore", message, e);
+          const safeErrorMessage: LoginError = isKnownLoginError(message)
+            ? message
+            : "unexpected-error";
           const redirectResponse = NextResponse.redirect(
-            new URL(`/login?error=${e.message}`, request.url)
+            new URL(`/login?error=${safeErrorMessage}`, request.url)
           );
           await deleteSession(redirectResponse.cookies);
 

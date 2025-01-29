@@ -3,18 +3,18 @@ import { paths } from "@/types/myed-rest";
 import CallableInstance from "callable-instance";
 import * as cheerio from "cheerio";
 
-export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen";
+export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen/";
 export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
 
 export const MYED_SESSION_COOKIE_NAME = "JSESSIONID";
 export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   MYED_SESSION_COOKIE_NAME,
+  "ApplicationGatewayAffinityCORS",
   "deploymentId",
   "ApplicationGatewayAffinity",
-  "ApplicationGatewayAffinityCORS",
 ];
 export const MYED_DATE_FORMAT = "YYYY-MM-DD";
-const getHTMLToken = ($: cheerio.CheerioAPI) =>
+export const parseHTMLToken = ($: cheerio.CheerioAPI) =>
   $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`).first().val() as string;
 
 export type FlatRouteStep = {
@@ -23,20 +23,20 @@ export type FlatRouteStep = {
   body?: Record<string, any>;
   expect: "json" | "html";
 } & (
-    | {
+  | {
       method: "GET";
       contentType?: never;
       htmlToken?: never;
     }
-    | {
+  | {
       method: "POST";
       contentType:
-      | "application/x-www-form-urlencoded"
-      | "form-data"
-      | "applicatiob/json";
+        | "application/x-www-form-urlencoded"
+        | "form-data"
+        | "applicatiob/json";
       htmlToken: string;
     }
-  );
+);
 type RouteParams = Record<string, any>;
 type RouteResponse =
   | cheerio.CheerioAPI
@@ -46,12 +46,12 @@ type RouteStep<Params extends RouteParams> =
   | Omit<FlatRouteStep, "htmlToken">
   | Omit<FlatRouteStep, "htmlToken">[]
   | ((props: {
-    responses: RouteResponse[];
-    params: Params;
-    studentID: string;
-  }) =>
-    | Omit<FlatRouteStep, "htmlToken">
-    | Omit<FlatRouteStep, "htmlToken">[]);
+      responses: RouteResponse[];
+      params: Params;
+      studentID: string;
+    }) =>
+      | Omit<FlatRouteStep, "htmlToken">
+      | Omit<FlatRouteStep, "htmlToken">[]);
 
 const processStep = <Params extends RouteParams>(
   self: ResolvedRoute<Params>,
@@ -66,7 +66,7 @@ const processStep = <Params extends RouteParams>(
     if (htmlTokenIndex === -1) throw new Error("No html token found");
 
     const htmlTokenResponse = self.responses[htmlTokenIndex];
-    (step as FlatRouteStep).htmlToken = getHTMLToken(
+    (step as FlatRouteStep).htmlToken = parseHTMLToken(
       //!
       Array.isArray(htmlTokenResponse)
         ? htmlTokenResponse[0]
@@ -138,10 +138,10 @@ export class Route<
     step:
       | Omit<FlatRouteStep, "htmlToken">
       | ((props: {
-        responses: RouteResponse[];
-        params: Params;
-        studentID: string;
-      }) => Omit<FlatRouteStep, "htmlToken">),
+          responses: RouteResponse[];
+          params: Params;
+          studentID: string;
+        }) => Omit<FlatRouteStep, "htmlToken">),
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(step);
@@ -152,10 +152,10 @@ export class Route<
     multipleSteps:
       | Omit<FlatRouteStep, "htmlToken">[]
       | ((props: {
-        responses: RouteResponse[];
-        params: Params;
-        studentID: string;
-      }) => Omit<FlatRouteStep, "htmlToken">[]),
+          responses: RouteResponse[];
+          params: Params;
+          studentID: string;
+        }) => Omit<FlatRouteStep, "htmlToken">[]),
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(multipleSteps);
@@ -216,11 +216,6 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 export type MyEdRestEndpointURL = keyof paths;
 
-type MyEdRestEndpointFlatInstruction = FlatRouteStep | FlatRouteStep[];
-type MyEdRestEndpointInstruction = (props: {
-  params: any;
-  studentID: string;
-}) => MyEdRestEndpointFlatInstruction;
 export const myEdRestEndpoints = {
   subjects: new Route().step(({ studentID }) => ({
     method: "GET",
@@ -229,36 +224,44 @@ export const myEdRestEndpoints = {
     expect: "json",
   })),
   //TODO add ability to reuse steps in other steps
-  subjectAssignments: new Route<{ subjectName: string, subjectId?: string }>()
-    .step(({ studentID }) => ({
-      method: "GET",
-      path: `rest/lists/academics.classes.list`,
-      body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls" },
-      expect: "json",
-    }), ({ subjectId }) => !subjectId)
-    .multiple(({ params: { subjectName, subjectId: externalSubjectId }, responses }) => {
-      let subjectId = externalSubjectId;
-      if (!subjectId) {
-        subjectId = (
-          responses[0] as OpenAPI200JSONResponse<"/lists/academics.classes.list">
-        ).find(
-          (subject) => subject.relSscMstOid_mstDescription === subjectName
-        )?.oid;
-        if (!subjectId) throw new Error("Subject not found");
+  subjectAssignments: new Route<{ subjectName: string; subjectId?: string }>()
+    .step(
+      ({ studentID }) => ({
+        method: "GET",
+        path: `rest/lists/academics.classes.list`,
+        body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls" },
+        expect: "json",
+      }),
+      ({ subjectId }) => !subjectId
+    )
+    .multiple(
+      ({
+        params: { subjectName, subjectId: externalSubjectId },
+        responses,
+      }) => {
+        let subjectId = externalSubjectId;
+        if (!subjectId) {
+          subjectId = (
+            responses[0] as OpenAPI200JSONResponse<"/lists/academics.classes.list">
+          ).find(
+            (subject) => subject.relSscMstOid_mstDescription === subjectName
+          )?.oid;
+          if (!subjectId) throw new Error("Subject not found");
+        }
+        return [
+          {
+            method: "GET",
+            path: `rest/studentSchedule/${subjectId}/categoryDetails/pastDue`,
+            expect: "json",
+          },
+          {
+            method: "GET",
+            path: `rest/studentSchedule/${subjectId}/categoryDetails/upcoming`,
+            expect: "json",
+          },
+        ];
       }
-      return [
-        {
-          method: "GET",
-          path: `rest/studentSchedule/${subjectId}/categoryDetails/pastDue`,
-          expect: "json",
-        },
-        {
-          method: "GET",
-          path: `rest/studentSchedule/${subjectId}/categoryDetails/upcoming`,
-          expect: "json",
-        },
-      ];
-    }),
+    ),
 };
 
 export type MyEdRestEndpoints = typeof myEdRestEndpoints;

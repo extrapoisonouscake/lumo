@@ -6,13 +6,11 @@ import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { login } from "@/lib/auth/mutations";
-import { LoginError, loginErrorIDToMessageMap } from "@/lib/auth/public";
+import { isKnownLoginError, loginErrorIDToMessageMap } from "@/lib/auth/public";
 import { TriangleAlert } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { loginSchema, LoginSchema } from "./validation";
-const isLoginError = (error: string): error is LoginError => {
-  return Object.keys(loginErrorIDToMessageMap).includes(error as LoginError);
-};
+
 export default function Page() {
   const form = useFormValidation(loginSchema);
   const searchParams = useSearchParams();
@@ -32,7 +30,7 @@ export default function Page() {
             <TriangleAlert className="size-4 !text-red-500" />
             <AlertTitle className="text-red-500">Error</AlertTitle>
             <AlertDescription className="text-red-500">
-              {isLoginError(errorMessage)
+              {isKnownLoginError(errorMessage)
                 ? loginErrorIDToMessageMap[errorMessage]
                 : errorMessage}
             </AlertDescription>

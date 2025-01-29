@@ -2,6 +2,7 @@
 import { loginSchema, LoginSchema } from "@/app/login/validation";
 import { redirect } from "next/navigation";
 import { deleteSessionAndLogOut, performLogin } from "./helpers";
+import { isKnownLoginError, LoginError } from "./public";
 const redirectToLoginWithError = (error: string) => {
   redirect(`/login?error=${error}`);
 };
@@ -13,13 +14,15 @@ export async function login(formData: LoginSchema) {
   }
   try {
     await performLogin(formData);
-    
   } catch (e: any) {
-    const message =
-      e.message || "An unexpected error occurred. Try again later.";
-    redirectToLoginWithError(message);
+    const { message } = e;
+    console.log("errore", e);
+    const safeErrorMessage: LoginError = isKnownLoginError(message)
+      ? message
+      : "unexpected-error";
+    redirectToLoginWithError(safeErrorMessage);
   }
-redirect("/");
+  redirect("/");
 }
 
 export async function logOut() {

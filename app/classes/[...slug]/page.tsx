@@ -1,6 +1,6 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { getUserSettings } from "@/lib/settings/queries";
-import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import { convertPathParameterToSubjectName } from "./helpers";
 import { SubjectAssignmentsTable } from "./table";
 interface Props {
@@ -18,7 +18,7 @@ export default async function Page({ params }: Props) {
     data,
   ] = await Promise.all([
     getUserSettings(),
-    fetchMyEd("subjectAssignments", {
+    getMyEd("subjectAssignments", {
       subjectName: subjectName.replaceAll("_", " "),
       subjectId,
     }),

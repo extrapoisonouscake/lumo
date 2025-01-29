@@ -1,7 +1,9 @@
 import { MYED_ROOT_URL } from "@/constants/myed";
+import { fetchMyEd } from "@/instances/fetchMyEd";
+
 import { NextRequest, NextResponse } from "next/server";
 
-const ALLOWED_PATHS = ["/photos/aspen"];
+const ALLOWED_PATHS = ["photos/aspen"];
 
 function isAllowedPath(pathname: string): boolean {
   return ALLOWED_PATHS.some((allowedPath) => pathname.startsWith(allowedPath));
@@ -17,16 +19,16 @@ const filterResponseHeaders = (headers: Headers) =>
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const targetPath = url.pathname.replace("/api/aspen", "");
+  const targetPath = url.pathname.replace("/api/aspen/", "");
 
   if (!isAllowedPath(targetPath)) {
     return new NextResponse("Forbidden", { status: 403 });
   }
 
-  const targetUrl = `${MYED_ROOT_URL}${targetPath}${url.search}`;
-
+  const targetUrl = `${targetPath}${url.search}`;
+  console.log(targetUrl);
   try {
-    const response = await fetch(targetUrl, {
+    const response = await fetchMyEd(targetUrl, {
       method: request.method,
       headers: {
         ...Object.fromEntries(request.headers),
@@ -35,10 +37,9 @@ export async function GET(request: NextRequest) {
       credentials: "include",
     });
 
-    const body = await response.text();
     const headers = new Headers(response.headers);
 
-    return new NextResponse(body, {
+    return new NextResponse(response.body, {
       status: response.status,
       statusText: response.statusText,
       headers: filterResponseHeaders(headers),

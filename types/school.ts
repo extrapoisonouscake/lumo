@@ -11,15 +11,13 @@ export type ScheduleSubject = Omit<Subject, "gpa" | "id"> & {
   startsAt: Date;
   endsAt: Date;
 };
+export type AnnouncementSectionItemsFragment = {
+  items: string[];
+};
 export type AnnouncementSection = {
   heading: string;
   emoji: string;
-} & (
-  | {
-      items: string[];
-    }
-  | { table: string[][] }
-);
+} & (AnnouncementSectionItemsFragment | { table: string[][] });
 export interface PersonalDetails {
   firstName: string;
   middleName?: string;

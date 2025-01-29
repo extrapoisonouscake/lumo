@@ -1,6 +1,7 @@
 export enum KnownSchools {
   MarkIsfeld = "xruGQA",
 }
+export const knownSchoolsIDs = Object.values(KnownSchools);
 export const isKnownSchool = function (school: string): school is KnownSchools {
-  return Object.values(KnownSchools).includes(school as any);
+  return knownSchoolsIDs.includes(school as any);
 };

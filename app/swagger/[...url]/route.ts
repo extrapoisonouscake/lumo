@@ -1,6 +1,7 @@
 import { MYED_ROOT_URL } from "@/constants/myed";
+
 import { NextRequest, NextResponse } from "next/server";
-const getTargetUrl = (path: string) => `${MYED_ROOT_URL}/rest${path}`;
+const getTargetUrl = (path: string) => `rest/${path}`;
 const filterResponseHeaders = (headers: Headers) =>
   new Headers(
     [...headers.entries()].filter(
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   const url = new URL(request.url);
-  const targetPath = url.pathname.replace("/swagger/proxy", "") + url.search;
+  const targetPath = url.pathname.replace("/swagger/proxy/", "") + url.search;
   const targetUrl = getTargetUrl(targetPath);
 
   try {
@@ -51,13 +52,13 @@ export async function POST(request: NextRequest) {
   }
 
   const url = new URL(request.url);
-  const targetPath = url.pathname.replace("/swagger/proxy", "");
+  const targetPath = url.pathname.replace("/swagger/proxy/", "");
   const targetUrl = getTargetUrl(targetPath);
 
   try {
     const body = await request.json();
     const response = await fetch(targetUrl, {
-      method: request.method,
+      method: "POST",
       headers: {
         ...request.headers,
         cookie: request.headers.get("custom-cookie") || "",

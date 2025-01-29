@@ -2,14 +2,14 @@ import {
   getTextColorForBackground,
   stringToColor,
 } from "@/helpers/stringToColor";
-import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { SidebarMenuButton } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 
 export async function UserHeader() {
-  const data = await fetchMyEd("personalDetails");
+  const data = await getMyEd("personalDetails");
   if (!data) return null;
   const { firstName, middleName, lastName, grade } = data;
   const backgroundColor = stringToColor(data.firstName + data.lastName);

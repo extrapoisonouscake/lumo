@@ -84,6 +84,14 @@ const config: Config = {
             height: "var(--radix-accordion-content-height)",
           },
         },
+        "accordion-down-padding": {
+          from: {
+            paddingBottom: "0",
+          },
+          to: {
+            paddingBottom: "0.5rem",
+          },
+        },
         "accordion-up": {
           from: {
             height: "var(--radix-accordion-content-height)",
@@ -92,10 +100,18 @@ const config: Config = {
             height: "0",
           },
         },
+        "accordion-up-padding": {
+          from: {
+            paddingBottom: "0.5rem",
+          },
+          to: {
+            paddingBottom: "0",
+          },
+        },
       },
       animation: {
-        "accordion-down": `accordion-down 500ms ${accordionTimingFunction}`,
-        "accordion-up": `accordion-up 500ms ${accordionTimingFunction}`,
+        "accordion-down": `accordion-down 700ms ease-in-out, accordion-down-padding 700ms ease-in-out`,
+        "accordion-up": `accordion-up 700ms ease-in-out, accordion-up-padding 700ms ease-in-out`,
       },
     },
   },

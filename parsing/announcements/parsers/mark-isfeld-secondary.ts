@@ -1,4 +1,7 @@
-import { AnnouncementSection } from "@/types/school";
+import {
+  AnnouncementSection,
+  AnnouncementSectionItemsFragment,
+} from "@/types/school";
 import * as cheerio from "cheerio";
 import { DailyAnnouncementsParsingFunction } from "./types";
 const MEETINGS_AND_PRACTICES_ACTUAL_HEADING = "MEETINGS AND PRACTICES TODAY";
@@ -39,73 +42,68 @@ const referenceHeadings: Array<{
   },
 ];
 const meetingsAndClubsColumns = ["Time", "Event", "Place", "Reason"];
-const firstHeadingValue = referenceHeadings[0].actualName;
+const actualHeadingsValues = new Set(
+  referenceHeadings.map((h) => h.actualName)
+);
+const firstHeadingValue = actualHeadingsValues.values().next().value;
 export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsingFunction =
   (elements) => {
     const firstHeadingIndex = elements.findIndex(
-      (element) =>
-        element.type === "Title" && element.text === firstHeadingValue
+      (element) => element.text === firstHeadingValue
     );
+
     if (firstHeadingIndex === -1) return;
-    let nextHeadingIndex = 1;
-    let nextHeadingValue = referenceHeadings[nextHeadingIndex].actualName;
     const sections: AnnouncementSection[] = [];
     let accumulatedElements = [];
-    for (let i = firstHeadingIndex + 1; i < elements.length; i++) {
+    let tableData: string[][] = [];
+    let currentSectionIndex = 0;
+
+    for (let i = firstHeadingIndex + 1; i < elements.length + 1; i++) {
       const element = elements[i];
-      if (element.type === "Title" && element.text === nextHeadingValue) {
-        sections.push({
-          heading: referenceHeadings[nextHeadingIndex - 1].displayName,
-          emoji: referenceHeadings[nextHeadingIndex - 1].emoji,
-          items: accumulatedElements,
-        });
-        accumulatedElements = [];
-        nextHeadingIndex += 1;
-        if (nextHeadingValue === MEETINGS_AND_PRACTICES_ACTUAL_HEADING) {
-          i++;
-          let tableElement;
-          while (i < elements.length) {
-            const possibleElement = elements[i];
-            if (possibleElement.type === "Table") {
-              tableElement = possibleElement;
-              break;
-            }
-            i++;
-          }
-          i++; //for next heading skip
-          if (tableElement) {
-            const html = tableElement.metadata.text_as_html;
-            const $table = cheerio.load(html);
-            const tableData: string[][] = [meetingsAndClubsColumns];
-            $table("table tr").each((i, row) => {
-              if (i === 0) return;
-              const rowData: string[] = [];
 
-              for (const cell of $table(row).find("th, td").toArray()) {
-                const cellText = $table(cell).text().trim().split("\n")[0];
-
-                rowData.push(cellText.replaceAll("|", ""));
-              }
-              if (rowData.length === 4) {
-                tableData.push(rowData);
-              }
-            });
-            sections.push({
-              heading: referenceHeadings[nextHeadingIndex - 1].displayName,
-              emoji: referenceHeadings[nextHeadingIndex - 1].emoji,
-              table: tableData,
-            });
-          }
-          nextHeadingIndex += 1;
+      if (!element || actualHeadingsValues.has(element.text)) {
+        if (accumulatedElements.length > 0 || tableData.length > 0) {
+          const currentHeading = referenceHeadings[currentSectionIndex];
+          sections.push({
+            heading: currentHeading.displayName,
+            emoji: currentHeading.emoji,
+            ...(tableData.length > 0
+              ? { table: tableData }
+              : { items: accumulatedElements }),
+          });
+          accumulatedElements = [];
+          tableData = [];
         }
-        if (nextHeadingIndex >= referenceHeadings.length - 1) break;
-        nextHeadingValue = referenceHeadings[nextHeadingIndex].actualName;
+        currentSectionIndex += 1;
+        if (currentSectionIndex === referenceHeadings.length) break;
+      } else if (element.type === "NarrativeText") {
+        accumulatedElements.push(element.text);
+      } else if (element.type === "Table") {
+        const html = element.metadata.text_as_html;
+        const $table = cheerio.load(html);
+        tableData = [meetingsAndClubsColumns];
+        let brokenColumnsCount = 0;
+        $table("table tr").each((i, row) => {
+          if (i === 0) return;
+          const rowData: string[] = [];
 
-        continue;
+          for (const cell of $table(row).find("th, td").toArray()) {
+            const cellText = $table(cell).text().trim().split("\n")[0];
+
+            rowData.push(cellText.replaceAll("|", ""));
+          }
+          if (rowData.length === 4) {
+            tableData.push(rowData);
+          } else {
+            brokenColumnsCount += 1;
+          }
+        });
+        if (brokenColumnsCount > 0) {
+          tableData.push([`And ${brokenColumnsCount} more...`, "", "", ""]);
+        }
       }
-
-      accumulatedElements.push(element.text);
     }
 
+    (sections[0] as AnnouncementSectionItemsFragment).items.splice(0, 1);
     return sections;
   };

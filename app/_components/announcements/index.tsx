@@ -7,21 +7,30 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKnownSchool } from "@/constants/schools";
 import { getUserSettings } from "@/lib/settings/queries";
-import { getAnnouncements } from "@/parsing/announcements/getAnnouncements";
+
+import { redis } from "@/instances/redis";
+import { getAnnouncementsRedisKey } from "@/parsing/announcements/getAnnouncements";
+import { AnnouncementSection } from "@/types/school";
 import { AnnouncementsAccordions } from "./accordions";
 export const maxDuration = 60;
 export async function Announcements() {
   const { schoolId } = await getUserSettings();
   if (!schoolId || !isKnownSchool(schoolId)) return null;
+  const redisKey = getAnnouncementsRedisKey(schoolId);
+  let data: AnnouncementSection[] = [];
+  const cachedData = await redis.get(redisKey);
+  if (cachedData) {
+    const parsedData = JSON.parse(cachedData as string);
+    data = parsedData;
+  }
 
-  const data = await getAnnouncements(schoolId);
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm">Announcements</h3>
       {data.length > 0 ? (
         <AnnouncementsAccordions data={data} />
       ) : (
-        <ErrorCard emoji="💨" message="No announcements yet." />
+        <ErrorCard emoji="🙈" message="Nothing here yet." />
       )}
     </div>
   );

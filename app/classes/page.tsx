@@ -1,12 +1,12 @@
 import { ErrorCard } from "@/components/misc/error-card";
-import { fetchMyEd } from "@/parsing/myed/fetchMyEd";
-import { SubjectsPage } from "./content";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Metadata } from "next";
-export const metadata:Metadata={
-  title:"Classes"
-}
+import { SubjectsPage } from "./content";
+export const metadata: Metadata = {
+  title: "Classes",
+};
 export default async function Page() {
-  const subjects = await fetchMyEd("subjects");
+  const subjects = await getMyEd("subjects");
   if (!subjects) return <ErrorCard />;
   return <SubjectsPage data={subjects} />;
 }

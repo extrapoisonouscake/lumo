@@ -1,4 +1,4 @@
-import { MyEdEndpointResponse } from "@/parsing/myed/fetchMyEd";
+import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
 export function SubjectsPage({
   data,

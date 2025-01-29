@@ -9,29 +9,20 @@ import {
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
   MYED_SESSION_COOKIE_NAME,
+  parseHTMLToken,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
 
 import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
-import { myEdRestAPIClient } from "@/instances/myed-rest-fetch";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
-import * as cookie from "cookie";
+
+import { fetchMyEd } from "@/instances/fetchMyEd";
+import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import * as jose from "jose";
 import { redirect } from "next/navigation";
 import "server-only";
 import { LoginError } from "./public";
-const loginDefaultParams = {
-  userEvent: "930",
-  deploymentId: "aspen",
-  scrollX: "0",
-  scrollY: "0",
-  mobile: "false",
-  formFocusField: "username",
-  districtId: "Ent",
-  idpName: "BCSC Production SSO",
-};
 
 export async function performLogin(
   formData: LoginSchema,
@@ -73,70 +64,65 @@ export async function performLogin(
     });
   }
 }
+const loginDefaultParams = {
+  userEvent: "930",
+  deploymentId: "aspen",
+  mobile: "true",
+};
 export async function fetchAuthCookiesAndStudentID(
   username: string,
   password: string
 ) {
-  const loginTokenResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
+  const loginTokenResponse = await fetchMyEd("logon.do", {
     credentials: "include",
   });
-  if (!loginTokenResponse.ok) {
-    throw new Error("Failed"); //!
-  }
 
   const loginTokenHTML = await loginTokenResponse.text();
   const $loginTokenDOM = cheerio.load(loginTokenHTML);
-  const loginToken = $loginTokenDOM(`[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`)
-    .first()
-    .val();
-  if (!loginToken) throw new Error("Failed"); //!
-  const loginFormData = new FormData();
-  const loginParams = {
-    [MYED_HTML_TOKEN_INPUT_NAME]: Array.isArray(loginToken)
-      ? loginToken[0]
-      : loginToken,
-    username,
-    password,
-    ...loginDefaultParams,
-  };
-  for (const [key, value] of Object.entries(loginParams)) {
-    loginFormData.append(key, value);
-  }
+  const loginToken = parseHTMLToken($loginTokenDOM);
+  if (!loginToken) throw new Error("Failed 2"); //!
 
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
-  if (!cookiesPairs) throw new Error("Failed"); //!
-  const rawCookiesString = cookiesPairs.join("; ");
-  const loginResponse = await fetch(getFullMyEdUrl("logon.do?mobile=1"), {
+
+  const cookiesToAdd = cookiesPairs
+    .map((pair) => pair.split(";")[0].split("="))
+    .filter(([name]) => MYED_AUTHENTICATION_COOKIES_NAMES.includes(name));
+  const cookiesString = cookiesToAdd
+    .map(([name, value]) => `${name}=${value}`)
+    .join("; ");
+  console.log("JSJS");
+
+  const loginParams = new URLSearchParams({
+    ...loginDefaultParams,
+    [MYED_HTML_TOKEN_INPUT_NAME]: loginToken,
+    username,
+    password,
+  });
+
+  const loginResponse = await fetchMyEd("logon.do", {
     method: "POST",
-    body: loginFormData,
+    body: loginParams,
+
     headers: {
-      Cookie: rawCookiesString,
+      Cookie: cookiesString,
     },
   });
-  if (!loginResponse.ok) {
-    throw new Error("Failed"); //!
-  }
+  console.log(loginResponse.status);
   const loginHtml = await loginResponse.text();
+  // console.log(loginHtml);
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
-  const cookiesToAdd = cookiesPairs.map(pair=>pair.split(';')[0].split('=')).filter(([name]) =>
-    MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-  );
-  const cookiesString = cookiesToAdd
-    .map(([name, value]) => cookie.serialize(name, value || ""))
-    .join("; ");
-console.log({cookiesString,cookiesToAdd,cookiesPairs})
-  const studentsRequest = await myEdRestAPIClient.GET("/users/students", {
+
+  const studentsData = await fetchMyEd<
+    OpenAPI200JSONResponse<"/users/students">
+  >("rest/users/students", {
     headers: { Cookie: cookiesString },
-  });
-console.log(studentsRequest.data)
-  if (studentsRequest.error) throw new Error("Error");
-  const studentID = studentsRequest.data[0].studentOid;
+  }).then((response) => response.json());
+
+  const studentID = studentsData[0].studentOid;
 
   return {
-    cookies: cookiesToAdd.filter(([name]) =>
-      MYED_AUTHENTICATION_COOKIES_NAMES.includes(name)
-    ),
+    cookies: cookiesToAdd,
     studentID,
   };
 }
@@ -168,7 +154,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
       step: logoutStep,
       session,
       authCookies: getAuthCookies(cookieStore),
-    });
+    }); //TODO: replace with after()
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);

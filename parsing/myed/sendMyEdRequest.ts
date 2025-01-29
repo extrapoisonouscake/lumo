@@ -3,14 +3,18 @@ import {
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
 } from "@/constants/myed";
-import { getFullMyEdUrl } from "@/helpers/getFullMyEdURL";
+
 import { headers } from "next/headers";
 import "server-only";
+
+import { fetchMyEd } from "@/instances/fetchMyEd";
 import { clientQueueManager } from "./requests-queue";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
-export type SendMyEdRequestParameters<Steps extends FlatRouteStep | FlatRouteStep[]> = {
+export type SendMyEdRequestParameters<
+  Steps extends FlatRouteStep | FlatRouteStep[]
+> = {
   step: Steps;
   session: string;
   authCookies: Record<
@@ -18,9 +22,9 @@ export type SendMyEdRequestParameters<Steps extends FlatRouteStep | FlatRouteSte
     string | undefined
   >;
 } & (
-    | { requestGroup?: never; isLastRequest?: never }
-    | { requestGroup: string; isLastRequest: boolean }
-  );
+  | { requestGroup?: never; isLastRequest?: never }
+  | { requestGroup: string; isLastRequest: boolean }
+);
 const getUserAgent = () => {
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
   return userAgent;
@@ -31,7 +35,9 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep[]>(
 export async function sendMyEdRequest<Steps extends FlatRouteStep>(
   params: SendMyEdRequestParameters<Steps>
 ): Promise<Response>;
-export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteStep[]>({
+export async function sendMyEdRequest<
+  Steps extends FlatRouteStep | FlatRouteStep[]
+>({
   authCookies,
   step: stepOrSteps,
   session,
@@ -45,11 +51,12 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteSte
   const initHeaders = {
     Cookie: cookiesString,
     "User-Agent": userAgent,
-
   };
-  const argumentsArray: [string, RequestInit][] = []
-  const isMultipleSteps = Array.isArray(stepOrSteps)
-  const stepsArray: FlatRouteStep[] = isMultipleSteps ? stepOrSteps : [stepOrSteps]
+  const argumentsArray: [string, RequestInit][] = [];
+  const isMultipleSteps = Array.isArray(stepOrSteps);
+  const stepsArray: FlatRouteStep[] = isMultipleSteps
+    ? stepOrSteps
+    : [stepOrSteps];
   for (const step of stepsArray) {
     let params: RequestInit = { method: step.method, headers: initHeaders };
     if (step.method === "POST") {
@@ -61,22 +68,24 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteSte
           "Content-Type": step.contentType,
         },
       };
-
     }
 
-
     if (step.body) {
-
-      if (step.contentType === "application/x-www-form-urlencoded" || step.method === 'GET') {
+      if (
+        step.contentType === "application/x-www-form-urlencoded" ||
+        step.method === "GET"
+      ) {
         const queryString = new URLSearchParams({
           ...step.body,
-          ...(step.htmlToken ? { [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken } : {})
+          ...(step.htmlToken
+            ? { [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken }
+            : {}),
         });
         if (step.contentType === "application/x-www-form-urlencoded") {
-          params.body = queryString
+          params.body = queryString;
         } else {
-          step.path += `?${queryString}`
-          step.body = undefined
+          step.path += `?${queryString}`;
+          step.body = undefined;
         }
       } else if (step.contentType === "form-data") {
         const formData = new FormData();
@@ -87,15 +96,28 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep | FlatRouteSte
         params.body = formData;
       }
     }
-    const args: [string, RequestInit] = [getFullMyEdUrl(step.path), params];
-    argumentsArray.push(args)
-
+    const args: [string, RequestInit] = [step.path, params];
+    argumentsArray.push(args);
   }
 
-  console.log(argumentsArray)
+  console.log(argumentsArray);
   const queue = clientQueueManager.getQueue(session);
   const response = await queue.enqueue<Response | Response[]>(
-    (isMultipleSteps ? async () => { console.log(argumentsArray[0][0], Date.now()); const r = await Promise.all(argumentsArray.map(args => fetch(...args))); console.log(argumentsArray[0][0], 'f', Date.now()); return r } : async () => { console.log(argumentsArray[0][0], Date.now()); const r = await fetch(...argumentsArray[0]); console.log(argumentsArray[0][0], 'f', Date.now()); return r }),
+    isMultipleSteps
+      ? async () => {
+          console.log(argumentsArray[0][0], Date.now());
+          const r = await Promise.all(
+            argumentsArray.map((args) => fetchMyEd(...args))
+          );
+          console.log(argumentsArray[0][0], "f", Date.now());
+          return r;
+        }
+      : async () => {
+          console.log(argumentsArray[0][0], Date.now());
+          const r = await fetchMyEd(...argumentsArray[0]);
+          console.log(argumentsArray[0][0], "f", Date.now());
+          return r;
+        },
     requestGroup,
     isLastRequest
   );
