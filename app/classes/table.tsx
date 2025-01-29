@@ -76,7 +76,7 @@ const columns = [
       return "Teacher";
     },
     cell: ({ cell }) => {
-      return cell.getValue().join(";");
+      return cell.getValue().join("; ");
     },
   }),
 ];
