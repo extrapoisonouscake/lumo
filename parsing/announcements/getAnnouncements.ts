@@ -20,7 +20,7 @@ const fetchFunctionsBySchool: Record<
 > = {
   [KnownSchools.MarkIsfeld]: async (date) => {
     //TODO Add email files check
-    const parsedDate = timezonedDayJS(date).subtract(1, "day");
+    const parsedDate = timezonedDayJS(date);
     let homePageResponse;
     try {
       homePageResponse = await fetch(
