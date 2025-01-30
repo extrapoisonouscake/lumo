@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "openapi:generate-ts:myed-rest": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
-    "postinstall": "npm run openapi:generate-ts:myed-rest"
+    "postinstall": "npm run openapi:generate-ts:myed-rest",
+    "trigger:dev": "npx trigger.dev@latest dev"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -50,6 +51,7 @@
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "unstructured-client": "^0.18.2",
+    "uploadthing": "^7.4.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -8,17 +8,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { isKnownSchool } from "@/constants/schools";
 import { getUserSettings } from "@/lib/settings/queries";
 
+import { Button } from "@/components/ui/button";
 import { redis } from "@/instances/redis";
-import { getAnnouncementsRedisKey } from "@/parsing/announcements/getAnnouncements";
+import {
+  getAnnouncementsPDFRedisHashKey,
+  getAnnouncementsRedisKey,
+} from "@/parsing/announcements/getAnnouncements";
 import { AnnouncementSection } from "@/types/school";
+import { ArrowUpRightIcon } from "lucide-react";
+import Link from "next/link";
 import { AnnouncementsAccordions } from "./accordions";
 export const maxDuration = 60;
 export async function Announcements() {
   const { schoolId } = await getUserSettings();
   if (!schoolId || !isKnownSchool(schoolId)) return null;
   const redisKey = getAnnouncementsRedisKey(schoolId);
+  const pdfHashKey = getAnnouncementsPDFRedisHashKey(new Date());
   let data: AnnouncementSection[] = [];
-  const cachedData = await redis.get(redisKey);
+  const [cachedData, pdfID] = await Promise.all([
+    redis.get(redisKey),
+    redis.hget(pdfHashKey, schoolId),
+  ]);
   if (cachedData) {
     const parsedData = JSON.parse(cachedData as string);
     data = parsedData;
@@ -26,7 +36,16 @@ export async function Announcements() {
 
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-sm">Announcements</h3>
+      <div className="flex justify-between gap-2 items-center">
+        <h3 className="text-sm">Announcements</h3>
+        {!!pdfID && (
+          <Link href={`/announcements/direct/${pdfID}`} target="_blank">
+            <Button size="icon" variant="ghost" className="size-7">
+              <ArrowUpRightIcon />
+            </Button>
+          </Link>
+        )}
+      </div>
       {data.length > 0 ? (
         <AnnouncementsAccordions data={data} />
       ) : (
