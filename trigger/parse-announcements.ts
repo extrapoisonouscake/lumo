@@ -57,7 +57,7 @@ export const checkSchoolAnnouncementsTask = schemaTask({
   retry: {
     randomize: false,
     minTimeoutInMs: 20 * 1000,
-maxAttempts: 72
+maxAttempts: Math.round(24*60/20)
   },
   queue: {
     concurrencyLimit: 1,
