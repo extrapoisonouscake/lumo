@@ -9,3 +9,7 @@ export type DeepWithRequired<
   ? Array<WithRequired<U, K & keyof U>>
   : WithRequired<T, K>;
 export const zodEnum = <T>(arr: T[]): [T, ...T[]] => arr as [T, ...T[]];
+export type PickByKeys<T, K extends (keyof T)[]> = {
+  [P in K[number]]: T[P];
+};
+export type NonUndefined<T> = Exclude<T, undefined>;

@@ -1,6 +1,7 @@
 import { INTERNAL_DATE_FORMAT } from "@/constants/core";
 import { isKnownSchool } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
+import { edgeConfig } from "@/instances/edge-config";
 import { redis } from "@/instances/redis";
 import { utapi } from "@/instances/uploadthing";
 import {
@@ -67,7 +68,16 @@ export async function POST(request: NextRequest): Promise<Response> {
       { message: "School ID is required" },
       { status: 400 }
     );
-  const emailData = (await request.json()) as PostmarkWebhookPayload;
+  const emailDataPromise = request.json() as Promise<PostmarkWebhookPayload>;
+  const [emailData, trustedSenders] = await Promise.all([
+    emailDataPromise,
+    edgeConfig.get("announcementsUploadTrustedSenders"),
+  ]);
+  if (!trustedSenders.includes(emailData.From))
+    return NextResponse.json(
+      { message: "Unauthorized sender" },
+      { status: 403 }
+    );
 
   const pdfInBase64 = emailData.Attachments.find(
     (file) => file.ContentType === "application/pdf"
