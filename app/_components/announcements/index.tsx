@@ -18,9 +18,11 @@ import { AnnouncementSection } from "@/types/school";
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import { AnnouncementsAccordions } from "./accordions";
-export const maxDuration = 60;
+
 export async function Announcements() {
+  console.log("Announcements");
   const { schoolId } = await getUserSettings();
+  console.log("sshsdfds");
   if (!schoolId || !isKnownSchool(schoolId)) return null;
   const redisKey = getAnnouncementsRedisKey(schoolId);
   const pdfHashKey = getAnnouncementsPDFRedisHashKey(new Date());
@@ -29,6 +31,7 @@ export async function Announcements() {
     redis.get(redisKey),
     redis.hget(pdfHashKey, schoolId),
   ]);
+  console.log({ cachedData, pdfID });
   if (cachedData) {
     const parsedData = JSON.parse(cachedData as string);
     data = parsedData;
