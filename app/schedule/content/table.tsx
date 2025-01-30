@@ -33,12 +33,19 @@ import { Router } from "next/router";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
+type RowType = "subject" | "short-break" | "long-break" | "lunch";
+type BreakRowType = Exclude<RowType, "subject">;
 export type ScheduleSubjectRow =
-  | ({ isBreak?: never; isLunch?: never } & ScheduleSubject)
-  | ({ isBreak: true; isLunch: boolean } & Pick<
-      ScheduleSubject,
-      "startsAt" | "endsAt"
-    >);
+  | ({ type: Extract<RowType, "subject"> } & ScheduleSubject)
+  | ({ type: BreakRowType } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
+const breakRowVisualData: Record<
+  BreakRowType,
+  { emoji: string; label: string }
+> = {
+  "short-break": { emoji: "➡️", label: "Go to next class" },
+  "long-break": { emoji: "🛋️", label: "Break" },
+  lunch: { emoji: "🥪", label: "Lunch" },
+};
 const columnHelper = createColumnHelper<ScheduleSubjectRow>();
 const hoursFormat = "h:mm A";
 const columns = [
@@ -53,12 +60,16 @@ const columns = [
   columnHelper.accessor("name", {
     header: "Name",
     cell: ({ row, cell }) => {
-      if ("isBreak" in row.original) {
-        const emoji = row.original.isLunch ? "🥪" : "🏃";
+      if (row.original.type !== "subject") {
+        const visualData = breakRowVisualData[row.original.type];
         return (
           <div className="flex items-center gap-[6px]">
-            {row.original.isLunch ? "Lunch" : "Break"}{" "}
-            <AppleEmoji imageClassName="size-4" value={emoji} width={16} />
+            {visualData.label}{" "}
+            <AppleEmoji
+              imageClassName="size-4"
+              value={visualData.emoji}
+              width={16}
+            />
           </div>
         );
       }
@@ -120,7 +131,8 @@ const mockScheduleSubjects = (length: number) =>
         actualName: "",
         name: "",
         room: "",
-      } satisfies ScheduleSubject)
+        type: "subject",
+      } satisfies ScheduleSubject & { type: "subject" })
   );
 const prepareTableData = (data: ScheduleSubject[]) => {
   const preparedData = prepareTableDataForSorting(data);
@@ -128,20 +140,27 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   let wasLunchFound = false;
   for (let i = 0; i < preparedData.length; i++) {
     const currentElement = preparedData[i];
-    filledIntervals.push(currentElement);
+    filledIntervals.push({ type: "subject", ...currentElement });
 
     if (i < preparedData.length - 1) {
       const currentEnd = currentElement.endsAt;
       const nextStart = preparedData[i + 1].startsAt;
 
       if (currentEnd < nextStart) {
-        const isLunch =
-          !wasLunchFound &&
-          timezonedDayJS(nextStart).diff(currentEnd, "minutes") > 20;
-        if (isLunch) wasLunchFound = true;
+        let type: BreakRowType;
+        if (timezonedDayJS(nextStart).diff(currentEnd, "minutes") > 20) {
+          if (wasLunchFound) {
+            type = "long-break";
+          } else {
+            type = "lunch";
+            wasLunchFound = true;
+          }
+        } else {
+          type = "short-break";
+        }
+
         filledIntervals.push({
-          isBreak: true,
-          isLunch,
+          type,
           startsAt: currentEnd,
           endsAt: nextStart,
         });
@@ -152,7 +171,8 @@ const prepareTableData = (data: ScheduleSubject[]) => {
 };
 export const isRowScheduleSubject = (
   row: ScheduleSubjectRow
-): row is ScheduleSubject => !("isBreak" in row);
+): row is ScheduleSubject & { type: "subject" /*!??*/ } =>
+  row.type === "subject";
 const getRowRenderer: RowRendererFactory<
   ScheduleSubjectRow,
   [Router["push"]]
@@ -234,9 +254,9 @@ export function ScheduleTable({
             row.original.startsAt,
             row.original.endsAt
           ),
-        "cursor-pointer": !("isBreak" in row.original),
+        "cursor-pointer": row.original.type === "subject",
         "[&>td]:py-2":
-          "isBreak" in row.original ||
+          row.original.type !== "subject" ||
           row.original.name === TEACHER_ADVISORY_ABBREVIATION,
       });
     },
@@ -267,7 +287,7 @@ export function ScheduleTable({
             isBreak={
               !!(
                 typeof currentRowIndex === "number" &&
-                ("isBreak" in data[currentRowIndex] ||
+                (data[currentRowIndex].type !== "subject" ||
                   data[currentRowIndex].name === TEACHER_ADVISORY_ABBREVIATION)
               )
             }
