@@ -1,15 +1,15 @@
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { timezonedDayJS } from "@/instances/dayjs";
-import {  } from "@/types/school";
+import {} from "@/types/school";
 import { useEffect, useState } from "react";
-import { isRowScheduleSubject, ScheduleSubjectRow } from "./table";
+import { isRowScheduleSubject, ScheduleRow } from "./table";
 
 export function useTTNextSubject({
   isLoading,
   data,
 }: {
   isLoading: boolean;
-  data: ScheduleSubjectRow[];
+  data: ScheduleRow[];
 }) {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
   const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>();
@@ -54,9 +54,15 @@ export function useTTNextSubject({
         visibleNextRowStartingTimestamp = nextRowStartingTimestamp;
       } else {
         let rowsToSkip = 1;
-        if (isRowScheduleSubject(nextRow) && nextRow.name === TEACHER_ADVISORY_ABBREVIATION) {
+        if (
+          isRowScheduleSubject(nextRow) &&
+          nextRow.name === TEACHER_ADVISORY_ABBREVIATION
+        ) {
           rowsToSkip = 3;
-        } else if (isRowScheduleSubject(currentRow) && currentRow.name === TEACHER_ADVISORY_ABBREVIATION) {
+        } else if (
+          isRowScheduleSubject(currentRow) &&
+          currentRow.name === TEACHER_ADVISORY_ABBREVIATION
+        ) {
           rowsToSkip = 2;
         }
         nextRowStartingTimestamp = nextRow.startsAt;

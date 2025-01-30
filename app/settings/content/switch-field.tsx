@@ -32,7 +32,11 @@ export function SwitchField({
   };
   return (
     <div className="flex gap-3 justify-between lg:justify-start items-center">
-      <Label htmlFor={settingKey} aria-disabled={isLoading}>
+      <Label
+        htmlFor={settingKey}
+        aria-disabled={isLoading}
+        className="cursor-pointer"
+      >
         {label}
         {isLoading && <Spinner className="inline ml-1.5 align-middle size-4" />}
       </Label>

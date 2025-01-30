@@ -1,7 +1,8 @@
+import { KnownSchools } from "@/constants/schools";
 import { NonUndefined, PickByKeys } from "@/types/utils";
 import { get, getAll } from "@vercel/edge-config";
 interface EdgeConfig {
-  announcementsUploadTrustedSenders: string[]; //emails
+  announcementsUploadTrustedSenders: Record<string, KnownSchools>;
 }
 type EdgeConfigKey = keyof EdgeConfig;
 type EdgeConfigFunctionOptions = NonUndefined<

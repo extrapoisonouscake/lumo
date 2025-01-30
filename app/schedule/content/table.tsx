@@ -35,8 +35,11 @@ import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
 type RowType = "subject" | "short-break" | "long-break" | "lunch";
 type BreakRowType = Exclude<RowType, "subject">;
-export type ScheduleSubjectRow =
-  | ({ type: Extract<RowType, "subject"> } & ScheduleSubject)
+type ScheduleRowSubject = {
+  type: Extract<RowType, "subject">;
+} & ScheduleSubject;
+export type ScheduleRow =
+  | ScheduleRowSubject
   | ({ type: BreakRowType } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
 const breakRowVisualData: Record<
   BreakRowType,
@@ -46,7 +49,7 @@ const breakRowVisualData: Record<
   "long-break": { emoji: "🛋️", label: "Break" },
   lunch: { emoji: "🥪", label: "Lunch" },
 };
-const columnHelper = createColumnHelper<ScheduleSubjectRow>();
+const columnHelper = createColumnHelper<ScheduleRow>();
 const hoursFormat = "h:mm A";
 const columns = [
   columnHelper.display({
@@ -132,11 +135,11 @@ const mockScheduleSubjects = (length: number) =>
         name: "",
         room: "",
         type: "subject",
-      } satisfies ScheduleSubject & { type: "subject" })
+      } satisfies ScheduleRowSubject)
   );
 const prepareTableData = (data: ScheduleSubject[]) => {
   const preparedData = prepareTableDataForSorting(data);
-  const filledIntervals: ScheduleSubjectRow[] = [];
+  const filledIntervals: ScheduleRow[] = [];
   let wasLunchFound = false;
   for (let i = 0; i < preparedData.length; i++) {
     const currentElement = preparedData[i];
@@ -148,12 +151,20 @@ const prepareTableData = (data: ScheduleSubject[]) => {
 
       if (currentEnd < nextStart) {
         let type: BreakRowType;
-        if (timezonedDayJS(nextStart).diff(currentEnd, "minutes") > 20) {
-          if (wasLunchFound) {
-            type = "long-break";
+        const minutesDiff = timezonedDayJS(nextStart).diff(
+          currentEnd,
+          "minutes"
+        );
+        if (minutesDiff >= 10) {
+          if (minutesDiff >= 20) {
+            if (wasLunchFound) {
+              type = "long-break";
+            } else {
+              type = "lunch";
+              wasLunchFound = true;
+            }
           } else {
-            type = "lunch";
-            wasLunchFound = true;
+            type = "long-break";
           }
         } else {
           type = "short-break";
@@ -170,60 +181,58 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   return filledIntervals;
 };
 export const isRowScheduleSubject = (
-  row: ScheduleSubjectRow
-): row is ScheduleSubject & { type: "subject" /*!??*/ } =>
-  row.type === "subject";
-const getRowRenderer: RowRendererFactory<
-  ScheduleSubjectRow,
-  [Router["push"]]
-> = (table, push) => (row) => {
-  const cells = row.getVisibleCells();
-  const rowOriginal = row.original;
-  const isSubject = isRowScheduleSubject(rowOriginal);
-  let nameCell, timeCell;
-  if (!isSubject) {
-    //!optimize?
-    timeCell = cells.find((cell) => cell.column.id === "Time");
-    nameCell = cells.find((cell) => cell.column.id === "name");
-  }
-  const isTA = isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
-  return (
-    <TableRow
-      onClick={
-        isSubject && !isTA
-          ? () => push(getSubjectPageURL(rowOriginal))
-          : undefined //!
-      }
-      key={row.id}
-      data-state={row.getIsSelected() && "selected"}
-      style={table.options.meta?.getRowStyles?.(row)}
-      className={table.options.meta?.getRowClassName?.(row)}
-    >
-      {isSubject ? (
-        cells.map((cell, i) => {
-          const content = renderTableCell(cell);
-          const showArrow = i === cells.length - 1 && !isTA;
-          return showArrow ? (
-            <TableCellWithRedirectIcon key={cell.id}>
-              {content}
-            </TableCellWithRedirectIcon>
-          ) : (
-            <TableCell key={cell.id}>{content}</TableCell>
-          );
-        })
-      ) : (
-        <>
-          <TableCell>
-            {renderTableCell(timeCell as NonNullable<typeof timeCell>)}
-          </TableCell>
-          <TableCell colSpan={3}>
-            {renderTableCell(nameCell as NonNullable<typeof nameCell>)}
-          </TableCell>
-        </>
-      )}
-    </TableRow>
-  );
-};
+  row: ScheduleRow
+): row is ScheduleRowSubject => row.type === "subject";
+const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
+  (table, push) => (row) => {
+    const cells = row.getVisibleCells();
+    const rowOriginal = row.original;
+    const isSubject = isRowScheduleSubject(rowOriginal);
+    let nameCell, timeCell;
+    if (!isSubject) {
+      //!optimize?
+      timeCell = cells.find((cell) => cell.column.id === "Time");
+      nameCell = cells.find((cell) => cell.column.id === "name");
+    }
+    const isTA =
+      isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
+    return (
+      <TableRow
+        onClick={
+          isSubject && !isTA
+            ? () => push(getSubjectPageURL(rowOriginal))
+            : undefined //!
+        }
+        key={row.id}
+        data-state={row.getIsSelected() && "selected"}
+        style={table.options.meta?.getRowStyles?.(row)}
+        className={table.options.meta?.getRowClassName?.(row)}
+      >
+        {isSubject ? (
+          cells.map((cell, i) => {
+            const content = renderTableCell(cell);
+            const showArrow = i === cells.length - 1 && !isTA;
+            return showArrow ? (
+              <TableCellWithRedirectIcon key={cell.id}>
+                {content}
+              </TableCellWithRedirectIcon>
+            ) : (
+              <TableCell key={cell.id}>{content}</TableCell>
+            );
+          })
+        ) : (
+          <>
+            <TableCell>
+              {renderTableCell(timeCell as NonNullable<typeof timeCell>)}
+            </TableCell>
+            <TableCell colSpan={3}>
+              {renderTableCell(nameCell as NonNullable<typeof nameCell>)}
+            </TableCell>
+          </>
+        )}
+      </TableRow>
+    );
+  };
 export function ScheduleTable({
   data: externalData,
   isLoading = false,
@@ -247,7 +256,7 @@ export function ScheduleTable({
     data,
   });
   const getRowClassName = useMemo(
-    () => (row: Row<ScheduleSubjectRow>) => {
+    () => (row: Row<ScheduleRow>) => {
       const shouldBeClickable =
         row.original.type === "subject" &&
         !(row.original.name === TEACHER_ADVISORY_ABBREVIATION);
@@ -265,7 +274,7 @@ export function ScheduleTable({
     [currentRowIndex]
   );
   const router = useRouter();
-  const table = useReactTable<ScheduleSubjectRow>({
+  const table = useReactTable<ScheduleRow>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),

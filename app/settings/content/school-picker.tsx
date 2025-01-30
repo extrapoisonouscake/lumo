@@ -15,6 +15,7 @@ import {
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
+import { ImageWithPlaceholder } from "@/components/ui/ImageWithPlaceholder";
 import {
   Popover,
   PopoverContent,
@@ -27,7 +28,6 @@ import { setUserSetting } from "@/lib/settings/mutations";
 import { UserSetting } from "@/types/core";
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { z } from "zod";
@@ -44,8 +44,8 @@ const schema = z.object({
 type FormFields = z.infer<typeof schema>;
 const schoolsVisualData: Record<KnownSchools | "other", SchoolVisualData> = {
   [KnownSchools.MarkIsfeld]: {
-    name: "Mark R. Isfeld Secondary School",
-    logo: "mark-r-isfeld-secondary-school",
+    name: "Mark R. Isfeld Secondary",
+    logo: "mark-r-isfeld-secondary",
   },
   other: { name: "Other" },
 };
@@ -189,7 +189,7 @@ function SchoolName({
     <div className="flex items-center gap-[6px]">
       <p className="text-ellipsis whitespace-nowrap overflow-hidden">{name}</p>
       {logo && (
-        <Image
+        <ImageWithPlaceholder
           width={20}
           height={20}
           alt={`${name} logo`}
