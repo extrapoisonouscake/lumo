@@ -16,7 +16,6 @@ export async function login(formData: LoginSchema) {
     await performLogin(formData);
   } catch (e: any) {
     const { message } = e;
-    console.log("errore", e);
     const safeErrorMessage: LoginError = isKnownLoginError(message)
       ? message
       : "unexpected-error";

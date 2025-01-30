@@ -20,9 +20,7 @@ import Link from "next/link";
 import { AnnouncementsAccordions } from "./accordions";
 
 export async function Announcements() {
-  console.log("Announcements");
   const { schoolId } = await getUserSettings();
-  console.log("sshsdfds");
   if (!schoolId || !isKnownSchool(schoolId)) return null;
   const redisKey = getAnnouncementsRedisKey(schoolId);
   const pdfHashKey = getAnnouncementsPDFRedisHashKey(new Date());
@@ -31,9 +29,11 @@ export async function Announcements() {
     redis.get(redisKey),
     redis.hget(pdfHashKey, schoolId),
   ]);
-  console.log({ cachedData, pdfID });
   if (cachedData) {
-    const parsedData = JSON.parse(cachedData as string);
+    const parsedData =
+      process.env.NODE_ENV === "development"
+        ? JSON.parse(cachedData as string)
+        : cachedData;
     data = parsedData;
   }
 

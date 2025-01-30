@@ -90,7 +90,6 @@ export async function fetchAuthCookiesAndStudentID(
   const cookiesString = cookiesToAdd
     .map(([name, value]) => `${name}=${value}`)
     .join("; ");
-  console.log("JSJS");
 
   const loginParams = new URLSearchParams({
     ...loginDefaultParams,
@@ -107,9 +106,7 @@ export async function fetchAuthCookiesAndStudentID(
       Cookie: cookiesString,
     },
   });
-  console.log(loginResponse.status);
   const loginHtml = await loginResponse.text();
-  // console.log(loginHtml);
   const errorMessage = parseLoginErrorMessage(loginHtml);
   if (errorMessage) throw new Error(errorMessage);
 

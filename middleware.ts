@@ -69,7 +69,7 @@ export async function middleware(request: NextRequest) {
           }
         } catch (e: any) {
           const { message } = e;
-          console.log("errore", message, e);
+
           const safeErrorMessage: LoginError = isKnownLoginError(message)
             ? message
             : "unexpected-error";
