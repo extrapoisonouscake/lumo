@@ -118,14 +118,14 @@ export const checkAllAnnouncementsTask = schedules.task({
     );
   },
 });
-const runStatusesToDisable = ["QUEUED", "EXECUTING", "REATTEMPTING"];
+
 export const cancelTaskRuns = async (taskId: string, excludedRunId: string) => {
   const response = await runs.list({
     taskIdentifier: [taskId],
+    status: ["QUEUED", "EXECUTING", "REATTEMPTING", "DELAYED", "FROZEN"],
   });
   for (const run of response.data) {
-    if (run.id === excludedRunId || !runStatusesToDisable.includes(run.status))
-      continue;
+    if (run.id === excludedRunId) continue;
     await runs.cancel(run.id);
   }
 };
