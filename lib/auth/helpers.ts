@@ -1,4 +1,3 @@
-import { LoginSchema } from "@/app/login/validation";
 import {
   COOKIE_MAX_AGE,
   SESSION_TTL,
@@ -12,6 +11,7 @@ import {
   parseHTMLToken,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
+import { LoginSchema } from "./public";
 
 import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
