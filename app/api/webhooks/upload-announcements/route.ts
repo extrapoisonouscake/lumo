@@ -4,8 +4,8 @@ import { edgeConfig } from "@/instances/edge-config";
 import { redis } from "@/instances/redis";
 import { utapi } from "@/instances/uploadthing";
 import {
-  getAnnouncementsPDFRedisHashKey,
-  getAnnouncementsRedisIdentificator,
+  getAnnouncementsPDFIDRedisHashKey,
+  getAnnouncementsPDFLinkRedisHashKey,
 } from "@/parsing/announcements/getAnnouncements";
 
 import { clearPDFsTask } from "@/trigger/clear-pdfs";
@@ -93,11 +93,15 @@ export async function POST(request: NextRequest): Promise<Response> {
       { status: 500 }
     );
   }
-  const field = getAnnouncementsRedisIdentificator(schoolId, currentDate);
-
-  await redis.hset(getAnnouncementsPDFRedisHashKey(currentDate), {
-    [schoolId]: response.data.key,
-  });
+  const pdfKey = response.data.key;
+  await Promise.all([
+    redis.hset(getAnnouncementsPDFIDRedisHashKey(currentDate), {
+      [schoolId]: pdfKey,
+    }),
+    redis.hset(getAnnouncementsPDFLinkRedisHashKey(currentDate), {
+      [schoolId]: `/announcements/direct/${pdfKey}`,
+    }),
+  ]);
   const midnight = now.add(1, "day").startOf("day");
 
   await Promise.all([

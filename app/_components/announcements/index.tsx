@@ -11,7 +11,7 @@ import { getUserSettings } from "@/lib/settings/queries";
 import { Button } from "@/components/ui/button";
 import { redis } from "@/instances/redis";
 import {
-  getAnnouncementsPDFRedisHashKey,
+  getAnnouncementsPDFLinkRedisHashKey,
   getAnnouncementsRedisKey,
 } from "@/parsing/announcements/getAnnouncements";
 import { AnnouncementSection } from "@/types/school";
@@ -23,11 +23,13 @@ export async function Announcements() {
   const { schoolId } = await getUserSettings();
   if (!schoolId || !isKnownSchool(schoolId)) return null;
   const redisKey = getAnnouncementsRedisKey(schoolId);
-  const pdfHashKey = getAnnouncementsPDFRedisHashKey(new Date());
+
+  const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(new Date());
   let data: AnnouncementSection[] = [];
-  const [cachedData, pdfID] = await Promise.all([
+  const [cachedData, pdfLink] = await Promise.all([
     redis.get(redisKey),
-    redis.hget(pdfHashKey, schoolId),
+
+    redis.hget(pdfLinkHashKey, schoolId),
   ]);
   if (cachedData) {
     const parsedData =
@@ -41,8 +43,8 @@ export async function Announcements() {
     <div className="flex flex-col gap-2">
       <div className="flex justify-between gap-2 items-center">
         <h3 className="text-sm">Announcements</h3>
-        {!!pdfID && (
-          <Link href={`/announcements/direct/${pdfID}`} target="_blank">
+        {!!pdfLink && (
+          <Link href={pdfLink} target="_blank">
             <Button size="icon" variant="ghost" className="size-7">
               <ArrowUpRightIcon />
             </Button>

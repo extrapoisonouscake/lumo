@@ -3,7 +3,8 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
 import {
-  getAnnouncementsPDFRedisHashKey,
+  getAnnouncementsPDFIDRedisHashKey,
+  getAnnouncementsPDFLinkRedisHashKey,
   getAnnouncementsRedisKey,
   parseAnnouncements,
 } from "@/parsing/announcements/getAnnouncements";
@@ -16,9 +17,9 @@ import {
 } from "@trigger.dev/sdk/v3";
 import * as cheerio from "cheerio";
 import { z } from "zod";
-const fetchFunctionsBySchool: Record<
+const directURLFunctionsBySchool: Record<
   KnownSchools,
-  (date?: Date) => Promise<ArrayBuffer>
+  (date?: Date) => Promise<string>
 > = {
   [KnownSchools.MarkIsfeld]: async (date) => {
     //TODO Add email files check
@@ -41,15 +42,7 @@ const fetchFunctionsBySchool: Record<
     ).prop("href");
     if (!directURL) throw new Error("PDF link element not found");
 
-    let response;
-    try {
-      response = await fetch(directURL);
-    } catch {
-      throw new Error("Failed to fetch file directly");
-    }
-
-    const data = await response.arrayBuffer();
-    return data;
+    return directURL;
   },
 };
 export const checkSchoolAnnouncementsTask = schemaTask({
@@ -57,7 +50,7 @@ export const checkSchoolAnnouncementsTask = schemaTask({
   retry: {
     randomize: false,
     minTimeoutInMs: 20 * 1000,
-maxAttempts: Math.round(24*60/20)
+    maxAttempts: Math.round((24 * 60) / 20),
   },
   queue: {
     concurrencyLimit: 1,
@@ -75,18 +68,21 @@ maxAttempts: Math.round(24*60/20)
       return;
     }
 
-    const todayHashKey = getAnnouncementsPDFRedisHashKey(date);
-    console.log("ALL", await redis.keys("*"), todayHashKey, school);
-    const pdfID = await redis.hget(todayHashKey, school);
-    let buffer;
+    const pdfIDHashKey = getAnnouncementsPDFIDRedisHashKey(date);
+
+    const pdfID = await redis.hget(pdfIDHashKey, school);
+    let directUrl;
+    let needToSetPDFURL = false;
     if (pdfID) {
-      buffer = await fetch(getUploadthingFileUrl(pdfID as string)).then(
-        (response) => response.arrayBuffer()
-      );
+      directUrl = getUploadthingFileUrl(pdfID as string);
     } else {
-      const fetchBuffer = fetchFunctionsBySchool[school];
-      buffer = await fetchBuffer(date);
+      directUrl = await directURLFunctionsBySchool[school](date);
+
+      needToSetPDFURL = true;
     }
+    const fileResponse = await fetch(directUrl);
+    if (!fileResponse.ok) throw new Error("Failed to fetch file");
+    const buffer = await fileResponse.arrayBuffer();
     try {
       await parseAnnouncements(buffer, school, date);
     } catch (e) {
@@ -101,7 +97,13 @@ maxAttempts: Math.round(24*60/20)
         throw e;
       }
     }
-    await cancelTaskRuns(ctx.task.id, ctx.run.id);
+    await Promise.all([
+      cancelTaskRuns(ctx.task.id, ctx.run.id),
+      needToSetPDFURL &&
+        redis.hset(getAnnouncementsPDFLinkRedisHashKey(date), {
+          [school]: directUrl,
+        }),
+    ]);
   },
 });
 export const checkAllAnnouncementsTask = schedules.task({

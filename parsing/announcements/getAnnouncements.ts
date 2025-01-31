@@ -16,9 +16,13 @@ export const getAnnouncementsRedisIdentificator = (
 export const getAnnouncementsRedisKey = (school: KnownSchools, date?: Date) =>
   withAnnouncementsPrefix(getAnnouncementsRedisIdentificator(school, date));
 
-export const getAnnouncementsPDFRedisHashKey = (date: Date) =>
+export const getAnnouncementsPDFIDRedisHashKey = (date: Date) =>
   withAnnouncementsPrefix(
-    `pdf:${timezonedDayJS(date).format(INTERNAL_DATE_FORMAT)}`
+    `pdf-upload-id:${timezonedDayJS(date).format(INTERNAL_DATE_FORMAT)}`
+  );
+export const getAnnouncementsPDFLinkRedisHashKey = (date: Date) =>
+  withAnnouncementsPrefix(
+    `pdf-link:${timezonedDayJS(date).format(INTERNAL_DATE_FORMAT)}`
   );
 export async function parseAnnouncements(
   buffer: ArrayBuffer,
