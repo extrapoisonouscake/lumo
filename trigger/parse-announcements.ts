@@ -46,14 +46,15 @@ const directURLFunctionsBySchool: Record<
     return directURL;
   },
 };
-const twentyMinutesInMs = 20 * 60 * 1000;
+const delayMinutes = 20;
+const delayMs = delayMinutes * 60 * 1000;
 export const checkSchoolAnnouncementsTask = schemaTask({
   id: "check-school-announcements",
   retry: {
     randomize: false,
-    minTimeoutInMs: twentyMinutesInMs,
-    maxTimeoutInMs: twentyMinutesInMs,
-    maxAttempts: Math.round((24 * 60) / 20),
+    minTimeoutInMs: delayMs,
+    maxTimeoutInMs: delayMs,
+    maxAttempts: Math.round((24 * 60) / delayMinutes),
   },
   queue: {
     concurrencyLimit: 1,
