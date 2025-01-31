@@ -58,6 +58,7 @@ export async function parseAnnouncements(
   const preparedData =
     parseElements(elements as PDFParsingPartitionElement[]) || [];
   console.log("preparedData", preparedData);
+if(preparedData.length===0) throw new Error("Something went wrong")
   const now = timezonedDayJS();
   const midnight = getMidnight(now);
 
