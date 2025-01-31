@@ -67,7 +67,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     emailDataPromise,
     edgeConfig.get("announcementsUploadTrustedSenders"),
   ]);
-  const schoolId = trustedSenders[emailData.From];
+  const schoolId = trustedSenders[emailData.From.toLowerCase()];
   if (!schoolId)
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
 
