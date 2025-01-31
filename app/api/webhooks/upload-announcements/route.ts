@@ -1,15 +1,16 @@
 import { INTERNAL_DATE_FORMAT } from "@/constants/core";
+import { getMidnight } from "@/helpers/getMidnight";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { edgeConfig } from "@/instances/edge-config";
 import { redis } from "@/instances/redis";
 import { utapi } from "@/instances/uploadthing";
-import {
-  getAnnouncementsPDFIDRedisHashKey,
-  getAnnouncementsPDFLinkRedisHashKey,
-} from "@/parsing/announcements/getAnnouncements";
+import { getAnnouncementsPDFIDRedisHashKey } from "@/parsing/announcements/getAnnouncements";
 
 import { clearPDFsTask } from "@/trigger/clear-pdfs";
-import { checkSchoolAnnouncementsTask } from "@/trigger/parse-announcements";
+import {
+  checkSchoolAnnouncementsTask,
+  savePDFLink,
+} from "@/trigger/parse-announcements";
 
 import { NextRequest, NextResponse } from "next/server";
 
@@ -98,11 +99,9 @@ export async function POST(request: NextRequest): Promise<Response> {
     redis.hset(getAnnouncementsPDFIDRedisHashKey(currentDate), {
       [schoolId]: pdfKey,
     }),
-    redis.hset(getAnnouncementsPDFLinkRedisHashKey(currentDate), {
-      [schoolId]: `/announcements/direct/${pdfKey}`,
-    }),
+    savePDFLink(schoolId, currentDate, `/announcements/direct/${pdfKey}`),
   ]);
-  const midnight = now.add(1, "day").startOf("day");
+  const midnight = getMidnight(currentDate);
 
   await Promise.all([
     checkSchoolAnnouncementsTask.trigger({

@@ -1,4 +1,5 @@
 import { KnownSchools, knownSchoolsIDs } from "@/constants/schools";
+import { getMidnight } from "@/helpers/getMidnight";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
@@ -99,13 +100,22 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     }
     await Promise.all([
       cancelTaskRuns(ctx.task.id, ctx.run.id),
-      needToSetPDFURL &&
-        redis.hset(getAnnouncementsPDFLinkRedisHashKey(date), {
-          [school]: directUrl,
-        }),
+      needToSetPDFURL && savePDFLink(school, date, directUrl),
     ]);
   },
 });
+export const savePDFLink = async (
+  school: KnownSchools,
+  date: Date,
+  directUrl: string
+) => {
+  const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(date);
+  await redis.hset(pdfLinkHashKey, {
+    [school]: directUrl,
+  });
+
+  await redis.expireat(pdfLinkHashKey, getMidnight(date).unix());
+};
 export const checkAllAnnouncementsTask = schedules.task({
   id: "check-for-all-announcements",
 

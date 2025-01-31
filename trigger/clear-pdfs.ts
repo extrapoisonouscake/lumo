@@ -1,9 +1,6 @@
 import { redis } from "@/instances/redis";
 import { utapi } from "@/instances/uploadthing";
-import {
-  getAnnouncementsPDFIDRedisHashKey,
-  getAnnouncementsPDFLinkRedisHashKey,
-} from "@/parsing/announcements/getAnnouncements";
+import { getAnnouncementsPDFIDRedisHashKey } from "@/parsing/announcements/getAnnouncements";
 
 import { schemaTask } from "@trigger.dev/sdk/v3";
 import { z } from "zod";
@@ -19,9 +16,6 @@ export const clearPDFsTask = schemaTask({
     if (!allPDFIDs) return;
 
     await utapi.deleteFiles(Object.values(allPDFIDs) as string[]);
-    await Promise.all([
-      redis.del(pdfIDHashKey),
-      redis.del(getAnnouncementsPDFLinkRedisHashKey(date)),
-    ]);
+    await redis.del(pdfIDHashKey);
   },
 });

@@ -5,6 +5,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { unstructuredIO } from "@/instances/unstructured-io";
 import { PDFParsingPartitionElement } from "@/instances/unstructured-io/types";
 
+import { getMidnight } from "@/helpers/getMidnight";
 import { getRedisExpiryArgs, redis } from "@/instances/redis";
 import { Strategy } from "unstructured-client/sdk/models/shared";
 import { dailyAnnouncementsFileParser } from "./parsers";
@@ -58,9 +59,9 @@ export async function parseAnnouncements(
     parseElements(elements as PDFParsingPartitionElement[]) || [];
   console.log("preparedData", preparedData);
   const now = timezonedDayJS();
-  const midnight = now.add(1, "day").startOf("day");
-  const secondsTillMidnight = midnight.diff(now, "seconds");
-  const expiryArgs = getRedisExpiryArgs(secondsTillMidnight);
+  const midnight = getMidnight(now);
+
+  const expiryArgs = getRedisExpiryArgs(midnight);
   await redis.set(redisKey, JSON.stringify(preparedData), ...expiryArgs);
   return preparedData;
 }
