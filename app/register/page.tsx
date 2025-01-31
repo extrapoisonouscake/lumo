@@ -56,7 +56,9 @@ const getFields: <T extends RegistrationType>(
           name="legalLastName"
           label="Legal Last Name"
         />,
-      ];
+      ]
+    default:
+      throw new Error(`Missing registration type: ${type}`);
   }
 };
 export default function RegistrationPage() {
