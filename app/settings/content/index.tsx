@@ -8,7 +8,10 @@ const fields: Array<
   }
 > = [
   { custom: SchoolPicker, key: "schoolId" },
-  { label: "Show timer on schedule", key: "shouldShowNextSubjectTimer" },
+  {
+    label: "Show countdown timer on schedule",
+    key: "shouldShowNextSubjectTimer",
+  },
   {
     label: "Show percentage for assignment score",
     key: "shouldShowAssignmentScorePercentage",

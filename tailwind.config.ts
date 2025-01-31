@@ -110,8 +110,8 @@ const config: Config = {
         },
       },
       animation: {
-        "accordion-down": `accordion-down 350ms ease-in-out, accordion-down-padding 350ms ease-in-out`,
-        "accordion-up": `accordion-up 350ms ease-in-out, accordion-up-padding 350ms ease-in-out`,
+        "accordion-down": `accordion-down 300ms ease-in-out, accordion-down-padding 300ms ease-in-out`,
+        "accordion-up": `accordion-up 300ms ease-in-out, accordion-up-padding 300ms ease-in-out`,
       },
     },
   },

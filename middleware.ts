@@ -1,7 +1,6 @@
 import { decodeJwt, UnsecuredJWT } from "jose";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextRequest, NextResponse } from "next/server";
-import { LoginSchema, loginSchema } from "./app/login/validation";
 import {
   COOKIE_MAX_AGE,
   SESSION_TTL,
@@ -18,7 +17,12 @@ import {
   deleteSession,
   fetchAuthCookiesAndStudentID,
 } from "./lib/auth/helpers";
-import { isKnownLoginError, LoginError } from "./lib/auth/public";
+import {
+  isKnownLoginError,
+  LoginError,
+  loginSchema,
+  LoginSchema,
+} from "./lib/auth/public";
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();

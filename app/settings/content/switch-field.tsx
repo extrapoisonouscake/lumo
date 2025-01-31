@@ -23,7 +23,7 @@ export function SwitchField({
     setChecked(checked);
     setIsLoading(true);
     try {
-      await setUserSetting(settingKey, checked);
+      await setUserSetting({ key: settingKey, value: checked });
     } catch {
       setChecked(!checked);
       toast.error("An error occurred.");

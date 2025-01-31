@@ -1,15 +1,18 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { ErrorAlert } from "@/components/ui/error-alert";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { login } from "@/lib/auth/mutations";
-import { isKnownLoginError, loginErrorIDToMessageMap } from "@/lib/auth/public";
-import { TriangleAlert } from "lucide-react";
+import {
+  isKnownLoginError,
+  loginErrorIDToMessageMap,
+  loginSchema,
+  LoginSchema,
+} from "@/lib/auth/public";
 import { useSearchParams } from "next/navigation";
-import { loginSchema, LoginSchema } from "./validation";
 
 export default function Page() {
   const form = useFormValidation(loginSchema);
@@ -26,15 +29,11 @@ export default function Page() {
         className="flex flex-col gap-3 w-full"
       >
         {errorMessage && (
-          <Alert variant="destructive">
-            <TriangleAlert className="size-4 !text-red-500" />
-            <AlertTitle className="text-red-500">Error</AlertTitle>
-            <AlertDescription className="text-red-500">
-              {isKnownLoginError(errorMessage)
-                ? loginErrorIDToMessageMap[errorMessage]
-                : errorMessage}
-            </AlertDescription>
-          </Alert>
+          <ErrorAlert>
+            {isKnownLoginError(errorMessage)
+              ? loginErrorIDToMessageMap[errorMessage]
+              : errorMessage}
+          </ErrorAlert>
         )}
         <FormInput placeholder="user" name="username" label="Username" />
         <FormInput
