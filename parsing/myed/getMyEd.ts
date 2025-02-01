@@ -19,6 +19,7 @@ import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
+import { clientQueueManager } from "./requests-queue";
 
 const endpointToParsingFunction = {
   subjects: parseSubjects,
@@ -27,11 +28,7 @@ const endpointToParsingFunction = {
   subjectAssignments: parseSubjectAssignments,
   personalDetails: parsePersonalDetails,
 } satisfies {
-  [K in MyEdParsingRoute | MyEdRestEndpoint]: (
-    ...args: K extends MyEdRestEndpoint
-      ? any[] /*!*/
-      : ParserFunctionArguments<K>
-  ) => any;
+  [K in MyEdParsingRoute | MyEdRestEndpoint]: (args: ParserFunctionArguments<K>) => any;
 };
 const processResponse = async (response: Response, value: FlatRouteStep) => {
   return value.expect === "html"
@@ -54,10 +51,10 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   }>(session);
 
   const requestGroup = `${endpoint}-${Date.now()}`;
+  const queue=clientQueueManager.getQueue(session);
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
   const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...rest); //!
   try {
-    let lastRequestType: "parsing" | "rest";
     for (const step of steps) {
       const isLastRequest = step.index === steps.length - 1;
       const value = step.value;
@@ -65,7 +62,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       const response = await sendMyEdRequest({
         //@ts-expect-error FIX THIS
         step: value,
-        session,
+        queue,
         authCookies,
         requestGroup,
         isLastRequest,
@@ -84,10 +81,10 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       steps.addResponse(isArray ? responses : responses[0]);
     }
     return endpointToParsingFunction[endpoint](
-      rest[0] as unknown as any,
-      ...(steps.responses as any)
+      {params:rest[0] as unknown as any,responses:steps.responses as any,metadata:steps.metadata}
     ) as MyEdEndpointResponse<Endpoint>;
   } catch (e) {
+    queue.ensureUnlock();
     console.error(e);
     return undefined;
   }

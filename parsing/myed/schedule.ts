@@ -32,7 +32,7 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   return weekday ?? null;
 }
 export function parseCurrentWeekday(
-  ...[_, $initial, $dateAdjusted]: ParserFunctionArguments<"currentWeekday">
+  {responses:[$initial, $dateAdjusted]}: ParserFunctionArguments<"currentWeekday">
 ) {
   const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
@@ -45,11 +45,10 @@ const getDateFromSubjectTimeString = (initialDate: Dayjs) => (time: string) => {
   return initialDate.set("h", t.get("h")).set("minute", t.get("m")).toDate();
 };
 export function parseSchedule(
-  ...[
-    initialParams,
-    $initial,
-    $dateAdjusted,
-  ]: ParserFunctionArguments<"schedule">
+  {params:initialParams,
+    responses:[$initial,
+    $dateAdjusted],
+    }: ParserFunctionArguments<"schedule">
 ):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string }

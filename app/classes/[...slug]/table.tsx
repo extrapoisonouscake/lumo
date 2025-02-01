@@ -24,6 +24,7 @@ import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { displayTableCellWithFallback } from "@/helpers/tables";
 import { UserSettings } from "@/types/core";
+import { SubjectPageUserSettings } from "./types";
 
 const columnHelper = createColumnHelper<Assignment>();
 const getColumns = (
@@ -57,7 +58,7 @@ const getColumns = (
         let scoreValues = "";
         if (typeof score === "number" && typeof maxScore === "number") {
           scoreValues = `${score} / ${maxScore}${shouldShowAssignmentScorePercentage
-            ? ` (${+(score / (maxScore / 100)).toFixed(2)}%)`
+            ? ` (${+(score / (maxScore / 100)).toFixed(1)}%)`
             : ""
             }`;
         }
@@ -77,7 +78,9 @@ const getColumns = (
     }), columnHelper.display({
       header: "Class Average",
       cell: ({ row }) => {
-        return row.original.classAverage;
+        const { classAverage, maxScore } = row.original;
+        if (typeof classAverage !== "number") return NULL_VALUE_DISPLAY_FALLBACK;
+        return `${classAverage}${maxScore ? ` / ${maxScore}` : ""}`;
       },
     }),
     ...(shouldShowWeightColumn
@@ -131,11 +134,7 @@ export function SubjectAssignmentsTable({
 }: {
   data?: Assignment[];
   isLoading?: boolean;
-  shouldShowAssignmentScorePercentage?: UserSettings["shouldShowAssignmentScorePercentage"];
-} & Partial<Pick<
-  UserSettings,
-  "shouldShowAssignmentScorePercentage" | "shouldHighlightMissingAssignments"
->>) {
+} & SubjectPageUserSettings) {
   const data = useMemo(
     () =>
       isLoading

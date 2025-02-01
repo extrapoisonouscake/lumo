@@ -8,14 +8,14 @@ const scoreLabelToStatus: Record<string, AssignmentStatus> = {
 };
 
 export function parseSubjectAssignments(
-  ...[, ...responses]: ParserFunctionArguments<"subjectAssignments">
-): Assignment[] | null {
+  {responses,metadata}: ParserFunctionArguments<"subjectAssignments">
+): {subjectId?:string,assignments:Assignment[]} | null {
   const [pastDue, upcoming] = responses.at(-1) as [
     OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/pastDue">,
     OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
   ];
   const allAssignments = [...pastDue, ...upcoming];
-  return allAssignments.map(
+  const preparedAssignments = allAssignments.map(
     ({ name, dueDate, assignedDate, classAverage, scoreElements, remark }) => {
       const { scoreLabel, score, pointMax } = scoreElements[0];
       let status = AssignmentStatus.Unknown;
@@ -37,4 +37,5 @@ export function parseSubjectAssignments(
       };
     }
   );
+  return {subjectId:metadata.subjectId,assignments:preparedAssignments};
 }

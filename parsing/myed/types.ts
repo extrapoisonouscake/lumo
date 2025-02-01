@@ -4,10 +4,11 @@ import { paths } from "@/types/myed-rest";
 
 import { CheerioAPI } from "cheerio";
 
-export type ParserFunctionArguments<T extends MyEdEndpoint,KnownRestResponse extends any[]=any[]> = [
-  MyEdEndpointsParams<T>,
-  ...(T extends MyEdRestEndpoint ? KnownRestResponse : CheerioAPI[])
-];
+export type ParserFunctionArguments<T extends MyEdEndpoint,KnownRestResponse =any> = {
+  params:MyEdEndpointsParams<T>,
+  responses:(T extends MyEdRestEndpoint ? KnownRestResponse : CheerioAPI[]),
+  metadata:Record<string,any>
+}
 
 
 export type OpenAPI200ResponseContent<T extends MyEdRestEndpointURL> = paths[T]['get']['responses'][200]['content']

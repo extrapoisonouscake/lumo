@@ -42,16 +42,17 @@ type RouteResponse =
   | cheerio.CheerioAPI
   | Record<string, any>
   | Record<string, any>[];
+  type RouteResolver<T extends  Omit<FlatRouteStep, "htmlToken">
+  | Omit<FlatRouteStep, "htmlToken">[],Params extends RouteParams>=((props: {
+    responses: RouteResponse[];
+    params: Params;
+    metadata:Record<string,any>
+    studentID: string;
+  }) =>T)
+  type SingularRouteStep<Params extends RouteParams> =Omit<FlatRouteStep, "htmlToken">|RouteResolver<Omit<FlatRouteStep, "htmlToken">,Params>
+  type MultipleRouteStep<Params extends RouteParams> =Omit<FlatRouteStep, "htmlToken">[]|RouteResolver<Omit<FlatRouteStep, "htmlToken">[],Params>
 type RouteStep<Params extends RouteParams> =
-  | Omit<FlatRouteStep, "htmlToken">
-  | Omit<FlatRouteStep, "htmlToken">[]
-  | ((props: {
-      responses: RouteResponse[];
-      params: Params;
-      studentID: string;
-    }) =>
-      | Omit<FlatRouteStep, "htmlToken">
-      | Omit<FlatRouteStep, "htmlToken">[]);
+   SingularRouteStep<Params>|MultipleRouteStep<Params>
 
 const processStep = <Params extends RouteParams>(
   self: ResolvedRoute<Params>,
@@ -81,12 +82,14 @@ class ResolvedRoute<Params extends RouteParams> {
   steps: Array<RouteStep<Params>> = [];
   resolvedSteps: Array<FlatRouteStep | FlatRouteStep[]> = [];
   responses: (RouteResponse | RouteResponse[])[] = [];
+  metadata:Record<string,any>
   constructor(studentID: string, params: Params, steps: typeof this.steps) {
     this.studentID = studentID;
     this.params = params;
     this.steps = steps;
     this.resolvedSteps = [];
     this.responses = [];
+    this.metadata={}
   }
   addResponse(response: (typeof this.responses)[number]) {
     this.responses.push(response);
@@ -101,6 +104,7 @@ class ResolvedRoute<Params extends RouteParams> {
         nextStep = nextStep({
           responses: this.responses,
           params: this.params,
+          metadata:this.metadata,
           studentID: this.studentID,
         });
       }
@@ -135,13 +139,7 @@ export class Route<
     this.predicates = {};
   }
   step(
-    step:
-      | Omit<FlatRouteStep, "htmlToken">
-      | ((props: {
-          responses: RouteResponse[];
-          params: Params;
-          studentID: string;
-        }) => Omit<FlatRouteStep, "htmlToken">),
+    step: SingularRouteStep<Params>,
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(step);
@@ -149,13 +147,7 @@ export class Route<
     return this;
   }
   multiple(
-    multipleSteps:
-      | Omit<FlatRouteStep, "htmlToken">[]
-      | ((props: {
-          responses: RouteResponse[];
-          params: Params;
-          studentID: string;
-        }) => Omit<FlatRouteStep, "htmlToken">[]),
+    multipleSteps: MultipleRouteStep<Params>,
     predicate?: RouteStepPredicate<Params>
   ) {
     this.steps.push(multipleSteps);
@@ -229,7 +221,7 @@ export const myEdRestEndpoints = {
       ({ studentID }) => ({
         method: "GET",
         path: `rest/lists/academics.classes.list`,
-        body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls" },
+        body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls",customParams: "selectedYear|current;selectedTerm|all" },
         expect: "json",
       }),
       ({ subjectId }) => !subjectId
@@ -238,6 +230,7 @@ export const myEdRestEndpoints = {
       ({
         params: { subjectName, subjectId: externalSubjectId },
         responses,
+        metadata,
       }) => {
         let subjectId = externalSubjectId;
         if (!subjectId) {
@@ -248,6 +241,7 @@ export const myEdRestEndpoints = {
           )?.oid;
           if (!subjectId) throw new Error("Subject not found");
         }
+        metadata.subjectId=subjectId
         return [
           {
             method: "GET",

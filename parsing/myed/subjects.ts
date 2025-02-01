@@ -36,7 +36,7 @@ function separateTAFromSubjects(subject: Subject[]) {
 }
 
 export function parseSubjects(
-  ...[_, data]: ParserFunctionArguments<
+  {responses:[data]}: ParserFunctionArguments<
     "subjects",
     [
       DeepWithRequired<

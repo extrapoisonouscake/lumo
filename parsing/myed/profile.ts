@@ -3,10 +3,11 @@ import { PersonalDetails } from "@/types/school";
 
 import { getCORSProxyURL } from "@/helpers/getCORSProxyURL";
 import { ParserFunctionArguments } from "./types";
+import { CheerioAPI } from "cheerio";
 type PersonalDetailsParserArguments =
   ParserFunctionArguments<"personalDetails">;
 export function parsePersonalDetails(
-  ...[_, $main, $photoRoot]: PersonalDetailsParserArguments
+  {responses:[$main, $photoRoot]}: PersonalDetailsParserArguments
 ): PersonalDetails | undefined {
   const mainDetails = parseMainDetails($main);
   if (!mainDetails) return;
@@ -29,7 +30,7 @@ const detailLabelsMap: Record<string, keyof PersonalDetails> = {
   "Parking Space": "parkingSpaceNumber",
   "License Plate #": "licensePlateNumber",
 };
-function parseMainDetails($: PersonalDetailsParserArguments[1]) {
+function parseMainDetails($: CheerioAPI) {
   const rawDetailsEntries = $('tr[id^="Property|"]')
     .toArray()
     .map((el) => {
@@ -47,7 +48,7 @@ function parseMainDetails($: PersonalDetailsParserArguments[1]) {
   return result as Omit<PersonalDetails, "photoURL">;
 }
 
-function parsePhotoURL($: PersonalDetailsParserArguments[2]) {
+function parsePhotoURL($: CheerioAPI) {
   const url = $(
     '[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img'
   ).prop("src");

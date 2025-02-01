@@ -88,7 +88,7 @@ export default function RegistrationPage() {
         {getFields(form.getValues("type"), form.control).map((field, index) => (
           <React.Fragment key={index}>{field}</React.Fragment>
         ))}
-        <SubmitButton>Submit</SubmitButton>
+        <SubmitButton>Create Account</SubmitButton>
       </Form>
     </div>
   );

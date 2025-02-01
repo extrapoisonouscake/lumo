@@ -3,6 +3,7 @@ import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { convertPathParameterToSubjectName } from "./helpers";
 import { SubjectAssignmentsTable } from "./table";
+import { SubjectPageContent } from "./content";
 interface Props {
   params: { slug: [string, string] };
 }
@@ -25,10 +26,6 @@ export default async function Page({ params }: Props) {
   ]);
   if (!data) return <ErrorCard />;
   return (
-    <SubjectAssignmentsTable
-      shouldShowAssignmentScorePercentage={shouldShowAssignmentScorePercentage}
-      shouldHighlightMissingAssignments={shouldHighlightMissingAssignments}
-      data={data}
-    />
+    <SubjectPageContent {...data} shouldShowAssignmentScorePercentage={shouldShowAssignmentScorePercentage} shouldHighlightMissingAssignments={shouldHighlightMissingAssignments} />
   );
 }

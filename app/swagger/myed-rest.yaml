@@ -232,6 +232,7 @@ paths:
           in: query
           schema:
             type: string
+            pattern: "^selectedYear|(current|previous);selectedTerm|([a-zA-Z0-9]+)$"
         - name: fieldSetOid
           in: query
           schema:

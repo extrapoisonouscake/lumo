@@ -43,7 +43,7 @@ export default function Page() {
           label="Password"
         />
         <SubmitButton isLoading={form.formState.isSubmitting}>
-          Submit
+          Login
         </SubmitButton>
       </Form>
     </div>

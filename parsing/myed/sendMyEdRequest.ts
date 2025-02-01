@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 import "server-only";
 
 import { fetchMyEd } from "@/instances/fetchMyEd";
-import { clientQueueManager } from "./requests-queue";
+import { clientQueueManager, PrioritizedRequestQueue } from "./requests-queue";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
@@ -16,12 +16,13 @@ export type SendMyEdRequestParameters<
   Steps extends FlatRouteStep | FlatRouteStep[]
 > = {
   step: Steps;
-  session: string;
+  
   authCookies: Record<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
   >;
-} & (
+} & ({session: string}|
+  {queue: PrioritizedRequestQueue})&(
   | { requestGroup?: never; isLastRequest?: never }
   | { requestGroup: string; isLastRequest: boolean }
 );
@@ -40,9 +41,10 @@ export async function sendMyEdRequest<
 >({
   authCookies,
   step: stepOrSteps,
-  session,
+  
   isLastRequest,
   requestGroup,
+  ...sessionOrQueue
 }: SendMyEdRequestParameters<Steps>) {
   const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
     (name) => `${name}=${authCookies[name] || "aspen"}`
@@ -100,22 +102,17 @@ export async function sendMyEdRequest<
     argumentsArray.push(args);
   }
 
-  console.log(argumentsArray);
-  const queue = clientQueueManager.getQueue(session);
+
+  const queue = "queue" in sessionOrQueue ? sessionOrQueue.queue : clientQueueManager.getQueue(sessionOrQueue.session);
   const response = await queue.enqueue<Response | Response[]>(
     isMultipleSteps
-      ? async () => {
-          console.log(argumentsArray[0][0], Date.now());
-          const r = await Promise.all(
+      ?  () =>  Promise.all(
             argumentsArray.map((args) => fetchMyEd(...args))
-          );
-          console.log(argumentsArray[0][0], "f", Date.now());
-          return r;
-        }
+          )
       : async () => {
-          console.log(argumentsArray[0][0], Date.now());
+          // console.log(argumentsArray[0][0], Date.now());
           const r = await fetchMyEd(...argumentsArray[0]);
-          console.log(argumentsArray[0][0], "f", Date.now());
+          // console.log(argumentsArray[0][0], "f", Date.now());
           return r;
         },
     requestGroup,

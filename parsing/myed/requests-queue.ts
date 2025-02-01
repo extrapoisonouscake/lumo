@@ -30,11 +30,11 @@ interface QueueItem<T> {
   isLastRequest?: boolean;
 }
 
-class PrioritizedRequestQueue {
+export class PrioritizedRequestQueue {
   private queue: QueueItem<any>[] = [];
   private isProcessing: boolean = false;
   private currentGroup: string | null = null;
-
+  
   /**
    * Enqueues a request, ensuring global serialization and group prioritization.
    */
@@ -59,9 +59,11 @@ class PrioritizedRequestQueue {
    * Processes the queue, respecting group prioritization.
    */
   private async processQueue(): Promise<void> {
+    console.log("Processing queue",this.queue);
     if (this.isProcessing || this.queue.length === 0) { return; }
 
     const nextItem = this.getNextQueueItem();
+    console.log("Next item",nextItem);
     if (nextItem) {
       const { requestFunction, resolve, reject, group } = nextItem;
       this.isProcessing = true;
@@ -70,8 +72,12 @@ class PrioritizedRequestQueue {
         const result = await requestFunction();
         resolve(result);
       } catch (error) {
+        
         reject(error);
+        
+       
       } finally {
+        console.log("Processed",nextItem);
         this.isProcessing = false;
         if (this.currentGroup && nextItem.isLastRequest) {
           this.currentGroup = null;
@@ -80,7 +86,10 @@ class PrioritizedRequestQueue {
       }
     }
   }
-
+ensureUnlock(){
+  if(this.currentGroup){this.currentGroup = null;}
+  this.processQueue()
+}
   /**
    * Retrieves the next queue item, respecting the current group's priority.
    */
