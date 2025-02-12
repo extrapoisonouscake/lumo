@@ -7,69 +7,126 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { register } from "@/lib/auth/mutations";
 import {
+  AllowedRegistrationCountries,
   RegisterSchema,
   registerSchema,
   RegistrationType,
-  registrationTypes,
 } from "@/lib/auth/public";
 import { useSearchParams } from "next/navigation";
 import React, { ReactNode } from "react";
+import { UseFormReturn } from "react-hook-form";
+import { AddressAutocompleteInput } from "./address-autocomplete-input";
+const COUNTRIES_OPTIONS = [
+  { value: AllowedRegistrationCountries.Canada, label: "Canada" },
+  { value: AllowedRegistrationCountries.US, label: "US" },
+];
+const countrySpecificFieldData = {
+  province: {
+    [AllowedRegistrationCountries.Canada]: {
+      label: "Province",
+      placeholder: "BC",
+    },
+    [AllowedRegistrationCountries.US]: { label: "State", placeholder: "WA" },
+  },
+  postal_code: {
+    [AllowedRegistrationCountries.Canada]: {
+      label: "Postal Code",
+      placeholder: "V6Z 1B7",
+    },
+    [AllowedRegistrationCountries.US]: { label: "Zip", placeholder: "98122" },
+  },
+  city: {
+    [AllowedRegistrationCountries.Canada]: { placeholder: "Vancouver" },
+    [AllowedRegistrationCountries.US]: { placeholder: "Seattle" },
+  },
+} satisfies Record<
+  string,
+  Record<AllowedRegistrationCountries, { label?: string; placeholder?: string }>
+>;
 const getFields: <T extends RegistrationType>(
   type: T,
-  control: /*Control<RegisterFieldsByType[T]>*/ any
-) => ReactNode[] = (type, control) => {
+  form: UseFormReturn<any>,
+  country: AllowedRegistrationCountries | ""
+) => ReactNode[] = (type, form, country) => {
   switch (type) {
     case RegistrationType.guardianForStudent:
-      return [
+      const fields = [
         <FormInput
-          placeholder="user"
+          placeholder="Sophia"
           name="legalFirstName"
           label="Legal First Name"
         />,
         <FormInput
-          placeholder="user"
+          placeholder="Smith"
           name="legalLastName"
           label="Legal Last Name"
         />,
         <FormSelect
-          control={control}
-          name="country"
+          control={form.control}
+          name="fields.country"
           label="Country"
-          options={["Canada", "USA"]}
-          placeholder="Country"
+          options={COUNTRIES_OPTIONS}
+          placeholder="Choose your country..."
+          onChange={() => {
+            for (const name of ["address", "city", "postal_code", "province"]) {
+              form.setValue(`fields.${name}`, "");
+            }
+          }}
         />,
-        <FormInput placeholder="address" name="address" label="Address" />,
-        <FormInput placeholder="city" name="city" label="City" />,
-        <FormInput placeholder="state" name="state" label="State" />,
-        <FormInput placeholder="zip" name="zip" label="Zip" />,
-        <FormInput placeholder="phone" name="phone" label="Phone" />,
       ];
-    case RegistrationType.g:
-      return [
-        <FormInput
-          placeholder="user"
-          name="legalFirstName"
-          label="Legal First Name"
-        />,
-        <FormInput
-          placeholder="user"
-          name="legalLastName"
-          label="Legal Last Name"
-        />,
-      ]
+      if (country) {
+        const provinceFieldData = countrySpecificFieldData["province"][country];
+        const postalCodeFieldData =
+          countrySpecificFieldData["postal_code"][country];
+
+        const cityFieldData = countrySpecificFieldData["city"][country];
+        fields.push(
+          <AddressAutocompleteInput country={country} />,
+          <FormInput
+            placeholder={cityFieldData.placeholder}
+            name="fields.city"
+            label="City"
+          />,
+          <FormInput
+            placeholder={provinceFieldData.placeholder}
+            name="fields.province"
+            label={provinceFieldData.label}
+          />,
+          <FormInput
+            placeholder={postalCodeFieldData.placeholder}
+            name="fields.postal_code"
+            label={postalCodeFieldData.label}
+          />,
+          <FormInput
+            placeholder="+1 (000) 000-0000"
+            name="fields.phone"
+            label="Phone"
+          />
+        );
+      }
+      return fields;
     default:
       throw new Error(`Missing registration type: ${type}`);
   }
 };
+const REGISTRATION_TYPES_OPTIONS = [
+  { value: RegistrationType.guardianForStudent, label: "Guardian for Student" },
+];
 export default function RegistrationPage() {
   const form = useFormValidation(registerSchema, {
-    defaultValues: { type: RegistrationType.g },
+    defaultValues: { type: RegistrationType.guardianForStudent },
   });
+
   const searchParams = useSearchParams();
   const errorMessage = searchParams.get("error");
   async function onSubmit(data: RegisterSchema) {
     await register(data);
   }
+  const type = form.watch("type");
+  //@ts-expect-error
+  const country = form.watch("fields.country") as
+    | AllowedRegistrationCountries
+    | "";
   return (
     <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
       <Form
@@ -82,10 +139,10 @@ export default function RegistrationPage() {
           control={form.control}
           name="type"
           label="Type"
-          options={registrationTypes}
+          options={REGISTRATION_TYPES_OPTIONS}
           placeholder="Select type"
         />
-        {getFields(form.getValues("type"), form.control).map((field, index) => (
+        {getFields(type, form, country).map((field, index) => (
           <React.Fragment key={index}>{field}</React.Fragment>
         ))}
         <SubmitButton>Create Account</SubmitButton>

@@ -29,7 +29,7 @@ export async function Announcements() {
   const [cachedData, pdfLink] = await Promise.all([
     redis.get(redisKey),
 
-    redis.hget(pdfLinkHashKey, schoolId),
+    redis.hget(pdfLinkHashKey, schoolId) as Promise<string | null>,
   ]);
   if (cachedData) {
     const parsedData =
@@ -52,7 +52,7 @@ export async function Announcements() {
         )}
       </div>
       {data.length > 0 ? (
-        <AnnouncementsAccordions data={data} />
+        <AnnouncementsAccordions pdfURL={pdfLink ?? null} data={data} />
       ) : (
         <ErrorCard emoji="🙈" message="Nothing here yet." />
       )}

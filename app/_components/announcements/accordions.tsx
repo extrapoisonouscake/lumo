@@ -11,8 +11,10 @@ import { AnnouncementsSectionTable } from "./table";
 
 export function AnnouncementsAccordions({
   data,
+  pdfURL,
 }: {
   data: AnnouncementSection[];
+  pdfURL: string | null;
 }) {
   return (
     <Accordion
@@ -42,7 +44,10 @@ export function AnnouncementsAccordions({
                   <p>No announcements in this section.</p>
                 )
               ) : (
-                <AnnouncementsSectionTable rows={props.table} />
+                <AnnouncementsSectionTable
+                  pdfURL={pdfURL}
+                  rows={heading === "Meetings & Practices" ? [] : props.table}
+                />
               )}
             </AccordionContent>
           </AccordionItem>

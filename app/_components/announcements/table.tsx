@@ -10,7 +10,9 @@ import { AnnouncementSection } from "@/types/school";
 
 export function AnnouncementsSectionTable({
   rows,
+  pdfURL,
 }: {
+  pdfURL: string | null;
   rows: Extract<AnnouncementSection, { table: any }>["table"];
 }) {
   const [header, ...contentRows] = rows;
@@ -35,7 +37,17 @@ export function AnnouncementsSectionTable({
         ) : (
           <TableRow>
             <TableCell colSpan={header.length} className="h-24 text-center">
-              No subjects.
+              {pdfURL ? (
+                <>
+                  Please open{" "}
+                  <a href={pdfURL} target="_blank">
+                    the original file
+                  </a>{" "}
+                  to view this content.
+                </>
+              ) : (
+                "Nothing here for now."
+              )}
             </TableCell>
           </TableRow>
         )}

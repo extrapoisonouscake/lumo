@@ -19,7 +19,10 @@ export const loginSchema = z.object({
 export type LoginSchema = z.infer<typeof loginSchema>;
 export enum RegistrationType {
   guardianForStudent = "guardianForStudent",
-  g = "g",
+}
+export enum AllowedRegistrationCountries {
+  Canada = "CA",
+  US = "US",
 }
 export const registrationTypes = Object.values(RegistrationType);
 const registerSchemas = {

@@ -22,13 +22,15 @@ export function FormSelect<T extends FieldValues>({
   options,
   placeholder,
   description,
+  onChange,
 }: {
   control: Control<T>;
   name: /*Path<T>*/ any;
   label: string;
-  options: string[];
+  options: { label: string; value: string }[];
   placeholder: string;
   description?: string;
+  onChange?: () => void;
 }) {
   return (
     <FormField
@@ -37,15 +39,21 @@ export function FormSelect<T extends FieldValues>({
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
-          <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <Select
+            onValueChange={(e) => {
+              field.onChange(e);
+              onChange?.();
+            }}
+            defaultValue={field.value}
+          >
             <FormControl>
               <SelectTrigger>
                 <SelectValue placeholder={placeholder} />
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              {options.map((option) => (
-                <SelectItem value={option}>{option}</SelectItem>
+              {options.map(({ value, label }) => (
+                <SelectItem value={value}>{label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
