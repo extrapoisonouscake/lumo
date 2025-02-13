@@ -18,13 +18,13 @@ export function AnnouncementsSectionTable({
   const [header, ...contentRows] = rows;
   return (
     <Table className="[&:*]:p-0">
-      <TableHeader>
+      {header&&<TableHeader>
         <TableRow>
           {header.map((column) => (
             <TableHead key={column}>{column}</TableHead>
           ))}
         </TableRow>
-      </TableHeader>
+      </TableHeader>}
       <TableBody>
         {contentRows.length > 0 ? (
           contentRows.map((row, i) => (
