@@ -32,7 +32,9 @@ export function AnnouncementsAccordions({
                 <p>{heading}</p>
               </div>
             </AccordionTrigger>
-            <AccordionContent containerClassName={cn({ "p-0": !isItemsView })}>
+            <AccordionContent
+              containerClassName={cn("border-t pt-1", { "p-0": !isItemsView })}
+            >
               {isItemsView ? (
                 props.items.length > 0 ? (
                   <ul className="flex flex-col gap-1.5 leading-6">
