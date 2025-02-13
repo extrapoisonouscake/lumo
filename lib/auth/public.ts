@@ -1,4 +1,5 @@
 import { zodEnum } from "@/types/utils";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { z } from "zod";
 export const loginErrorIDToMessageMap = {
   "account-disabled":
@@ -24,21 +25,40 @@ export enum AllowedRegistrationCountries {
   Canada = "CA",
   US = "US",
 }
+export const allowedRegistrationCountries = Object.values(
+  AllowedRegistrationCountries
+);
 export const registrationTypes = Object.values(RegistrationType);
 const registerSchemas = {
   [RegistrationType.guardianForStudent]: z.object({
-    legalFirstName: z.string().min(1, { message: "Required." }),
-    legalLastName: z.string().min(1, { message: "Required." }),
+    firstName: z.string().min(1, { message: "Required." }),
+    lastName: z.string().min(1, { message: "Required." }),
     country: z.string().min(1, { message: "Required." }),
     address: z.string().min(1, { message: "Required." }),
     city: z.string().min(1, { message: "Required." }),
-    state: z.string().min(1, { message: "Required." }),
+    region: z.string().min(1, { message: "Required." }),
     postalCode: z.string().min(1, { message: "Required." }),
-    phone: z.string().min(1, { message: "Required." }),
-  }),
-  g: z.object({
-    legalFirstName: z.string().min(1, { message: "Required." }),
-    legalLastName: z.string().min(1, { message: "Required." }),
+    phone: z.string().transform((arg, ctx) => {
+      const phone = parsePhoneNumberFromString(arg, {
+        defaultCountry: "US",
+        extract: false,
+      });
+      if (
+        phone &&
+        phone.isValid() &&
+        allowedRegistrationCountries.includes(
+          phone.country as AllowedRegistrationCountries
+        )
+      ) {
+        return phone.number;
+      }
+
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Invalid phone number.",
+      });
+      return z.NEVER;
+    }),
   }),
 };
 type RegisterSchemas = typeof registerSchemas;
@@ -63,11 +83,9 @@ export const registerSchema = z
     if (schemaForType) {
       const result = schemaForType.safeParse(fields);
       if (!result.success) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: result.error.message,
-          path: ["fields"],
-        });
+        for (const issue of result.error.issues) {
+          ctx.addIssue({ ...issue, path: ["fields", ...issue.path] });
+        }
       }
     }
 

@@ -33,4 +33,5 @@ export const register = actionClient
   .schema(registerSchema)
   .action(async ({ parsedInput }) => {
     console.log({ parsedInput });
+    redirect("/login");
   });

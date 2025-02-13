@@ -12,6 +12,7 @@ import {
   loginSchema,
   LoginSchema,
 } from "@/lib/auth/public";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 export default function Page() {
@@ -35,7 +36,7 @@ export default function Page() {
               : errorMessage}
           </ErrorAlert>
         )}
-        <FormInput placeholder="user" name="username" label="Username" />
+        <FormInput placeholder="1111111" name="username" label="Username" />
         <FormInput
           placeholder="******"
           type="password"
@@ -45,6 +46,12 @@ export default function Page() {
         <SubmitButton isLoading={form.formState.isSubmitting}>
           Login
         </SubmitButton>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-secondary-foreground">Forgot Password?</p>
+          <Link href="/register" className="text-sm text-secondary-foreground">
+            Register
+          </Link>
+        </div>
       </Form>
     </div>
   );

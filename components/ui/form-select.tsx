@@ -1,3 +1,4 @@
+import { SelectProps } from "@radix-ui/react-select";
 import { Control, FieldValues } from "react-hook-form";
 import {
   FormControl,
@@ -23,6 +24,7 @@ export function FormSelect<T extends FieldValues>({
   placeholder,
   description,
   onChange,
+  ...props
 }: {
   control: Control<T>;
   name: /*Path<T>*/ any;
@@ -31,36 +33,40 @@ export function FormSelect<T extends FieldValues>({
   placeholder: string;
   description?: string;
   onChange?: () => void;
-}) {
+} & SelectProps) {
   return (
     <FormField
       control={control}
       name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <Select
-            onValueChange={(e) => {
-              field.onChange(e);
-              onChange?.();
-            }}
-            defaultValue={field.value}
-          >
-            <FormControl>
-              <SelectTrigger>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
-            </FormControl>
-            <SelectContent>
-              {options.map(({ value, label }) => (
-                <SelectItem value={value}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {description && <FormDescription>{description}</FormDescription>}
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <Select
+              onValueChange={function (e) {
+                field.onChange(e);
+                onChange?.();
+              }}
+              defaultValue={field.value}
+              {...props}
+              {...field}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {options.map(({ value, label }) => (
+                  <SelectItem value={value}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {description && <FormDescription>{description}</FormDescription>}
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }

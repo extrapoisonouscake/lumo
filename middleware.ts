@@ -23,14 +23,17 @@ import {
   loginSchema,
   LoginSchema,
 } from "./lib/auth/public";
-
+const unauthenticatedPathnames = ["/login", "/register"];
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   const isAuthenticated = isUserAuthenticated(request.cookies);
-  const isOnLoginPage = request.nextUrl.pathname.startsWith("/login");
+  const { pathname } = request.nextUrl;
+  const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
+    pathname.startsWith(path)
+  );
   if (isAuthenticated) {
-    if (isOnLoginPage) {
+    if (isOnUnauthenticatedPage) {
       return Response.redirect(new URL("/", request.url));
     } else {
       if (
@@ -87,7 +90,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   } else {
-    if (!isOnLoginPage) {
+    if (!isOnUnauthenticatedPage) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }

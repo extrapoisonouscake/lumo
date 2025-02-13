@@ -64,9 +64,7 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     date: z.date(),
   }),
   run: async ({ school, date }, { ctx }) => {
-    console.log("STATTR", school, date);
     const redisKey = getAnnouncementsRedisKey(school, date);
-    console.log({ redisKey });
     const cachedAnnouncements = await redis.get(redisKey);
     if (cachedAnnouncements) {
       return;
@@ -95,7 +93,6 @@ export const checkSchoolAnnouncementsTask = schemaTask({
         now.day() !== timezonedDayJS(ctx.run.createdAt).day() ||
         now.hour() > 15
       ) {
-        console.log("ABORTING");
         throw new AbortTaskRunError("New day");
       } else {
         throw e;

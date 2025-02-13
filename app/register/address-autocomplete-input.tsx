@@ -36,21 +36,21 @@ export function AddressAutocompleteInput({
     name,
   }: google.maps.places.PlaceResult) => {
     form.setValue(FORM_FIELD_NAME, name);
-    let city, province, postalCode;
+    let city, region, postalCode;
     if (!address_components) return;
     for (const component of address_components) {
       const { types, short_name } = component;
       if (types.includes("postal_code")) {
         postalCode = short_name;
       } else if (types.includes("administrative_area_level_1")) {
-        province = short_name;
+        region = short_name;
       } else if (types.includes("locality")) {
         city = short_name;
       }
     }
     form.setValue("fields.city", city);
-    form.setValue("fields.province", province);
-    form.setValue("fields.postal_code", postalCode);
+    form.setValue("fields.region", region);
+    form.setValue("fields.postalCode", postalCode);
   };
   useEffect(() => {
     if (!placeAutocomplete) return;
