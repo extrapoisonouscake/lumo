@@ -36,7 +36,7 @@ export function AnnouncementsSectionTable({
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={header.length} className="h-24 text-center">
+            <TableCell colSpan={header?.length} className="h-24 text-center">
               {pdfURL ? (
                 <>
                   Please open{" "}
