@@ -40,7 +40,7 @@ export function AnnouncementsSectionTable({
               {pdfURL ? (
                 <>
                   Please open{" "}
-                  <a href={pdfURL} target="_blank">
+                  <a href={pdfURL} className="underline text-blue-500" target="_blank">
                     the original file
                   </a>{" "}
                   to view this content.
