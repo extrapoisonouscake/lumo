@@ -33,7 +33,7 @@ export function AnnouncementsAccordions({
               </div>
             </AccordionTrigger>
             <AccordionContent
-              containerClassName={cn("border-t pt-1.5", { "p-0": !isItemsView })}
+              containerClassName={cn("border-t pt-2.5", { "p-0": !isItemsView })}
             >
               {isItemsView ? (
                 props.items.length > 0 ? (
