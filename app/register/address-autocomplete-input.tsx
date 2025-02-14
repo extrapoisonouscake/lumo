@@ -65,9 +65,11 @@ export function AddressAutocompleteInput({
       name={FORM_FIELD_NAME}
       render={({ field: { onChange, value, ...field } }) => (
         <FormItem>
-          <FormLabel>Address</FormLabel>
+          <FormLabel required>Address</FormLabel>
           <Input
+            required
             value={value}
+            autoComplete="address-line1"
             placeholder={countrySpecificPlaceholder[country]}
             onChange={onChange}
             {...field}

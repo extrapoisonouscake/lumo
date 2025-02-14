@@ -8,6 +8,7 @@ export function useFormValidation<T extends z.Schema<any, any>>(
 ) {
   const methods = useForm<z.infer<typeof schema>>({
     mode: "onTouched",
+    context: schema,
     resolver: zodResolver(schema),
     ...options,
   });

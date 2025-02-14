@@ -21,7 +21,7 @@ export type SendMyEdRequestParameters<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
   >;
-} & ({ session: string } | { queue: PrioritizedRequestQueue }) &
+} & ({ session?: string } | { queue: PrioritizedRequestQueue }) &
   (
     | { requestGroup?: never; isLastRequest?: never }
     | { requestGroup: string; isLastRequest: boolean }
@@ -46,9 +46,15 @@ export async function sendMyEdRequest<
   requestGroup,
   ...sessionOrQueue
 }: SendMyEdRequestParameters<Steps>) {
-  const cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
-    (name) => `${name}=${authCookies[name] || "aspen"}`
-  ).join("; ");
+  const isQueue = "queue" in sessionOrQueue;
+  const isSession = !isQueue && sessionOrQueue.session;
+  const isAuthenticated = isQueue || isSession;
+  let cookiesString = "";
+  if (isAuthenticated) {
+    cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
+      (name) => `${name}=${authCookies[name] || "aspen"}`
+    ).join("; ");
+  }
   const userAgent = getUserAgent();
   const initHeaders = {
     Cookie: cookiesString,
@@ -102,17 +108,24 @@ export async function sendMyEdRequest<
     argumentsArray.push(args);
   }
 
-  const queue =
-    "queue" in sessionOrQueue
-      ? sessionOrQueue.queue
-      : clientQueueManager.getQueue(sessionOrQueue.session);
-  const response = await queue.enqueue<Response | Response[]>(
-    isMultipleSteps
-      ? () => Promise.all(argumentsArray.map((args) => fetchMyEd(...args)))
-      : () => fetchMyEd(...argumentsArray[0]),
-    requestGroup,
-    isLastRequest
-  );
+  const queue = isQueue
+    ? sessionOrQueue.queue
+    : isSession
+    ? clientQueueManager.getQueue(sessionOrQueue.session as string)
+    : undefined;
+  const requestFunction = isMultipleSteps
+    ? () => Promise.all(argumentsArray.map((args) => fetchMyEd(...args)))
+    : () => fetchMyEd(...argumentsArray[0]);
+  let response;
+  if (queue) {
+    response = await queue.enqueue<Response | Response[]>(
+      requestFunction,
+      requestGroup,
+      isLastRequest
+    );
+  } else {
+    response = await requestFunction();
+  }
 
   return response;
 }

@@ -13,7 +13,6 @@ import {
   registerSchema,
   RegistrationType,
 } from "@/lib/auth/public";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React, { ReactNode } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -117,15 +116,22 @@ const countrySpecificRegions: Record<AllowedRegistrationCountries, string[]> = {
   [AllowedRegistrationCountries.Canada]: CANADA_PROVINCES,
   [AllowedRegistrationCountries.US]: US_STATES,
 };
-const getFields: <T extends RegistrationType>(
-  type: T,
-  form: UseFormReturn<any>,
-  country: AllowedRegistrationCountries | ""
-) => ReactNode[] = (type, form, country) => {
+const getFields: <T extends RegistrationType>({
+  type,
+  form,
+  country,
+  schoolDistricts,
+}: {
+  type: T;
+  form: UseFormReturn<any>;
+  country: AllowedRegistrationCountries | "";
+  schoolDistricts: string[];
+}) => ReactNode[] = ({ type, form, country, schoolDistricts }) => {
   switch (type) {
     case RegistrationType.guardianForStudent:
       const fields = [
         <FormInput
+          required
           placeholder="Sophia"
           name="fields.firstName"
           autoCapitalize="on"
@@ -133,6 +139,7 @@ const getFields: <T extends RegistrationType>(
           label="Student Legal First Name"
         />,
         <FormInput
+          required
           placeholder="Smith"
           name="fields.lastName"
           autoCapitalize="on"
@@ -140,11 +147,11 @@ const getFields: <T extends RegistrationType>(
           label="Student Legal Last Name"
         />,
         <FormSelect
-          control={form.control}
+          required
           name="fields.country"
           label="Country"
           options={COUNTRIES_OPTIONS}
-          placeholder="Choose your country..."
+          placeholder="Click to choose..."
           onChange={() => {
             for (const name of ["address", "city", "postalCode", "region"]) {
               form.setValue(`fields.${name}`, "");
@@ -160,24 +167,27 @@ const getFields: <T extends RegistrationType>(
         const cityFieldData = countrySpecificFieldData["city"][country];
         fields.push(
           <AddressAutocompleteInput country={country} />,
+          <FormInput name="fields.poBox" label="RR Number / PO Box" />,
           <FormInput
+            required
             autoComplete="address-level2"
             placeholder={cityFieldData.placeholder}
             name="fields.city"
             label="City"
           />,
           <FormSelect
+            required
             placeholder={regionFieldData.placeholder}
             name="fields.region"
             options={countrySpecificRegions[country].map((region) => ({
               value: region,
               label: region,
             }))}
-            control={form.control}
             autoComplete="address-level1"
             label={regionFieldData.label}
           />,
           <FormInput
+            required
             placeholder={postalCodeFieldData.placeholder}
             name="fields.postalCode"
             autoComplete="postal-code"
@@ -186,6 +196,18 @@ const getFields: <T extends RegistrationType>(
           <PhoneInput />
         );
       }
+      fields.push(
+        <FormSelect
+          required
+          name="fields.schoolDistrict"
+          label="School District"
+          placeholder="Click to choose..."
+          options={schoolDistricts.map((district) => ({
+            value: district,
+            label: district,
+          }))}
+        />
+      );
       return fields;
     default:
       throw new Error(`Missing registration type: ${type}`);
@@ -196,7 +218,9 @@ const REGISTRATION_TYPES_OPTIONS = [
 ];
 export function RegistrationForm({
   defaultCountry,
+  schoolDistricts,
 }: {
+  schoolDistricts: string[];
   defaultCountry: string | null;
 }) {
   const form = useFormValidation(registerSchema, {
@@ -229,22 +253,17 @@ export function RegistrationForm({
       >
         {errorMessage && <ErrorAlert>{errorMessage}</ErrorAlert>}
         <FormSelect
-          control={form.control}
           name="type"
           label="Type"
           options={REGISTRATION_TYPES_OPTIONS}
           placeholder="Select type"
         />
-        {getFields(type, form, country).map((field, index) => (
-          <React.Fragment key={index}>{field}</React.Fragment>
-        ))}
+        {getFields({ type, form, country, schoolDistricts }).map(
+          (field, index) => (
+            <React.Fragment key={index}>{field}</React.Fragment>
+          )
+        )}
         <SubmitButton>Create Account</SubmitButton>
-        <Link
-          href="/login"
-          className="text-center text-sm text-secondary-foreground"
-        >
-          Already have an account?
-        </Link>
       </Form>
     </div>
   );

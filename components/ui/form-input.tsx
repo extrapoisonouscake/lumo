@@ -14,7 +14,7 @@ import { Input, InputProps } from "./input";
 
 export const FormInput = forwardRef<
   HTMLInputElement,
-  WithRequired<InputProps, "name" | "placeholder"> & {
+  WithRequired<InputProps, "name"> & {
     label: string;
     description?: string;
   }
@@ -25,14 +25,13 @@ export const FormInput = forwardRef<
   if (context) {
     currentError = context.formState.errors[name]?.message?.toString() || null; //!too complicated??
   }
-
   return (
     <FormField
       control={context.control}
       name={name}
       render={({ field: { ref: fieldRef, ...rest } }) => (
         <FormItem>
-          {label && <FormLabel>{label}</FormLabel>}
+          {label && <FormLabel required={props.required}>{label}</FormLabel>}
           <FormControl>
             <Input
               {...rest}

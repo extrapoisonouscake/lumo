@@ -1,11 +1,12 @@
 import { AppleEmoji } from "@/components/misc/apple-emoji";
 import { Card } from "@/components/ui/card";
+import { ReactNode } from "react";
 
 export function ErrorCard({
-  message = "Something went wrong.",
+  children = "Something went wrong.",
   emoji = "‼️",
 }: {
-  message?: string;
+  children?: string | ReactNode;
   emoji?: string;
 }) {
   return (
@@ -16,7 +17,7 @@ export function ErrorCard({
         imageClassName="size-[30px]"
       />
 
-      <p className="text-sm">{message}</p>
+      <p className="text-sm">{children}</p>
     </Card>
   );
 }

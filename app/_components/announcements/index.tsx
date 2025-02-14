@@ -54,7 +54,7 @@ export async function Announcements() {
       {data.length > 0 ? (
         <AnnouncementsAccordions pdfURL={pdfLink ?? null} data={data} />
       ) : (
-        <ErrorCard emoji="🙈" message="Nothing here yet." />
+        <ErrorCard emoji="🙈">Nothing here yet.</ErrorCard>
       )}
     </div>
   );

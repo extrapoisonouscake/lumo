@@ -19,7 +19,7 @@ export const loginSchema = z.object({
 });
 export type LoginSchema = z.infer<typeof loginSchema>;
 export enum RegistrationType {
-  guardianForStudent = "guardianForStudent",
+  guardianForStudent = "0",
 }
 export enum AllowedRegistrationCountries {
   Canada = "CA",
@@ -37,6 +37,7 @@ const registerSchemas = {
     address: z.string().min(1, { message: "Required." }),
     city: z.string().min(1, { message: "Required." }),
     region: z.string().min(1, { message: "Required." }),
+    poBox: z.string().optional(),
     postalCode: z.string().min(1, { message: "Required." }),
     phone: z.string().transform((arg, ctx) => {
       const phone = parsePhoneNumberFromString(arg, {
@@ -59,6 +60,7 @@ const registerSchemas = {
       });
       return z.NEVER;
     }),
+    schoolDistrict: z.string().min(1, { message: "Required." }),
   }),
 };
 type RegisterSchemas = typeof registerSchemas;
@@ -92,3 +94,14 @@ export const registerSchema = z
     return true;
   });
 export type RegisterSchema = z.infer<typeof registerSchema>;
+export enum registrationInternalFields {
+  firstName = "psnNameFirst",
+  lastName = "psnNameLast",
+  streetAddress = "relPsnAdrPhys_adrAddress01",
+  poBox = "relPsnAdrPhys_adrAddress02",
+  city = "relPsnAdrPhys_adrCity",
+  region = "relPsnAdrPhys.adrState",
+  postalCode = "relPsnAdrPhys_adrPostalCode",
+  phone = "psnPhone01",
+  schoolDistrict = "psnFieldC025",
+}

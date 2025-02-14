@@ -15,11 +15,12 @@ import { cache } from "react";
 import "server-only";
 import { parseSubjectAssignments } from "./assignments";
 import { parsePersonalDetails } from "./profile";
+import { parseRegistrationFields } from "./registration";
+import { clientQueueManager } from "./requests-queue";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import { parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
-import { clientQueueManager } from "./requests-queue";
 
 const endpointToParsingFunction = {
   subjects: parseSubjects,
@@ -27,8 +28,11 @@ const endpointToParsingFunction = {
   currentWeekday: parseCurrentWeekday,
   subjectAssignments: parseSubjectAssignments,
   personalDetails: parsePersonalDetails,
+  registrationFields: parseRegistrationFields,
 } satisfies {
-  [K in MyEdParsingRoute | MyEdRestEndpoint]: (args: ParserFunctionArguments<K>) => any;
+  [K in MyEdParsingRoute | MyEdRestEndpoint]: (
+    args: ParserFunctionArguments<K>
+  ) => any;
 };
 const processResponse = async (response: Response, value: FlatRouteStep) => {
   return value.expect === "html"
@@ -39,21 +43,27 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   endpoint: Endpoint,
   ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
-  const cookieStore = new MyEdCookieStore();
+  const route = ENDPOINTS[endpoint];
+  console.log(route);
+  let authParameters, studentId;
+  if (route.requiresAuth) {
+    const cookieStore = new MyEdCookieStore();
 
-  const authCookies = getAuthCookies(cookieStore);
+    const authCookies = getAuthCookies(cookieStore);
 
-  const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
-  if (!session) return;
-  const { payload: parsedSession } = jose.UnsecuredJWT.decode<{
-    session: string;
-    studentID: string;
-  }>(session);
-
-  const requestGroup = `${endpoint}-${Date.now()}`;
-  const queue=clientQueueManager.getQueue(session);
+    const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
+    if (!session) return;
+    const { payload: parsedSession } = jose.UnsecuredJWT.decode<{
+      session: string;
+      studentID: string;
+    }>(session);
+    studentId = parsedSession.studentID;
+    const requestGroup = `${endpoint}-${Date.now()}`;
+    const queue = clientQueueManager.getQueue(session);
+    authParameters = { queue, authCookies, requestGroup };
+  }
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
-  const steps = ENDPOINTS[endpoint](parsedSession.studentID, ...rest); //!
+  const steps = route(studentId, ...rest); //!
   try {
     for (const step of steps) {
       const isLastRequest = step.index === steps.length - 1;
@@ -62,10 +72,9 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       const response = await sendMyEdRequest({
         //@ts-expect-error FIX THIS
         step: value,
-        queue,
-        authCookies,
-        requestGroup,
+
         isLastRequest,
+        ...authParameters,
       });
       const responses = [];
       const isArray = Array.isArray(response) && Array.isArray(value);
@@ -80,11 +89,13 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       }
       steps.addResponse(isArray ? responses : responses[0]);
     }
-    return endpointToParsingFunction[endpoint](
-      {params:rest[0] as unknown as any,responses:steps.responses as any,metadata:steps.metadata}
-    ) as MyEdEndpointResponse<Endpoint>;
+    return endpointToParsingFunction[endpoint]({
+      params: rest[0] as unknown as any,
+      responses: steps.responses as any,
+      metadata: steps.metadata,
+    }) as MyEdEndpointResponse<Endpoint>;
   } catch (e) {
-    queue.ensureUnlock();
+    authParameters?.queue?.ensureUnlock();
     console.error(e);
     return undefined;
   }

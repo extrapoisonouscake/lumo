@@ -26,8 +26,8 @@ import {
 const unauthenticatedPathnames = ["/login", "/register"];
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
-
-  const isAuthenticated = isUserAuthenticated(request.cookies);
+  const { cookies } = request;
+  const isAuthenticated = isUserAuthenticated(cookies);
   const { pathname } = request.nextUrl;
   const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
     pathname.startsWith(path)
@@ -38,12 +38,12 @@ export async function middleware(request: NextRequest) {
     } else {
       if (
         !isValidSession(
-          request.cookies.get(getFullCookieName(MYED_SESSION_COOKIE_NAME))
+          cookies.get(getFullCookieName(MYED_SESSION_COOKIE_NAME))
         )
       ) {
         const formData = {
-          username: request.cookies.get(getFullCookieName("username"))?.value,
-          password: request.cookies.get(getFullCookieName("password"))?.value,
+          username: cookies.get(getFullCookieName("username"))?.value,
+          password: cookies.get(getFullCookieName("password"))?.value,
         } as LoginSchema;
 
         try {

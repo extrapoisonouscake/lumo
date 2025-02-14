@@ -1,5 +1,5 @@
 import { SelectProps } from "@radix-ui/react-select";
-import { Control, FieldValues } from "react-hook-form";
+import { FieldValues, useFormContext } from "react-hook-form";
 import {
   FormControl,
   FormDescription,
@@ -17,7 +17,6 @@ import {
 } from "./select";
 
 export function FormSelect<T extends FieldValues>({
-  control,
   name,
   label,
   options,
@@ -26,14 +25,14 @@ export function FormSelect<T extends FieldValues>({
   onChange,
   ...props
 }: {
-  control: Control<T>;
   name: /*Path<T>*/ any;
   label: string;
   options: { label: string; value: string }[];
-  placeholder: string;
+  placeholder?: string;
   description?: string;
   onChange?: () => void;
 } & SelectProps) {
+  const { control } = useFormContext();
   return (
     <FormField
       control={control}
@@ -41,7 +40,7 @@ export function FormSelect<T extends FieldValues>({
       render={({ field }) => {
         return (
           <FormItem>
-            <FormLabel>{label}</FormLabel>
+            <FormLabel required={props.required}>{label}</FormLabel>
             <Select
               onValueChange={function (e) {
                 field.onChange(e);

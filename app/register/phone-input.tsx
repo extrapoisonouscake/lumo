@@ -7,6 +7,7 @@ export function PhoneInput() {
   });
   return (
     <FormInput
+      required
       placeholder="(000) 000-0000"
       name="fields.phone"
       autoComplete="tel"

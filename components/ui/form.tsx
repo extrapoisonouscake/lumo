@@ -102,20 +102,24 @@ const FormItem = React.forwardRef<
   );
 });
 FormItem.displayName = "FormItem";
-
+type FormLabelProps = React.ComponentPropsWithoutRef<
+  typeof LabelPrimitive.Root
+> & { required?: boolean };
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof LabelPrimitive.Root>
->(({ className, ...props }, ref) => {
+  FormLabelProps
+>(({ className, children, required, ...props }, ref) => {
   const { error, formItemId } = useFormField();
-
   return (
     <Label
       ref={ref}
       className={cn(error && "text-destructive", className)}
       htmlFor={formItemId}
       {...props}
-    />
+    >
+      {children}
+      {required && <span className="text-destructive"> *</span>}
+    </Label>
   );
 });
 FormLabel.displayName = "FormLabel";
