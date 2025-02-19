@@ -57,7 +57,9 @@ export function FormSelect<T extends FieldValues>({
               </FormControl>
               <SelectContent>
                 {options.map(({ value, label }) => (
-                  <SelectItem value={value}>{label}</SelectItem>
+                  <SelectItem value={value} key={value}>
+                    {label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

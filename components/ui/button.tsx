@@ -106,9 +106,11 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : undefined
         }
       >
-        {isLoading ? <Spinner /> : leftIcon}
-        {(!isLoading || shouldShowChildrenOnLoading) && children}
-        {rightIcon}
+        <>
+          {isLoading ? <Spinner /> : leftIcon}
+          {(!isLoading || shouldShowChildrenOnLoading) && children}
+          {rightIcon}
+        </>
       </Comp>
     );
   }
