@@ -29,7 +29,7 @@ export function AnnouncementsAccordions({
             <AccordionTrigger>
               <div className="flex gap-2 items-center">
                 <AppleEmoji value={emoji} />
-                <p>{heading}</p>
+                <p className="font-normal">{heading}</p>
               </div>
             </AccordionTrigger>
             <AccordionContent
