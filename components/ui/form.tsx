@@ -107,40 +107,47 @@ type FormLabelProps = React.ComponentPropsWithoutRef<
 > & { required?: boolean };
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
-  FormLabelProps
->(({ className, children, required, ...props }, ref) => {
-  const { error, formItemId } = useFormField();
-  return (
-    <Label
-      ref={ref}
-      className={cn(error && "text-destructive", className)}
-      htmlFor={formItemId}
-      {...props}
-    >
-      {children}
-      {required && <span className="text-destructive"> *</span>}
-    </Label>
-  );
-});
+  FormLabelProps & { shouldShowError?: boolean }
+>(
+  (
+    { className, children, required, shouldShowError = true, ...props },
+    ref
+  ) => {
+    const { error, formItemId } = useFormField();
+
+    const isShowingError = shouldShowError && !!error;
+    return (
+      <Label
+        ref={ref}
+        className={cn(isShowingError && "text-destructive", className)}
+        htmlFor={formItemId}
+        {...props}
+      >
+        {children}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
+    );
+  }
+);
 FormLabel.displayName = "FormLabel";
 
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot>
->(({ ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof Slot> & { shouldShowError?: boolean }
+>(({ shouldShowError = true, ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } =
     useFormField();
-
+  const isShowingError = shouldShowError && !!error;
   return (
     <Slot
       ref={ref}
       id={formItemId}
       aria-describedby={
-        !error
+        !isShowingError
           ? `${formDescriptionId}`
           : `${formDescriptionId} ${formMessageId}`
       }
-      aria-invalid={!!error}
+      aria-invalid={isShowingError}
       {...props}
     />
   );

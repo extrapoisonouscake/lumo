@@ -1,3 +1,4 @@
+import { passwordZodType } from "@/app/register/password-input";
 import { zodEnum } from "@/types/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { z } from "zod";
@@ -29,7 +30,7 @@ export const allowedRegistrationCountries = Object.values(
   AllowedRegistrationCountries
 );
 export const registrationTypes = Object.values(RegistrationType);
-const registerSchemas = {
+export const registerTypeSchemas = {
   [RegistrationType.guardianForStudent]: z.object({
     firstName: z.string().min(1, { message: "Required." }),
     lastName: z.string().min(1, { message: "Required." }),
@@ -61,9 +62,15 @@ const registerSchemas = {
       return z.NEVER;
     }),
     schoolDistrict: z.string().min(1, { message: "Required." }),
+    email: z.string().min(1, { message: "Required." }).email({
+      message: "Invalid email address.",
+    }),
+    password: passwordZodType,
+    securityQuestionType: z.string().min(1, { message: "Required." }),
+    securityQuestionAnswer: z.string().min(1, { message: "Required." }),
   }),
 };
-type RegisterSchemas = typeof registerSchemas;
+type RegisterSchemas = typeof registerTypeSchemas;
 export type RegisterFieldsByType = {
   [Type in keyof RegisterSchemas]: z.infer<RegisterSchemas[Type]>;
 };
@@ -79,7 +86,7 @@ export const registerSchema = z
     const { type, fields } = data;
 
     // Get the schema for the given type from the map
-    const schemaForType = registerSchemas[type];
+    const schemaForType = registerTypeSchemas[type];
 
     // If schema for type is found, validate the `fields`
     if (schemaForType) {
@@ -104,4 +111,8 @@ export enum registrationInternalFields {
   postalCode = "relPsnAdrPhys_adrPostalCode",
   phone = "psnPhone01",
   schoolDistrict = "psnFieldC025",
+  email = "relUsrPsnOid_psnEmail01",
+  password = "usrPw",
+  securityQuestionType = "usrPwdRcQ",
+  securityQuestionAnswer = "usrPwdRcA",
 }

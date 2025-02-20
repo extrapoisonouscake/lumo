@@ -32,7 +32,7 @@ export function FormSelect<T extends FieldValues>({
   description?: string;
   onChange?: () => void;
 } & SelectProps) {
-  const { control } = useFormContext();
+  const { control, trigger, clearErrors } = useFormContext();
   return (
     <FormField
       control={control}
@@ -42,9 +42,14 @@ export function FormSelect<T extends FieldValues>({
           <FormItem>
             <FormLabel required={props.required}>{label}</FormLabel>
             <Select
-              onValueChange={function (e) {
+              onValueChange={async function (e) {
                 field.onChange(e);
+
                 onChange?.();
+                const valid = await trigger(name);
+                if (valid) {
+                  clearErrors(name);
+                }
               }}
               defaultValue={field.value}
               {...props}

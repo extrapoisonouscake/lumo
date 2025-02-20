@@ -48,9 +48,11 @@ export function AddressAutocompleteInput({
         city = short_name;
       }
     }
-    form.setValue("fields.city", city);
-    form.setValue("fields.region", region);
-    form.setValue("fields.postalCode", postalCode);
+    for (const [key, value] of Object.entries({ city, region, postalCode })) {
+      const fullKey = `fields.${key}` as any;
+      form.setValue(fullKey, value);
+      form.trigger(fullKey);
+    }
   };
   useEffect(() => {
     if (!placeAutocomplete) return;
