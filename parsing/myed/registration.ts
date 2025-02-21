@@ -1,4 +1,4 @@
-import { registrationInternalFields } from "@/lib/auth/public";
+import { RegistrationInternalFields } from "@/lib/auth/public";
 import { ParserFunctionArguments } from "./types";
 
 export function parseRegistrationFields({
@@ -9,10 +9,10 @@ export function parseRegistrationFields({
       .map((_, el) => $(el).val())
       .toArray();
   const schoolDistrictOptions = getSelectOptions(
-    registrationInternalFields.schoolDistrict
+    RegistrationInternalFields.schoolDistrict
   );
   const securityQuestionOptions = getSelectOptions(
-    registrationInternalFields.securityQuestionType
+    RegistrationInternalFields.securityQuestionType
   );
   return { schoolDistrictOptions, securityQuestionOptions };
 }

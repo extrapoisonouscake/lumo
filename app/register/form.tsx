@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
+import { FormPasswordInput } from "@/components/ui/form-password-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { cn } from "@/helpers/cn";
@@ -16,7 +17,6 @@ import {
   registerTypeSchemas,
   RegistrationType,
 } from "@/lib/auth/public";
-import { useSearchParams } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
@@ -191,7 +191,7 @@ const getFields: <T extends RegistrationType>({
                 name="fields.country"
                 label="Country"
                 options={COUNTRIES_OPTIONS}
-                placeholder="Click to choose..."
+                placeholder="Click to select..."
                 onChange={() => {
                   for (const name of [
                     "address",
@@ -229,7 +229,7 @@ const getFields: <T extends RegistrationType>({
                 required
                 name="fields.securityQuestionType"
                 label="Security Question"
-                placeholder="Click to choose..."
+                placeholder="Click to select..."
                 options={securityQuestionOptions.map((option) => ({
                   value: option,
                   label: option,
@@ -240,7 +240,7 @@ const getFields: <T extends RegistrationType>({
           {
             name: "securityQuestionAnswer",
             node: (
-              <FormInput
+              <FormPasswordInput
                 required
                 name="fields.securityQuestionAnswer"
                 label="Security Answer"
@@ -318,7 +318,7 @@ const getFields: <T extends RegistrationType>({
             required
             name="fields.schoolDistrict"
             label="School District"
-            placeholder="Click to choose..."
+            placeholder="Click to select..."
             options={schoolDistricts.map((district) => ({
               value: district,
               label: district,
@@ -332,7 +332,7 @@ const getFields: <T extends RegistrationType>({
   }
 };
 const REGISTRATION_TYPES_OPTIONS = [
-  { value: RegistrationType.guardianForStudent, label: "Guardian for Student" },
+  { value: RegistrationType.guardianForStudent, label: "Student" },
 ];
 interface RegistrationFormProps {
   schoolDistricts: string[];
@@ -356,11 +356,18 @@ export function RegistrationForm({
     },
   });
 
-  const searchParams = useSearchParams();
-  const errorMessage = searchParams.get("error");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   async function onSubmit(data: RegisterSchema) {
-    await register(data);
-    form.reset();
+    if (errorMessage) {
+      setErrorMessage(null);
+    }
+    const response = await register(data);
+    if (!response?.data?.success) {
+      setErrorMessage(
+        response?.data?.message ||
+          "An unexpected error occurred. Try again later."
+      );
+    }
   }
   const type = form.watch("type");
   //@ts-expect-error

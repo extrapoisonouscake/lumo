@@ -101,7 +101,7 @@ export const registerSchema = z
     return true;
   });
 export type RegisterSchema = z.infer<typeof registerSchema>;
-export enum registrationInternalFields {
+export enum RegistrationInternalFields {
   firstName = "psnNameFirst",
   lastName = "psnNameLast",
   streetAddress = "relPsnAdrPhys_adrAddress01",

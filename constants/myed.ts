@@ -12,7 +12,9 @@ export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   "ApplicationGatewayAffinityCORS",
   "deploymentId",
   "ApplicationGatewayAffinity",
-];
+] as const;
+export type MyEdAuthenticationCookiesName =
+  (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number];
 export const MYED_DATE_FORMAT = "YYYY-MM-DD";
 export const parseHTMLToken = ($: cheerio.CheerioAPI) =>
   $(`input[name="${MYED_HTML_TOKEN_INPUT_NAME}"]`).first().val() as string;

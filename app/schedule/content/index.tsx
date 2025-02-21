@@ -1,4 +1,4 @@
-import { ErrorCard } from "@/components/misc/error-card";
+import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
@@ -44,7 +44,7 @@ const isDayJSObjectBetweenDates = (
 ) => dateObject.isBetween(date1, date2, "date", "[]");
 const visualizableErrors: Record<
   string,
-  ({ day }: { day: string | undefined }) => { message: string; emoji: string }
+  ({ day }: { day: string | undefined }) => ErrorCardProps
 > = {
   "School is not in session on that date.": ({ day }) => {
     const dateObject = locallyTimezonedDayJS(day);
@@ -68,7 +68,7 @@ const visualizableErrors: Record<
 
       message = `No school ${messagePortion}.`;
     }
-    return { message, emoji };
+    return { children: message, emoji };
   },
 };
 interface Props {
@@ -90,7 +90,7 @@ export async function ScheduleContent({ day }: Props) {
 
   const hasKnownError = data && "knownError" in data;
   if (!data || hasKnownError) {
-    let errorCardProps: ComponentProps<typeof ErrorCard> = {};
+    let errorCardProps: ErrorCardProps = {};
     if (hasKnownError) {
       const visualData = visualizableErrors[data.knownError]?.({ day });
       if (visualData) {

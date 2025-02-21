@@ -1,13 +1,10 @@
-import {
-  COOKIE_MAX_AGE,
-  SESSION_TTL,
-  shouldSecureCookies,
-} from "@/constants/auth";
+import { SESSION_TTL_IN_SECONDS } from "@/constants/auth";
 import {
   FlatRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
   MYED_SESSION_COOKIE_NAME,
+  MyEdAuthenticationCookiesName,
   parseHTMLToken,
 } from "@/constants/myed";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
@@ -17,10 +14,14 @@ import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
 
+import {
+  USER_SETTINGS_COOKIE_PREFIX,
+  USER_SETTINGS_KEYS,
+} from "@/constants/core";
+import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
-import * as jose from "jose";
-import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import "server-only";
 import { LoginError } from "./public";
 
@@ -36,32 +37,15 @@ export async function performLogin(
   }
   const { cookies: cookiesToAdd, studentID } =
     await fetchAuthCookiesAndStudentID(username, password);
-  for (const entry of cookiesToAdd) {
-    const name = entry[0];
-    let value = entry[1];
-    if (name === MYED_SESSION_COOKIE_NAME) {
-      value = new jose.UnsecuredJWT({ session: value, studentID })
-        .setIssuedAt()
-        .setExpirationTime(SESSION_TTL)
-        .encode();
-    }
-    cookieStore.set(name, value || "", {
-      secure: shouldSecureCookies,
-      httpOnly: true,
-      maxAge: COOKIE_MAX_AGE,
+  for (const [name, value] of Object.entries(cookiesToAdd)) {
+    cookieStore.set(name, value, {
+      maxAge: SESSION_TTL_IN_SECONDS,
     });
   }
+  cookieStore.set("studentId", studentID);
   if (formData) {
-    cookieStore.set("username", username, {
-      secure: shouldSecureCookies,
-      maxAge: COOKIE_MAX_AGE,
-      httpOnly: true,
-    });
-    cookieStore.set("password", password, {
-      secure: shouldSecureCookies,
-      maxAge: COOKIE_MAX_AGE,
-      httpOnly: true,
-    });
+    cookieStore.set("username", username);
+    cookieStore.set("password", password);
   }
 }
 const loginDefaultParams = {
@@ -69,10 +53,7 @@ const loginDefaultParams = {
   deploymentId: "aspen",
   mobile: "true",
 };
-export async function fetchAuthCookiesAndStudentID(
-  username: string,
-  password: string
-) {
+export async function getFreshAuthCookiesAndHTMLToken() {
   const loginTokenResponse = await fetchMyEd("logon.do", {
     credentials: "include",
   });
@@ -84,12 +65,28 @@ export async function fetchAuthCookiesAndStudentID(
 
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
 
-  const cookiesToAdd = cookiesPairs
-    .map((pair) => pair.split(";")[0].split("="))
-    .filter(([name]) => MYED_AUTHENTICATION_COOKIES_NAMES.includes(name));
-  const cookiesString = cookiesToAdd
-    .map(([name, value]) => `${name}=${value}`)
-    .join("; ");
+  const cookiesToAdd = Object.fromEntries(
+    cookiesPairs
+      .map((pair) => pair.split(";")[0].split("="))
+      .filter(([name]) =>
+        MYED_AUTHENTICATION_COOKIES_NAMES.includes(
+          name as MyEdAuthenticationCookiesName
+        )
+      )
+  );
+  return {
+    cookies: cookiesToAdd as Record<string, string>,
+    token: loginToken,
+  };
+}
+export async function fetchAuthCookiesAndStudentID(
+  username: string,
+  password: string
+) {
+  const { cookies, token: loginToken } =
+    await getFreshAuthCookiesAndHTMLToken();
+  console.log("cookies", cookies, loginToken);
+  const cookiesString = convertObjectToCookieString(cookies);
 
   const loginParams = new URLSearchParams({
     ...loginDefaultParams,
@@ -108,6 +105,7 @@ export async function fetchAuthCookiesAndStudentID(
   });
   const loginHtml = await loginResponse.text();
   const errorMessage = parseLoginErrorMessage(loginHtml);
+  console.log("errorMessage", errorMessage);
   if (errorMessage) throw new Error(errorMessage);
 
   const studentsData = await fetchMyEd<
@@ -119,7 +117,7 @@ export async function fetchAuthCookiesAndStudentID(
   const studentID = studentsData[0].studentOid;
 
   return {
-    cookies: cookiesToAdd,
+    cookies,
     studentID,
   };
 }
@@ -143,23 +141,26 @@ const logoutStep: FlatRouteStep = {
   expect: "html",
 };
 export async function deleteSession(externalStore?: PlainCookieStore) {
-  const cookieStore = new MyEdCookieStore(externalStore);
+  const cookiePlainStore = externalStore ?? cookies();
+  const cookieStore = new MyEdCookieStore(cookiePlainStore);
 
   const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
   if (session) {
-    await sendMyEdRequest({
-      step: logoutStep,
-      session,
-      authCookies: getAuthCookies(cookieStore),
-    }); //TODO: replace with after()
+    try {
+      await sendMyEdRequest({
+        step: logoutStep,
+        session,
+        authCookies: getAuthCookies(cookieStore),
+      }); //TODO: replace with after()
+    } catch {}
   }
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
+  cookieStore.delete("studentId");
   cookieStore.delete("username");
   cookieStore.delete("password");
-}
-export async function deleteSessionAndLogOut(cookieStore?: PlainCookieStore) {
-  await deleteSession(cookieStore);
-  redirect("/login");
+  for (const setting of USER_SETTINGS_KEYS) {
+    cookiePlainStore.delete(`${USER_SETTINGS_COOKIE_PREFIX}.${setting}`);
+  }
 }

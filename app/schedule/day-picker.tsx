@@ -14,9 +14,8 @@ function ChevronButton(props: ButtonProps) {
     <Button
       variant="outline"
       className="size-10 bg-transparent p-0"
-      isManualLoading
       {...props}
-disabled={false}
+      disabled={false}
     />
   );
 }

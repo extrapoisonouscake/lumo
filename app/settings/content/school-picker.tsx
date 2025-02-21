@@ -87,11 +87,11 @@ export function SchoolPicker({
         <FormField
           control={form.control}
           name="school"
-          render={({ field, formState }) => {
+          render={({ field: { value }, formState }) => {
             let buttonContent = <>Click to select...</>;
-            if (field.value) {
+            if (value) {
               const schoolData = schoolsVisualDataArray.find(
-                (school) => school.id === field.value
+                (school) => school.id === value
               );
               if (schoolData) {
                 buttonContent = (
@@ -117,7 +117,10 @@ export function SchoolPicker({
                       variant="outline"
                       role="combobox"
                       aria-expanded={isOpen}
-                      className="justify-between max-w-[300px] font-normal"
+                      className={cn(
+                        "justify-between max-w-[300px] font-normal",
+                        { "text-muted-foreground": !value }
+                      )}
                     >
                       {buttonContent}
                       <ChevronsUpDown className="opacity-50" />
@@ -155,9 +158,7 @@ export function SchoolPicker({
                               <Check
                                 className={cn(
                                   "ml-auto",
-                                  field.value === id
-                                    ? "opacity-100"
-                                    : "opacity-0"
+                                  value === id ? "opacity-100" : "opacity-0"
                                 )}
                               />
                             </CommandItem>

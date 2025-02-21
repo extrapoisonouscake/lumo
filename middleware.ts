@@ -1,15 +1,6 @@
-import { decodeJwt, UnsecuredJWT } from "jose";
-import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { NextRequest, NextResponse } from "next/server";
-import {
-  COOKIE_MAX_AGE,
-  SESSION_TTL,
-  shouldSecureCookies,
-} from "./constants/auth";
-import {
-  MYED_AUTHENTICATION_COOKIES_NAMES,
-  MYED_SESSION_COOKIE_NAME,
-} from "./constants/myed";
+import { SESSION_TTL_IN_SECONDS } from "./constants/auth";
+import { MYED_SESSION_COOKIE_NAME } from "./constants/myed";
 import { getFullCookieName } from "./helpers/getFullCookieName";
 import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
@@ -36,42 +27,30 @@ export async function middleware(request: NextRequest) {
     if (isOnUnauthenticatedPage) {
       return Response.redirect(new URL("/", request.url));
     } else {
+      const cookieWritableStore = new MyEdCookieStore(response.cookies);
+      const username = cookies.get(getFullCookieName("username"))?.value;
+      const password = cookies.get(getFullCookieName("password"))?.value;
+
       if (
-        !isValidSession(
-          cookies.get(getFullCookieName(MYED_SESSION_COOKIE_NAME))
-        )
+        !cookies.has(getFullCookieName(MYED_SESSION_COOKIE_NAME)) &&
+        username &&
+        password
       ) {
         const formData = {
-          username: cookies.get(getFullCookieName("username"))?.value,
-          password: cookies.get(getFullCookieName("password"))?.value,
+          username,
+          password,
         } as LoginSchema;
 
         try {
           loginSchema.parse(formData);
-          const cookieStore = new MyEdCookieStore(response.cookies);
 
-          for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
-            cookieStore.delete(name);
-          }
-
-          const { cookies: cookiesToAdd, studentID } =
-            await fetchAuthCookiesAndStudentID(
-              formData.username,
-              formData.password
-            );
-          for (const entry of cookiesToAdd) {
-            const name = entry[0];
-            let value = entry[1];
-            if (name === MYED_SESSION_COOKIE_NAME) {
-              value = new UnsecuredJWT({ session: value, studentID })
-                .setIssuedAt()
-                .setExpirationTime(SESSION_TTL)
-                .encode();
-            }
-            cookieStore.set(name, value || "", {
-              secure: shouldSecureCookies,
-              httpOnly: true,
-              maxAge: COOKIE_MAX_AGE,
+          const { cookies: cookiesToAdd } = await fetchAuthCookiesAndStudentID(
+            formData.username,
+            formData.password
+          );
+          for (const [name, value] of Object.entries(cookiesToAdd)) {
+            cookieWritableStore.set(name, value || "", {
+              maxAge: SESSION_TTL_IN_SECONDS,
             });
           }
         } catch (e: any) {
@@ -96,16 +75,7 @@ export async function middleware(request: NextRequest) {
   }
   return response;
 }
-function isValidSession(session?: RequestCookie) {
-  if (!session) return false;
-  try {
-    const decodedToken = decodeJwt(session.value);
 
-    return !decodedToken.exp || (decodedToken.exp - 10) * 1000 > Date.now();
-  } catch {
-    return false;
-  }
-}
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|public).*)"],
 };

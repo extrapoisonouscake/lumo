@@ -42,7 +42,6 @@ export interface ButtonProps
   shouldShowChildrenOnLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
-  isManualLoading?: boolean;
 }
 export const Spinner = ({ className }: { className?: string }) => (
   <svg
@@ -75,27 +74,24 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       leftIcon,
       rightIcon,
       disabled,
-      isManualLoading,
       ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
     const [isLoading, setIsLoading] = React.useState(externalIsLoading);
-
+    const hasExternalIsLoading = typeof externalIsLoading === "boolean";
+    const derivedIsLoading = hasExternalIsLoading
+      ? externalIsLoading
+      : isLoading;
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        disabled={
-          disabled ||
-          (typeof externalIsLoading === "boolean"
-            ? externalIsLoading
-            : isLoading)
-        }
+        disabled={disabled || derivedIsLoading}
         {...props}
         onClick={
-          isManualLoading
+          hasExternalIsLoading
             ? onClick
             : onClick
             ? async (e) => {
@@ -109,8 +105,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         }
       >
         <>
-          {isLoading ? <Spinner /> : leftIcon}
-          {(!isLoading || shouldShowChildrenOnLoading) && children}
+          {derivedIsLoading ? <Spinner /> : leftIcon}
+          {(!derivedIsLoading || shouldShowChildrenOnLoading) && children}
           {rightIcon}
         </>
       </Comp>

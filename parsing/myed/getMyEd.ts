@@ -1,7 +1,6 @@
 import {
   ENDPOINTS,
   FlatRouteStep,
-  MYED_SESSION_COOKIE_NAME,
   MyEdEndpoint,
   MyEdParsingRoute,
   MyEdRestEndpoint,
@@ -10,7 +9,6 @@ import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
-import * as jose from "jose";
 import { cache } from "react";
 import "server-only";
 import { parseSubjectAssignments } from "./assignments";
@@ -49,18 +47,14 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     const cookieStore = new MyEdCookieStore();
 
     const authCookies = getAuthCookies(cookieStore);
-
-    const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
-    if (!session) return;
-    const { payload: parsedSession } = jose.UnsecuredJWT.decode<{
-      session: string;
-      studentID: string;
-    }>(session);
-    studentId = parsedSession.studentID;
+    studentId = cookieStore.get("studentId")?.value;
+    const session = authCookies.JSESSIONID;
+    if (!session || !studentId) return;
     const requestGroup = `${endpoint}-${Date.now()}`;
     const queue = clientQueueManager.getQueue(session);
     authParameters = { queue, authCookies, requestGroup };
   }
+
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
   const steps = route(studentId, ...rest); //!
   try {
