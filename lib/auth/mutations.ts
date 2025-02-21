@@ -145,6 +145,12 @@ export const resetPassword = actionClient
       username: parsedInput.username,
       email: parsedInput.email,
       [MYED_HTML_TOKEN_INPUT_NAME]: token,
+      ...(parsedInput.securityQuestion
+        ? {
+            question: parsedInput.securityQuestion,
+            answer: parsedInput.securityAnswer,
+          }
+        : {}),
     });
 
     const response = await fetchMyEd("passwordRecovery.do", {
@@ -175,9 +181,13 @@ export const resetPassword = actionClient
           resetPasswordModifiedErrorMessages[errorMessage] ?? errorMessage,
       };
     }
-    const securityQuestion = $(
-      ".logonDetailContainer:nth-child(2) tr:nth-child(5) label"
-    ).text();
+    const bodyOnLoadAttribute = $("body").attr("onLoad");
+    let securityQuestion;
+    if (!bodyOnLoadAttribute.includes("message.email.passwordEmailSent")) {
+      securityQuestion = $(
+        ".logonDetailContainer:nth-child(2) tr:nth-child(5) label"
+      ).text();
+    }
     return {
       success: true,
       securityQuestion,

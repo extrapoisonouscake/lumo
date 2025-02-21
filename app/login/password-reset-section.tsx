@@ -14,6 +14,7 @@ import { resetPassword } from "@/lib/auth/mutations";
 import { PasswordResetSchema, passwordResetSchema } from "@/lib/auth/public";
 import { isActionResponseSuccess } from "@/lib/helpers";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function PasswordResetSection() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,7 +27,14 @@ export function PasswordResetSection() {
     }
     const response = await resetPassword(data);
     if (isActionResponseSuccess(response)) {
-      setSecurityQuestion(response?.data?.securityQuestion ?? null);
+      const securityQuestion = response?.data?.securityQuestion; //fix types
+      if (securityQuestion) {
+        setSecurityQuestion(securityQuestion);
+      } else {
+        toast("A password reset link has been sent to your email.");
+        setIsOpen(false);
+        form.reset();
+      }
     } else {
       setErrorMessage(response?.data?.message ?? "An unknown error occurred.");
     }
