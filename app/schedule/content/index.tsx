@@ -37,16 +37,18 @@ const getSpringBreakDates = (year: number) => {
   const secondFriday = firstFriday.add(1, "week");
   return [thirdToLastMonday, secondFriday] as const;
 };
+
 const isDayJSObjectBetweenDates = (
   dateObject: Dayjs,
   date1: Dayjs,
   date2: Dayjs
 ) => dateObject.isBetween(date1, date2, "date", "[]");
+const SCHOOL_NOT_IN_SESSION_MESSAGE="School is not in session on that date."
 const visualizableErrors: Record<
   string,
   ({ day }: { day: string | undefined }) => ErrorCardProps
 > = {
-  "School is not in session on that date.": ({ day }) => {
+ [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ day }) => {
     const dateObject = locallyTimezonedDayJS(day);
     let message,
       emoji = "😴";
@@ -78,14 +80,22 @@ const getActualWeekdayIndex = (day: Props["day"]) =>
   (day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day();
 export async function ScheduleContent({ day }: Props) {
   const params: MyEdEndpointsParams<"schedule"> = {};
+let currentDayObject=dayjs()
   if (day) {
-    params.day = locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT).format(
+currentDayObject=locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT)
+    params.day = currentDayObject.format(
       MYED_DATE_FORMAT
     );
   }
+let dataPromise
+if([0,6].includes(currentDayObject.day)){
+dataPromise=Promise.resolve({knownError:" "School is not in session on that date."})
+}else{
+dataPromise=getMyEd("schedule", params)
+}
   const [userSettings, data] = await Promise.all([
     getUserSettings(),
-    getMyEd("schedule", params),
+    dataPromise,
   ]);
 
   const hasKnownError = data && "knownError" in data;
