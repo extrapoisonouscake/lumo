@@ -74,11 +74,17 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       if (isArray) {
         for (let i = 0; i < response.length; i++) {
           const r = response[i];
-          responses.push(await processResponse(r, value[i]));
+//optimize
+const processedData=await processResponse(r, value[i])
+if(!processedData) return
+          responses.push(processedData);
         }
       } else {
+//@ts-expect-error jic
+const processedData=await processResponse(response, value as FlatRouteStep)
+if(!processedData) return
         //@ts-expect-error FIX THIS
-        responses.push(await processResponse(response, value as FlatRouteStep));
+        responses.push(processedData);
       }
       steps.addResponse(isArray ? responses : responses[0]);
     }
