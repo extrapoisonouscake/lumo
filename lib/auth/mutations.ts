@@ -183,7 +183,7 @@ export const resetPassword = actionClient
     }
     const bodyOnLoadAttribute = $("body").attr("onLoad");
     let securityQuestion;
-    if (!bodyOnLoadAttribute.includes("message.email.passwordEmailSent")) {
+    if (!bodyOnLoadAttribute?.includes("message.email.passwordEmailSent")) {
       securityQuestion = $(
         ".logonDetailContainer:nth-child(2) tr:nth-child(5) label"
       ).text();
