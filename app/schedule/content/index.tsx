@@ -1,7 +1,7 @@
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
-import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
+import { locallyTimezonedDayJS, dayjs,timezonedDayJS } from "@/instances/dayjs";
 import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
