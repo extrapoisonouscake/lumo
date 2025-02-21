@@ -117,7 +117,7 @@ export function SchoolPicker({
                       variant="outline"
                       role="combobox"
                       aria-expanded={isOpen}
-                      className="justify-between max-w-[300px]"
+                      className="justify-between max-w-[300px] font-normal"
                     >
                       {buttonContent}
                       <ChevronsUpDown className="opacity-50" />

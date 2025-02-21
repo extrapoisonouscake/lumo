@@ -193,7 +193,6 @@ const getFields: <T extends RegistrationType>({
                 options={COUNTRIES_OPTIONS}
                 placeholder="Click to choose..."
                 onChange={() => {
-                  console.log("CHANGED");
                   for (const name of [
                     "address",
                     "city",
@@ -252,7 +251,6 @@ const getFields: <T extends RegistrationType>({
         ],
       };
       if (country) {
-        console.log({ country });
         const regionFieldData = countrySpecificFieldData["region"][country];
         const postalCodeFieldData =
           countrySpecificFieldData["postalCode"][country];

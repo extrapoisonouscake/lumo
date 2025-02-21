@@ -17,14 +17,16 @@ export function AnnouncementsSectionTable({
 }) {
   const [header, ...contentRows] = rows;
   return (
-    <Table className="[&:*]:p-0 border-t-0 [&_th]:border-t-0">
-      {header&&<TableHeader>
-        <TableRow>
-          {header.map((column) => (
-            <TableHead key={column}>{column}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>}
+    <Table className="[&:*]:p-0">
+      {header && (
+        <TableHeader>
+          <TableRow>
+            {header.map((column) => (
+              <TableHead key={column}>{column}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+      )}
       <TableBody>
         {contentRows.length > 0 ? (
           contentRows.map((row, i) => (
@@ -36,11 +38,18 @@ export function AnnouncementsSectionTable({
           ))
         ) : (
           <TableRow>
-            <TableCell colSpan={header?.length} className="h-24 text-center">
+            <TableCell
+              colSpan={header?.length}
+              className="h-24 text-center border-0"
+            >
               {pdfURL ? (
                 <>
                   Please open{" "}
-                  <a href={pdfURL} className="underline text-blue-500" target="_blank">
+                  <a
+                    href={pdfURL}
+                    className="underline text-blue-500"
+                    target="_blank"
+                  >
                     the original file
                   </a>{" "}
                   to view this content.

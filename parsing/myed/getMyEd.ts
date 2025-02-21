@@ -44,7 +44,6 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
   const route = ENDPOINTS[endpoint];
-  console.log(route);
   let authParameters, studentId;
   if (route.requiresAuth) {
     const cookieStore = new MyEdCookieStore();
