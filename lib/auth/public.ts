@@ -127,7 +127,7 @@ export const passwordResetSchema = z
   })
   .refine(
     (data) => {
-      return !(data.securityQuestion ^ data.securityAnswer)
+      return !(+(data.securityQuestion||'') ^ +(data.securityAnswer||''))
     },
     {
       message: "Both the security question and the security answer must be provided if one is present.",
