@@ -2,9 +2,9 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  Dialog
 } from "@/components/ui/dialog";
 
-import { Dialog } from "@/components/ui/dialog";
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
@@ -20,12 +20,12 @@ export function PasswordResetSection() {
   const [isOpen, setIsOpen] = useState(false);
   const form = useFormValidation(passwordResetSchema);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
+  const [securityQuestion, setSecurityQuestion] = useState<string|null>(null);
   const onSubmit = async (data: PasswordResetSchema) => {
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await resetPassword(data);
+    const response = await resetPassword({...data,securityQuestion:securityQuestion??undefined});
     if (isActionResponseSuccess(response)) {
       const securityQuestion = response?.data?.securityQuestion; //fix types
       if (securityQuestion) {
@@ -33,6 +33,8 @@ export function PasswordResetSection() {
       } else {
         toast("A password reset link has been sent to your email.");
         setIsOpen(false);
+        setErrorMessage(null)
+        setSecurityQuestion(null)
         form.reset();
       }
     } else {
@@ -65,9 +67,11 @@ export function PasswordResetSection() {
             {securityQuestion && (
               <FormInput
                 placeholder="Security Question"
-                name="securityQuestionAnswer"
+                name="securityAnswer"
                 label={securityQuestion}
               />
+              
+              
             )}
             <SubmitButton>Submit</SubmitButton>
           </Form>
