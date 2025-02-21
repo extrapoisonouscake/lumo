@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     default: WEBSITE_TITLE,
     template: `%s | ${WEBSITE_TITLE}`,
   },
+viewport:{maximumScale:1}
 };
 export default async function RootLayout({
   children,
