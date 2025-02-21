@@ -2,7 +2,7 @@ import { convertPathParameterToSubjectName } from "@/app/classes/[...slug]/helpe
 import { Calendar, Home, Settings, Shapes } from "lucide-react";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
-export const WEBSITE_TITLE = "MyEdBC";
+export const WEBSITE_TITLE = "MyEd+";
 interface WebsitePage {
   name: string;
   icon?: any /*//!*/;

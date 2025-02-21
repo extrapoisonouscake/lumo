@@ -55,7 +55,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.53.1",
     "server-only": "^0.0.1",
-    "sonner": "^1.7.2",
+    "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "unstructured-client": "^0.18.2",

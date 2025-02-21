@@ -116,3 +116,10 @@ export enum RegistrationInternalFields {
   securityQuestionType = "usrPwdRcQ",
   securityQuestionAnswer = "usrPwdRcA",
 }
+export const passwordResetSchema = z.object({
+  username: z.string().min(1, { message: "Required." }),
+  email: z.string().min(1, { message: "Required." }).email({
+    message: "Invalid email address.",
+  }),
+});
+export type PasswordResetSchema = z.infer<typeof passwordResetSchema>;

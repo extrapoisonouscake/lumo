@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
 
 export default function Page() {
@@ -59,9 +60,7 @@ export default function Page() {
             Login
           </SubmitButton>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm text-secondary-foreground">
-              Forgot Password?
-            </p>
+            <PasswordResetSection />
             <Link
               href="/register"
               className="text-sm text-secondary-foreground"

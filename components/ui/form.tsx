@@ -27,7 +27,10 @@ function Form<T extends FieldValues>({
 } & FormProviderProps<T>) {
   return (
     <FormProvider {...props}>
-      <form onSubmit={props.handleSubmit(onSubmit)} className={className}>
+      <form
+        onSubmit={props.handleSubmit(onSubmit)}
+        className={cn("flex flex-col gap-3", className)}
+      >
         {children}
       </form>
     </FormProvider>
