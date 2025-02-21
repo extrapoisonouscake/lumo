@@ -88,7 +88,7 @@ currentDayObject=locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT)
     );
   }
 let dataPromise
-if([0,6].includes(currentDayObject.day)){
+if([0,6].includes(currentDayObject.day())){
 dataPromise=Promise.resolve({knownError:" "School is not in session on that date."})
 }else{
 dataPromise=getMyEd("schedule", params)
