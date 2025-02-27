@@ -66,6 +66,7 @@ export default function Page() {
         />
       )}
       <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
+        <Link href="/slow">Slow Page</Link>
         <Form
           onSubmit={onSubmit}
           {...form}
