@@ -11,7 +11,7 @@ export function ExtendedFormPasswordInput(props: FormPasswordInputProps) {
   const value = watch(props.name);
   return (
     <div className="flex flex-col gap-2">
-      <FormPasswordInput shouldShowErrorMessage={false} required {...props} />
+      <FormPasswordInput shouldShowError={false} required {...props} />
 
       {value && (
         <ul className="text-sm space-y-1">

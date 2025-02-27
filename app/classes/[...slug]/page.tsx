@@ -1,9 +1,8 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
-import { convertPathParameterToSubjectName } from "./helpers";
-import { SubjectAssignmentsTable } from "./table";
 import { SubjectPageContent } from "./content";
+import { convertPathParameterToSubjectName } from "./helpers";
 interface Props {
   params: { slug: [string, string] };
 }
@@ -26,6 +25,10 @@ export default async function Page({ params }: Props) {
   ]);
   if (!data) return <ErrorCard />;
   return (
-    <SubjectPageContent {...data} shouldShowAssignmentScorePercentage={shouldShowAssignmentScorePercentage} shouldHighlightMissingAssignments={shouldHighlightMissingAssignments} />
+    <SubjectPageContent
+      {...data}
+      shouldShowAssignmentScorePercentage={shouldShowAssignmentScorePercentage}
+      shouldHighlightMissingAssignments={shouldHighlightMissingAssignments}
+    />
   );
 }

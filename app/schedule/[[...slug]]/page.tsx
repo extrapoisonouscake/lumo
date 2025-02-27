@@ -1,12 +1,9 @@
 import { PageHeading } from "@/components/layout/page-heading";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { Suspense } from "react";
-import { SCHEDULE_QUERY_DATE_FORMAT } from "./[[...slug]]/constants";
-import {
-  ScheduleContent,
-  ScheduleContentSkeleton,
-} from "./[[...slug]]/content";
-import { ScheduleDayPicker } from "./[[...slug]]/day-picker";
+import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
+import { ScheduleContent, ScheduleContentSkeleton } from "./content";
+import { ScheduleDayPicker } from "./day-picker";
 
 interface Props {
   params: { slug?: [string?] };

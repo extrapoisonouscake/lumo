@@ -4,9 +4,10 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState, useTransition } from "react";
-import { convertQueryDayToDate } from "./helpers";
+import { convertQueryDayToDate } from "../[[...slug]]/helpers";
 const formatDateToStandard = (date: Date | undefined) =>
   timezonedDayJS(date).format("MM-DD-YYYY");
 function ChevronButton(props: ButtonProps) {
@@ -42,18 +43,13 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
     const dateToSet =
       day === formatDateToStandard(new Date()) ? undefined : newDate;
     setDate(dateToSet);
-
-    const updatedSearchParams = new URLSearchParams(
-      currentSearchParams.toString()
-    );
-    if (dateToSet) {
-      updatedSearchParams.set("day", `${day}`);
-    } else {
-      updatedSearchParams.delete("day");
-    }
     setLoadingButtonName(originButton);
     startTransition(() => {
-      router.push(`${pathname}?${updatedSearchParams.toString()}`);
+      router.push(
+        `${pathname}${
+          dateToSet ? `/${day}` : ""
+        }?${currentSearchParams.toString()}`
+      );
     });
   };
   useEffect(() => {

@@ -137,7 +137,7 @@ export async function fetchAuthCookiesAndStudentID(
   const rawErrorMessage = parseAuthGenericErrorMessage($);
   if (rawErrorMessage) {
     const errorMessage =
-      rawErrorMessageToIDMap[rawErrorMessage] ?? rawErrorMessage;
+      rawLoginErrorMessageToIDMap[rawErrorMessage] ?? rawErrorMessage;
     throw new LoginError(errorMessage);
   }
   if (needsPasswordChange($)) {
@@ -160,7 +160,7 @@ export async function fetchStudentID(cookies: AuthCookies) {
   const studentID = studentsData[0].studentOid;
   return studentID;
 }
-const rawErrorMessageToIDMap: Record<string, LoginErrors> = {
+export const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
   "This account has been disabled.": LoginErrors.accountDisabled,
   "Invalid login.": LoginErrors.invalidAuth,
 };

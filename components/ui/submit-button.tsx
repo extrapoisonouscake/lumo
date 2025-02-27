@@ -5,7 +5,6 @@ export function SubmitButton(props: ButtonProps) {
   const {
     formState: { isDirty, errors, isValid, isSubmitting },
   } = useFormContext();
-
   return (
     <Button
       disabled={!isDirty || !isValid}

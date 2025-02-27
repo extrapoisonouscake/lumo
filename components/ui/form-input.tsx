@@ -25,7 +25,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
       currentError =
         context.formState.errors[name]?.message?.toString() || null; //!too complicated??
     }
-
+    console.log(context.formState.errors[name]);
     return (
       <FormField
         control={context.control}

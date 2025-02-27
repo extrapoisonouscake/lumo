@@ -1,33 +1,22 @@
 "use client";
 
-import { Form } from "@/components/ui/form";
-import { FormInput } from "@/components/ui/form-input";
-import { FormPasswordInput } from "@/components/ui/form-password-input";
-import { SubmitButton } from "@/components/ui/submit-button";
 import { AuthCookies } from "@/helpers/getAuthCookies";
-import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { forceLogin, login } from "@/lib/auth/mutations";
-import {
-  loginErrorIDToMessageMap,
-  LoginErrors,
-  loginSchema,
-  LoginSchema,
-} from "@/lib/auth/public";
-import { isActionResponseSuccess } from "@/lib/helpers";
+import { forceLogin } from "@/lib/auth/mutations";
+import { loginSchema } from "@/lib/auth/public";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { ChangePasswordModal } from "./change-password-modal";
+import { LoginForm } from "./login-form";
 import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
 export default function Page() {
   const form = useFormValidation(loginSchema);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { errorMessageNode, errorMessage, setErrorMessage } =
-    useFormErrorMessage();
+
   const queryRegistrationResult = searchParams.get("registration_result") as
     | "success"
     | "pending"
@@ -38,25 +27,7 @@ export default function Page() {
   const [temporaryAuthCookies, setTemporaryAuthCookies] = useState<
     AuthCookies | undefined
   >(undefined);
-  async function onSubmit(data: LoginSchema) {
-    if (errorMessage) {
-      setErrorMessage(null);
-    }
-    const response = await login(data);
 
-    if (!isActionResponseSuccess(response)) {
-      const message = response?.data?.message;
-
-      if (message === LoginErrors.passwordChangeRequired) {
-        setTemporaryAuthCookies(response?.data?.authCookies);
-      } else {
-        setErrorMessage(
-          loginErrorIDToMessageMap[message as LoginErrors] ||
-            "An unexpected error occurred."
-        );
-      }
-    }
-  }
   return (
     <>
       {!!registrationResult && (
@@ -65,18 +36,12 @@ export default function Page() {
           setResult={setRegistrationResult}
         />
       )}
-      <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
-        <Form
-          onSubmit={onSubmit}
-          {...form}
-          className="flex flex-col gap-3 w-full"
-        >
-          {errorMessageNode}
-          <FormInput placeholder="1234567" name="username" label="Username" />
-          <FormPasswordInput name="password" />
-          <SubmitButton isLoading={form.formState.isSubmitting}>
-            Login
-          </SubmitButton>
+      <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto gap-3">
+        <div className="w-full flex flex-col gap-3">
+          <LoginForm
+            setTemporaryAuthCookies={setTemporaryAuthCookies}
+            form={form}
+          />
           <div className="flex items-center justify-between gap-2">
             <PasswordResetSection
               setLoginFormValues={(newUsername) => {
@@ -91,7 +56,7 @@ export default function Page() {
               Register
             </Link>
           </div>
-        </Form>
+        </div>
       </div>
       <ChangePasswordModal
         getCredentials={() => ({
@@ -103,14 +68,16 @@ export default function Page() {
           if (!temporaryAuthCookies) {
             throw new Error("No temporary auth cookies");
           }
-          await forceLogin({
-            authCookies: temporaryAuthCookies,
-            credentials: {
-              username: form.getValues("username"),
-              password: form.getValues("password"),
-            },
-          });
-          router.push("/");
+          form.handleSubmit(async (data) => {
+            await forceLogin({
+              authCookies: temporaryAuthCookies,
+              credentials: {
+                username: data.username,
+                password: data.password,
+              },
+            });
+            router.push("/");
+          })();
         }}
         onClose={() => {
           router.push("/login");

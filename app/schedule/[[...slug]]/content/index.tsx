@@ -1,7 +1,11 @@
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
-import { locallyTimezonedDayJS, dayjs,timezonedDayJS } from "@/instances/dayjs";
+import {
+  dayjs,
+  locallyTimezonedDayJS,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { MyEdEndpointsParams } from "@/types/myed";
@@ -43,12 +47,12 @@ const isDayJSObjectBetweenDates = (
   date1: Dayjs,
   date2: Dayjs
 ) => dateObject.isBetween(date1, date2, "date", "[]");
-const SCHOOL_NOT_IN_SESSION_MESSAGE="School is not in session on that date."
+const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
 const visualizableErrors: Record<
   string,
   ({ day }: { day: string | undefined }) => ErrorCardProps
 > = {
- [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ day }) => {
+  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ day }) => {
     const dateObject = locallyTimezonedDayJS(day);
     let message,
       emoji = "😴";
@@ -80,19 +84,19 @@ const getActualWeekdayIndex = (day: Props["day"]) =>
   (day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day();
 export async function ScheduleContent({ day }: Props) {
   const params: MyEdEndpointsParams<"schedule"> = {};
-let currentDayObject=dayjs()
+  let currentDayObject = dayjs();
   if (day) {
-currentDayObject=locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT)
-    params.day = currentDayObject.format(
-      MYED_DATE_FORMAT
-    );
+    currentDayObject = locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT);
+    params.day = currentDayObject.format(MYED_DATE_FORMAT);
   }
-let dataPromise
-if([0,6].includes(currentDayObject.day())){
-dataPromise=Promise.resolve({knownError:"School is not in session on that date."})
-}else{
-dataPromise=getMyEd("schedule", params)
-}
+  let dataPromise;
+  if ([0, 6].includes(currentDayObject.day())) {
+    dataPromise = Promise.resolve({
+      knownError: "School is not in session on that date.",
+    });
+  } else {
+    dataPromise = getMyEd("schedule", params);
+  }
   const [userSettings, data] = await Promise.all([
     getUserSettings(),
     dataPromise,

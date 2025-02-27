@@ -39,7 +39,7 @@ export function PasswordResetSection({
       if (securityQuestion) {
         setSecurityQuestion(securityQuestion);
       } else {
-        toast("A temporary password has been sent to your email.");
+        toast.success("A temporary password has been sent to your email.");
         setIsOpen(false);
         setErrorMessage(null);
         setSecurityQuestion(null);
@@ -81,6 +81,7 @@ export function PasswordResetSection({
             <FormInput
               onChange={() => clearSecurityQuestion()}
               placeholder="student@school.ca"
+              autoComplete="email"
               type="email"
               name="email"
               label="Email"

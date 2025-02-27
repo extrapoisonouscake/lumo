@@ -7,6 +7,11 @@ const colors = fullConfig.theme?.colors;
 const primaryColor = colors?.blue[500];
 export function TopLoader() {
   return (
-    <NextTopLoader shadow={false} color={primaryColor} showSpinner={false} />
+    <NextTopLoader
+      zIndex={40}
+      shadow={false}
+      color={primaryColor}
+      showSpinner={false}
+    />
   );
 }

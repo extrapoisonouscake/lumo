@@ -148,8 +148,9 @@ const getFields: <T extends RegistrationType>({
             name: "type",
             node: (
               <FormSelect
+                required
                 name="type"
-                label="Type"
+                label="Account Type"
                 options={REGISTRATION_TYPES_OPTIONS}
                 placeholder="Select type"
               />

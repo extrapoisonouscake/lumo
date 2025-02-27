@@ -7,6 +7,9 @@ body {
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
 }
+* {
+  scrollbar-gutter: stable both-edges;
+}
 *:not(:focus-visible) {
   outline: none !important;
   outline-width: 0 !important;
@@ -101,8 +104,6 @@ ul {
     @apply bg-background text-foreground;
   }
 }
-
-
 
 @layer base {
   * {

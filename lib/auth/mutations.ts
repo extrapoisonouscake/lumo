@@ -15,9 +15,11 @@ import {
   deleteSession,
   fetchStudentID,
   getFreshAuthCookiesAndHTMLToken,
+  LoginError,
   parseAuthGenericErrorMessage,
   parseHTMLTokenFromResponse,
   performLogin,
+  rawLoginErrorMessageToIDMap,
   setUpLogin,
 } from "./helpers";
 import {
@@ -316,11 +318,19 @@ async function finalizePasswordChange({
     password: "",
     [MYED_HTML_TOKEN_INPUT_NAME]: htmlToken,
   });
-  await fetchMyEd("logon.do", {
+  const response = await fetchMyEd("logon.do", {
     method: "POST",
     headers: {
       Cookie: convertObjectToCookieString(authCookies),
     },
     body: params,
   });
+  const responseHTML = await response.text();
+  const $ = cheerio.load(responseHTML);
+  const rawErrorMessage = parseAuthGenericErrorMessage($);
+  if (rawErrorMessage) {
+    const errorMessage =
+      rawLoginErrorMessageToIDMap[rawErrorMessage] ?? rawErrorMessage;
+    throw new LoginError(errorMessage);
+  }
 }

@@ -25,5 +25,5 @@ export function isActionResponseSuccess<
       >
     | undefined
 ) {
-  return response?.data?.success;
+  return response ? response.data?.success : true;
 }

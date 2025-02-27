@@ -6,10 +6,14 @@ export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  rightIconContainerProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, leftIcon, rightIcon, ...props }, ref) => {
+  (
+    { className, type, leftIcon, rightIcon, rightIconContainerProps, ...props },
+    ref
+  ) => {
     return (
       <div className="relative">
         {leftIcon && (
@@ -27,7 +31,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {rightIcon && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+          <div
+            {...rightIconContainerProps}
+            className={cn(
+              "absolute rounded-lg right-[1px] px-3 top-[1px] bottom-[1px] h-[calc(100%-2px)] flex items-center justify-center bg-background",
+              rightIconContainerProps?.className
+            )}
+          >
             {rightIcon}
           </div>
         )}

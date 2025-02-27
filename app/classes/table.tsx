@@ -27,8 +27,8 @@ import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
 import { renderTableCell } from "@/helpers/tables";
 import { Subject } from "@/types/school";
-import { useRouter } from "next/navigation";
 import { Router } from "next/router";
+import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 
 const columnHelper = createColumnHelper<Subject>();
@@ -88,14 +88,14 @@ const columnsSkeletons = makeTableColumnsSkeletons(columns, {
 const mockSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
-    ({
-      gpa: 0,
-      teachers: [],
-      name: "",
-      room: "",
-      id: "",
-      actualName: "",
-    } satisfies Subject)
+      ({
+        gpa: 0,
+        teachers: [],
+        name: "",
+        room: "",
+        id: "",
+        actualName: "",
+      } satisfies Subject)
   );
 export function SubjectsTable({
   data: externalData,
@@ -111,29 +111,27 @@ export function SubjectsTable({
       isLoading
         ? mockSubjects(5)
         : prepareTableDataForSorting(
-          externalData as NonNullable<typeof externalData>
-        ),
+            externalData as NonNullable<typeof externalData>
+          ),
     [isLoading, externalData]
   );
   const columnVisibility = shownColumns
     ? Object.fromEntries(
-      columns.map((column) => {
-        const identifier = column.accessorKey;
-        return [identifier, shownColumns.includes(identifier)];
-      })
-    )
+        columns.map((column) => {
+          const identifier = column.accessorKey;
+          return [identifier, shownColumns.includes(identifier)];
+        })
+      )
     : {};
   const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
     (table, push) => (row) => {
       const cells = row.getVisibleCells();
-      const isTA = row.original.name === TEACHER_ADVISORY_ABBREVIATION
+      const isTA = row.original.name === TEACHER_ADVISORY_ABBREVIATION;
       return (
         <TableRow
-          onClick={!isTA ? () =>
-            push(
-              getSubjectPageURL(row.original)
-            )
-            : undefined}
+          onClick={
+            !isTA ? () => push(getSubjectPageURL(row.original)) : undefined
+          }
           key={row.id}
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}

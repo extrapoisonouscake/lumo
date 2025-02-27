@@ -13,7 +13,6 @@ import { Form } from "../ui/form";
 import { FormInput } from "../ui/form-input";
 import { FormPasswordInput } from "../ui/form-password-input";
 import { SubmitButton } from "../ui/submit-button";
-
 export function ChangePasswordForm({
   onSuccess,
   authCookies,
@@ -48,25 +47,27 @@ export function ChangePasswordForm({
   };
 
   return (
-    <Form {...form} onSubmit={onSubmit}>
-      {errorMessageNode}
+    <>
+      <Form {...form} onSubmit={onSubmit}>
+        {errorMessageNode}
 
-      {!initialCredentials && (
-        <FormInput
+        {!initialCredentials && (
+          <FormInput
+            required
+            placeholder="········"
+            name="oldPassword"
+            label="Old password"
+          />
+        )}
+        <ExtendedFormPasswordInput name="newPassword" label="New password" />
+        <FormPasswordInput
           required
           placeholder="········"
-          name="oldPassword"
-          label="Old password"
+          name="confirmPassword"
+          label="Confirm password"
         />
-      )}
-      <ExtendedFormPasswordInput name="newPassword" label="New password" />
-      <FormPasswordInput
-        required
-        placeholder="········"
-        name="confirmPassword"
-        label="Confirm password"
-      />
-      <SubmitButton>Submit</SubmitButton>
-    </Form>
+        <SubmitButton>Submit</SubmitButton>
+      </Form>
+    </>
   );
 }

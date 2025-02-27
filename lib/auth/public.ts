@@ -25,8 +25,8 @@ export const isKnownLoginError = (error: string): error is LoginErrors => {
 };
 
 export const loginSchema = z.object({
-  username: z.string().min(1, { message: "Required." }),
-  password: z.string().min(1, { message: "Required." }),
+  username: z.string().min(1, { message: "Required." }).default(""),
+  password: z.string().min(1, { message: "Required." }).default(""),
 });
 export type LoginSchema = z.infer<typeof loginSchema>;
 export enum RegistrationType {
@@ -42,42 +42,55 @@ export const allowedRegistrationCountries = Object.values(
 export const registrationTypes = Object.values(RegistrationType);
 export const registerTypeSchemas = {
   [RegistrationType.guardianForStudent]: z.object({
-    firstName: z.string().min(1, { message: "Required." }),
-    lastName: z.string().min(1, { message: "Required." }),
-    country: z.string().min(1, { message: "Required." }),
-    address: z.string().min(1, { message: "Required." }),
-    city: z.string().min(1, { message: "Required." }),
-    region: z.string().min(1, { message: "Required." }),
+    firstName: z.string().min(1, { message: "Required." }).default(""),
+    lastName: z.string().min(1, { message: "Required." }).default(""),
+    country: z.string().min(1, { message: "Required." }).default(""),
+    address: z.string().min(1, { message: "Required." }).default(""),
+    city: z.string().min(1, { message: "Required." }).default(""),
+    region: z.string().min(1, { message: "Required." }).default(""),
     poBox: z.string().optional(),
-    postalCode: z.string().min(1, { message: "Required." }),
-    phone: z.string().transform((arg, ctx) => {
-      const phone = parsePhoneNumberFromString(arg, {
-        defaultCountry: "US",
-        extract: false,
-      });
-      if (
-        phone &&
-        phone.isValid() &&
-        allowedRegistrationCountries.includes(
-          phone.country as AllowedRegistrationCountries
-        )
-      ) {
-        return phone.number;
-      }
+    postalCode: z.string().min(1, { message: "Required." }).default(""),
+    phone: z
+      .string()
+      .transform((arg, ctx) => {
+        const phone = parsePhoneNumberFromString(arg, {
+          defaultCountry: "US",
+          extract: false,
+        });
+        if (
+          phone &&
+          phone.isValid() &&
+          allowedRegistrationCountries.includes(
+            phone.country as AllowedRegistrationCountries
+          )
+        ) {
+          return phone.number;
+        }
 
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Invalid phone number.",
-      });
-      return z.NEVER;
-    }),
-    schoolDistrict: z.string().min(1, { message: "Required." }),
-    email: z.string().min(1, { message: "Required." }).email({
-      message: "Invalid email address.",
-    }),
-    password: passwordZodType,
-    securityQuestionType: z.string().min(1, { message: "Required." }),
-    securityQuestionAnswer: z.string().min(1, { message: "Required." }),
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Invalid phone number.",
+        });
+        return z.NEVER;
+      })
+      .default(""),
+    schoolDistrict: z.string().min(1, { message: "Required." }).default(""),
+    email: z
+      .string()
+      .min(1, { message: "Required." })
+      .email({
+        message: "Invalid email address.",
+      })
+      .default(""),
+    password: passwordZodType.default(""),
+    securityQuestionType: z
+      .string()
+      .min(1, { message: "Required." })
+      .default(""),
+    securityQuestionAnswer: z
+      .string()
+      .min(1, { message: "Required." })
+      .default(""),
   }),
 };
 type RegisterSchemas = typeof registerTypeSchemas;
@@ -128,10 +141,14 @@ export enum RegistrationInternalFields {
 }
 export const passwordResetSchema = z
   .object({
-    username: z.string().min(1, { message: "Required." }),
-    email: z.string().min(1, { message: "Required." }).email({
-      message: "Invalid email address.",
-    }),
+    username: z.string().min(1, { message: "Required." }).default(""),
+    email: z
+      .string()
+      .min(1, { message: "Required." })
+      .email({
+        message: "Invalid email address.",
+      })
+      .default(""),
     securityQuestion: z.string().optional(),
     securityAnswer: z.string().optional(),
   })
@@ -154,9 +171,9 @@ export const authCookiesSchema = z.object({
 } satisfies Record<AuthCookieName, ZodType>);
 export const changePasswordSchema = z
   .object({
-    oldPassword: z.string().min(1, { message: "Required." }),
-    newPassword: passwordZodType,
-    confirmPassword: z.string().min(1, { message: "Required." }),
+    oldPassword: z.string().min(1, { message: "Required." }).default(""),
+    newPassword: passwordZodType.default(""),
+    confirmPassword: z.string().min(1, { message: "Required." }).default(""),
     authCookies: authCookiesSchema.optional(),
     username: z.string().optional(),
   })
@@ -175,7 +192,7 @@ export const changePasswordSchema = z
         path: ["newPassword"],
       });
     }
-    if (+(data.authCookies || "") ^ +(data.username || "")) {
+    if (+!!(data.authCookies || "") ^ +!!(data.username || "")) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "authCookies and username must be provided together.",

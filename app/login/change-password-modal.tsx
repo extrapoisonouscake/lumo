@@ -35,8 +35,12 @@ export function ChangePasswordModal({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Password</DialogTitle>
+          <DialogTitle>Password Change Required</DialogTitle>
         </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          You recently requested a password reset. Please change your password
+          to continue using MyEdBC.
+        </p>
         <ChangePasswordForm
           getInitialCredentials={getCredentials}
           onSuccess={() => {

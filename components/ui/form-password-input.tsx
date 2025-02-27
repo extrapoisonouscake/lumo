@@ -18,12 +18,11 @@ export function FormPasswordInput({
       type={showPassword ? "text" : "password"}
       placeholder="········"
       label={label}
-      rightIcon={
-        <Icon
-          className="cursor-pointer size-4 opacity-50"
-          onClick={() => setShowPassword(!showPassword)}
-        />
-      }
+      rightIcon={<Icon className="cursor-pointer size-4 opacity-50" />}
+      rightIconContainerProps={{
+        className: "cursor-pointer",
+        onClick: () => setShowPassword(!showPassword),
+      }}
     />
   );
 }
