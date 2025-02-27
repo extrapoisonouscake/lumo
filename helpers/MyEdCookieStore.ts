@@ -18,7 +18,6 @@ export class MyEdCookieStore {
     this.store = plainStore;
   }
   get: PlainCookieStore["get"] = (name: string) => {
-    console.log(this.store.get);
     return this.store.get(getFullCookieName(name));
   };
   has: PlainCookieStore["has"] = (name: string) => {

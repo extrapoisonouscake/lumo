@@ -18,13 +18,14 @@ export type FormInputProps = WithRequired<InputProps, "name"> & {
 };
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ name, description, label, shouldShowError = true, ...props }, ref) => {
-    //? resue existing types?
+    //? reuse existing types?
     const context = useFormContext();
     let currentError: string | null = null;
     if (context) {
       currentError =
         context.formState.errors[name]?.message?.toString() || null; //!too complicated??
     }
+
     return (
       <FormField
         control={context.control}
@@ -53,6 +54,10 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                   }
                 }}
                 {...props}
+                onChange={(e) => {
+                  rest.onChange(e);
+                  props.onChange?.(e);
+                }}
               />
             </FormControl>
             {description && <FormDescription>{description}</FormDescription>}

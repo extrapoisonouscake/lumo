@@ -1,8 +1,8 @@
 import {
+  Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  Dialog
 } from "@/components/ui/dialog";
 
 import { ErrorAlert } from "@/components/ui/error-alert";
@@ -16,29 +16,43 @@ import { isActionResponseSuccess } from "@/lib/helpers";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export function PasswordResetSection() {
+export function PasswordResetSection({
+  setLoginFormValues,
+}: {
+  setLoginFormValues: (newUsername: string) => void;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useFormValidation(passwordResetSchema);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [securityQuestion, setSecurityQuestion] = useState<string|null>(null);
+  const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
   const onSubmit = async (data: PasswordResetSchema) => {
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await resetPassword({...data,securityQuestion:securityQuestion??undefined});
+    const response = await resetPassword({
+      ...data,
+      securityQuestion: securityQuestion ?? undefined,
+    });
     if (isActionResponseSuccess(response)) {
       const securityQuestion = response?.data?.securityQuestion; //fix types
       if (securityQuestion) {
         setSecurityQuestion(securityQuestion);
       } else {
-        toast("A password reset link has been sent to your email.");
+        toast("A temporary password has been sent to your email.");
         setIsOpen(false);
-        setErrorMessage(null)
-        setSecurityQuestion(null)
+        setErrorMessage(null);
+        setSecurityQuestion(null);
+        setLoginFormValues(data.username);
         form.reset();
       }
     } else {
       setErrorMessage(response?.data?.message ?? "An unknown error occurred.");
+    }
+  };
+  const clearSecurityQuestion = () => {
+    if (securityQuestion) {
+      setSecurityQuestion(null);
+      form.setValue("securityAnswer", "");
     }
   };
   return (
@@ -57,8 +71,14 @@ export function PasswordResetSection() {
           <Form {...form} onSubmit={onSubmit}>
             {errorMessage && <ErrorAlert>{errorMessage}</ErrorAlert>}
 
-            <FormInput placeholder="1111111" name="username" label="Username" />
             <FormInput
+              onChange={() => clearSecurityQuestion()}
+              placeholder="1111111"
+              name="username"
+              label="Username"
+            />
+            <FormInput
+              onChange={() => clearSecurityQuestion()}
               placeholder="student@school.ca"
               type="email"
               name="email"
@@ -66,12 +86,10 @@ export function PasswordResetSection() {
             />
             {securityQuestion && (
               <FormInput
-                placeholder="Security Question"
+                placeholder="Type in your answer..."
                 name="securityAnswer"
                 label={securityQuestion}
               />
-              
-              
             )}
             <SubmitButton>Submit</SubmitButton>
           </Form>

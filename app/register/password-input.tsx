@@ -1,44 +1,17 @@
-import { FormPasswordInput } from "@/components/ui/form-password-input";
+import {
+  FormPasswordInput,
+  FormPasswordInputProps,
+} from "@/components/ui/form-password-input";
+import { passwordRequirements } from "@/lib/zod";
 import { Check, X } from "lucide-react";
 import { useFormContext } from "react-hook-form";
-import { z } from "zod";
-const zodString = z.string();
-const passwordRequirements = [
-  {
-    label: "At least 8 characters",
-    test: zodString.min(8),
-  },
-  {
-    label: "Contains a number",
-    test: zodString.regex(/\d/),
-  },
-  {
-    label: "Contains an uppercase and a lowercase letter",
-    test: zodString.regex(/[a-z]/).regex(/[A-Z]/),
-  },
-  {
-    label: "Contains a special character",
-    test: zodString.regex(/[^A-Za-z0-9]/),
-  },
-];
-export const passwordZodType = zodString.refine((value) => {
-  try {
-    for (const requirement of Object.values(passwordRequirements)) {
-      requirement.test.parse(value);
-    }
-    return true;
-  } catch {
-    return false;
-  }
-});
 
-const PASSWORD_NAME = "fields.password";
-export function RegistrationFormPasswordInput() {
+export function ExtendedFormPasswordInput(props: FormPasswordInputProps) {
   const { watch } = useFormContext();
-  const value = watch(PASSWORD_NAME);
+  const value = watch(props.name);
   return (
     <div className="flex flex-col gap-2">
-      <FormPasswordInput required name={PASSWORD_NAME} />
+      <FormPasswordInput required {...props} />
 
       {value && (
         <ul className="text-sm space-y-1">

@@ -1,12 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { ErrorAlert } from "@/components/ui/error-alert";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { FormPasswordInput } from "@/components/ui/form-password-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { cn } from "@/helpers/cn";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { register } from "@/lib/auth/mutations";
 import {
@@ -21,7 +21,7 @@ import { ReactNode, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
 import { LoginSuggestionText } from "./login-suggestion-text";
-import { RegistrationFormPasswordInput } from "./password-input";
+import { ExtendedFormPasswordInput } from "./password-input";
 import { PhoneInput } from "./phone-input";
 import { RegistrationStepsBar } from "./steps";
 const COUNTRIES_OPTIONS = [
@@ -220,7 +220,7 @@ const getFields: <T extends RegistrationType>({
           },
           {
             name: "password",
-            node: <RegistrationFormPasswordInput />,
+            node: <ExtendedFormPasswordInput name="fields.password" />,
           },
           {
             name: "securityQuestionType",
@@ -356,7 +356,8 @@ export function RegistrationForm({
     },
   });
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { errorMessage, setErrorMessage, errorMessageNode } =
+    useFormErrorMessage();
   async function onSubmit(data: RegisterSchema) {
     if (errorMessage) {
       setErrorMessage(null);
@@ -390,7 +391,7 @@ export function RegistrationForm({
         {...form}
         className="flex flex-col gap-3 w-full"
       >
-        {errorMessage && <ErrorAlert>{errorMessage}</ErrorAlert>}
+        {errorMessageNode}
 
         {Object.entries(fields).map(([step, fields]) => (
           <div

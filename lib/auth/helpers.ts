@@ -7,8 +7,8 @@ import {
   MyEdAuthenticationCookiesName,
   parseHTMLToken,
 } from "@/constants/myed";
-import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { LoginSchema } from "./public";
+import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
+import { LoginErrors, LoginSchema } from "./public";
 
 import { MyEdCookieStore, PlainCookieStore } from "@/helpers/MyEdCookieStore";
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
@@ -23,8 +23,15 @@ import { fetchMyEd } from "@/instances/fetchMyEd";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import { cookies } from "next/headers";
 import "server-only";
-import { LoginError } from "./public";
-
+import { genericErrorMessageVariableRegex } from "./public";
+export class LoginError extends Error {
+  authCookies?: AuthCookies;
+  constructor(message: string, authCookies?: AuthCookies) {
+    super(message);
+    this.name = "LoginError";
+    this.authCookies = authCookies;
+  }
+}
 export async function performLogin(
   formData: LoginSchema,
   store?: PlainCookieStore
@@ -37,30 +44,51 @@ export async function performLogin(
   }
   const { cookies: cookiesToAdd, studentID } =
     await fetchAuthCookiesAndStudentID(username, password);
+  setUpLogin({
+    cookies: cookiesToAdd,
+    studentID,
+    credentials: formData,
+    store,
+  });
+}
+export function setUpLogin({
+  cookies: cookiesToAdd,
+  studentID,
+  credentials,
+  store,
+}: {
+  cookies: AuthCookies;
+  studentID: string;
+  credentials?: LoginSchema;
+  store?: PlainCookieStore;
+}) {
+  const cookieStore = new MyEdCookieStore(store);
   for (const [name, value] of Object.entries(cookiesToAdd)) {
     cookieStore.set(name, value, {
       maxAge: SESSION_TTL_IN_SECONDS,
     });
   }
   cookieStore.set("studentId", studentID);
-  if (formData) {
-    cookieStore.set("username", username);
-    cookieStore.set("password", password);
+  if (credentials) {
+    cookieStore.set("username", credentials.username);
+    cookieStore.set("password", credentials.password);
   }
 }
 const loginDefaultParams = {
   userEvent: "930",
   deploymentId: "aspen",
-  mobile: "true",
 };
+export async function parseHTMLTokenFromResponse(response: Response) {
+  const loginTokenHTML = await response.text();
+  const $loginTokenDOM = cheerio.load(loginTokenHTML);
+  const loginToken = parseHTMLToken($loginTokenDOM);
+  return loginToken;
+}
 export async function getFreshAuthCookiesAndHTMLToken() {
   const loginTokenResponse = await fetchMyEd("logon.do", {
     credentials: "include",
   });
-
-  const loginTokenHTML = await loginTokenResponse.text();
-  const $loginTokenDOM = cheerio.load(loginTokenHTML);
-  const loginToken = parseHTMLToken($loginTokenDOM);
+  const loginToken = await parseHTMLTokenFromResponse(loginTokenResponse);
   if (!loginToken) throw new Error("Failed 2"); //!
 
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
@@ -75,7 +103,7 @@ export async function getFreshAuthCookiesAndHTMLToken() {
       )
   );
   return {
-    cookies: cookiesToAdd as Record<string, string>,
+    cookies: cookiesToAdd as AuthCookies,
     token: loginToken,
   };
 }
@@ -85,7 +113,7 @@ export async function fetchAuthCookiesAndStudentID(
 ) {
   const { cookies, token: loginToken } =
     await getFreshAuthCookiesAndHTMLToken();
-  console.log("cookies", cookies, loginToken);
+
   const cookiesString = convertObjectToCookieString(cookies);
 
   const loginParams = new URLSearchParams({
@@ -104,36 +132,74 @@ export async function fetchAuthCookiesAndStudentID(
     },
   });
   const loginHtml = await loginResponse.text();
-  const errorMessage = parseLoginErrorMessage(loginHtml);
-  console.log("errorMessage", errorMessage);
-  if (errorMessage) throw new Error(errorMessage);
+  const $ = cheerio.load(loginHtml);
 
-  const studentsData = await fetchMyEd<
-    OpenAPI200JSONResponse<"/users/students">
-  >("rest/users/students", {
-    headers: { Cookie: cookiesString },
-  }).then((response) => response.json());
-
-  const studentID = studentsData[0].studentOid;
+  const rawErrorMessage = parseAuthGenericErrorMessage($);
+  if (rawErrorMessage) {
+    const errorMessage =
+      rawErrorMessageToIDMap[rawErrorMessage] ?? rawErrorMessage;
+    throw new LoginError(errorMessage);
+  }
+  if (needsPasswordChange($)) {
+    throw new LoginError(LoginErrors.passwordChangeRequired, cookies);
+  }
+  const studentID = await fetchStudentID(cookies);
 
   return {
     cookies,
     studentID,
   };
 }
-const rawErrorMessageToIDMap: Record<string, LoginError> = {
-  "This account has been disabled.": "account-disabled",
-  "Invalid login.": "invalid-auth",
+export async function fetchStudentID(cookies: AuthCookies) {
+  const studentsData = await fetchMyEd<
+    OpenAPI200JSONResponse<"/users/students">
+  >("rest/users/students", {
+    headers: { Cookie: convertObjectToCookieString(cookies) },
+  }).then((response) => response.json());
+
+  const studentID = studentsData[0].studentOid;
+  return studentID;
+}
+const rawErrorMessageToIDMap: Record<string, LoginErrors> = {
+  "This account has been disabled.": LoginErrors.accountDisabled,
+  "Invalid login.": LoginErrors.invalidAuth,
 };
-function parseLoginErrorMessage(html: string) {
-  const $ = cheerio.load(html);
-  const rawErrorMessage = $('.panel div[style="color:red"]')
-    .text()
-    .trim()
-    .replace(/\n/g, " ");
-  return rawErrorMessage
-    ? rawErrorMessageToIDMap[rawErrorMessage] ?? "unexpected-error"
-    : undefined;
+export function parseAuthGenericErrorMessage($: cheerio.CheerioAPI) {
+  let errorMessage: string | null = null;
+  $('script[language="JavaScript"]').each(function () {
+    const scriptContent = $(this).html();
+    if (!scriptContent) return;
+
+    const match = scriptContent.match(genericErrorMessageVariableRegex);
+    if (match) {
+      errorMessage = match[2];
+      return false;
+    }
+  });
+  return errorMessage;
+}
+// function parseLoginErrorMessage($: cheerio.CheerioAPI) {
+//   const rawErrorMessage = $('.panel div[style="color:red"]')
+//     .text()
+//     .trim()
+//     .replace(/\n/g, " ");
+//   return rawErrorMessage
+//     ? rawErrorMessageToIDMap[rawErrorMessage] ?? LoginError.unexpectedError
+//     : undefined;
+// }
+function needsPasswordChange($: cheerio.CheerioAPI) {
+  let wasFound = false;
+  $('script[language="JavaScript"], script[language="Javascript"]').each(
+    function () {
+      const scriptContent = $(this).html();
+      if (!scriptContent) return;
+      if (scriptContent.includes("changePassword.do?parentForm=logonForm")) {
+        wasFound = true;
+        return false;
+      }
+    }
+  );
+  return wasFound;
 }
 const logoutStep: FlatRouteStep = {
   method: "GET",

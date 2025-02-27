@@ -10,7 +10,7 @@ import {
 } from "./lib/auth/helpers";
 import {
   isKnownLoginError,
-  LoginError,
+  LoginErrors,
   loginSchema,
   LoginSchema,
 } from "./lib/auth/public";
@@ -56,9 +56,9 @@ export async function middleware(request: NextRequest) {
         } catch (e: any) {
           const { message } = e;
 
-          const safeErrorMessage: LoginError = isKnownLoginError(message)
+          const safeErrorMessage: LoginErrors = isKnownLoginError(message)
             ? message
-            : "unexpected-error";
+            : LoginErrors.unexpectedError;
           const redirectResponse = NextResponse.redirect(
             new URL(`/login?error=${safeErrorMessage}`, request.url)
           );

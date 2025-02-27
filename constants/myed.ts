@@ -10,7 +10,6 @@ export const MYED_SESSION_COOKIE_NAME = "JSESSIONID";
 export const MYED_AUTHENTICATION_COOKIES_NAMES = [
   MYED_SESSION_COOKIE_NAME,
   "ApplicationGatewayAffinityCORS",
-  "deploymentId",
   "ApplicationGatewayAffinity",
 ] as const;
 export type MyEdAuthenticationCookiesName =

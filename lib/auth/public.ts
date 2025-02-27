@@ -1,17 +1,27 @@
-import { passwordZodType } from "@/app/register/password-input";
+import { AuthCookieName } from "@/helpers/getAuthCookies";
 import { zodEnum } from "@/types/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { z } from "zod";
+import { z, ZodType } from "zod";
+import { passwordZodType } from "../zod";
+export enum LoginErrors {
+  accountDisabled = "account-disabled",
+  invalidAuth = "invalid-auth",
+  invalidParameters = "invalid-parameters",
+  unexpectedError = "unexpected-error",
+  passwordChangeRequired = "password-change-required",
+}
 export const loginErrorIDToMessageMap = {
-  "account-disabled":
+  [LoginErrors.accountDisabled]:
     "Your account has been disabled. Please contact your school administrator for more information.",
-  "invalid-auth": "Incorrect username or password.",
-  "invalid-parameters": "Invalid parameters.",
-  "unexpected-error": "An unexpected error occurred. Try again later.",
+  [LoginErrors.invalidAuth]: "Incorrect username or password.",
+  [LoginErrors.invalidParameters]: "Invalid parameters.",
+  [LoginErrors.unexpectedError]:
+    "An unexpected error occurred. Try again later.",
+  [LoginErrors.passwordChangeRequired]: "Change your password to continue.",
 };
-export type LoginError = keyof typeof loginErrorIDToMessageMap;
-export const isKnownLoginError = (error: string): error is LoginError => {
-  return Object.keys(loginErrorIDToMessageMap).includes(error as LoginError);
+
+export const isKnownLoginError = (error: string): error is LoginErrors => {
+  return Object.keys(loginErrorIDToMessageMap).includes(error as LoginErrors);
 };
 
 export const loginSchema = z.object({
@@ -123,15 +133,57 @@ export const passwordResetSchema = z
       message: "Invalid email address.",
     }),
     securityQuestion: z.string().optional(),
-    securityAnswer:z.string().optional(),
+    securityAnswer: z.string().optional(),
   })
   .refine(
     (data) => {
-      return !(+(data.securityQuestion||'') ^ +(data.securityAnswer||''))
+      return !(+(data.securityQuestion || "") ^ +(data.securityAnswer || ""));
     },
     {
-      message: "Both the security question and the security answer must be provided if one is present.",
+      message:
+        "Both the security question and the security answer must be provided if one is present.",
       path: ["securityQuestion", "securityAnswer"],
     }
   );
 export type PasswordResetSchema = z.infer<typeof passwordResetSchema>;
+export const authCookiesSchema = z.object({
+  JSESSIONID: z.string().min(1, { message: "Required." }),
+  ApplicationGatewayAffinityCORS: z.string().min(1, { message: "Required." }),
+
+  ApplicationGatewayAffinity: z.string().min(1, { message: "Required." }),
+} satisfies Record<AuthCookieName, ZodType>);
+export const changePasswordSchema = z
+  .object({
+    oldPassword: z.string().min(1, { message: "Required." }),
+    newPassword: passwordZodType,
+    confirmPassword: z.string().min(1, { message: "Required." }),
+    authCookies: authCookiesSchema.optional(),
+    username: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.newPassword !== data.confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords must match.",
+        path: ["confirmPassword"],
+      });
+    }
+    if (data.newPassword === data.oldPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "New password cannot be the same as the old password.",
+        path: ["newPassword"],
+      });
+    }
+    if (+(data.authCookies || "") ^ +(data.username || "")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "authCookies and username must be provided together.",
+        path: ["authCookies", "username"],
+      });
+    }
+    return true;
+  });
+export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
+export const genericErrorMessageVariableRegex =
+  /var\s+msg\s*=\s*(['"])(.*?)\1;/;

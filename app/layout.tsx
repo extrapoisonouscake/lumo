@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { GeistSans } from "geist/font/sans";
-import { Metadata,Viewport } from "next";
+import { Metadata, Viewport } from "next";
+import NextTopLoader from "nextjs-toploader";
 import { ReactNode } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -11,9 +12,9 @@ export const metadata: Metadata = {
   title: {
     default: WEBSITE_TITLE,
     template: `%s | ${WEBSITE_TITLE}`,
-  }
+  },
 };
-export const viewport:Viewport={maximumScale:1}
+export const viewport: Viewport = { maximumScale: 1 };
 export default async function RootLayout({
   children,
 }: {
@@ -26,6 +27,7 @@ export default async function RootLayout({
         <body
           className={cn("flex justify-center min-h-full", GeistSans.className)}
         >
+          <NextTopLoader />
           <Providers>
             <Toaster />
             <AppSidebarWrapper>{children}</AppSidebarWrapper>
