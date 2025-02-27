@@ -5,10 +5,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { ErrorAlert } from "@/components/ui/error-alert";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { resetPassword } from "@/lib/auth/mutations";
 import { PasswordResetSchema, passwordResetSchema } from "@/lib/auth/public";
@@ -23,7 +23,8 @@ export function PasswordResetSection({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const form = useFormValidation(passwordResetSchema);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { errorMessage, setErrorMessage, errorMessageNode } =
+    useFormErrorMessage();
   const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
   const onSubmit = async (data: PasswordResetSchema) => {
     if (errorMessage) {
@@ -69,11 +70,11 @@ export function PasswordResetSection({
             <DialogTitle>Password Reset</DialogTitle>
           </DialogHeader>
           <Form {...form} onSubmit={onSubmit}>
-            {errorMessage && <ErrorAlert>{errorMessage}</ErrorAlert>}
+            {errorMessageNode}
 
             <FormInput
               onChange={() => clearSecurityQuestion()}
-              placeholder="1111111"
+              placeholder="1234567"
               name="username"
               label="Username"
             />

@@ -66,14 +66,13 @@ export default function Page() {
         />
       )}
       <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto">
-        <Link href="/slow">Slow Page</Link>
         <Form
           onSubmit={onSubmit}
           {...form}
           className="flex flex-col gap-3 w-full"
         >
           {errorMessageNode}
-          <FormInput placeholder="1111111" name="username" label="Username" />
+          <FormInput placeholder="1234567" name="username" label="Username" />
           <FormPasswordInput name="password" />
           <SubmitButton isLoading={form.formState.isSubmitting}>
             Login
