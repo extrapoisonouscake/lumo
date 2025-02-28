@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 import colors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
 const accordionTimingFunction = "cubic-bezier(0.68, -0.55, 0.265, 1.55)";
-const config: Config = {
+const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -36,6 +36,9 @@ const config: Config = {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -129,5 +132,5 @@ const config: Config = {
       );
     }),
   ],
-};
+} satisfies Config;
 export default config;

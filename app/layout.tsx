@@ -27,10 +27,12 @@ export default async function RootLayout({
         <body
           className={cn("flex justify-center min-h-full", GeistSans.className)}
         >
-          <TopLoader />
           <Providers>
             <Toaster />
-            <AppSidebarWrapper>{children}</AppSidebarWrapper>
+            <AppSidebarWrapper>
+              <TopLoader />
+              {children}
+            </AppSidebarWrapper>
           </Providers>
         </body>
       </html>

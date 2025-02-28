@@ -12,9 +12,11 @@ export function makeTableColumnsSkeletons<T extends RowData>(
   return columns.map((column) => ({
     ...column,
     cell: ({ cell }) => (
-      <Skeleton>
-        <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
-      </Skeleton>
+      <div className="flex items-center">
+        <Skeleton>
+          <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
+        </Skeleton>
+      </div>
     ),
   })) as typeof columns;
 }

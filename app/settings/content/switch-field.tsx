@@ -35,7 +35,7 @@ export function SwitchField({
       <Label
         htmlFor={settingKey}
         aria-disabled={isLoading}
-        className="cursor-pointer"
+        className="cursor-pointer font-normal"
       >
         {label}
         {isLoading && <Spinner className="inline ml-1.5 align-middle size-4" />}

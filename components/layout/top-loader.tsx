@@ -4,7 +4,7 @@ import tailwindConfig from "../../tailwind.config";
 
 const fullConfig = resolveConfig(tailwindConfig);
 const colors = fullConfig.theme?.colors;
-const primaryColor = colors?.blue[500];
+const primaryColor = colors?.brand?.DEFAULT;
 export function TopLoader() {
   return (
     <NextTopLoader
