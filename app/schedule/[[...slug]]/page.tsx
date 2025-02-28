@@ -20,6 +20,7 @@ export async function generateMetadata({ params: { slug } }: Props) {
 }
 export default async function Page({ params: { slug } }: Props) {
   const day = slug?.[0];
+  console.log(day);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-start gap-2">

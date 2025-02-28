@@ -46,7 +46,7 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
     setLoadingButtonName(originButton);
     startTransition(() => {
       router.push(
-        `${pathname}${
+        `/schedule${
           dateToSet ? `/${day}` : ""
         }?${currentSearchParams.toString()}`
       );

@@ -26,6 +26,9 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
       name: `${convertPathParameterToSubjectName(params.slug[0])}`,
       icon: websitePagesWithStaticPaths["/classes"].icon,
     };
+  if (segments[0] === "schedule") {
+    return websitePagesWithStaticPaths["/schedule"];
+  }
   return null;
 };
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
