@@ -132,12 +132,11 @@ export function SubjectsTable({
           onClick={
             !isTA ? () => push(getSubjectPageURL(row.original)) : undefined
           }
-          key={row.id}
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
           className={cn(
             table.options.meta?.getRowClassName?.(row),
-            "cursor-pointer"
+            { "cursor-pointer": !isTA }
           )}
         >
           {cells.map((cell, i) => {
