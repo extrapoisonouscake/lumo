@@ -42,7 +42,7 @@ export async function Announcements() {
     const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(new Date());
     let data: AnnouncementSection[] = [];
     let cachedData;
-    let a=Date.now()
+    let a=Date.now();
     [cachedData, pdfLink] = await Promise.all([
       redis.get(redisKey),
 
