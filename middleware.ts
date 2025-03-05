@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   if (isAllowedGeneralAccess) {
     if (isOnUnauthenticatedPage) {
       return Response.redirect(new URL("/", request.url));
-    } else if (isGuest && !guestAllowedPathnames.includes(pathname)) {
+    } else if (isGuest && !guestAllowedPathnames.some(p=>p.startsWith(pathname))) {
       return Response.redirect(new URL("/", request.url));
     } else {
       const cookieWritableStore = new MyEdCookieStore(response.cookies);
