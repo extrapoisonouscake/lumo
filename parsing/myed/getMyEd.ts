@@ -82,6 +82,8 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
         }
       } else {
         const processedData = await processResponse(
+          
+        //@ts-expect-error jic
           response,
           
         //@ts-expect-error jic
