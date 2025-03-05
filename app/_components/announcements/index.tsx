@@ -42,11 +42,13 @@ export async function Announcements() {
     const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(new Date());
     let data: AnnouncementSection[] = [];
     let cachedData;
+    let a=Date.now()
     [cachedData, pdfLink] = await Promise.all([
       redis.get(redisKey),
 
       redis.hget(pdfLinkHashKey, schoolId) as Promise<string | null>,
     ]);
+    console.log("cur",Date.now()-a)
     if (cachedData) {
       const parsedData =
         process.env.NODE_ENV === "development"
