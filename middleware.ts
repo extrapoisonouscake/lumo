@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_TTL_IN_SECONDS } from "./constants/auth";
 import { MYED_SESSION_COOKIE_NAME } from "./constants/myed";
+import {
+  guestAllowedPathnames,
+  unauthenticatedPathnames,
+} from "./constants/website";
+import { isGuestMode, isUserAuthenticated } from "./helpers/auth-statuses";
 import { getFullCookieName } from "./helpers/getFullCookieName";
-import { isUserAuthenticated } from "./helpers/isUserAuthenticated";
 import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
 import {
   deleteSession,
@@ -14,17 +18,20 @@ import {
   loginSchema,
   LoginSchema,
 } from "./lib/auth/public";
-const unauthenticatedPathnames = ["/login", "/register"];
+
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { cookies } = request;
-  const isAuthenticated = isUserAuthenticated(cookies);
+  const isGuest = isGuestMode(cookies);
+  const isAllowedGeneralAccess = isUserAuthenticated(cookies) || isGuest;
   const { pathname } = request.nextUrl;
   const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
     pathname.startsWith(path)
   );
-  if (isAuthenticated) {
+  if (isAllowedGeneralAccess) {
     if (isOnUnauthenticatedPage) {
+      return Response.redirect(new URL("/", request.url));
+    } else if (isGuest && !guestAllowedPathnames.includes(pathname)) {
       return Response.redirect(new URL("/", request.url));
     } else {
       const cookieWritableStore = new MyEdCookieStore(response.cookies);

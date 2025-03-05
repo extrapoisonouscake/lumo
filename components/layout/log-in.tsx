@@ -2,10 +2,10 @@
 
 import { Spinner } from "@/components/ui/button";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { logOut } from "@/lib/auth/mutations";
-import { LogOutIcon } from "lucide-react";
+import { exitGuestMode } from "@/lib/auth/mutations";
+import { LogInIcon } from "lucide-react";
 import { useState } from "react";
-export function LogOutButton() {
+export function LogInButton() {
   const [isLoading, setIsLoading] = useState(false);
   return (
     <SidebarMenuButton
@@ -13,12 +13,12 @@ export function LogOutButton() {
       disabled={isLoading}
       onClick={async () => {
         setIsLoading(true);
-        await logOut();
+        await exitGuestMode();
         setIsLoading(false);
       }}
     >
-      {isLoading ? <Spinner /> : <LogOutIcon />}
-      Log out
+      {isLoading ? <Spinner /> : <LogInIcon />}
+      Log In
     </SidebarMenuButton>
   );
 }

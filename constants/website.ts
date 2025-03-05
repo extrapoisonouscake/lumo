@@ -10,6 +10,8 @@ interface WebsitePage {
 interface StaticWebsitePage extends WebsitePage {
   isHiddenInSidebar?: boolean;
 }
+export const unauthenticatedPathnames = ["/login", "/register"];
+export const guestAllowedPathnames = ["/", "/settings"];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { name: "Home", icon: Home },
   "/schedule": { name: "Schedule", icon: Calendar },

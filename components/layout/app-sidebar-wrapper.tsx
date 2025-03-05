@@ -1,4 +1,4 @@
-import { isUserAuthenticated } from "@/helpers/isUserAuthenticated";
+import { isGuestMode, isUserAuthenticated } from "@/helpers/auth-statuses";
 import { cookies } from "next/headers";
 import { ReactNode, Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
@@ -13,15 +13,19 @@ const Inset = ({ children }: { children: ReactNode }) => (
 export function AppSidebarWrapper({ children }: { children: ReactNode }) {
   const cookieStore = cookies();
   const isAuthenticated = isUserAuthenticated(cookieStore);
-  if (!isAuthenticated) return <Inset>{children}</Inset>;
+  const isGuest = isGuestMode(cookieStore);
+  if (!isAuthenticated && !isGuest) return <Inset>{children}</Inset>;
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar
+        isGuest={isGuest}
         userHeader={
-          <Suspense fallback={<UserHeaderSkeleton />}>
-            <UserHeader />
-          </Suspense>
+          !isGuest ? (
+            <Suspense fallback={<UserHeaderSkeleton />}>
+              <UserHeader />
+            </Suspense>
+          ) : null
         }
       />
       <Inset>{children}</Inset>

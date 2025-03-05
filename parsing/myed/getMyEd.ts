@@ -41,6 +41,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   endpoint: Endpoint,
   ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
+  console.log("getMyEd", endpoint, rest);
   const route = ENDPOINTS[endpoint];
   let authParameters, studentId;
   if (route.requiresAuth) {
@@ -74,15 +75,18 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
       if (isArray) {
         for (let i = 0; i < response.length; i++) {
           const r = response[i];
-//optimize
-const processedData=await processResponse(r, value[i])
-if(!processedData) return
+          //optimize
+          const processedData = await processResponse(r, value[i]);
+          if (!processedData) return;
           responses.push(processedData);
         }
       } else {
-//@ts-expect-error jic
-const processedData=await processResponse(response, value as FlatRouteStep)
-if(!processedData) return
+        //@ts-expect-error jic
+        const processedData = await processResponse(
+          response,
+          value as FlatRouteStep
+        );
+        if (!processedData) return;
         responses.push(processedData);
       }
       steps.addResponse(isArray ? responses : responses[0]);

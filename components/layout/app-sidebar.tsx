@@ -12,62 +12,76 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { websitePagesWithStaticPaths } from "@/constants/website";
+import {
+  guestAllowedPathnames,
+  websitePagesWithStaticPaths,
+} from "@/constants/website";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
+import { LogInButton } from "./log-in";
 import { LogOutButton } from "./log-out";
 import { ThemeToggle } from "./theme-toggle";
 
 export function AppSidebar({
   userHeader,
+  isGuest,
   ...props
-}: { userHeader: ReactNode } & React.ComponentProps<typeof Sidebar>) {
+}: { userHeader: ReactNode | null; isGuest: boolean } & React.ComponentProps<
+  typeof Sidebar
+>) {
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="pb-0">
-        <SidebarMenu>
-          <SidebarMenuItem>{userHeader}</SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarHeader>
-      <SidebarContent className="py-1">
-        <SidebarGroup className="py-0">
+      {userHeader && (
+        <SidebarHeader className="pb-0">
+          <SidebarMenu>
+            <SidebarMenuItem>{userHeader}</SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+      )}
+      <SidebarContent>
+        <SidebarGroup>
           <SidebarGroupContent>
-            <PagesMenu />
+            <PagesMenu isGuest={isGuest} />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <ThemeToggle />
-          <LogOutButton />
+          <SidebarMenuItem>
+            {isGuest ? <LogInButton /> : <LogOutButton />}
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
 }
-function PagesMenu() {
+function PagesMenu({ isGuest }: { isGuest: boolean }) {
   const pathname = usePathname();
+  const pages = useMemo(() => {
+    return Object.entries(websitePagesWithStaticPaths).filter(
+      ([url, page]) =>
+        !page.isHiddenInSidebar &&
+        (!isGuest || guestAllowedPathnames.includes(url))
+    );
+  }, [isGuest]);
   return (
     <SidebarMenu>
-      {Object.entries(websitePagesWithStaticPaths)
-        .filter(([, page]) => !page.isHiddenInSidebar)
-        .map(([url, page]) => (
-          <SidebarMenuItem key={page.name}>
-            <SidebarMenuButton
-              asChild
-              isActive={
-                url === "/" ? url === pathname : pathname.startsWith(url)
-              }
-            >
-              <Link href={url}>
-                <page.icon />
-                {page.name}
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+      {pages.map(([url, page]) => (
+        <SidebarMenuItem key={page.name}>
+          <SidebarMenuButton
+            asChild
+            isActive={url === "/" ? url === pathname : pathname.startsWith(url)}
+          >
+            <Link href={url}>
+              <page.icon />
+              {page.name}
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
     </SidebarMenu>
   );
 }

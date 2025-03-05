@@ -42,6 +42,7 @@ export default function Page() {
             setTemporaryAuthCookies={setTemporaryAuthCookies}
             form={form}
           />
+
           <div className="flex items-center justify-between gap-2">
             <PasswordResetSection
               setLoginFormValues={(newUsername) => {

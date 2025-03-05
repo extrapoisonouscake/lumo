@@ -6,3 +6,8 @@ export function isUserAuthenticated(
 ) {
   return cookieStore.has(getFullCookieName("studentId"));
 }
+export function isGuestMode(
+  cookieStore: RequestCookies | ReadonlyRequestCookies
+) {
+  return cookieStore.get("isGuest")?.value === "true";
+}

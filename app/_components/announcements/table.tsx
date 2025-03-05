@@ -1,3 +1,4 @@
+import { Link } from "@/components/ui/link";
 import {
   Table,
   TableBody,
@@ -45,13 +46,9 @@ export function AnnouncementsSectionTable({
               {pdfURL ? (
                 <>
                   Please open{" "}
-                  <a
-                    href={pdfURL}
-                    className="underline text-blue-500"
-                    target="_blank"
-                  >
+                  <Link href={pdfURL} variant="underline" target="_blank">
                     the original file
-                  </a>{" "}
+                  </Link>{" "}
                   to view this content.
                 </>
               ) : (

@@ -4,12 +4,13 @@ import { LoginSchema } from "@/lib/auth/public";
 
 import { FormPasswordInput } from "@/components/ui/form-password-input";
 
+import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
-import { login } from "@/lib/auth/mutations";
+import { enterGuestMode, login } from "@/lib/auth/mutations";
 import {
   LoginErrors,
   loginErrorIDToMessageMap,
@@ -50,7 +51,14 @@ export function LoginForm({
       {errorMessageNode}
       <FormInput placeholder="1234567" name="username" label="Username" />
       <FormPasswordInput name="password" />
-      <SubmitButton isLoading={form.formState.isSubmitting}>Login</SubmitButton>
+      <div className="flex flex-col gap-2">
+        <SubmitButton isLoading={form.formState.isSubmitting}>
+          Login
+        </SubmitButton>
+        <Button variant="outline" size="sm" onClick={() => enterGuestMode()}>
+          Continue as guest
+        </Button>
+      </div>
     </Form>
   );
 }
