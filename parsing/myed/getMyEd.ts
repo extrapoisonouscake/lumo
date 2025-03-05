@@ -81,9 +81,10 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
           responses.push(processedData);
         }
       } else {
-        //@ts-expect-error jic
         const processedData = await processResponse(
           response,
+          
+        //@ts-expect-error jic
           value as FlatRouteStep
         );
         if (!processedData) return;
