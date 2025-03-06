@@ -11,12 +11,8 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { enterGuestMode, login } from "@/lib/auth/mutations";
-import {
-  LoginErrors,
-  loginErrorIDToMessageMap,
-  loginSchema,
-} from "@/lib/auth/public";
-import { isActionResponseSuccess } from "@/lib/helpers";
+import { LoginErrors, loginErrorIDToMessageMap } from "@/lib/auth/public";
+import { isSuccessfulActionResponse } from "@/lib/helpers";
 
 export function LoginForm({
   setTemporaryAuthCookies,
@@ -28,12 +24,11 @@ export function LoginForm({
   const { errorMessageNode, errorMessage, setErrorMessage } =
     useFormErrorMessage();
   async function onSubmit(data: LoginSchema) {
-    console.log(loginSchema.safeParse(data));
     if (errorMessage) {
       setErrorMessage(null);
     }
     const response = await login(data);
-    if (!isActionResponseSuccess(response)) {
+    if (!isSuccessfulActionResponse(response)) {
       const message = response?.data?.message;
 
       if (message === LoginErrors.passwordChangeRequired) {

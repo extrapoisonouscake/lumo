@@ -6,7 +6,7 @@ import {
 import { cookies } from "next/headers";
 import "server-only";
 import { getFullCookieName } from "./getFullCookieName";
-const cookieDefaultOptions: Partial<ResponseCookie> = {
+export const cookieDefaultOptions: Partial<ResponseCookie> = {
   secure: shouldSecureCookies,
   maxAge: COOKIE_MAX_AGE,
   httpOnly: true,

@@ -33,14 +33,14 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       {userHeader && (
-        <SidebarHeader className="pb-0">
+        <SidebarHeader className="pb-1">
           <SidebarMenu>
             <SidebarMenuItem>{userHeader}</SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
       )}
-      <SidebarContent>
-        <SidebarGroup>
+      <SidebarContent className="pb-1">
+        <SidebarGroup className="py-0">
           <SidebarGroupContent>
             <PagesMenu isGuest={isGuest} />
           </SidebarGroupContent>

@@ -32,7 +32,6 @@ export async function parseAnnouncements(
 ) {
   const redisKey = getAnnouncementsRedisKey(school, date);
 
-  console.log("usbu", !!buffer);
   const response = await unstructuredIO.general.partition({
     partitionParameters: {
       files: {
@@ -48,7 +47,6 @@ export async function parseAnnouncements(
     },
   });
   const { statusCode, elements } = response;
-  console.log("usbu2", statusCode, elements, redisKey);
 
   if (statusCode !== 200 || !elements) {
     console.error("failed to parse pdf", response);
@@ -57,8 +55,7 @@ export async function parseAnnouncements(
   const parseElements = dailyAnnouncementsFileParser[school];
   const preparedData =
     parseElements(elements as PDFParsingPartitionElement[]) || [];
-  console.log("preparedData", preparedData);
-if(preparedData.length===0) throw new Error("Something went wrong")
+  if (preparedData.length === 0) throw new Error("Something went wrong");
   const now = timezonedDayJS();
   const midnight = getMidnight(now);
 

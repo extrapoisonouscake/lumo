@@ -41,7 +41,6 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   endpoint: Endpoint,
   ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
 ) {
-  console.log("getMyEd", endpoint, rest);
   const route = ENDPOINTS[endpoint];
   let authParameters, studentId;
   if (route.requiresAuth) {
@@ -82,10 +81,9 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
         }
       } else {
         const processedData = await processResponse(
-          
-        //@ts-expect-error jic
+          //@ts-expect-error jic
           response,
-          
+
           value as FlatRouteStep
         );
         if (!processedData) return;

@@ -4,7 +4,10 @@ import { MYED_HTML_TOKEN_INPUT_NAME } from "@/constants/myed";
 import { isUserAuthenticated } from "@/helpers/auth-statuses";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
-import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
+import {
+  cookieDefaultOptions,
+  MyEdCookieStore,
+} from "@/helpers/MyEdCookieStore";
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import * as cheerio from "cheerio";
 import { cookies } from "next/headers";
@@ -35,7 +38,7 @@ import {
   RegistrationType,
 } from "./public";
 export const enterGuestMode = actionClient.action(async () => {
-  cookies().set("isGuest", "true");
+  cookies().set("isGuest", "true", cookieDefaultOptions);
   redirect("/");
 });
 export const exitGuestMode = actionClient.action(async () => {

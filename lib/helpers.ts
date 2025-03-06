@@ -5,7 +5,7 @@ import {
 } from "next-safe-action";
 import { Schema, ZodObject } from "zod";
 
-export function isActionResponseSuccess<
+export function isSuccessfulActionResponse<
   ServerError,
   S extends ZodObject<any, any, any> | undefined,
   BAS extends readonly Schema[],
@@ -25,5 +25,5 @@ export function isActionResponseSuccess<
       >
     | undefined
 ) {
-  return response ? response.data?.success : true;
+  return !response || response.data?.success;
 }

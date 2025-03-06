@@ -277,7 +277,6 @@ export function ScheduleTable({
     [currentRowIndex]
   );
   const router = useRouter();
-  console.log(isLoading ? columnsSkeletons : columns);
   const table = useReactTable<ScheduleRow>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),

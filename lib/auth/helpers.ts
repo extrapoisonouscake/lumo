@@ -44,6 +44,7 @@ export async function performLogin(
   }
   const { cookies: cookiesToAdd, studentID } =
     await fetchAuthCookiesAndStudentID(username, password);
+
   setUpLogin({
     cookies: cookiesToAdd,
     studentID,
@@ -71,7 +72,7 @@ export function setUpLogin({
   cookieStore.set("studentId", studentID);
   if (credentials) {
     cookieStore.set("username", credentials.username);
-    cookieStore.set("password", credentials.password);
+    cookieStore.set("password", encodeURIComponent(credentials.password));
   }
 }
 const loginDefaultParams = {

@@ -13,7 +13,12 @@ import {
 } from "@/trigger/parse-announcements";
 
 import { NextRequest, NextResponse } from "next/server";
-
+const POSTMARK_WEBHOOK_IPS = [
+  "3.134.147.250",
+  "50.31.156.6",
+  "50.31.156.77",
+  "18.217.206.57",
+];
 interface PostmarkWebhookPayloadUser {
   Email: string;
   Name: string;
@@ -59,7 +64,13 @@ export async function POST(request: NextRequest): Promise<Response> {
   const { searchParams } = request.nextUrl;
 
   const token = searchParams.get("token");
-  if (!token || token !== ANNOUNCEMENTS_UPLOAD_AUTH_KEY)
+  const ip = request.headers.get("x-forwarded-for");
+  if (
+    !token ||
+    token !== ANNOUNCEMENTS_UPLOAD_AUTH_KEY ||
+    !ip ||
+    !POSTMARK_WEBHOOK_IPS.includes(ip)
+  )
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
 
   const emailDataPromise = request.json() as Promise<PostmarkWebhookPayload>;

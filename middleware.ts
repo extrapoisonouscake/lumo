@@ -31,7 +31,10 @@ export async function middleware(request: NextRequest) {
   if (isAllowedGeneralAccess) {
     if (isOnUnauthenticatedPage) {
       return Response.redirect(new URL("/", request.url));
-    } else if (isGuest && !guestAllowedPathnames.some(p=>pathname.startsWith(p))) {
+    } else if (
+      isGuest &&
+      !guestAllowedPathnames.some((p) => pathname.startsWith(p))
+    ) {
       return Response.redirect(new URL("/", request.url));
     } else {
       const cookieWritableStore = new MyEdCookieStore(response.cookies);
@@ -45,7 +48,7 @@ export async function middleware(request: NextRequest) {
       ) {
         const formData = {
           username,
-          password,
+          password: decodeURIComponent(password),
         } as LoginSchema;
 
         try {
