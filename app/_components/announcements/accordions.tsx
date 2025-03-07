@@ -113,7 +113,7 @@ export function AnnouncementsAccordions({
       {personalAnnouncementsItems.length > 0 && (
         <AnnouncementItem
           emoji="👋"
-          heading="Personal Announcements"
+          heading="Personal"
           isItemsView={true}
           index={-1}
         >
