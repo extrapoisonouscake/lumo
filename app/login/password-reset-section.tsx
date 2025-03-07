@@ -12,7 +12,7 @@ import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { resetPassword } from "@/lib/auth/mutations";
 import { PasswordResetSchema, passwordResetSchema } from "@/lib/auth/public";
-import { isActionResponseSuccess } from "@/lib/helpers";
+import { isSuccessfulActionResponse } from "@/lib/helpers";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -34,7 +34,7 @@ export function PasswordResetSection({
       ...data,
       securityQuestion: securityQuestion ?? undefined,
     });
-    if (isActionResponseSuccess(response)) {
+    if (isSuccessfulActionResponse(response)) {
       const securityQuestion = response?.data?.securityQuestion; //fix types
       if (securityQuestion) {
         setSecurityQuestion(securityQuestion);

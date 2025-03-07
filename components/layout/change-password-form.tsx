@@ -8,7 +8,7 @@ import {
   ChangePasswordSchema,
   LoginSchema,
 } from "@/lib/auth/public";
-import { isActionResponseSuccess } from "@/lib/helpers";
+import { isSuccessfulActionResponse } from "@/lib/helpers";
 import { Form } from "../ui/form";
 import { FormInput } from "../ui/form-input";
 import { FormPasswordInput } from "../ui/form-password-input";
@@ -37,7 +37,7 @@ export function ChangePasswordForm({
       setErrorMessage(null);
     }
     const response = await changePassword(data);
-    if (isActionResponseSuccess(response)) {
+    if (isSuccessfulActionResponse(response)) {
       onSuccess();
     } else {
       setErrorMessage(
