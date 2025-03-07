@@ -11,31 +11,22 @@ import { AnnouncementsSectionTable } from "./table";
 const gradeRegex =
   /\b(?:grade|grades|gr\.?)\s*(?:\d+s?(?:\s*(?:[-\/]|\s+to\s+)\s*\d+s?|\s*,\s*\d+s?)*(?:\s*(?:,?\s+(?:and|&)\s+)?\d+s?)?)\b/gi;
 export const highlightGrades = (targetGrade: number) => (text: string) => {
-  const segments: { text: string; isHighlighted: boolean }[] = [];
   let lastIndex = 0;
 
   const lowercasedText = text.toLowerCase();
   let match,
     hasOneRelevant = false;
 
-  while ((match = gradeRegex.exec(lowercasedText)) !== null) {
+  while (
+    (match = gradeRegex.exec(lowercasedText)) !== null &&
+    !hasOneRelevant
+  ) {
     // Add non-matching text before this match
-    if (match.index > lastIndex) {
-      segments.push({
-        text: text.slice(lastIndex, match.index),
-        isHighlighted: false,
-      });
-    }
 
     const gradeText = match[0];
-    const originalText = text.slice(
-      match.index,
-      match.index + gradeText.length
-    );
 
     // Extract numbers from the grade text (removing any 's' suffix)
     const numbers = gradeText.match(/\d+/g)?.map(Number) || [];
-    let isRelevant = false;
 
     // Check if the target grade is mentioned
     for (let i = 0; i < numbers.length; i++) {
@@ -45,31 +36,15 @@ export const highlightGrades = (targetGrade: number) => (text: string) => {
           numbers[i] <= targetGrade &&
           targetGrade <= numbers[i + 1])
       ) {
-        isRelevant = true;
-        if (!hasOneRelevant) {
-          hasOneRelevant = true;
-        }
+        hasOneRelevant = true;
         break;
       }
     }
 
-    segments.push({
-      text: originalText,
-      isHighlighted: isRelevant,
-    });
-
     lastIndex = match.index + gradeText.length;
   }
 
-  // Add remaining text
-  if (lastIndex < text.length) {
-    segments.push({
-      text: text.slice(lastIndex),
-      isHighlighted: false,
-    });
-  }
-
-  return { segments, hasOneRelevant };
+  return hasOneRelevant;
 };
 export function AnnouncementsAccordions({
   data,
@@ -96,18 +71,8 @@ export function AnnouncementsAccordions({
         if (highlightStudentGrade) {
           listItems = [];
           for (const item of props.items) {
-            const { hasOneRelevant, segments } = highlightStudentGrade(item);
-            const element = (
-              <li className="list-disc list-inside">
-                {segments.map(({ text, isHighlighted }) => {
-                  return isHighlighted ? (
-                    <span className="font-bold">{text}</span>
-                  ) : (
-                    text
-                  );
-                })}
-              </li>
-            );
+            const hasOneRelevant = highlightStudentGrade(item);
+            const element = <li className="list-disc list-inside">{item}</li>;
             if (hasOneRelevant) {
               personalAnnouncementsItems.push(element);
             } else {
