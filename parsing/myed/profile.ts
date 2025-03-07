@@ -2,13 +2,13 @@ import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { PersonalDetails } from "@/types/school";
 
 import { getCORSProxyURL } from "@/helpers/getCORSProxyURL";
-import { ParserFunctionArguments } from "./types";
 import { CheerioAPI } from "cheerio";
+import { ParserFunctionArguments } from "./types";
 type PersonalDetailsParserArguments =
   ParserFunctionArguments<"personalDetails">;
-export function parsePersonalDetails(
-  {responses:[$main, $photoRoot]}: PersonalDetailsParserArguments
-): PersonalDetails | undefined {
+export function parsePersonalDetails({
+  responses: [$main, $photoRoot],
+}: PersonalDetailsParserArguments): PersonalDetails | undefined {
   const mainDetails = parseMainDetails($main);
   if (!mainDetails) return;
   const photoURL = parsePhotoURL($photoRoot);
@@ -43,7 +43,8 @@ function parseMainDetails($: CheerioAPI) {
   for (const [key, value] of rawDetailsEntries) {
     const propertyName = detailLabelsMap[key];
     if (!key) continue;
-    result[propertyName] = value;
+    const valueAsNumber = Number(value);
+    result[propertyName] = isNaN(valueAsNumber) ? value : valueAsNumber;
   }
   return result as Omit<PersonalDetails, "photoURL">;
 }

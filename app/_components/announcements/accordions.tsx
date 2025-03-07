@@ -9,7 +9,7 @@ import { cn } from "@/helpers/cn";
 import { AnnouncementSection, PersonalDetails } from "@/types/school";
 import { AnnouncementsSectionTable } from "./table";
 const gradeRegex =
-  /\b(?:grade|grades|gr\.?)\s*(?:\d+s?(?:\s*(?:[-\/]|\s+to\s+)\s*\d+s?|\s*,\s*\d+s?)*(?:\s*(?:,?\s+(?:and|&)\s+)?\d+s?)?)\b/gi;
+  /\b(?:grade|grades|gr\.?)\s*(?:\d+(?:['’]?s)?(?:\s*(?:[-\/]|\s+to\s+)\s*\d+(?:[''']?s)?|\s*,\s*\d+(?:[''']?s)?)*(?:\s*(?:,?\s+(?:and|&)\s+)?\d+(?:[''']?s)?)?)\b/gi;
 export const highlightGrades = (targetGrade: number) => (text: string) => {
   let lastIndex = 0;
 
@@ -17,10 +17,7 @@ export const highlightGrades = (targetGrade: number) => (text: string) => {
   let match,
     hasOneRelevant = false;
 
-  while (
-    (match = gradeRegex.exec(lowercasedText)) !== null &&
-    !hasOneRelevant
-  ) {
+  while ((match = gradeRegex.exec(lowercasedText)) !== null) {
     // Add non-matching text before this match
 
     const gradeText = match[0];
