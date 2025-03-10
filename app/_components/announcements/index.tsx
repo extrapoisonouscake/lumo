@@ -26,13 +26,7 @@ function AnnouncementsHeading() {
 }
 export async function Announcements() {
   const date = timezonedDayJS();
-  if ([0, 6].includes(date.day())) {
-    return (
-      <AnnouncementsNotAvailableCard
-        reason={AnnouncementsNotAvailableReason.NotAWeekday}
-      />
-    );
-  }
+
   const { schoolId } = await getUserSettings();
   let content, pdfLink;
   if (!schoolId) {
@@ -45,6 +39,12 @@ export async function Announcements() {
     content = (
       <AnnouncementsNotAvailableCard
         reason={AnnouncementsNotAvailableReason.SchoolNotAvailable}
+      />
+    );
+  } else if ([0, 6].includes(date.day())) {
+    content = (
+      <AnnouncementsNotAvailableCard
+        reason={AnnouncementsNotAvailableReason.NotAWeekday}
       />
     );
   } else {
