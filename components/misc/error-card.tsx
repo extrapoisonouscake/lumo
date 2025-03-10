@@ -13,7 +13,7 @@ export function ErrorCard({
     <Card className="p-3 flex flex-col gap-1.5">
       <AppleEmoji
         value={emoji}
-        textClassName="text-3xl leading-8"
+        textClassName="text-3xl leading-none"
         imageClassName="size-[30px]"
       />
 

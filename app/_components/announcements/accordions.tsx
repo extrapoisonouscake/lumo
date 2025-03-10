@@ -7,10 +7,11 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/helpers/cn";
 import { AnnouncementSection, PersonalDetails } from "@/types/school";
+import { useMemo } from "react";
 import { AnnouncementsSectionTable } from "./table";
 const gradeRegex =
   /\b(?:grade|grades|gr\.?)\s*(?:\d+(?:['’]?s)?(?:\s*(?:[-\/]|\s+to\s+)\s*\d+(?:[''']?s)?|\s*,\s*\d+(?:[''']?s)?)*(?:\s*(?:,?\s+(?:and|&)\s+)?\d+(?:[''']?s)?)?)\b/gi;
-export const highlightGrades = (targetGrade: number) => (text: string) => {
+export const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
   let lastIndex = 0;
 
   const lowercasedText = text.toLowerCase();
@@ -43,6 +44,7 @@ export const highlightGrades = (targetGrade: number) => (text: string) => {
 
   return hasOneRelevant;
 };
+
 export function AnnouncementsAccordions({
   data,
   pdfURL,
@@ -52,58 +54,67 @@ export function AnnouncementsAccordions({
   pdfURL: string | null;
   studentGrade: PersonalDetails["grade"] | undefined;
 }) {
-  const highlightStudentGrade = studentGrade
-    ? highlightGrades(studentGrade)
+  const hasRelevantGrade = studentGrade
+    ? getHasRelevantGrade(studentGrade)
     : undefined;
-  const personalAnnouncementsItems = [];
-  const accordionItems: React.ReactNode[] = [];
-  for (let i = 0; i < data.length; i++) {
-    const { heading, emoji, ...props } = data[i];
-    let content;
-    const isItemsView = "items" in props;
+  const [personalAnnouncementsItems, accordionItems] = useMemo(() => {
+    const personalAnnouncementsItems = [];
+    const accordionItems: React.ReactNode[] = [];
+    for (let i = 0; i < data.length; i++) {
+      const { heading, emoji, ...props } = data[i];
+      let content;
+      const isItemsView = "items" in props;
 
-    if (isItemsView) {
-      if (props.items.length > 0) {
-        let listItems;
-        if (highlightStudentGrade) {
-          listItems = [];
-          for (const item of props.items) {
-            const hasOneRelevant = highlightStudentGrade(item);
-            const element = <li className="list-disc list-inside">{item}</li>;
-            if (hasOneRelevant) {
-              personalAnnouncementsItems.push(element);
-            } else {
-              listItems.push(element);
+      if (isItemsView) {
+        if (props.items.length > 0) {
+          let listItems;
+          if (hasRelevantGrade) {
+            listItems = [];
+            const priorityItems = [];
+            for (const item of props.items) {
+              const hasOneRelevant = hasRelevantGrade(item);
+              const element = <li className="list-disc list-inside">{item}</li>;
+              if (hasOneRelevant) {
+                if (heading === "Today") {
+                  personalAnnouncementsItems.push(element);
+                } else {
+                  priorityItems.push(element);
+                }
+              } else {
+                listItems.push(element);
+              }
             }
+            listItems = [...priorityItems, ...listItems];
+          } else {
+            listItems = props.items;
           }
+          content = (
+            <ul className="flex flex-col gap-1.5 leading-6">{listItems}</ul>
+          );
         } else {
-          listItems = props.items;
+          content = <p>No announcements in this section.</p>;
         }
-        content = (
-          <ul className="flex flex-col gap-1.5 leading-6">{listItems}</ul>
-        );
       } else {
-        content = <p>No announcements in this section.</p>;
+        content = (
+          <AnnouncementsSectionTable
+            pdfURL={pdfURL}
+            rows={heading === "Meetings & Practices" ? [] : props.table}
+          />
+        );
       }
-    } else {
-      content = (
-        <AnnouncementsSectionTable
-          pdfURL={pdfURL}
-          rows={heading === "Meetings & Practices" ? [] : props.table}
-        />
+      accordionItems.push(
+        <AnnouncementItem
+          emoji={emoji}
+          heading={heading}
+          isItemsView={isItemsView}
+          index={i}
+        >
+          {content}
+        </AnnouncementItem>
       );
     }
-    accordionItems.push(
-      <AnnouncementItem
-        emoji={emoji}
-        heading={heading}
-        isItemsView={isItemsView}
-        index={i}
-      >
-        {content}
-      </AnnouncementItem>
-    );
-  }
+    return [personalAnnouncementsItems, accordionItems];
+  }, [data, studentGrade]);
   return (
     <Accordion
       type="multiple"

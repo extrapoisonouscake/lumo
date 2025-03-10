@@ -19,7 +19,7 @@ export function AppleEmojiComponent({
   const isText = isAppleDevice || !(value in emojiSrcs);
   const className = cn(
     commonClassName,
-    { [textClassName || ""]: isText },
+    { [textClassName || "leading-none"]: isText },
     { [cn("size-5", imageClassName)]: !isText }
   );
 

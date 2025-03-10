@@ -18,13 +18,38 @@ import {
   loginSchema,
   LoginSchema,
 } from "./lib/auth/public";
+import { encryption } from "./lib/encryption";
+async function getRedirectResponse(
+  request: NextRequest,
+  errorMessage?: string
+) {
+  let safeErrorMessage;
+  if (errorMessage) {
+    safeErrorMessage = isKnownLoginError(errorMessage)
+      ? errorMessage
+      : LoginErrors.unexpectedError;
+  }
+  const redirectResponse = NextResponse.redirect(
+    new URL(
+      `/login${errorMessage ? `?error=${safeErrorMessage}` : ""}`,
+      request.url
+    )
+  );
+  await deleteSession(redirectResponse.cookies);
 
+  return redirectResponse;
+}
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { cookies } = request;
   const isGuest = isGuestMode(cookies);
   const isAllowedGeneralAccess = isUserAuthenticated(cookies) || isGuest;
   const { pathname } = request.nextUrl;
+  console.log(pathname);
+  if (pathname === "/log-out") {
+    const redirectResponse = await getRedirectResponse(request);
+    return redirectResponse;
+  }
   const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
     pathname.startsWith(path)
   );
@@ -38,8 +63,12 @@ export async function middleware(request: NextRequest) {
       return Response.redirect(new URL("/", request.url));
     } else {
       const cookieWritableStore = new MyEdCookieStore(response.cookies);
-      const username = cookies.get(getFullCookieName("username"))?.value;
-      const password = cookies.get(getFullCookieName("password"))?.value;
+      const username = encryption.decrypt(
+        cookies.get(getFullCookieName("username"))?.value || ""
+      ); //? workaround
+      const password = encryption.decrypt(
+        cookies.get(getFullCookieName("password"))?.value || ""
+      ); //? workaround
 
       if (
         !cookies.has(getFullCookieName(MYED_SESSION_COOKIE_NAME)) &&
@@ -59,20 +88,15 @@ export async function middleware(request: NextRequest) {
             formData.password
           );
           for (const [name, value] of Object.entries(cookiesToAdd)) {
-            cookieWritableStore.set(name, value || "", {
+            cookieWritableStore.set(name, encryption.encrypt(value), {
               maxAge: SESSION_TTL_IN_SECONDS,
             });
           }
         } catch (e: any) {
-          const { message } = e;
-
-          const safeErrorMessage: LoginErrors = isKnownLoginError(message)
-            ? message
-            : LoginErrors.unexpectedError;
-          const redirectResponse = NextResponse.redirect(
-            new URL(`/login?error=${safeErrorMessage}`, request.url)
+          const redirectResponse = await getRedirectResponse(
+            request,
+            e.message
           );
-          await deleteSession(redirectResponse.cookies);
 
           return redirectResponse;
         }

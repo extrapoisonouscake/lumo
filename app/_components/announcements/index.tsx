@@ -149,7 +149,7 @@ const reasonToVisualData = {
     message: "No announcements for today yet.",
   },
   [AnnouncementsNotAvailableReason.NotAWeekday]: {
-    emoji: "🌞",
+    emoji: "📭",
     message: "No announcements for today.",
   },
 };
