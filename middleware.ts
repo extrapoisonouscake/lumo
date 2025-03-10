@@ -45,7 +45,7 @@ export async function middleware(request: NextRequest) {
   const isGuest = isGuestMode(cookies);
   const isAllowedGeneralAccess = isUserAuthenticated(cookies) || isGuest;
   const { pathname } = request.nextUrl;
-  console.log(pathname);
+
   if (pathname === "/log-out") {
     const redirectResponse = await getRedirectResponse(request);
     return redirectResponse;

@@ -16,6 +16,7 @@ import {
   guestAllowedPathnames,
   websitePagesWithStaticPaths,
 } from "@/constants/website";
+import { cn } from "@/helpers/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode, useMemo } from "react";
@@ -40,7 +41,7 @@ export function AppSidebar({
         </SidebarHeader>
       )}
       <SidebarContent className="pb-1">
-        <SidebarGroup className="py-0">
+        <SidebarGroup className={cn("py-0", { "pt-2": isGuest })}>
           <SidebarGroupContent>
             <PagesMenu isGuest={isGuest} />
           </SidebarGroupContent>

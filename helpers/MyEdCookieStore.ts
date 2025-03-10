@@ -58,7 +58,6 @@ export class MyEdCookieStore {
         props.push(cookieDefaultOptions as any);
       }
     }
-    console.log(props);
     return this.store.set(...props);
   };
   getAll: PlainCookieStore["getAll"] = (...props: [name: string] | []) => {
