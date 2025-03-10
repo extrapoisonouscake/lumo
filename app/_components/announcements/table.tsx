@@ -43,17 +43,15 @@ export function AnnouncementsSectionTable({
               colSpan={header?.length}
               className="h-24 text-center border-0"
             >
+              Please open{" "}
               {pdfURL ? (
-                <>
-                  Please open{" "}
-                  <Link href={pdfURL} variant="underline" target="_blank">
-                    the original file
-                  </Link>{" "}
-                  to view this content.
-                </>
+                <Link href={pdfURL} variant="underline" target="_blank">
+                  the original file
+                </Link>
               ) : (
-                "Nothing here for now."
-              )}
+                "the original file"
+              )}{" "}
+              to view this content.
             </TableCell>
           </TableRow>
         )}

@@ -2,7 +2,7 @@ import {
   prettifySubjectName,
   TEACHER_ADVISORY_ABBREVIATION,
 } from "@/helpers/prettifySubjectName";
-import { Subject } from "@/types/school";
+import { Subject, Term } from "@/types/school";
 import { DeepWithRequired } from "@/types/utils";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
@@ -35,20 +35,27 @@ function separateTAFromSubjects(subject: Subject[]) {
   };
 }
 
-export function parseSubjects(
-  {responses:[data]}: ParserFunctionArguments<
-    "subjects",
-    [
-      DeepWithRequired<
-        OpenAPI200JSONResponse<"/lists/academics.classes.list">,
-        | "relSscMstOid_mstDescription"
-        | "relSscMstOid_mstStaffView"
-        | "cfTermAverage"
-        | "relSscMstOid_mstRoomView"
-      >
-    ]
-  >
-) {
+export function parseSubjects({
+  responses: [gradeTerms, data],
+}: ParserFunctionArguments<
+  "subjects",
+  [
+    OpenAPI200JSONResponse<"/lists/academics.classes.list/studentGradeTerms">,
+    DeepWithRequired<
+      OpenAPI200JSONResponse<"/lists/academics.classes.list">,
+      | "relSscMstOid_mstDescription"
+      | "relSscMstOid_mstStaffView"
+      | "cfTermAverage"
+      | "relSscMstOid_mstRoomView"
+    >
+  ]
+>): {
+  terms: Term[];
+  subjects: {
+    main: Subject[];
+    teacherAdvisory: Subject | null;
+  };
+} {
   const preparedData = data.map(
     ({
       relSscMstOid_mstDescription,
@@ -65,5 +72,12 @@ export function parseSubjects(
       gpa: normalizeGPA(cfTermAverage),
     })
   );
-  return separateTAFromSubjects(preparedData);
+  const preparedTerms = gradeTerms.map((item) => ({
+    id: item.oid,
+    name: item.gradeTermId,
+  }));
+  return {
+    terms: preparedTerms,
+    subjects: separateTAFromSubjects(preparedData),
+  };
 }

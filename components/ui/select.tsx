@@ -5,6 +5,7 @@ import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/helpers/cn";
+import { Skeleton } from "./skeleton";
 
 const Select = SelectPrimitive.Root;
 
@@ -33,7 +34,7 @@ const SelectTrigger = React.forwardRef<
       className={
         !asChild
           ? cn(
-              "flex h-10 w-full items-center justify-between rounded-lg r border border-input bg-background px-3 py-2 text-sm ring-offset-background [&[data-placeholder]>span]:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+              "flex h-10 w-full gap-2 items-center justify-between rounded-lg r border border-input bg-background px-3 py-2 text-sm ring-offset-background [&[data-placeholder]>span]:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
               className
             )
           : className
@@ -160,6 +161,22 @@ const SelectSeparator = React.forwardRef<
 ));
 SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 
+const SelectSkeleton = React.forwardRef<
+  React.ElementRef<typeof SelectPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SelectTrigger>
+>(({ className, ...props }, ref) => (
+  <Select>
+    <SelectTrigger
+      ref={ref}
+      {...props}
+      className={cn("pointer-events-none", className)}
+    >
+      <Skeleton>Value</Skeleton>
+    </SelectTrigger>
+  </Select>
+));
+SelectSkeleton.displayName = SelectPrimitive.Root.displayName;
+
 export {
   Select,
   SelectContent,
@@ -169,6 +186,7 @@ export {
   SelectScrollDownButton,
   SelectScrollUpButton,
   SelectSeparator,
+  SelectSkeleton,
   SelectTrigger,
   SelectValue,
 };

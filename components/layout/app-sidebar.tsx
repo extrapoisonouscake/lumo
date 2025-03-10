@@ -71,14 +71,14 @@ function PagesMenu({ isGuest }: { isGuest: boolean }) {
   return (
     <SidebarMenu>
       {pages.map(([url, page]) => (
-        <SidebarMenuItem key={page.name}>
+        <SidebarMenuItem key={url}>
           <SidebarMenuButton
             asChild
             isActive={url === "/" ? url === pathname : pathname.startsWith(url)}
           >
             <Link href={url}>
               <page.icon />
-              {page.name}
+              {page.breadcrumb[0].name}
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

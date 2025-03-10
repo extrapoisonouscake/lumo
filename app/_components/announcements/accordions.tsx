@@ -159,7 +159,10 @@ function AnnouncementItem({
         </div>
       </AccordionTrigger>
       <AccordionContent
-        containerClassName={cn("border-t pt-2.5 pb-3", {
+        className={cn("pt-2.5 pb-3", {
+          "p-0": !isItemsView,
+        })}
+        containerClassName={cn("pb-0 border-t", {
           "p-0": !isItemsView,
         })}
       >

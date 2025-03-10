@@ -42,6 +42,7 @@ export enum AssignmentStatus {
   Exempt,
 }
 export interface Assignment {
+  id: string;
   name: string;
   dueAt: Date;
   assignedAt: Date;
@@ -51,4 +52,8 @@ export interface Assignment {
   score: number | null;
   maxScore: number | null;
   classAverage: number | null;
+}
+export interface Term {
+  id: string;
+  name: string;
 }

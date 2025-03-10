@@ -1,4 +1,7 @@
-import { PageHeading } from "@/components/layout/page-heading";
+import {
+  PageDataProvider,
+  PageHeading,
+} from "@/components/layout/page-heading";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { Metadata } from "next";
 import { ReactNode } from "react";
@@ -10,9 +13,9 @@ export const metadata: Metadata = {
 };
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <PageDataProvider>
       <PageHeading />
       {children}
-    </>
+    </PageDataProvider>
   );
 }

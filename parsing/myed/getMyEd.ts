@@ -12,7 +12,7 @@ import * as cheerio from "cheerio";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
-import { parseSubjectAssignments } from "./assignments";
+import { parseSubjectAssignment, parseSubjectAssignments } from "./assignments";
 import { parsePersonalDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
 import { clientQueueManager } from "./requests-queue";
@@ -28,6 +28,7 @@ const endpointToParsingFunction = {
   subjectAssignments: parseSubjectAssignments,
   personalDetails: parsePersonalDetails,
   registrationFields: parseRegistrationFields,
+  subjectAssignment: parseSubjectAssignment,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>
@@ -66,7 +67,6 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     for (const step of steps) {
       const isLastRequest = step.index === steps.length - 1;
       const value = step.value;
-
       const response = await sendMyEdRequest({
         //@ts-expect-error FIX THIS
         step: value,
@@ -103,7 +103,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     }) as MyEdEndpointResponse<Endpoint>;
   } catch (e) {
     authParameters?.queue?.ensureUnlock();
-    console.error(e);
+    console.log(e);
     return undefined;
   }
 });

@@ -5,8 +5,19 @@ import { SubjectsPage } from "./content";
 export const metadata: Metadata = {
   title: "Classes",
 };
-export default async function Page() {
-  const subjects = await getMyEd("subjects");
-  if (!subjects) return <ErrorCard />;
-  return <SubjectsPage data={subjects} />;
+export interface TermSearchParams {
+  year?: string;
+  term?: string;
+}
+export default async function Page({
+  searchParams: { year, term },
+}: {
+  searchParams: TermSearchParams;
+}) {
+  const response = await getMyEd("subjects", {
+    isPreviousYear: year === "previous",
+    termOid: term,
+  });
+  if (!response) return <ErrorCard />;
+  return <SubjectsPage response={response} year={year} term={term} />;
 }

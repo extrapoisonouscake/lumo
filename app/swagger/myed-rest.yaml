@@ -219,6 +219,30 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/StudentAssignment"
+  /students/{studentOid}/assignments/{assignmentOid}:
+    get:
+      summary: Get the assignment for a student
+      operationId: getStudentAssignment
+      tags:
+        - students
+      parameters:
+        - name: studentOid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: assignmentOid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The assignment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentAssignment"
   /lists/academics.classes.list:
     get:
       summary: Get the list of classes for a student

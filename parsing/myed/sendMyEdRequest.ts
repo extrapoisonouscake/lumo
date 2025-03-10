@@ -84,7 +84,7 @@ export async function sendMyEdRequest<
         step.method === "GET"
       ) {
         const queryString = new URLSearchParams({
-          ...step.body,
+          ...removeNullableProperties(step.body),
           ...(step.htmlToken
             ? { [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken }
             : {}),
@@ -128,4 +128,13 @@ export async function sendMyEdRequest<
   }
 
   return response;
+}
+function removeNullableProperties<T extends Record<string, any>>(
+  obj: T
+): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(
+      ([_, value]) => value !== null && value !== undefined
+    )
+  ) as Partial<T>;
 }

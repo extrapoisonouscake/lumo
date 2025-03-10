@@ -105,15 +105,13 @@ export function SchoolPicker({
               <FormItem className="flex flex-col">
                 <FormLabel
                   htmlFor={"schoolId" satisfies UserSetting}
-                  className="text-sm"
+                  className="text-sm font-normal"
                 >
                   School
                 </FormLabel>
                 <Popover open={isOpen} onOpenChange={setIsOpen}>
                   <PopoverTrigger asChild>
                     <Button
-                      shouldShowChildrenOnLoading
-                      isLoading={formState.isSubmitting}
                       variant="outline"
                       role="combobox"
                       aria-expanded={isOpen}
@@ -129,14 +127,7 @@ export function SchoolPicker({
                   <PopoverContent className="max-w-[300px] p-0">
                     <Command
                       filter={(value, search, keywords) => {
-                        if (
-                          value === "other" &&
-                          !schoolsVisualDataArray.some(
-                            ({ name, id }) =>
-                              defaultCmdkFilter(id, search, [name]) > 0
-                          )
-                        )
-                          return 1;
+                        if (value === "other") return 0.1;
                         return defaultCmdkFilter(value, search, keywords);
                       }}
                     >

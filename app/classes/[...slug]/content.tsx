@@ -1,27 +1,56 @@
-"use client"
+"use client";
 
-import { Assignment } from "@/types/school";
-import { SubjectPageUserSettings } from "./types";
-import { SubjectAssignmentsTable } from "./table";
-import { useEffect } from "react";
+import { TermSelect, TermSelectSkeleton } from "@/components/misc/term-select";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { SubjectAssignmentsTable } from "./table";
+import { SubjectPageUserSettings } from "./types";
 
-export function SubjectPageContent({subjectId,assignments,...props}: MyEdEndpointResponse<'subjectAssignments'> & SubjectPageUserSettings) {
+export function SubjectPageContent({
+  subjectId,
+  subjectName,
+  assignments,
+  terms,
+  currentTermIndex,
+  term,
+  ...props
+}: MyEdEndpointResponse<"subjectAssignments"> &
+  SubjectPageUserSettings & {
+    subjectName: string;
+    term?: string;
+  }) {
   const pathname = usePathname();
-    useEffect(() => {
-        const fragments=pathname.split('/');
-        if(!subjectId||fragments.length===4) return
-            fragments.push(subjectId);
-            window.history.replaceState(null, '', fragments.join('/'));
-        
-    }, [subjectId]);
-  return <SubjectAssignmentsTable
-  data={assignments}
-  {...props}
-/>;
+  useEffect(() => {
+    const fragments = pathname.split("/");
+    if (!subjectId || fragments.length === 4) return;
+    fragments.push(subjectId);
+    window.history.replaceState(null, "", fragments.join("/"));
+  }, [subjectId]);
+  return (
+    <>
+      <TermSelect
+        terms={terms}
+        initialTerm={
+          term || (currentTermIndex ? terms[currentTermIndex].id : undefined)
+        }
+        shouldShowAllOption={false}
+        shouldShowYearSelect={false}
+      />
+      <SubjectAssignmentsTable
+        data={assignments}
+        subjectId={subjectId}
+        subjectName={subjectName}
+        {...props}
+      />
+    </>
+  );
 }
-export function SubjectPageSkeleton(){
-
-    return <SubjectAssignmentsTable isLoading />;
+export function SubjectPageSkeleton() {
+  return (
+    <>
+      <TermSelectSkeleton />
+      <SubjectAssignmentsTable isLoading />
+    </>
+  );
 }

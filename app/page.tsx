@@ -1,4 +1,7 @@
-import { PageHeading } from "@/components/layout/page-heading";
+import {
+  PageDataProvider,
+  PageHeading,
+} from "@/components/layout/page-heading";
 import { Suspense } from "react";
 import {
   Announcements,
@@ -6,13 +9,13 @@ import {
 } from "./_components/announcements";
 export default async function Home() {
   return (
-    <>
+    <PageDataProvider>
       <PageHeading />
       <div className="">
         <Suspense fallback={<AnnouncementsSkeleton />}>
           <Announcements />
         </Suspense>
       </div>
-    </>
+    </PageDataProvider>
   );
 }

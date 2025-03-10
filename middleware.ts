@@ -69,7 +69,6 @@ export async function middleware(request: NextRequest) {
       const password = encryption.decrypt(
         cookies.get(getFullCookieName("password"))?.value || ""
       ); //? workaround
-
       if (
         !cookies.has(getFullCookieName(MYED_SESSION_COOKIE_NAME)) &&
         username &&
@@ -88,7 +87,7 @@ export async function middleware(request: NextRequest) {
             formData.password
           );
           for (const [name, value] of Object.entries(cookiesToAdd)) {
-            cookieWritableStore.set(name, encryption.encrypt(value), {
+            cookieWritableStore.set(name, value, {
               maxAge: SESSION_TTL_IN_SECONDS,
             });
           }

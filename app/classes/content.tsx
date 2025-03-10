@@ -1,20 +1,34 @@
+import { TermSelect, TermSelectSkeleton } from "@/components/misc/term-select";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
 export function SubjectsPage({
-  data,
+  response,
+  year,
+  term,
 }: {
-  data?: MyEdEndpointResponse<"subjects">;
+  response?: MyEdEndpointResponse<"subjects">;
+  year?: string;
+  term?: string;
 }) {
   return (
     <>
-      <SubjectsTable data={data?.main} isLoading={!data} />
+      {response ? (
+        <TermSelect
+          terms={response.terms}
+          initialYear={year}
+          initialTerm={term}
+        />
+      ) : (
+        <TermSelectSkeleton />
+      )}
+      <SubjectsTable data={response?.subjects.main} isLoading={!response} />
 
-      {data?.teacherAdvisory && (
+      {response?.subjects.teacherAdvisory && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm">TA</h3>
+          <h3 className="text-sm font-medium">TA</h3>
           <SubjectsTable
             shownColumns={["room", "teachers"]}
-            data={[data.teacherAdvisory]}
+            data={[response.subjects.teacherAdvisory]}
           />
         </div>
       )}

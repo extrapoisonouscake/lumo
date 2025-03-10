@@ -43,17 +43,27 @@ type RouteResponse =
   | cheerio.CheerioAPI
   | Record<string, any>
   | Record<string, any>[];
+type RouteResolverParams<Params extends RouteParams> = {
+  responses: RouteResponse[];
+  params: Params;
+  metadata: Record<string, any>;
+  studentID: string;
+};
+type MetadataResolverFunction<Params extends RouteParams> = (
+  props: RouteResolverParams<Params>
+) => void;
+class MetadataResolver<Params extends RouteParams> {
+  constructor(private resolver: MetadataResolverFunction<Params>) {}
+  resolve(props: RouteResolverParams<Params>) {
+    this.resolver(props);
+  }
+}
 type RouteResolver<
   T extends
     | Omit<FlatRouteStep, "htmlToken">
     | Omit<FlatRouteStep, "htmlToken">[],
   Params extends RouteParams
-> = (props: {
-  responses: RouteResponse[];
-  params: Params;
-  metadata: Record<string, any>;
-  studentID: string;
-}) => T;
+> = (props: RouteResolverParams<Params>) => T;
 type SingularRouteStep<Params extends RouteParams> =
   | Omit<FlatRouteStep, "htmlToken">
   | RouteResolver<Omit<FlatRouteStep, "htmlToken">, Params>;
@@ -89,7 +99,7 @@ const processStep = <Params extends RouteParams>(
 class ResolvedRoute<Params extends RouteParams> {
   studentID?: string;
   params: Params;
-  steps: Array<RouteStep<Params>> = [];
+  steps: Array<RouteStep<Params> | MetadataResolver<Params>> = [];
   resolvedSteps: Array<FlatRouteStep | FlatRouteStep[]> = [];
   responses: (RouteResponse | RouteResponse[])[] = [];
   metadata: Record<string, any>;
@@ -102,7 +112,7 @@ class ResolvedRoute<Params extends RouteParams> {
   }: {
     studentID?: string;
     params: Params;
-    steps: Array<RouteStep<Params>>;
+    steps: Array<RouteStep<Params> | MetadataResolver<Params>>;
     requiresAuth: boolean;
   }) {
     if (requiresAuth && !studentID) throw new Error("route requires auth");
@@ -123,7 +133,15 @@ class ResolvedRoute<Params extends RouteParams> {
   *[Symbol.iterator]() {
     for (let i = 0; i < this.steps.length; i++) {
       let nextStep = this.steps[i];
-      if (typeof nextStep === "function") {
+      if (nextStep instanceof MetadataResolver) {
+        nextStep.resolve({
+          responses: this.responses,
+          params: this.params,
+          metadata: this.metadata,
+          studentID: this.studentID as string,
+        });
+        continue;
+      } else if (typeof nextStep === "function") {
         nextStep = nextStep({
           responses: this.responses,
           params: this.params,
@@ -155,7 +173,7 @@ export class Route<
   ResolvedRoute<Params>
 > {
   requiresAuth: boolean;
-  steps: Array<RouteStep<Params>>;
+  steps: Array<RouteStep<Params> | MetadataResolver<Params>>;
   predicates: Record<number, RouteStepPredicate<Params>> = {};
   constructor(requiresAuth = true) {
     super("call");
@@ -177,6 +195,10 @@ export class Route<
   ) {
     this.steps.push(multipleSteps);
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
+    return this;
+  }
+  metadata(resolver: MetadataResolverFunction<Params>) {
+    this.steps.push(new MetadataResolver(resolver));
     return this;
   }
   call(...[studentID, params]: [string, Params]) {
@@ -244,14 +266,40 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 export type MyEdRestEndpointURL = keyof paths;
 
 export const myEdRestEndpoints = {
-  subjects: new Route().step(({ studentID }) => ({
-    method: "GET",
-    path: `rest/lists/academics.classes.list`,
-    body: { selectedStudent: studentID, fieldSetOid: "fsnX2Cls" },
-    expect: "json",
-  })),
+  subjects: new Route<{
+    isPreviousYear?: boolean;
+    termOid?: string;
+  }>()
+    .step(({ params: { isPreviousYear, termOid } }) => ({
+      method: "GET",
+      path: `rest/lists/academics.classes.list/studentGradeTerms`,
+      body: {
+        year: isPreviousYear ? "previous" : "current",
+        term: termOid ? termOid : "all",
+      },
+      expect: "json",
+    }))
+    .step(({ studentID, params: { isPreviousYear, termOid } }) => {
+      const customParams = [];
+      if (isPreviousYear) customParams.push("selectedYear|previous");
+      if (termOid) customParams.push(`selectedTerm|${termOid}`);
+      return {
+        method: "GET",
+        path: `rest/lists/academics.classes.list`,
+        body: {
+          selectedStudent: studentID,
+          fieldSetOid: "fsnX2Cls",
+          customParams: customParams.join(";"),
+        },
+        expect: "json",
+      };
+    }),
   //TODO add ability to reuse steps in other steps
-  subjectAssignments: new Route<{ subjectName: string; subjectId?: string }>()
+  subjectAssignments: new Route<{
+    subjectName: string;
+    subjectId?: string;
+    termOid?: string;
+  }>()
     .step(
       ({ studentID }) => ({
         method: "GET",
@@ -265,7 +313,7 @@ export const myEdRestEndpoints = {
       }),
       ({ subjectId }) => !subjectId
     )
-    .multiple(
+    .metadata(
       ({
         params: { subjectName, subjectId: externalSubjectId },
         responses,
@@ -281,20 +329,50 @@ export const myEdRestEndpoints = {
           if (!subjectId) throw new Error("Subject not found");
         }
         metadata.subjectId = subjectId;
-        return [
-          {
-            method: "GET",
-            path: `rest/studentSchedule/${subjectId}/categoryDetails/pastDue`,
-            expect: "json",
-          },
-          {
-            method: "GET",
-            path: `rest/studentSchedule/${subjectId}/categoryDetails/upcoming`,
-            expect: "json",
-          },
-        ];
       }
-    ),
+    )
+    .step(({ metadata: { subjectId } }) => ({
+      method: "GET",
+      path: `rest/studentSchedule/${subjectId}/gradeTerms`,
+      expect: "json",
+    }))
+    .multiple(({ responses, metadata: { subjectId }, params: { termOid } }) => {
+      let selectedTermOid = termOid;
+      if (!selectedTermOid) {
+        const foundTerms = responses.at(
+          -1
+        ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
+        if (typeof foundTerms.currentTermIndex === "number") {
+          selectedTermOid = foundTerms.terms[foundTerms.currentTermIndex].oid;
+        }
+      }
+
+      return [
+        {
+          method: "GET",
+          path: `rest/studentSchedule/${subjectId}/categoryDetails/pastDue`,
+          body: {
+            gradeTermOid: selectedTermOid,
+          },
+          expect: "json",
+        },
+        {
+          method: "GET",
+          path: `rest/studentSchedule/${subjectId}/categoryDetails/upcoming`,
+          body: {
+            gradeTermOid: selectedTermOid,
+          },
+          expect: "json",
+        },
+      ];
+    }),
+  subjectAssignment: new Route<{
+    assignmentId: string;
+  }>().step(({ studentID, params: { assignmentId } }) => ({
+    method: "GET",
+    path: `rest/students/${studentID}/assignments/${assignmentId}`,
+    expect: "json",
+  })),
 };
 
 export type MyEdRestEndpoints = typeof myEdRestEndpoints;
