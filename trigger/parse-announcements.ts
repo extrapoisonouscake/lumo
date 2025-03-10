@@ -67,14 +67,13 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     const redisKey = getAnnouncementsRedisKey(school, date);
     const cachedAnnouncements = await redis.get(redisKey);
     if (cachedAnnouncements) {
-      console.log("Cached announcements found");
       return;
     }
 
     const pdfIDHashKey = getAnnouncementsPDFIDRedisHashKey(date);
-    console.log("pdfIDHashKey", pdfIDHashKey);
+
     const pdfID = await redis.hget(pdfIDHashKey, school);
-    console.log("pdfID", pdfID);
+
     let directUrl;
     let needToSetPDFURL = false;
     if (pdfID) {
