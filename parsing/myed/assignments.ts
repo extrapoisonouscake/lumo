@@ -62,7 +62,6 @@ export function parseSubjectAssignments({
       name: item.gradeTermId,
     }));
   return {
-    subjectId: metadata.subjectId,
     assignments: preparedAssignments,
     terms: preparedTerms,
     currentTermIndex:

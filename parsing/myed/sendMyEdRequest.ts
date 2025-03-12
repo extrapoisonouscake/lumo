@@ -21,11 +21,8 @@ export type SendMyEdRequestParameters<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
   >;
-} & ({ session?: string } | { queue: PrioritizedRequestQueue }) &
-  (
-    | { requestGroup?: never; isLastRequest?: never }
-    | { requestGroup: string; isLastRequest: boolean }
-  );
+  requestGroup?: string;
+} & ({ session?: string } | { queue: PrioritizedRequestQueue });
 const getUserAgent = () => {
   const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
   return userAgent;
@@ -42,7 +39,6 @@ export async function sendMyEdRequest<
   authCookies,
   step: stepOrSteps,
 
-  isLastRequest,
   requestGroup,
   ...sessionOrQueue
 }: SendMyEdRequestParameters<Steps>) {
@@ -120,8 +116,7 @@ export async function sendMyEdRequest<
   if (queue) {
     response = await queue.enqueue<Response | Response[]>(
       requestFunction,
-      requestGroup,
-      isLastRequest
+      requestGroup
     );
   } else {
     response = await requestFunction();

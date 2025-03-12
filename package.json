@@ -38,6 +38,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.0.4",
     "crypto-js": "^4.2.0",
+    "d3": "^7.9.0",
     "dayjs": "^1.11.13",
     "domhandler": "^5.0.3",
     "framer-motion": "^11.11.9",
@@ -57,6 +58,7 @@
     "react-day-picker": "^8.10.1",
     "react-dom": "^18",
     "react-hook-form": "^7.53.1",
+    "recharts": "^2.15.1",
     "server-only": "^0.0.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.4",
@@ -68,6 +70,7 @@
   "devDependencies": {
     "@trigger.dev/build": "3.3.17",
     "@types/crypto-js": "^4.2.2",
+    "@types/d3": "^7.4.3",
     "@types/js-yaml": "^4.0.9",
     "@types/lodash": "^4.17.15",
     "@types/node": "^20",

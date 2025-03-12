@@ -7,7 +7,7 @@ import { DeepWithRequired } from "@/types/utils";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
-const normalizeGPA = (string?: string) => {
+const normalizeAverage = (string?: string) => {
   if (!string) return null;
   const result = string.match(gpaRegex);
   if (!result) return null;
@@ -34,20 +34,42 @@ function separateTAFromSubjects(subject: Subject[]) {
     teacherAdvisory: (removedItem as unknown as Subject) ?? null,
   };
 }
+type SubjectResponse = DeepWithRequired<
+  OpenAPI200JSONResponse<"/lists/academics.classes.list">,
+  | "relSscMstOid_mstDescription"
+  | "relSscMstOid_mstStaffView"
+  | "cfTermAverage"
+  | "relSscMstOid_mstRoomView"
+>[number];
+const termRawValueToNormalized: Record<string, string> = {
+  FY: "Full Year",
+  S1: "First Semester",
+  S2: "Second Semester",
+};
 
+const convertSubject = ({
+  relSscMstOid_mstDescription,
+  relSscMstOid_mstStaffView,
+  cfTermAverage,
+  relSscMstOid_mstRoomView,
+  oid,
+  sscTermView,
+}: SubjectResponse) => ({
+  id: oid,
+  actualName: relSscMstOid_mstDescription,
+  name: prettifySubjectName(relSscMstOid_mstDescription),
+  teachers: relSscMstOid_mstStaffView.map((item) => item.name),
+  room: relSscMstOid_mstRoomView ?? null,
+  average: normalizeAverage(cfTermAverage),
+  term: sscTermView ? termRawValueToNormalized[sscTermView] : null,
+});
 export function parseSubjects({
   responses: [gradeTerms, data],
 }: ParserFunctionArguments<
   "subjects",
   [
     OpenAPI200JSONResponse<"/lists/academics.classes.list/studentGradeTerms">,
-    DeepWithRequired<
-      OpenAPI200JSONResponse<"/lists/academics.classes.list">,
-      | "relSscMstOid_mstDescription"
-      | "relSscMstOid_mstStaffView"
-      | "cfTermAverage"
-      | "relSscMstOid_mstRoomView"
-    >
+    SubjectResponse[]
   ]
 >): {
   terms: Term[];
@@ -56,22 +78,7 @@ export function parseSubjects({
     teacherAdvisory: Subject | null;
   };
 } {
-  const preparedData = data.map(
-    ({
-      relSscMstOid_mstDescription,
-      relSscMstOid_mstStaffView,
-      cfTermAverage,
-      relSscMstOid_mstRoomView,
-      oid,
-    }) => ({
-      id: oid,
-      actualName: relSscMstOid_mstDescription,
-      name: prettifySubjectName(relSscMstOid_mstDescription),
-      teachers: relSscMstOid_mstStaffView.map((item) => item.name),
-      room: relSscMstOid_mstRoomView ?? null,
-      gpa: normalizeGPA(cfTermAverage),
-    })
-  );
+  const preparedData = data.map(convertSubject);
   const preparedTerms = gradeTerms.map((item) => ({
     id: item.oid,
     name: item.gradeTermId,
@@ -80,4 +87,17 @@ export function parseSubjects({
     terms: preparedTerms,
     subjects: separateTAFromSubjects(preparedData),
   };
+}
+export function parseSubject({
+  metadata: { subject },
+}: ParserFunctionArguments<
+  "subject",
+  [
+    DeepWithRequired<
+      OpenAPI200JSONResponse<"/lists/academics.classes.list">,
+      "relSscMstOid_mstDescription" | "relSscMstOid_mstStaffView"
+    >
+  ]
+>): Subject {
+  return convertSubject(subject);
 }

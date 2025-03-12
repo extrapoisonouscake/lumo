@@ -1,5 +1,4 @@
 import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
-import { TopLoader } from "@/components/layout/top-loader";
 import { Toaster } from "@/components/ui/sonner";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { cn } from "@/helpers/cn";
@@ -29,10 +28,7 @@ export default async function RootLayout({
         >
           <Providers>
             <Toaster />
-            <AppSidebarWrapper>
-              <TopLoader />
-              {children}
-            </AppSidebarWrapper>
+            <AppSidebarWrapper>{children}</AppSidebarWrapper>
           </Providers>
         </body>
       </html>

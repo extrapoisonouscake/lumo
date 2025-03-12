@@ -12,11 +12,16 @@ export function TopLoader() {
     NProgress.configure({ parent: "#top-loader-container" });
   }, []);
   return (
-    <NextTopLoader
-      zIndex={40}
-      shadow={false}
-      color={primaryColor}
-      showSpinner={false}
-    />
+    <>
+      <NextTopLoader
+        zIndex={40}
+        shadow={false}
+        color={primaryColor}
+        showSpinner={false}
+      />
+      <div className="absolute top-0 left-0 w-full h-[3px]">
+        <div className="relative size-full" id="top-loader-container" />
+      </div>
+    </>
   );
 }

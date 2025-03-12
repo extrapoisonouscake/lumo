@@ -26,7 +26,6 @@ import {
   TableCellWithRedirectIcon,
   TableRow,
 } from "@/components/ui/table";
-import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { fractionFormatter } from "@/constants/intl";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
@@ -37,7 +36,6 @@ import {
 import { UserSettings } from "@/types/core";
 import { useRouter } from "next/navigation";
 import { Router } from "next/router";
-import { SubjectPageUserSettings } from "./types";
 
 const columnHelper = createColumnHelper<Assignment>();
 const getColumns = (
@@ -138,51 +136,38 @@ const mockAssignments = (length: number) =>
   );
 export function SubjectAssignmentsTable({
   data: externalData,
-  isLoading = false,
   subjectId,
-  subjectName,
-  shouldShowAssignmentScorePercentage = USER_SETTINGS_DEFAULT_VALUES[
-    "shouldShowAssignmentScorePercentage"
-  ],
-
-  shouldHighlightMissingAssignments = USER_SETTINGS_DEFAULT_VALUES[
-    "shouldHighlightMissingAssignments"
-  ],
+  settings,
 }: {
-  data?: Assignment[];
-  isLoading?: boolean;
-  subjectId?: Subject["id"];
-  subjectName?: Subject["name"];
-} & SubjectPageUserSettings) {
+  data: Assignment[];
+
+  subjectId: Subject["id"];
+  settings: UserSettings;
+}) {
   const data = useMemo(
-    () =>
-      isLoading
-        ? mockAssignments(5)
-        : prepareTableDataForSorting(
-            externalData as NonNullable<typeof externalData>
-          ),
-    [isLoading, externalData]
+    () => prepareTableDataForSorting(externalData),
+    [externalData]
   );
   const columns = useMemo(
     () =>
       getColumns(
         data && data.some((assignment) => "weight" in assignment),
-        shouldShowAssignmentScorePercentage
+        settings.shouldShowAssignmentScorePercentage
       ),
-    [data]
+    [data, settings.shouldShowAssignmentScorePercentage]
   );
   const getRowClassName = useMemo(
     () =>
-      shouldHighlightMissingAssignments
+      settings.shouldHighlightMissingAssignments
         ? (row: Row<Assignment>) => {
             return cn({
-              "bg-red-50 hover:bg-red-50":
+              "bg-red-200/25 hover:bg-red-200/25":
                 row.original.status === AssignmentStatus.Missing,
             });
           }
         : undefined,
 
-    [data, shouldHighlightMissingAssignments]
+    [data, settings.shouldHighlightMissingAssignments]
   );
   const getRowRenderer: RowRendererFactory<Assignment, [Router["push"]]> =
     (table, push) => (row) => {
@@ -191,9 +176,7 @@ export function SubjectAssignmentsTable({
         <TableRow
           onClick={() =>
             subjectId &&
-            push(
-              `/classes/${subjectName}/${subjectId}/assignments/${row.original.id}`
-            )
+            push(`/classes/${subjectId}/assignments/${row.original.id}`)
           }
           style={table.options.meta?.getRowStyles?.(row)}
           className={cn(
@@ -227,7 +210,7 @@ export function SubjectAssignmentsTable({
     },
     data,
     manualPagination: true,
-    columns: isLoading ? columnsSkeletons : columns,
+    columns,
   });
   const router = useRouter();
   return (
@@ -239,4 +222,12 @@ export function SubjectAssignmentsTable({
       rowRendererFactoryProps={[router.push]}
     />
   );
+}
+export function SubjectAssignmentsTableSkeleton() {
+  const table = useReactTable<Assignment>({
+    data: mockAssignments(5),
+    getCoreRowModel: getCoreRowModel(),
+    columns: columnsSkeletons,
+  });
+  return <TableRenderer table={table} columns={columnsSkeletons} />;
 }

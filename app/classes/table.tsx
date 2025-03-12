@@ -39,15 +39,15 @@ const columns = [
       <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
     ),
   }),
-  columnHelper.accessor("gpa", {
+  columnHelper.accessor("average", {
     header: ({ column }) => {
-      return <SortableColumn {...column}>GPA</SortableColumn>;
+      return <SortableColumn {...column}>Average</SortableColumn>;
     },
 
     cell: ({ row }) => {
-      const gpa = row.getValue("gpa");
-      if (!gpa) return NULL_VALUE_DISPLAY_FALLBACK;
-      return fractionFormatter.format(gpa as number);
+      const average = row.getValue("average");
+      if (!average) return NULL_VALUE_DISPLAY_FALLBACK;
+      return fractionFormatter.format(average as number);
     },
     sortUndefined: "last",
   }),
@@ -81,7 +81,7 @@ const columns = [
   }),
 ];
 const columnsSkeletons = makeTableColumnsSkeletons(columns, {
-  gpa: 4,
+  average: 4,
   name: 12,
   teachers: 12,
 });
@@ -89,9 +89,10 @@ const mockSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
       ({
-        gpa: 0,
+        average: 0,
         teachers: [],
         name: "",
+        term: "",
         room: "",
         id: "",
         actualName: "",
@@ -134,10 +135,9 @@ export function SubjectsTable({
           }
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
-          className={cn(
-            table.options.meta?.getRowClassName?.(row),
-            { "cursor-pointer": !isTA }
-          )}
+          className={cn(table.options.meta?.getRowClassName?.(row), {
+            "cursor-pointer": !isTA,
+          })}
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);

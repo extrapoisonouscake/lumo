@@ -3,6 +3,7 @@ import {
   stringToColor,
 } from "@/helpers/stringToColor";
 import { getMyEd } from "@/parsing/myed/getMyEd";
+
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { SidebarMenuButton } from "../ui/sidebar";

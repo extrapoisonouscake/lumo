@@ -18,7 +18,7 @@ import { parseRegistrationFields } from "./registration";
 import { clientQueueManager } from "./requests-queue";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
-import { parseSubjects } from "./subjects";
+import { parseSubject, parseSubjects } from "./subjects";
 import { ParserFunctionArguments } from "./types";
 
 const endpointToParsingFunction = {
@@ -29,6 +29,7 @@ const endpointToParsingFunction = {
   personalDetails: parsePersonalDetails,
   registrationFields: parseRegistrationFields,
   subjectAssignment: parseSubjectAssignment,
+  subject: parseSubject,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>
@@ -55,7 +56,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     }
     studentId = cookieStore.get("studentId")?.value;
     const session = authCookies.JSESSIONID;
-    if (!session || !studentId) return;
+    if (!session || !studentId) throw new Error("No session or studentId");
     const requestGroup = `${endpoint}-${Date.now()}`;
     const queue = clientQueueManager.getQueue(session);
     authParameters = { queue, authCookies, requestGroup };
@@ -65,13 +66,10 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   const steps = route(studentId, ...rest); //!
   try {
     for (const step of steps) {
-      const isLastRequest = step.index === steps.length - 1;
       const value = step.value;
       const response = await sendMyEdRequest({
         //@ts-expect-error FIX THIS
         step: value,
-
-        isLastRequest,
         ...authParameters,
       });
       const responses = [];
@@ -81,7 +79,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
           const r = response[i];
           //optimize
           const processedData = await processResponse(r, value[i]);
-          if (!processedData) return;
+          if (!processedData) throw new Error("No processed data");
           responses.push(processedData);
         }
       } else {
@@ -91,11 +89,12 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
 
           value as FlatRouteStep
         );
-        if (!processedData) return;
+        if (!processedData) throw new Error("No processed data");
         responses.push(processedData);
       }
       steps.addResponse(isArray ? responses : responses[0]);
     }
+    authParameters?.queue?.ensureUnlock();
     return endpointToParsingFunction[endpoint]({
       params: rest[0] as unknown as any,
       responses: steps.responses as any,
@@ -103,8 +102,7 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     }) as MyEdEndpointResponse<Endpoint>;
   } catch (e) {
     authParameters?.queue?.ensureUnlock();
-    console.log(e);
-    return undefined;
+    throw e;
   }
 });
 

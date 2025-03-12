@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ReactNode, Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
+import { TopLoader } from "./top-loader";
 import { UserHeader, UserHeaderSkeleton } from "./user-header";
 
 const Inset = ({ children }: { children: ReactNode }) => (
@@ -28,7 +29,10 @@ export function AppSidebarWrapper({ children }: { children: ReactNode }) {
           ) : null
         }
       />
-      <Inset>{children}</Inset>
+      <Inset>
+        <TopLoader />
+        {children}
+      </Inset>
     </SidebarProvider>
   );
 }

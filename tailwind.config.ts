@@ -132,5 +132,6 @@ const config = {
       );
     }),
   ],
+  safelist: ["fill-red-500", "fill-green-500", "fill-yellow-400"],
 } satisfies Config;
 export default config;

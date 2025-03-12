@@ -1,5 +1,14 @@
 import { Subject } from "@/types/school";
 
-export const getSubjectPageURL = (subject: Pick<Subject, "actualName"> & { id?: string }) => {
-  return `/classes/${subject.actualName.replaceAll(" ", "_")}${subject.id ? `/${subject.id}` : ""}`;
+export const getSubjectPageURL = ({
+  id,
+  actualName,
+}: Pick<Subject, "actualName"> & { id?: string }) => {
+  let path = `/classes/`;
+  if (id) {
+    path += id;
+  } else {
+    path += `n_${encodeURIComponent(actualName)}`;
+  }
+  return path;
 };

@@ -2,9 +2,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { TermSearchParams } from "../page";
 import AssignmentPageComponent from "./assignments/[assignmentId]/page-component";
-import { SubjectPageSkeleton } from "./content";
 import { convertPathParameterToSubjectName } from "./helpers";
-import SubjectPageComponent from "./page-component";
+import SubjectPageComponent, { SubjectPageSkeleton } from "./main";
+
 interface Props {
   params: { slug: [string, string?, string?, string?] };
   searchParams: Pick<TermSearchParams, "term">;
@@ -15,7 +15,8 @@ export async function generateMetadata({ params }: Props) {
   return { title: subjectName };
 }
 export default async function Page({ params, searchParams }: Props) {
-  const [subjectName, subjectId, section, contentId] = params.slug;
+  const [subjectNameOrId, section, contentId] = params.slug;
+  const isQueryParamName = subjectNameOrId.startsWith("n_");
   switch (section) {
     case "assignments":
       return <AssignmentPageComponent assignmentId={contentId as string} />;
@@ -23,9 +24,13 @@ export default async function Page({ params, searchParams }: Props) {
       return (
         <Suspense fallback={<SubjectPageSkeleton />}>
           <SubjectPageComponent
-            subjectName={subjectName}
-            subjectId={subjectId}
-            term={searchParams.term}
+            subjectName={
+              isQueryParamName
+                ? decodeURIComponent(subjectNameOrId.slice(2))
+                : subjectNameOrId
+            }
+            subjectId={isQueryParamName ? undefined : subjectNameOrId}
+            termId={searchParams.term}
           />
         </Suspense>
       );

@@ -163,9 +163,10 @@ class ResolvedRoute<Params extends RouteParams> {
     }
   }
 }
-type RouteStepPredicate<Params extends RouteParams> = (
-  params: Params
-) => boolean;
+type RouteStepPredicate<Params extends RouteParams> = (args: {
+  params: Params;
+  metadata: Record<string, any>;
+}) => boolean;
 export class Route<
   Params extends RouteParams = Record<string, never>
 > extends CallableInstance<
@@ -197,15 +198,19 @@ export class Route<
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
-  metadata(resolver: MetadataResolverFunction<Params>) {
+  metadata(
+    resolver: MetadataResolverFunction<Params>,
+    predicate?: RouteStepPredicate<Params>
+  ) {
     this.steps.push(new MetadataResolver(resolver));
+    if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
   call(...[studentID, params]: [string, Params]) {
     const filteredSteps = this.steps.filter((_, index) => {
       const predicate = this.predicates[index];
       if (!predicate) return true;
-      return predicate(params);
+      return predicate({ params, metadata: this.metadata });
     });
     return new ResolvedRoute({
       studentID,
@@ -230,7 +235,7 @@ export const myEdParsingRoutes = {
         path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
         expect: "html",
       }),
-      ({ day }) => !!day
+      ({ params: { day } }) => !!day
     ),
   currentWeekday: new Route().step({
     method: "GET",
@@ -265,6 +270,38 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 export type MyEdRestEndpointURL = keyof paths;
 
+const generateSubjectsListStepParams = (
+  studentID: string,
+  params?: {
+    isPreviousYear?: boolean;
+    termOid?: string;
+  }
+) => {
+  const { isPreviousYear, termOid } = params ?? {};
+  const customParams = [];
+  if (isPreviousYear) customParams.push("selectedYear|previous");
+  customParams.push(`selectedTerm|${termOid}`);
+  return {
+    method: "GET" as const,
+    path: `rest/lists/academics.classes.list`,
+    body: {
+      selectedStudent: studentID,
+      fieldSetOid: "fsnX2Cls",
+      customParams: customParams.join(";"),
+    },
+    expect: "json" as const,
+  };
+};
+const findSubjectByName = (subjects: RouteResponse, name: string) => {
+  return (
+    subjects as OpenAPI200JSONResponse<"/lists/academics.classes.list">
+  ).find((subject) => subject.relSscMstOid_mstDescription === name);
+};
+const findSubjectById = (subjects: RouteResponse, id: string) => {
+  return (
+    subjects as OpenAPI200JSONResponse<"/lists/academics.classes.list">
+  ).find((subject) => subject.oid === id);
+};
 export const myEdRestEndpoints = {
   subjects: new Route<{
     isPreviousYear?: boolean;
@@ -280,64 +317,70 @@ export const myEdRestEndpoints = {
       expect: "json",
     }))
     .step(({ studentID, params: { isPreviousYear, termOid } }) => {
-      const customParams = [];
-      if (isPreviousYear) customParams.push("selectedYear|previous");
-      if (termOid) customParams.push(`selectedTerm|${termOid}`);
-      return {
-        method: "GET",
-        path: `rest/lists/academics.classes.list`,
-        body: {
-          selectedStudent: studentID,
-          fieldSetOid: "fsnX2Cls",
-          customParams: customParams.join(";"),
-        },
-        expect: "json",
-      };
+      return generateSubjectsListStepParams(studentID, {
+        isPreviousYear,
+        termOid,
+      });
     }),
-  //TODO add ability to reuse steps in other steps
-  subjectAssignments: new Route<{
-    subjectName: string;
-    subjectId?: string;
-    termOid?: string;
+  subject: new Route<{
+    name?: string;
+    id?: string;
   }>()
+    .metadata(({ params: { name, id } }) => {
+      if (!name && !id) {
+        throw new Error("No subject name or id");
+      }
+    })
+    .step(({ studentID }) => generateSubjectsListStepParams(studentID))
+    .metadata(({ params: { name, id }, responses, metadata }) => {
+      const targetResponse = responses[0];
+      if (id) {
+        metadata.subject = findSubjectById(targetResponse, id);
+      } else {
+        metadata.subject = findSubjectByName(targetResponse, name as string);
+      }
+      if (!metadata.subject) {
+        metadata.shouldSearchInPreviousYear = true;
+      }
+    })
     .step(
-      ({ studentID }) => ({
-        method: "GET",
-        path: `rest/lists/academics.classes.list`,
-        body: {
-          selectedStudent: studentID,
-          fieldSetOid: "fsnX2Cls",
-          customParams: "selectedYear|current;selectedTerm|all",
-        },
-        expect: "json",
-      }),
-      ({ subjectId }) => !subjectId
+      ({ studentID }) =>
+        generateSubjectsListStepParams(studentID, {
+          isPreviousYear: true,
+        }),
+      ({ metadata: { shouldSearchInPreviousYear } }) =>
+        shouldSearchInPreviousYear
     )
     .metadata(
-      ({
-        params: { subjectName, subjectId: externalSubjectId },
-        responses,
-        metadata,
-      }) => {
-        let subjectId = externalSubjectId;
-        if (!subjectId) {
-          subjectId = (
-            responses[0] as OpenAPI200JSONResponse<"/lists/academics.classes.list">
-          ).find(
-            (subject) => subject.relSscMstOid_mstDescription === subjectName
-          )?.oid;
-          if (!subjectId) throw new Error("Subject not found");
+      ({ responses, metadata, params: { name, id } }) => {
+        const targetResponse = responses[1];
+        if (id) {
+          metadata.subject = findSubjectById(targetResponse, id);
+        } else {
+          metadata.subject = findSubjectByName(targetResponse, name as string);
         }
-        metadata.subjectId = subjectId;
-      }
-    )
-    .step(({ metadata: { subjectId } }) => ({
-      method: "GET",
-      path: `rest/studentSchedule/${subjectId}/gradeTerms`,
-      expect: "json",
-    }))
-    .multiple(({ responses, metadata: { subjectId }, params: { termOid } }) => {
-      let selectedTermOid = termOid;
+
+        if (!metadata.subject) {
+          throw new Error("Subject not found");
+        }
+      },
+      ({ metadata: { shouldSearchInPreviousYear } }) =>
+        shouldSearchInPreviousYear
+    ),
+  //TODO add ability to reuse steps in other steps
+  subjectAssignments: new Route<{
+    id: string;
+    termId?: string;
+  }>()
+    .step(({ params: { id } }) => {
+      return {
+        method: "GET",
+        path: `rest/studentSchedule/${id}/gradeTerms`,
+        expect: "json",
+      };
+    })
+    .multiple(({ responses, params: { id, termId } }) => {
+      let selectedTermOid = termId;
       if (!selectedTermOid) {
         const foundTerms = responses.at(
           -1
@@ -350,7 +393,7 @@ export const myEdRestEndpoints = {
       return [
         {
           method: "GET",
-          path: `rest/studentSchedule/${subjectId}/categoryDetails/pastDue`,
+          path: `rest/studentSchedule/${id}/categoryDetails/pastDue`,
           body: {
             gradeTermOid: selectedTermOid,
           },
@@ -358,7 +401,7 @@ export const myEdRestEndpoints = {
         },
         {
           method: "GET",
-          path: `rest/studentSchedule/${subjectId}/categoryDetails/upcoming`,
+          path: `rest/studentSchedule/${id}/categoryDetails/upcoming`,
           body: {
             gradeTermOid: selectedTermOid,
           },

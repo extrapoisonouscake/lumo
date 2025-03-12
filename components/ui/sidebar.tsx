@@ -320,7 +320,6 @@ const SidebarInset = React.forwardRef<
 >(({ className, ...props }, ref) => {
   return (
     <main
-      id="top-loader-container"
       ref={ref}
       className={cn(
         "relative flex min-h-svh flex-1 flex-col bg-background",

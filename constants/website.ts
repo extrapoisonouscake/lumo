@@ -1,4 +1,3 @@
-import { convertPathParameterToSubjectName } from "@/app/classes/[...slug]/helpers";
 import { Calendar, Home, Settings, Shapes } from "lucide-react";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
@@ -36,11 +35,16 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
       icon: websitePagesWithStaticPaths["/classes"].icon,
     };
     if (segments[1]) {
-      lastPathname += `/${params.slug[0]}${
-        params.slug[1] ? `/${params.slug[1]}` : ""
-      }`;
+      lastPathname += `/${segments[1]}`;
       data.breadcrumb.push({
-        name: `${convertPathParameterToSubjectName(params.slug[0])}`,
+        name: `Class`,
+        href: lastPathname,
+      });
+    }
+    if (segments[2]) {
+      lastPathname += `/${segments[2]}`;
+      data.breadcrumb.push({
+        name: "Assignment",
         href: lastPathname,
       });
     }

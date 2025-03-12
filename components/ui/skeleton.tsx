@@ -16,9 +16,13 @@ export const Skeleton = ({
       className={cn("relative inline-block overflow-hidden", className)}
       {...props}
     >
-      
-        <div className={cn("pointer-events-none absolute inset-0 w-full h-full bg-accent rounded-lg r opacity-0 transition-opacity",{"opacity-1 animate-pulse":isLoading})}></div>
-      
+      <div
+        className={cn(
+          "pointer-events-none absolute inset-0 w-full h-full bg-accent rounded-lg r opacity-0 transition-opacity",
+          { "opacity-1 animate-pulse": isLoading }
+        )}
+      ></div>
+
       <div
         className={isLoading ? "invisible flex [&>*]:leading-none" : "visible"}
       >
