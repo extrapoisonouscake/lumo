@@ -52,8 +52,8 @@ export function SubjectSummary({
   return (
     <Card className="flex flex-col gap-3 relative">
       
-      <CardHeader className="items-start flex-row justify-between pb-0">
-        <div></div><div className="flex flex-col space-y-1.5"><CardTitle className="text-center">{name}</CardTitle>
+      <CardHeader className="flex-1 items-start flex-row justify-between pb-0">
+        <div></div><div className="flex flex-col space-y-1.5 items-center"><CardTitle className="text-center">{name}</CardTitle>
         {term && <CardDescription>{termToLabel[term]}</CardDescription>}
 </div>
  <LetterGradeSwitch
