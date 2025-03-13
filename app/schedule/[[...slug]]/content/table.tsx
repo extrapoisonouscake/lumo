@@ -24,7 +24,7 @@ import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
@@ -120,24 +120,37 @@ const columns = [
     },
   }),
 ];
-const columnsSkeletons = makeTableColumnsSkeletons(columns, {
-  time: 10,
-  name: 12,
-  teachers: 12,
-});
-const mockScheduleSubjects = (length: number) =>
-  [...Array(length)].map(
-    () =>
-      ({
+const columnsSkeletons = makeTableColumnsSkeletons(
+  columns,
+  {
+    time: 10,
+    name: 12,
+    teachers: 12,
+  },
+  true
+);
+const mockScheduleSubjects = (length: number) => {
+  const rows = [];
+  for (let i = 0; i < length; i++) {
+    rows.push({
+      startsAt: new Date(),
+      endsAt: new Date(),
+      teachers: [],
+      actualName: "",
+      name: "",
+      room: "",
+      type: "subject" as const,
+    } satisfies ScheduleRowSubject);
+    if (i < length - 1) {
+      rows.push({
         startsAt: new Date(),
         endsAt: new Date(),
-        teachers: [],
-        actualName: "",
-        name: "",
-        room: "",
-        type: "subject",
-      } satisfies ScheduleRowSubject)
-  );
+        type: "short-break" as const,
+      });
+    }
+  }
+  return rows;
+};
 const prepareTableData = (data: ScheduleSubject[]) => {
   const preparedData = prepareTableDataForSorting(data);
   const filledIntervals: ScheduleRow[] = [];

@@ -104,8 +104,10 @@ class ResolvedRoute<Params extends RouteParams> {
   responses: (RouteResponse | RouteResponse[])[] = [];
   metadata: Record<string, any>;
   requiresAuth: boolean;
+  predicates: Record<number, RouteStepPredicate<Params>> = {};
   constructor({
     steps,
+    predicates,
     studentID,
     params,
     requiresAuth,
@@ -113,6 +115,7 @@ class ResolvedRoute<Params extends RouteParams> {
     studentID?: string;
     params: Params;
     steps: Array<RouteStep<Params> | MetadataResolver<Params>>;
+    predicates: Record<number, RouteStepPredicate<Params>>;
     requiresAuth: boolean;
   }) {
     if (requiresAuth && !studentID) throw new Error("route requires auth");
@@ -123,6 +126,7 @@ class ResolvedRoute<Params extends RouteParams> {
     this.resolvedSteps = [];
     this.responses = [];
     this.metadata = {};
+    this.predicates = predicates;
   }
   addResponse(response: (typeof this.responses)[number]) {
     this.responses.push(response);
@@ -133,6 +137,13 @@ class ResolvedRoute<Params extends RouteParams> {
   *[Symbol.iterator]() {
     for (let i = 0; i < this.steps.length; i++) {
       let nextStep = this.steps[i];
+      const predicate = this.predicates[i];
+      if (
+        predicate &&
+        !predicate({ params: this.params, metadata: this.metadata })
+      ) {
+        continue;
+      }
       if (nextStep instanceof MetadataResolver) {
         nextStep.resolve({
           responses: this.responses,
@@ -207,15 +218,11 @@ export class Route<
     return this;
   }
   call(...[studentID, params]: [string, Params]) {
-    const filteredSteps = this.steps.filter((_, index) => {
-      const predicate = this.predicates[index];
-      if (!predicate) return true;
-      return predicate({ params, metadata: this.metadata });
-    });
     return new ResolvedRoute({
       studentID,
       params,
-      steps: filteredSteps,
+      steps: this.steps,
+      predicates: this.predicates,
       requiresAuth: this.requiresAuth,
     });
   }
@@ -274,13 +281,13 @@ const generateSubjectsListStepParams = (
   studentID: string,
   params?: {
     isPreviousYear?: boolean;
-    termOid?: string;
+    termId?: string;
   }
 ) => {
-  const { isPreviousYear, termOid } = params ?? {};
+  const { isPreviousYear, termId } = params ?? {};
   const customParams = [];
   if (isPreviousYear) customParams.push("selectedYear|previous");
-  customParams.push(`selectedTerm|${termOid}`);
+  if (termId) customParams.push(`selectedTerm|${termId}`);
   return {
     method: "GET" as const,
     path: `rest/lists/academics.classes.list`,
@@ -292,54 +299,52 @@ const generateSubjectsListStepParams = (
     expect: "json" as const,
   };
 };
-const findSubjectByName = (subjects: RouteResponse, name: string) => {
+const findSubjectIdByName = (subjects: RouteResponse, name: string) => {
   return (
     subjects as OpenAPI200JSONResponse<"/lists/academics.classes.list">
-  ).find((subject) => subject.relSscMstOid_mstDescription === name);
+  ).find((subject) => subject.relSscMstOid_mstDescription === name)?.oid;
 };
-const findSubjectById = (subjects: RouteResponse, id: string) => {
-  return (
-    subjects as OpenAPI200JSONResponse<"/lists/academics.classes.list">
-  ).find((subject) => subject.oid === id);
-};
+
 export const myEdRestEndpoints = {
   subjects: new Route<{
     isPreviousYear?: boolean;
-    termOid?: string;
+    termId?: string;
   }>()
-    .step(({ params: { isPreviousYear, termOid } }) => ({
+    .step(({ params: { isPreviousYear, termId } }) => ({
       method: "GET",
       path: `rest/lists/academics.classes.list/studentGradeTerms`,
       body: {
         year: isPreviousYear ? "previous" : "current",
-        term: termOid ? termOid : "all",
+        term: termId || "all",
       },
       expect: "json",
     }))
-    .step(({ studentID, params: { isPreviousYear, termOid } }) => {
+    .step(({ studentID, params: { isPreviousYear, termId } }) => {
       return generateSubjectsListStepParams(studentID, {
         isPreviousYear,
-        termOid,
+        termId,
       });
     }),
-  subject: new Route<{
-    name?: string;
-    id?: string;
+  subjectSummary: new Route<{ id: string }>().step(({ params: { id } }) => ({
+    method: "GET",
+    path: `rest/studentSchedule/${id}/academics`,
+    body: {
+      properties:
+        "relSscMstOid.mstDescription,relSscMstOid.mstCourseView,sscTermView",
+    },
+    expect: "json",
+  })),
+  subjectIdByName: new Route<{
+    name: string;
   }>()
-    .metadata(({ params: { name, id } }) => {
-      if (!name && !id) {
-        throw new Error("No subject name or id");
-      }
-    })
-    .step(({ studentID }) => generateSubjectsListStepParams(studentID))
-    .metadata(({ params: { name, id }, responses, metadata }) => {
+    .step(({ studentID }) =>
+      generateSubjectsListStepParams(studentID, { termId: "all" })
+    )
+    .metadata(({ params: { name }, responses, metadata }) => {
       const targetResponse = responses[0];
-      if (id) {
-        metadata.subject = findSubjectById(targetResponse, id);
-      } else {
-        metadata.subject = findSubjectByName(targetResponse, name as string);
-      }
-      if (!metadata.subject) {
+
+      metadata.subjectId = findSubjectIdByName(targetResponse, name as string);
+      if (!metadata.subjectId) {
         metadata.shouldSearchInPreviousYear = true;
       }
     })
@@ -347,20 +352,20 @@ export const myEdRestEndpoints = {
       ({ studentID }) =>
         generateSubjectsListStepParams(studentID, {
           isPreviousYear: true,
+          termId: "all",
         }),
       ({ metadata: { shouldSearchInPreviousYear } }) =>
         shouldSearchInPreviousYear
     )
     .metadata(
-      ({ responses, metadata, params: { name, id } }) => {
+      ({ responses, metadata, params: { name } }) => {
         const targetResponse = responses[1];
-        if (id) {
-          metadata.subject = findSubjectById(targetResponse, id);
-        } else {
-          metadata.subject = findSubjectByName(targetResponse, name as string);
-        }
 
-        if (!metadata.subject) {
+        metadata.subjectId = findSubjectIdByName(
+          targetResponse,
+          name as string
+        );
+        if (!metadata.subjectId) {
           throw new Error("Subject not found");
         }
       },

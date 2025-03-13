@@ -24,7 +24,7 @@ import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { Subject } from "@/types/school";
 import { Router } from "next/router";
@@ -81,7 +81,7 @@ const columns = [
   }),
 ];
 const columnsSkeletons = makeTableColumnsSkeletons(columns, {
-  average: 4,
+  average: 6,
   name: 12,
   teachers: 12,
 });

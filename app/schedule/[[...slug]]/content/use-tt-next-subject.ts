@@ -1,4 +1,4 @@
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifySubjectName";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { timezonedDayJS } from "@/instances/dayjs";
 import {} from "@/types/school";
 import { useEffect, useState } from "react";

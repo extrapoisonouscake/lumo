@@ -132,6 +132,17 @@ const config = {
       );
     }),
   ],
-  safelist: ["fill-red-500", "fill-green-500", "fill-yellow-400"],
+  safelist: [
+    "fill-red-500",
+    "fill-green-500",
+    "fill-yellow-400",
+    "fill-orange-500",
+    "fill-red-600",
+    "text-red-500",
+    "text-green-500",
+    "text-yellow-400",
+    "text-orange-500",
+    "text-zinc-200",
+  ],
 } satisfies Config;
 export default config;

@@ -1,9 +1,9 @@
 "use client";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { Term } from "@/types/school";
+import { TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "../ui/label";
 import {
   Select,
@@ -15,12 +15,12 @@ import {
 } from "../ui/select";
 export function TermSelect({
   terms,
-  initialYear,
-  initialTerm,
+  initialYear = "current",
+  initialTerm = "",
   shouldShowAllOption = true,
   shouldShowYearSelect = true,
 }: {
-  terms: Term[];
+  terms: TermEntry[];
   initialYear?: string;
   initialTerm?: string;
   shouldShowYearSelect?: boolean;
@@ -29,13 +29,21 @@ export function TermSelect({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [year, setYear] = useState(initialYear || "current");
+  const [year, setYear] = useState(initialYear);
   const [term, setTerm] = useState(initialTerm);
   const date = timezonedDayJS();
   const currentYear = date.year();
   const isSecondYear = date.month() < 6;
   const secondYear = isSecondYear ? currentYear : currentYear - 1;
   const shouldShowTermSelect = terms.length > 0;
+  useEffect(() => {
+    if (initialTerm !== term) {
+      setTerm(initialTerm);
+    }
+    if (initialYear !== year) {
+      setYear(initialYear);
+    }
+  }, [initialTerm, initialYear]);
   if (!shouldShowTermSelect && !shouldShowYearSelect) return null;
   return (
     <div className="flex flex-wrap gap-2">
@@ -50,7 +58,7 @@ export function TermSelect({
 
               params.set("year", value);
               if (term) {
-                setTerm(undefined);
+                setTerm("");
                 params.delete("term");
               }
               router.push(`${pathname}?${params.toString()}`);
@@ -83,7 +91,7 @@ export function TermSelect({
             }}
           >
             <SelectTrigger>
-              {term && terms.some((t) => t.id === term) ? (
+              {term && (terms.some((t) => t.id === term) || term === "all") ? (
                 <SelectValue placeholder="Select a term..." />
               ) : (
                 "Current"

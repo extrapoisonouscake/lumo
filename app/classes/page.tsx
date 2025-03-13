@@ -15,7 +15,7 @@ export default async function Page({
 }) {
   const response = await getMyEd("subjects", {
     isPreviousYear: year === "previous",
-    termOid: term,
+    termId: term,
   });
   return <SubjectsPage response={response} year={year} term={term} />;
 }

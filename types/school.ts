@@ -12,6 +12,35 @@ export type ScheduleSubject = Omit<Subject, "average" | "id" | "term"> & {
   startsAt: Date;
   endsAt: Date;
 };
+export enum SubjectTerm {
+  FirstSemester = "FIRST_SEMESTER",
+  SecondSemester = "SECOND_SEMESTER",
+  FullYear = "FULL_YEAR",
+}
+export interface SubjectSummary {
+  id: string;
+  name: string;
+  term: SubjectTerm;
+  academics: {
+    average: number | null;
+    posted: number | null;
+    categories: {
+      id: string;
+      name: string;
+      average: number | null;
+      terms: {
+        name: string;
+        weight: number;
+        average: number;
+      }[];
+    }[];
+  };
+  attendance: {
+    tardy: number;
+    absent: number;
+    dismissed: number;
+  };
+}
 export type AnnouncementSectionItemsFragment = {
   items: string[];
 };
@@ -54,7 +83,7 @@ export interface Assignment {
   maxScore: number | null;
   classAverage: number | null;
 }
-export interface Term {
+export interface TermEntry {
   id: string;
   name: string;
 }

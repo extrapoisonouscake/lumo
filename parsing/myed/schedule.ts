@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-import { prettifySubjectName } from "@/helpers/prettifySubjectName";
+import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { Dayjs } from "dayjs";
@@ -31,9 +31,9 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   const weekday = removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim();
   return weekday ?? null;
 }
-export function parseCurrentWeekday(
-  {responses:[$initial, $dateAdjusted]}: ParserFunctionArguments<"currentWeekday">
-) {
+export function parseCurrentWeekday({
+  responses: [$initial, $dateAdjusted],
+}: ParserFunctionArguments<"currentWeekday">) {
   const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
   if (!$tableBody) return null;
@@ -44,12 +44,10 @@ const getDateFromSubjectTimeString = (initialDate: Dayjs) => (time: string) => {
   const t = locallyTimezonedDayJS(time, "HH:mm A");
   return initialDate.set("h", t.get("h")).set("minute", t.get("m")).toDate();
 };
-export function parseSchedule(
-  {params:initialParams,
-    responses:[$initial,
-    $dateAdjusted],
-    }: ParserFunctionArguments<"schedule">
-):
+export function parseSchedule({
+  params: initialParams,
+  responses: [$initial, $dateAdjusted],
+}: ParserFunctionArguments<"schedule">):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string }
   | null {
@@ -80,7 +78,7 @@ export function parseSchedule(
       const subject = {
         startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
         endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
-        name: prettifySubjectName(name),
+        name: prettifyEducationalName(name),
         actualName: name,
         teachers: teachersString.split("; "),
         room: room || null,

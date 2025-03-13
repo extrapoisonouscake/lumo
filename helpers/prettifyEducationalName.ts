@@ -10,7 +10,7 @@ const educationAbbreviations = new Set([
   "AP",
 ]);
 export const TEACHER_ADVISORY_ABBREVIATION = "TA";
-const subjectsToAbbreviation: Record<string, string> = {
+const directReplacements: Record<string, string> = {
   "teacher advisory": TEACHER_ADVISORY_ABBREVIATION,
 };
 const smallWords = new Set([
@@ -31,16 +31,22 @@ const smallWords = new Set([
   "up",
   "with",
 ]);
-export const prettifySubjectName = (name: string) => {
+export const prettifyEducationalName = (name: string) => {
   const lowerCaseName = name.toLowerCase();
-  const abbreviation = subjectsToAbbreviation[lowerCaseName];
-  if (abbreviation) return abbreviation;
+  const replacement = directReplacements[lowerCaseName];
+  if (replacement) return replacement;
   return lowerCaseName
     .split(/(\s+|[-–—])/g)
     .map((word, i) => {
-      if (educationAbbreviations.has(word.toUpperCase()) || /^\d/.test(word)) {
+      if (
+        educationAbbreviations.has(word.toUpperCase()) ||
+        /^[IVXLCDM]+$/i.test(word)
+      ) {
         return word.toUpperCase();
-      } else if (i === 0 || !smallWords.has(word)) {
+      } else if (
+        (i === 0 || !smallWords.has(word)) &&
+        !/^\d+(st|nd|rd|th)$/i.test(word)
+      ) {
         return word.charAt(0).toUpperCase() + word.slice(1);
       } else {
         return word;

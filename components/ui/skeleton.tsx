@@ -5,11 +5,13 @@ export const Skeleton = ({
   isLoading = true,
   children,
   className,
+  shouldShrink = true,
   ...props
 }: {
   isLoading?: boolean;
   children?: ReactNode | ReactNode[];
   className?: string;
+  shouldShrink?: boolean;
 } & DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>) => {
   return (
     <div
@@ -24,7 +26,9 @@ export const Skeleton = ({
       ></div>
 
       <div
-        className={isLoading ? "invisible flex [&>*]:leading-none" : "visible"}
+        className={cn(isLoading ? "invisible flex" : "visible", {
+          "[&>*]:leading-none": shouldShrink,
+        })}
       >
         {children}
       </div>

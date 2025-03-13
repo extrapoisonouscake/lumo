@@ -1,5 +1,6 @@
+import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import { components } from "@/types/myed-rest";
-import { Assignment, AssignmentStatus, Term } from "@/types/school";
+import { Assignment, AssignmentStatus, TermEntry } from "@/types/school";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const scoreLabelToStatus: Record<string, AssignmentStatus> = {
@@ -26,7 +27,7 @@ function convertAssignment({
   }
   return {
     id: oid,
-    name,
+    name: prettifyEducationalName(name),
     dueAt: new Date(dueDate),
     assignedAt: new Date(assignedDate),
     classAverage: +classAverage.split(" ")[0] || null,
@@ -42,7 +43,7 @@ export function parseSubjectAssignments({
 }: ParserFunctionArguments<"subjectAssignments">): {
   subjectId?: string;
   assignments: Assignment[];
-  terms: Term[];
+  terms: TermEntry[];
   currentTermIndex: number | null;
 } | null {
   const [termsData, [pastDue, upcoming]] = responses.slice(-2) as [

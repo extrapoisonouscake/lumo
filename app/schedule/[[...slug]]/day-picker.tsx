@@ -4,7 +4,7 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState, useTransition } from "react";
 import { convertQueryDayToDate } from "../[[...slug]]/helpers";
@@ -28,7 +28,6 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
     if (newDate?.getTime() === date?.getTime()) return;
     setDate(newDate);
   }, [day]);
-  const pathname = usePathname();
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
