@@ -9,19 +9,17 @@ export async function SubjectAssignments({
   id: string;
   termId?: string;
 }) {
-  const [userSettings, assignments] = await Promise.all([
-    getUserSettings(),
-    getMyEd("subjectAssignments", {
-      id,
-      termId,
-    }),
-  ]);
+  const settings = getUserSettings();
+  const assignments = await getMyEd("subjectAssignments", {
+    id,
+    termId,
+  });
   return (
     <SubjectAssignmentsContent
       {...assignments}
       subjectId={id}
       term={termId}
-      settings={userSettings}
+      settings={settings}
     />
   );
 }

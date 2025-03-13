@@ -51,10 +51,12 @@ export function SubjectSummary({
   );
   return (
     <Card className="flex flex-col gap-3 relative">
-      <LetterGradeSwitch
-        value={isLetterGradeShown}
-        onValueChange={setIsLetterGradeShown}
-      />
+      <div className="absolute top-2 right-2">
+        <LetterGradeSwitch
+          value={isLetterGradeShown}
+          onValueChange={setIsLetterGradeShown}
+        />
+      </div>
       <CardHeader className="items-center pb-0">
         <CardTitle className="text-center">{name}</CardTitle>
         {term && <CardDescription>{termToLabel[term]}</CardDescription>}
@@ -116,12 +118,17 @@ export function SubjectSummary({
     </Card>
   );
 }
-export function SubjectSummarySkeleton() {
+export function SubjectSummarySkeleton({
+  shouldShowLetterGrade,
+}: Pick<UserSettings, "shouldShowLetterGrade">) {
   return (
-    <Card className="flex flex-col gap-3">
+    <Card className="flex flex-col gap-3 relative">
+      <Skeleton className="pointer-events-none absolute top-2 right-2">
+        <LetterGradeSwitch value={shouldShowLetterGrade} />
+      </Skeleton>
       <CardHeader className="items-center pb-0">
         <Skeleton shouldShrink={false}>
-          <CardTitle>Subject Name</CardTitle>
+          <CardTitle className="text-center">Subject Name</CardTitle>
         </Skeleton>
         <Skeleton shouldShrink={false}>
           <CardDescription>Full Year</CardDescription>
@@ -129,20 +136,45 @@ export function SubjectSummarySkeleton() {
       </CardHeader>
       <CardContent className="flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
-          <div className="relative h-[50px]">
+          <div
+            className={cn(
+              "relative",
+              shouldShowLetterGrade ? "h-[45px]" : "h-[50px]"
+            )}
+          >
             <div>
               <HalfDonutProgressChart value={90} isLoading />
             </div>
-            <div className="absolute top-[1.25rem] left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center">
+            <div
+              className={cn(
+                "absolute",
+                shouldShowLetterGrade ? "top-[1.05rem]" : "top-[1.25rem]",
+                "left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
+              )}
+            >
               <Skeleton>
-                <span className="font-bold leading-none">90</span>
+                <span
+                  className={cn(
+                    "font-bold",
+                    {
+                      "text-2xl": shouldShowLetterGrade,
+                    },
+                    "leading-none"
+                  )}
+                >
+                  {shouldShowLetterGrade ? "A" : 90}
+                </span>
               </Skeleton>
-              <span className="text-muted-foreground leading-none text-[10px]">
-                /&nbsp;100
-              </span>
+              {!shouldShowLetterGrade && (
+                <span className="text-muted-foreground leading-none text-[10px]">
+                  /&nbsp;100
+                </span>
+              )}
             </div>
-          </div>{" "}
-          <span className="text-zinc-500 text-[10px] uppercase">Average</span>
+          </div>
+          <span className="text-zinc-500 text-[10px] uppercase">
+            {shouldShowLetterGrade ? "Grade" : "Average"}
+          </span>
         </div>
       </CardContent>
       {/* <CardFooter className="flex-col gap-2 text-sm"></CardFooter> */}

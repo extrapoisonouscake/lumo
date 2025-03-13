@@ -17,11 +17,11 @@ export function LetterGradeSwitch({
   onValueChange,
 }: {
   value: boolean;
-  onValueChange: (value: boolean) => void;
+  onValueChange?: (value: boolean) => void;
 }) {
   async function handleValueChange(value: string) {
     const newIsLetterGradeToggled = value === "on";
-    onValueChange(newIsLetterGradeToggled);
+    onValueChange?.(newIsLetterGradeToggled);
     await updateUserSetting({
       key: "shouldShowLetterGrade",
       value: newIsLetterGradeToggled,
@@ -30,7 +30,7 @@ export function LetterGradeSwitch({
   return (
     <ToggleGroup
       type="single"
-      className="absolute top-2 right-2 bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1 gap-0"
+      className="bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1 gap-0"
       value={value ? "on" : "off"}
       onValueChange={handleValueChange}
     >

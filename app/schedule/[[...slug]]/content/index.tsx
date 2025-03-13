@@ -89,30 +89,16 @@ export async function ScheduleContent({ day }: Props) {
     currentDayObject = locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT);
     params.day = currentDayObject.format(MYED_DATE_FORMAT);
   }
-  let dataPromise;
-  if ([0, 6].includes(currentDayObject.day())) {
-    dataPromise = Promise.resolve({
-      knownError: "School is not in session on that date.",
-    });
-  } else {
-    dataPromise = getMyEd("schedule", params);
-  }
-  const [userSettings, data] = await Promise.all([
-    getUserSettings(),
-    dataPromise,
-  ]);
 
-  const hasKnownError = data && "knownError" in data;
-  if (!data || hasKnownError) {
-    let errorCardProps: ErrorCardProps = {};
-    if (hasKnownError) {
-      const visualData = visualizableErrors[data.knownError]?.({ day });
-      if (visualData) {
-        errorCardProps = visualData;
-      }
-    }
-    return <ErrorCard {...errorCardProps} />;
+  if ([0, 6].includes(currentDayObject.day())) {
+    return <ErrorCard {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]} />;
   }
+  const data = await getMyEd("schedule", params);
+
+  if ("knownError" in data) {
+    return <ErrorCard {...visualizableErrors[data.knownError]?.({ day })} />;
+  }
+  const userSettings = getUserSettings();
   const shouldShowWeekday = getActualWeekdayIndex(day) === 5;
   return (
     <GridLayout>

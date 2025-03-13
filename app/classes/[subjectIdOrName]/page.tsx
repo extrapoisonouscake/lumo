@@ -3,6 +3,7 @@ import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Metadata } from "next";
 import { Suspense } from "react";
+import { setTimeout } from "timers/promises";
 import { TermSearchParams } from "../page";
 import { SubjectAssignments } from "./(assignments)";
 import { SubjectAssignmentsSkeleton } from "./(assignments)/content";
@@ -26,14 +27,11 @@ export default async function SubjectPage({
       name: decodeURIComponent(subjectIdOrName.slice(2)),
     });
   }
-
-  const [summary, settings] = await Promise.all([
-    getMyEd("subjectSummary", {
-      id: subjectId,
-    }),
-    getUserSettings(),
-  ]);
-
+  const settings = getUserSettings();
+  const summary = await getMyEd("subjectSummary", {
+    id: subjectId,
+  });
+  await setTimeout(1000);
   return (
     <>
       <TitleManager title={summary.name} />

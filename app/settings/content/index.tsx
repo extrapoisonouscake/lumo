@@ -21,8 +21,8 @@ const fields: Array<
     key: "shouldHighlightMissingAssignments",
   },
 ];
-export async function SettingsContent() {
-  const userSettings = await getUserSettings();
+export function SettingsContent() {
+  const userSettings = getUserSettings();
   return fields.map((field) => {
     const initialValue = userSettings[field.key];
     if ("custom" in field) {

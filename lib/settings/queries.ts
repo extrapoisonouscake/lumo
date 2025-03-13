@@ -6,7 +6,7 @@ import {
   USER_SETTINGS_KEYS,
 } from "../../constants/core";
 
-export async function getUserSettings() {
+export function getUserSettings() {
   const store = cookies();
   const settings: Partial<Record<UserSetting, any>> = {}; //? workaround?
   for (const key of USER_SETTINGS_KEYS) {

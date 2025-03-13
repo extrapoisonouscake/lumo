@@ -10,7 +10,6 @@ export async function GET(
   try {
     // Fetch the content from the original source
     const response = await fetch(url);
-    console.log({ response });
     if (!response.ok) {
       return new Response(`Failed to fetch content: ${response.statusText}`, {
         status: response.status,

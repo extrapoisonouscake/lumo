@@ -27,7 +27,7 @@ function AnnouncementsHeading() {
 export async function Announcements() {
   const date = timezonedDayJS();
 
-  const { schoolId } = await getUserSettings();
+  const { schoolId } = getUserSettings();
   let content, pdfLink;
   if (!schoolId) {
     content = (
