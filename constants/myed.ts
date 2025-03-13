@@ -342,7 +342,6 @@ export const myEdRestEndpoints = {
     )
     .metadata(({ params: { name }, responses, metadata }) => {
       const targetResponse = responses[0];
-
       metadata.subjectId = findSubjectIdByName(targetResponse, name as string);
       if (!metadata.subjectId) {
         metadata.shouldSearchInPreviousYear = true;

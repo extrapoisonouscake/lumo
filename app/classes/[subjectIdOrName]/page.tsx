@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { TermSearchParams } from "../page";
 import { SubjectAssignments } from "./(assignments)";
 import { SubjectAssignmentsSkeleton } from "./(assignments)/content";
+import { SubjectNameReplacer } from "./subject-name-replacer";
 import { SubjectSummary } from "./summary";
 export const metadata: Metadata = {
   title: "Loading...",
@@ -21,7 +22,7 @@ export default async function SubjectPage({
   let subjectId = isQueryParamId ? subjectIdOrName : undefined;
   if (!subjectId) {
     subjectId = await getMyEd("subjectIdByName", {
-      name: subjectIdOrName,
+      name: decodeURIComponent(subjectIdOrName.slice(2)),
     });
   }
 
@@ -32,6 +33,7 @@ export default async function SubjectPage({
   return (
     <>
       <TitleManager title={summary.name} />
+      <SubjectNameReplacer id={summary.id} />
       <SubjectSummary {...summary} />
       <Suspense fallback={<SubjectAssignmentsSkeleton />}>
         <SubjectAssignments id={summary.id} termId={term} />
