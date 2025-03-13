@@ -17,7 +17,6 @@ export async function SubjectAssignments({
   return (
     <SubjectAssignmentsContent
       {...assignments}
-      subjectId={id}
       term={termId}
       settings={settings}
     />

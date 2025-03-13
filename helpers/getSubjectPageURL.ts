@@ -1,14 +1,18 @@
 import { Subject } from "@/types/school";
+import { prepareStringForURI } from "./prepareStringForURI";
 
-export const getSubjectPageURL = ({
-  id,
-  actualName,
-}: Pick<Subject, "actualName"> & { id?: string }) => {
+export const getSubjectPageURL = (
+  props: Pick<Subject, "actualName"> &
+    (
+      | { id: Subject["id"]; name: Subject["name"] }
+      | { id?: never; name?: never }
+    )
+) => {
   let path = `/classes/`;
-  if (id) {
-    path += id;
+  if (props.id) {
+    path += `${props.id}/${prepareStringForURI(props.name)}`;
   } else {
-    path += `n_${encodeURIComponent(actualName)}`;
+    path += `n_${encodeURIComponent(props.actualName)}`;
   }
   return path;
 };

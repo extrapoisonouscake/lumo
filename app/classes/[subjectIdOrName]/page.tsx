@@ -12,13 +12,16 @@ import { SubjectSummary } from "./summary";
 export const metadata: Metadata = {
   title: "Loading...",
 };
+
+export interface SubjectPageProps {
+  searchParams: Pick<TermSearchParams, "term">;
+  params: { subjectIdOrName: string };
+}
+
 export default async function SubjectPage({
   searchParams: { term },
   params: { subjectIdOrName },
-}: {
-  params: { subjectIdOrName: string };
-  searchParams: Pick<TermSearchParams, "term">;
-}) {
+}: SubjectPageProps) {
   const isQueryParamId = !subjectIdOrName.startsWith("n_");
 
   let subjectId = isQueryParamId ? subjectIdOrName : undefined;
@@ -35,7 +38,7 @@ export default async function SubjectPage({
   return (
     <>
       <TitleManager title={summary.name} />
-      <SubjectNameReplacer id={summary.id} />
+      <SubjectNameReplacer id={summary.id} newName={summary.name} />
       <SubjectSummary
         {...summary}
         shouldShowLetterGrade={settings.shouldShowLetterGrade}

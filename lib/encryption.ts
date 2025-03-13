@@ -4,7 +4,7 @@ if (!MYED_CREDENTIALS_ENCRYPTION_KEY) {
   throw new Error("MYED_CREDENTIALS_ENCRYPTION_KEY is not set");
 }
 // Define a fixed key (must be 256-bit)
-const key = CryptoJS.enc.Hex.parse("0123456789abcdef0123456789abcdef");
+const key = CryptoJS.enc.Hex.parse(MYED_CREDENTIALS_ENCRYPTION_KEY);
 
 // Synchronous encryption
 export const encryption = {

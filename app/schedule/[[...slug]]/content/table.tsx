@@ -216,7 +216,8 @@ const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
       <TableRow
         onClick={
           isSubject && !isTeacherAdvisory
-            ? () => push(getSubjectPageURL(rowOriginal))
+            ? () =>
+                push(getSubjectPageURL({ actualName: rowOriginal.actualName }))
             : undefined //!
         }
         key={row.id}

@@ -34,15 +34,20 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
       breadcrumb: [{ name: "Classes", href: lastPathname }],
       icon: websitePagesWithStaticPaths["/classes"].icon,
     };
+    const assignmentId = segments[3];
     if (segments[1]) {
-      lastPathname += `/${segments[1]}`;
+      const subjectName = segments[2]
+        ? decodeURIComponent(segments[2])
+        : undefined;
+      lastPathname += `/${segments[1]}${subjectName ? `/${subjectName}` : ""}`;
+
       data.breadcrumb.push({
-        name: `Class`,
+        name: subjectName ? subjectName.replaceAll("_", " ") : `Loading...`,
         href: lastPathname,
       });
     }
-    if (segments[2]) {
-      lastPathname += `/${segments[2]}`;
+    if (assignmentId) {
+      lastPathname += `/assignments/${assignmentId}`;
       data.breadcrumb.push({
         name: "Assignment",
         href: lastPathname,

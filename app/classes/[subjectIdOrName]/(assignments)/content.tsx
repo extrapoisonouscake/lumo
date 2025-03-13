@@ -10,7 +10,6 @@ import {
 } from "./table";
 
 export function SubjectAssignmentsContent({
-  subjectId,
   assignments,
   terms,
   currentTermIndex,
@@ -19,7 +18,6 @@ export function SubjectAssignmentsContent({
 }: MyEdEndpointResponse<"subjectAssignments"> & {
   settings: UserSettings;
   term: string | undefined;
-  subjectId: string;
 }) {
   return (
     <>
@@ -31,11 +29,7 @@ export function SubjectAssignmentsContent({
         shouldShowAllOption={false}
         shouldShowYearSelect={false}
       />
-      <SubjectAssignmentsTable
-        data={assignments}
-        settings={settings}
-        subjectId={subjectId}
-      />
+      <SubjectAssignmentsTable data={assignments} settings={settings} />
     </>
   );
 }

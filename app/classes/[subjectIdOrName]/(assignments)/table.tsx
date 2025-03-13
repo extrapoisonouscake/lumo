@@ -18,7 +18,7 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { Assignment, AssignmentStatus, Subject } from "@/types/school";
+import { Assignment, AssignmentStatus } from "@/types/school";
 import { useMemo } from "react";
 
 import {
@@ -34,7 +34,7 @@ import {
   renderTableCell,
 } from "@/helpers/tables";
 import { UserSettings } from "@/types/core";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Router } from "next/router";
 
 const columnHelper = createColumnHelper<Assignment>();
@@ -136,12 +136,9 @@ const mockAssignments = (length: number) =>
   );
 export function SubjectAssignmentsTable({
   data: externalData,
-  subjectId,
   settings,
 }: {
   data: Assignment[];
-
-  subjectId: Subject["id"];
   settings: UserSettings;
 }) {
   const data = useMemo(
@@ -169,15 +166,13 @@ export function SubjectAssignmentsTable({
 
     [data, settings.shouldHighlightMissingAssignments]
   );
+  const pathname = usePathname();
   const getRowRenderer: RowRendererFactory<Assignment, [Router["push"]]> =
     (table, push) => (row) => {
       const cells = row.getVisibleCells();
       return (
         <TableRow
-          onClick={() =>
-            subjectId &&
-            push(`/classes/${subjectId}/assignments/${row.original.id}`)
-          }
+          onClick={() => push(`${pathname}/assignments/${row.original.id}`)}
           style={table.options.meta?.getRowStyles?.(row)}
           className={cn(
             table.options.meta?.getRowClassName?.(row),
@@ -186,7 +181,7 @@ export function SubjectAssignmentsTable({
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && subjectId;
+            const showArrow = i === cells.length - 1;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}
