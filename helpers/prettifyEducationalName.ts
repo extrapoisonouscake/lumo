@@ -40,6 +40,7 @@ export const prettifyEducationalName = (name: string) => {
     .map((word, i) => {
       if (
         educationAbbreviations.has(word.toUpperCase()) ||
+        /^\d+[a-zA-Z]+$/.test(word) ||
         /^[IVXLCDM]+$/i.test(word)
       ) {
         return word.toUpperCase();
