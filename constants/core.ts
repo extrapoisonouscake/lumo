@@ -1,4 +1,4 @@
-import { PartialUserSettings, UserSetting } from "@/types/core";
+import { UserSetting, UserSettings } from "@/types/core";
 
 export const INTERNAL_DATE_FORMAT = "YYYY-MM-DD";
 export const USER_SETTINGS_COOKIE_PREFIX = "settings";
@@ -7,9 +7,11 @@ export const USER_SETTINGS_KEYS = [
   "shouldShowNextSubjectTimer",
   "shouldShowAssignmentScorePercentage",
   "shouldHighlightMissingAssignments",
-] as const satisfies Array<keyof PartialUserSettings>;
+  "shouldShowLetterGrade",
+] as const satisfies Array<keyof UserSettings>;
 export const USER_SETTINGS_DEFAULT_VALUES: Partial<Record<UserSetting, any>> = {
   shouldShowNextSubjectTimer: true,
   shouldShowAssignmentScorePercentage: true,
   shouldHighlightMissingAssignments: true,
+  shouldShowLetterGrade: false,
 };

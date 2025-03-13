@@ -164,14 +164,14 @@ SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
 const SelectSkeleton = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof SelectTrigger>
->(({ className, ...props }, ref) => (
+>(({ className, value = "Value", ...props }, ref) => (
   <Select>
     <SelectTrigger
       ref={ref}
       {...props}
       className={cn("pointer-events-none", className)}
     >
-      <Skeleton>Value</Skeleton>
+      <Skeleton>{value}</Skeleton>
     </SelectTrigger>
   </Select>
 ));

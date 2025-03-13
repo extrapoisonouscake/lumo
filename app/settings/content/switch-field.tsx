@@ -2,7 +2,7 @@
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { setUserSetting } from "@/lib/settings/mutations";
+import { updateUserSetting } from "@/lib/helpers/client";
 import { UserSetting } from "@/types/core";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ export function SwitchField({
   const onChangeHandler = async (checked: boolean) => {
     setChecked(checked);
     try {
-      await setUserSetting({ key: settingKey, value: checked });
+      await updateUserSetting({ key: settingKey, value: checked });
     } catch {
       setChecked(!checked);
       toast.error("An error occurred.");

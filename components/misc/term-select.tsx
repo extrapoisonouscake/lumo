@@ -121,12 +121,12 @@ export function TermSelectSkeleton({
       {shouldShowYearSelect && (
         <div className="flex flex-col gap-2">
           <Label>Year</Label>
-          <SelectSkeleton />
+          <SelectSkeleton value="2020 - 2020" />
         </div>
       )}
       <div className="flex flex-col gap-2">
         <Label>Term</Label>
-        <SelectSkeleton />
+        <SelectSkeleton value="Current" />
       </div>
     </div>
   );

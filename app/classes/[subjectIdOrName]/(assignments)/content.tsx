@@ -42,7 +42,7 @@ export function SubjectAssignmentsContent({
 export function SubjectAssignmentsSkeleton() {
   return (
     <>
-      <TermSelectSkeleton />
+      <TermSelectSkeleton shouldShowYearSelect={false} />
       <SubjectAssignmentsTableSkeleton />
     </>
   );

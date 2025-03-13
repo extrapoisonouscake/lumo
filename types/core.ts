@@ -6,6 +6,7 @@ export interface UserSettings {
   shouldShowNextSubjectTimer: boolean;
   shouldShowAssignmentScorePercentage: boolean;
   shouldHighlightMissingAssignments: boolean;
+  shouldShowLetterGrade: boolean;
 }
 export type UserSetting = keyof UserSettings;
 export type PartialUserSettings = {

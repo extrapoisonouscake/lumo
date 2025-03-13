@@ -24,7 +24,7 @@ import {
 import { KnownSchools } from "@/constants/schools";
 import { cn } from "@/helpers/cn";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { setUserSetting } from "@/lib/settings/mutations";
+import { updateUserSetting } from "@/lib/helpers/client";
 import { UserSetting } from "@/types/core";
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -65,7 +65,10 @@ export function SchoolPicker({
   const onSubmit = async ({ school }: FormFields) => {
     setIsOpen(false);
 
-    await setUserSetting({ key: "schoolId", value: school });
+    await updateUserSetting({
+      key: "schoolId",
+      value: school as KnownSchools | "other",
+    });
   };
   const [isMounted, setIsMounted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);

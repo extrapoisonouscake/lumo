@@ -1,4 +1,5 @@
 import { TitleManager } from "@/components/misc/title-manager";
+import { getUserSettings } from "@/lib/settings/queries";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Metadata } from "next";
 import { Suspense } from "react";
@@ -26,15 +27,21 @@ export default async function SubjectPage({
     });
   }
 
-  const summary = await getMyEd("subjectSummary", {
-    id: subjectId,
-  });
+  const [summary, settings] = await Promise.all([
+    getMyEd("subjectSummary", {
+      id: subjectId,
+    }),
+    getUserSettings(),
+  ]);
 
   return (
     <>
       <TitleManager title={summary.name} />
       <SubjectNameReplacer id={summary.id} />
-      <SubjectSummary {...summary} />
+      <SubjectSummary
+        {...summary}
+        shouldShowLetterGrade={settings.shouldShowLetterGrade}
+      />
       <Suspense fallback={<SubjectAssignmentsSkeleton />}>
         <SubjectAssignments id={summary.id} termId={term} />
       </Suspense>
