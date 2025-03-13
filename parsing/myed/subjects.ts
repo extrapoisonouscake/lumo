@@ -22,7 +22,7 @@ const normalizeMarkWithLetter = (string?: string) => {
 // const parseSubjectTeachersString = (string: string) => {
 //   return string.split(";").map((name) => name.split(", ").reverse().join(" "));
 // };
-function separateTAFromSubjects(subject: Subject[]) {
+function separateTeacherAdvisoryFromSubjects(subject: Subject[]) {
   const resultArray: typeof subject = [];
   let removedItem;
 
@@ -90,7 +90,7 @@ export function parseSubjects({
   }));
   return {
     terms: preparedTerms,
-    subjects: separateTAFromSubjects(preparedData),
+    subjects: separateTeacherAdvisoryFromSubjects(preparedData),
   };
 }
 

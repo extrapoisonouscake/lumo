@@ -209,13 +209,13 @@ const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
       timeCell = cells.find((cell) => cell.column.id === "time");
       nameCell = cells.find((cell) => cell.column.id === "name");
     }
-    const isTA =
+    const isTeacherAdvisory =
       isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
 
     return (
       <TableRow
         onClick={
-          isSubject && !isTA
+          isSubject && !isTeacherAdvisory
             ? () => push(getSubjectPageURL(rowOriginal))
             : undefined //!
         }
@@ -227,7 +227,7 @@ const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
         {isSubject ? (
           cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && !isTA;
+            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}

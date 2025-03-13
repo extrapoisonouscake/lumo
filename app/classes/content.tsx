@@ -25,7 +25,7 @@ export function SubjectsPage({
 
       {response?.subjects.teacherAdvisory && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium">TA</h3>
+          <h3 className="text-sm font-medium">Teacher Advisory</h3>
           <SubjectsTable
             shownColumns={["room", "teachers"]}
             data={[response.subjects.teacherAdvisory]}

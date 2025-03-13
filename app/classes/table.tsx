@@ -127,21 +127,24 @@ export function SubjectsTable({
   const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
     (table, push) => (row) => {
       const cells = row.getVisibleCells();
-      const isTA = row.original.name === TEACHER_ADVISORY_ABBREVIATION;
+      const isTeacherAdvisory =
+        row.original.name === TEACHER_ADVISORY_ABBREVIATION;
       return (
         <TableRow
           onClick={
-            !isTA ? () => push(getSubjectPageURL(row.original)) : undefined
+            !isTeacherAdvisory
+              ? () => push(getSubjectPageURL(row.original))
+              : undefined
           }
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
           className={cn(table.options.meta?.getRowClassName?.(row), {
-            "cursor-pointer": !isTA,
+            "cursor-pointer": !isTeacherAdvisory,
           })}
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && !isTA;
+            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}
