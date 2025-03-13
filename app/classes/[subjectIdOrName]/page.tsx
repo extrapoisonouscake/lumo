@@ -1,4 +1,4 @@
-import { TitleManager } from "@/components/misc/TItleManager";
+import { TitleManager } from "@/components/misc/title-manager";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Metadata } from "next";
 import { Suspense } from "react";
