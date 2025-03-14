@@ -18,7 +18,7 @@ export function LogInButton() {
       }}
     >
       {isLoading ? <Spinner /> : <LogInIcon />}
-      Log In
+      Log in
     </SidebarMenuButton>
   );
 }
