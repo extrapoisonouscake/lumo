@@ -19,7 +19,7 @@ import {
   LoginSchema,
 } from "./lib/auth/public";
 import { encryption } from "./lib/encryption";
-async function getRedirectResponse(
+async function getLoginRedirectResponse(
   request: NextRequest,
   errorMessage?: string
 ) {
@@ -47,7 +47,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/log-out") {
-    const redirectResponse = await getRedirectResponse(request);
+    const redirectResponse = await getLoginRedirectResponse(request);
     return redirectResponse;
   }
   const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
@@ -92,7 +92,7 @@ export async function middleware(request: NextRequest) {
             });
           }
         } catch (e: any) {
-          const redirectResponse = await getRedirectResponse(
+          const redirectResponse = await getLoginRedirectResponse(
             request,
             e.message
           );
@@ -106,9 +106,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
-  return response;}catch{const redirectResponse = await getRedirectResponse(
+  return response;}catch{const redirectResponse = await getLoginRedirectResponse(
             request,
-            "unknown-error"
+            "unexpected-error"
           );
 
           return redirectResponse;}
