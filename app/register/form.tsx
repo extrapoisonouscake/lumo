@@ -165,7 +165,7 @@ const getFields: <T extends RegistrationType>({
                 name="fields.firstName"
                 autoCapitalize="on"
                 autoComplete="given-name"
-                label="Student Legal First Name"
+                label="Legal First Name"
               />
             ),
           },
@@ -178,7 +178,7 @@ const getFields: <T extends RegistrationType>({
                 name="fields.lastName"
                 autoCapitalize="on"
                 autoComplete="family-name"
-                label="Student Legal Last Name"
+                label="Legal Last Name"
               />
             ),
           },
