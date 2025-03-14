@@ -30,7 +30,7 @@ export function SwitchField({
     }
   };
   return (
-    <div className="flex gap-3 justify-between lg:justify-start items-center">
+    <div className="flex gap-3 justify-between md:justify-start items-center">
       <Label htmlFor={settingKey} className="cursor-pointer font-normal">
         {label}
       </Label>
