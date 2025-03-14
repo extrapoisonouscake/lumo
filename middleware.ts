@@ -42,7 +42,7 @@ async function getRedirectResponse(
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { cookies } = request;
-  const isGuest = isGuestMode(cookies);
+  try{const isGuest = isGuestMode(cookies);
   const isAllowedGeneralAccess = isUserAuthenticated(cookies) || isGuest;
   const { pathname } = request.nextUrl;
 
@@ -106,7 +106,12 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
-  return response;
+  return response;}catch{const redirectResponse = await getRedirectResponse(
+            request,
+            "unknown-error"
+          );
+
+          return redirectResponse;}
 }
 
 export const config = {
