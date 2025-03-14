@@ -15,7 +15,13 @@ export function AppSidebarWrapper({ children }: { children: ReactNode }) {
   const cookieStore = cookies();
   const isAuthenticated = isUserAuthenticated(cookieStore);
   const isGuest = isGuestMode(cookieStore);
-  if (!isAuthenticated && !isGuest) return <Inset>{children}</Inset>;
+  if (!isAuthenticated && !isGuest)
+    return (
+      <Inset>
+        <TopLoader />
+        {children}
+      </Inset>
+    );
   const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
   return (
     <SidebarProvider defaultOpen={defaultOpen}>

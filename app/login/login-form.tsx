@@ -13,7 +13,13 @@ import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { enterGuestMode, login } from "@/lib/auth/mutations";
 import { LoginErrors, loginErrorIDToMessageMap } from "@/lib/auth/public";
 import { isSuccessfulActionResponse } from "@/lib/helpers";
-
+import { useSearchParams } from "next/navigation";
+function getFullErrorMessage(error: string | null | undefined) {
+  return (
+    loginErrorIDToMessageMap[error as LoginErrors] ||
+    "An unexpected error occurred."
+  );
+}
 export function LoginForm({
   setTemporaryAuthCookies,
   form,
@@ -21,8 +27,9 @@ export function LoginForm({
   setTemporaryAuthCookies: (cookies: AuthCookies) => void;
   form: UseFormReturn<LoginSchema>;
 }) {
+  const searchParams = useSearchParams();
   const { errorMessageNode, errorMessage, setErrorMessage } =
-    useFormErrorMessage();
+    useFormErrorMessage(getFullErrorMessage(searchParams.get("error")));
   async function onSubmit(data: LoginSchema) {
     if (errorMessage) {
       setErrorMessage(null);
@@ -34,10 +41,7 @@ export function LoginForm({
       if (message === LoginErrors.passwordChangeRequired) {
         setTemporaryAuthCookies(response?.data?.authCookies);
       } else {
-        setErrorMessage(
-          loginErrorIDToMessageMap[message as LoginErrors] ||
-            "An unexpected error occurred."
-        );
+        setErrorMessage(getFullErrorMessage(message));
       }
     }
   }
