@@ -91,7 +91,11 @@ export async function ScheduleContent({ day }: Props) {
   }
 
   if ([0, 6].includes(currentDayObject.day())) {
-    return <ErrorCard {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]} />;
+    return (
+      <ErrorCard
+        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]({ day })}
+      />
+    );
   }
   const data = await getMyEd("schedule", params);
 
