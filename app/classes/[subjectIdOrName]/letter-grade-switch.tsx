@@ -30,7 +30,7 @@ export function LetterGradeSwitch({
   return (
     <ToggleGroup
       type="single"
-      className="bg-zinc-100 dark:bg-zinc-900 rounded-lg p-1 gap-0"
+      className="bg-zinc-100 dark:bg-zinc-800 rounded-lg p-1 gap-0"
       value={value ? "on" : "off"}
       onValueChange={handleValueChange}
     >

@@ -51,17 +51,15 @@ export function SubjectSummary({
   );
   return (
     <Card className="flex flex-col gap-3 relative">
-      <CardHeader className="w-full grid grid-cols-3 p-2 pb-0 space-y-0 space-x-1.5">
-        <div className="flex flex-col col-start-2 space-y-1.5 items-center justify-self-center p-4 pb-0">
-          <CardTitle className="text-center">{name}</CardTitle>
-          {term && <CardDescription>{termToLabel[term]}</CardDescription>}
-        </div>
-        <div className="justify-self-end col-start-3">
-          <LetterGradeSwitch
-            value={isLetterGradeShown}
-            onValueChange={setIsLetterGradeShown}
-          />
-        </div>
+      <div className="absolute top-2 right-2">
+        <LetterGradeSwitch
+          value={isLetterGradeShown}
+          onValueChange={setIsLetterGradeShown}
+        />
+      </div>
+      <CardHeader className="items-center pb-0 px-[80px]">
+        <CardTitle className="text-center">{name}</CardTitle>
+        {term && <CardDescription>{termToLabel[term]}</CardDescription>}
       </CardHeader>
       <CardContent className="flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
