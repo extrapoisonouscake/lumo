@@ -28,8 +28,11 @@ export function LoginForm({
   form: UseFormReturn<LoginSchema>;
 }) {
   const searchParams = useSearchParams();
+  const initialErrorCode = searchParams.get("error");
   const { errorMessageNode, errorMessage, setErrorMessage } =
-    useFormErrorMessage(getFullErrorMessage(searchParams.get("error")));
+    useFormErrorMessage(
+      initialErrorCode ? getFullErrorMessage(initialErrorCode) : null
+    );
   async function onSubmit(data: LoginSchema) {
     if (errorMessage) {
       setErrorMessage(null);
