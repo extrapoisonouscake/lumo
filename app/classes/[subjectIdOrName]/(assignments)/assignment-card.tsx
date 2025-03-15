@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
+import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { UserSettings } from "@/types/core";
 import { Assignment, AssignmentStatus } from "@/types/school";
@@ -20,10 +21,14 @@ export function AssignmentCard({
   onClick,
 }: AssignmentCardProps) {
   const { name, dueAt, status, weight, feedback } = assignment;
+  const isMissing = status === AssignmentStatus.Missing;
   return (
     <Card
       onClick={onClick}
-      className="p-4 cursor-pointer transition-colors gap-2 hover:bg-muted/50"
+      className={cn(
+        "p-4 cursor-pointer transition-colors gap-2 hover:bg-muted/50",
+        { "border-red-500/50 dark:border-red-500/40": isMissing }
+      )}
     >
       <h3 className="font-medium text-base">{name}</h3>
 
@@ -40,11 +45,7 @@ export function AssignmentCard({
         <div>
           <p className="text-muted-foreground">Score</p>
           <div className="flex gap-1 items-center">
-            <p
-              className={
-                status === AssignmentStatus.Missing ? "text-red-500" : undefined
-              }
-            >
+            <p className={isMissing ? "text-red-500" : undefined}>
               {formatAssignmentScore(
                 assignment,
                 settings.shouldShowAssignmentScorePercentage
