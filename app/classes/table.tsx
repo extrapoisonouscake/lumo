@@ -27,7 +27,6 @@ import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { Subject } from "@/types/school";
-import { Router } from "next/router";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 
@@ -124,38 +123,38 @@ export function SubjectsTable({
         })
       )
     : {};
-  const getRowRenderer: RowRendererFactory<Subject, [Router["push"]]> =
-    (table, push) => (row) => {
-      const cells = row.getVisibleCells();
-      const isTeacherAdvisory =
-        row.original.name === TEACHER_ADVISORY_ABBREVIATION;
-      return (
-        <TableRow
-          onClick={
-            !isTeacherAdvisory
-              ? () => push(getSubjectPageURL(row.original))
-              : undefined
-          }
-          data-state={row.getIsSelected() && "selected"}
-          style={table.options.meta?.getRowStyles?.(row)}
-          className={cn(table.options.meta?.getRowClassName?.(row), {
-            "cursor-pointer": !isTeacherAdvisory,
-          })}
-        >
-          {cells.map((cell, i) => {
-            const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
-            return showArrow ? (
-              <TableCellWithRedirectIcon key={cell.id}>
-                {content}
-              </TableCellWithRedirectIcon>
-            ) : (
-              <TableCell key={cell.id}>{content}</TableCell>
-            );
-          })}
-        </TableRow>
-      );
-    };
+  const router = useRouter();
+  const getRowRenderer: RowRendererFactory<Subject> = (table) => (row) => {
+    const cells = row.getVisibleCells();
+    const isTeacherAdvisory =
+      row.original.name === TEACHER_ADVISORY_ABBREVIATION;
+    return (
+      <TableRow
+        onClick={
+          !isTeacherAdvisory
+            ? () => router.push(getSubjectPageURL(row.original))
+            : undefined
+        }
+        data-state={row.getIsSelected() && "selected"}
+        style={table.options.meta?.getRowStyles?.(row)}
+        className={cn(table.options.meta?.getRowClassName?.(row), {
+          "cursor-pointer": !isTeacherAdvisory,
+        })}
+      >
+        {cells.map((cell, i) => {
+          const content = renderTableCell(cell);
+          const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
+          return showArrow ? (
+            <TableCellWithRedirectIcon key={cell.id}>
+              {content}
+            </TableCellWithRedirectIcon>
+          ) : (
+            <TableCell key={cell.id}>{content}</TableCell>
+          );
+        })}
+      </TableRow>
+    );
+  };
 
   const table = useReactTable<Subject>({
     getCoreRowModel: getCoreRowModel(),
@@ -170,11 +169,9 @@ export function SubjectsTable({
     manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
   });
-  const router = useRouter();
   return (
     <TableRenderer
       rowRendererFactory={getRowRenderer}
-      rowRendererFactoryProps={[router.push]}
       table={table}
       columns={columns}
     />
