@@ -34,8 +34,10 @@ import {
   renderTableCell,
 } from "@/helpers/tables";
 import { UserSettings } from "@/types/core";
-import { usePathname, useRouter } from "next/navigation";
-import { Router } from "next/router";
+import { useRouter } from "nextjs-toploader/app";
+import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
+import { formatAssignmentScore, formatClassAverage } from "./helpers";
+import { useAssignmentNavigation } from "./use-assignment-navigation";
 
 const columnHelper = createColumnHelper<Assignment>();
 const getColumns = (
@@ -65,35 +67,16 @@ const getColumns = (
     header: "Score",
 
     cell: ({ row }) => {
-      const { score, maxScore, status } = row.original;
-      let scoreValues = "";
-      if (typeof score === "number" && typeof maxScore === "number") {
-        scoreValues = `${score} / ${maxScore}${
-          shouldShowAssignmentScorePercentage
-            ? ` (${+(score / (maxScore / 100)).toFixed(1)}%)`
-            : ""
-        }`;
-      }
-      switch (status) {
-        case AssignmentStatus.Unknown:
-          return NULL_VALUE_DISPLAY_FALLBACK;
-        case AssignmentStatus.Graded:
-          return scoreValues;
-        case AssignmentStatus.Missing:
-          return `Missing, ${scoreValues}`;
-        case AssignmentStatus.Exempt:
-          return "Exempt";
-        case AssignmentStatus.Ungraded:
-          return "Ungraded";
-      }
+      return formatAssignmentScore(
+        row.original,
+        shouldShowAssignmentScorePercentage
+      );
     },
   }),
   columnHelper.display({
     header: "Class Average",
     cell: ({ row }) => {
-      const { classAverage, maxScore } = row.original;
-      if (typeof classAverage !== "number") return NULL_VALUE_DISPLAY_FALLBACK;
-      return `${classAverage}${maxScore ? ` / ${maxScore}` : ""}`;
+      return formatClassAverage(row.original);
     },
   }),
   ...(shouldShowWeightColumn
@@ -137,9 +120,11 @@ const mockAssignments = (length: number) =>
 export function SubjectAssignmentsTable({
   data: externalData,
   settings,
+  className,
 }: {
   data: Assignment[];
   settings: UserSettings;
+  className?: string;
 }) {
   const data = useMemo(
     () => prepareTableDataForSorting(externalData),
@@ -166,33 +151,34 @@ export function SubjectAssignmentsTable({
 
     [data, settings.shouldHighlightMissingAssignments]
   );
-  const pathname = usePathname();
-  const getRowRenderer: RowRendererFactory<Assignment, [Router["push"]]> =
-    (table, push) => (row) => {
-      const cells = row.getVisibleCells();
-      return (
-        <TableRow
-          onClick={() => push(`${pathname}/assignments/${row.original.id}`)}
-          style={table.options.meta?.getRowStyles?.(row)}
-          className={cn(
-            table.options.meta?.getRowClassName?.(row),
-            "cursor-pointer"
-          )}
-        >
-          {cells.map((cell, i) => {
-            const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1;
-            return showArrow ? (
-              <TableCellWithRedirectIcon key={cell.id}>
-                {content}
-              </TableCellWithRedirectIcon>
-            ) : (
-              <TableCell key={cell.id}>{content}</TableCell>
-            );
-          })}
-        </TableRow>
-      );
-    };
+
+  const { navigateToAssignment } = useAssignmentNavigation();
+
+  const getRowRenderer: RowRendererFactory<Assignment> = (table) => (row) => {
+    const cells = row.getVisibleCells();
+    return (
+      <TableRow
+        onClick={() => navigateToAssignment(row.original)}
+        style={table.options.meta?.getRowStyles?.(row)}
+        className={cn(
+          table.options.meta?.getRowClassName?.(row),
+          "cursor-pointer"
+        )}
+      >
+        {cells.map((cell, i) => {
+          const content = renderTableCell(cell);
+          const showArrow = i === cells.length - 1;
+          return showArrow ? (
+            <TableCellWithRedirectIcon key={cell.id}>
+              {content}
+            </TableCellWithRedirectIcon>
+          ) : (
+            <TableCell key={cell.id}>{content}</TableCell>
+          );
+        })}
+      </TableRow>
+    );
+  };
 
   const table = useReactTable<Assignment>({
     getCoreRowModel: getCoreRowModel(),
@@ -210,19 +196,29 @@ export function SubjectAssignmentsTable({
   const router = useRouter();
   return (
     <TableRenderer
-      emptyText="No assignments yet."
+      emptyState={{ text: EMPTY_ASSIGNMENTS_MESSAGE, emoji: "📚" }}
       table={table}
       columns={columns}
       rowRendererFactory={getRowRenderer}
-      rowRendererFactoryProps={[router.push]}
+      containerClassName={className}
     />
   );
 }
-export function SubjectAssignmentsTableSkeleton() {
+export function SubjectAssignmentsTableSkeleton({
+  className,
+}: {
+  className?: string;
+}) {
   const table = useReactTable<Assignment>({
     data: mockAssignments(5),
     getCoreRowModel: getCoreRowModel(),
     columns: columnsSkeletons,
   });
-  return <TableRenderer table={table} columns={columnsSkeletons} />;
+  return (
+    <TableRenderer
+      containerClassName={className}
+      table={table}
+      columns={columnsSkeletons}
+    />
+  );
 }

@@ -50,7 +50,7 @@ export function SubjectSummary({
     shouldShowLetterGrade
   );
   return (
-    <Card className="flex flex-col gap-3 relative">
+    <Card className="flex flex-col gap-3 relative items-center">
       <div className="absolute top-2 right-2">
         <LetterGradeSwitch
           value={isLetterGradeShown}
@@ -122,7 +122,7 @@ export function SubjectSummarySkeleton({
   shouldShowLetterGrade,
 }: Pick<UserSettings, "shouldShowLetterGrade">) {
   return (
-    <Card className="flex flex-col gap-3 relative">
+    <Card className="flex flex-col gap-3 relative items-center">
       <Skeleton className="pointer-events-none absolute top-2 right-2">
         <LetterGradeSwitch value={shouldShowLetterGrade} />
       </Skeleton>

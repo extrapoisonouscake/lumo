@@ -1,6 +1,7 @@
-export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type WithRequired<T, K extends keyof T> = T & {
+  [P in K]-?: NonNullable<T[P]>;
+};
 export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
-// ... existing code ...
 
 type Split<S extends string> = S extends `${infer T}.${infer U}` ? [T, U] : [S];
 

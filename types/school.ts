@@ -71,18 +71,26 @@ export enum AssignmentStatus {
   Missing,
   Exempt,
 }
-export interface Assignment {
+export type Assignment = {
   id: string;
   name: string;
   dueAt: Date;
   assignedAt: Date;
   weight?: number;
   feedback: string | null;
-  status: AssignmentStatus;
-  score: number | null;
-  maxScore: number | null;
   classAverage: number | null;
-}
+} & (
+  | {
+      status: AssignmentStatus.Graded;
+      score: number;
+      maxScore: number;
+    }
+  | {
+      status: Exclude<AssignmentStatus, AssignmentStatus.Graded>;
+      score: number | null;
+      maxScore: number | null;
+    }
+);
 export interface TermEntry {
   id: string;
   name: string;

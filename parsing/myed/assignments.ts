@@ -18,24 +18,32 @@ function convertAssignment({
   remark,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const { scoreLabel, score, pointMax } = scoreElements[0];
-  let status = AssignmentStatus.Unknown;
-  if (score && score !== "NaN") {
-    status = AssignmentStatus.Graded;
-  }
-  if (status === AssignmentStatus.Unknown && scoreLabel) {
-    status = scoreLabelToStatus[scoreLabel];
-  }
-  return {
+  const baseAssignment = {
     id: oid,
     name: prettifyEducationalName(name),
     dueAt: new Date(dueDate),
     assignedAt: new Date(assignedDate),
     classAverage: +classAverage.split(" ")[0] || null,
     feedback: remark ?? null,
-    status: status ?? AssignmentStatus.Unknown,
-    score: score ? +score : null,
-    maxScore: pointMax ? +pointMax : null,
   };
+  let status = AssignmentStatus.Unknown;
+  if (score && score !== "NaN") {
+    return {
+      ...baseAssignment,
+      status: AssignmentStatus.Graded,
+      score: +score,
+      maxScore: pointMax ? +pointMax : null,
+    } as Assignment;
+  }
+  if (status === AssignmentStatus.Unknown && scoreLabel) {
+    status = scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Unknown;
+  }
+  return {
+    ...baseAssignment,
+    status,
+    score: null,
+    maxScore: pointMax ? +pointMax : null,
+  } as Assignment;
 }
 export function parseSubjectAssignments({
   responses,

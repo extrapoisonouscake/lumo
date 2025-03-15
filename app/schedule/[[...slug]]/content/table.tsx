@@ -28,7 +28,6 @@ import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
-import { Router } from "next/router";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
@@ -198,8 +197,32 @@ const prepareTableData = (data: ScheduleSubject[]) => {
 export const isRowScheduleSubject = (
   row: ScheduleRow
 ): row is ScheduleRowSubject => row.type === "subject";
-const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
-  (table, push) => (row) => {
+
+export function ScheduleTable({
+  data: externalData,
+  isLoading = false,
+  isWeekdayShown,
+  shouldShowTimer,
+}: {
+  data?: ScheduleSubject[];
+  isLoading?: boolean;
+  isWeekdayShown?: boolean;
+  shouldShowTimer?: boolean;
+}) {
+  const data = useMemo(
+    () =>
+      isLoading
+        ? mockScheduleSubjects(5)
+        : prepareTableData(externalData as NonNullable<typeof externalData>),
+    [isLoading, externalData]
+  );
+  const { currentRowIndex, timeToNextSubject } = useTTNextSubject({
+    isLoading,
+    data,
+  });
+
+  const router = useRouter();
+  const getRowRenderer: RowRendererFactory<ScheduleRow> = (table) => (row) => {
     const cells = row.getVisibleCells();
     const rowOriginal = row.original;
     const isSubject = isRowScheduleSubject(rowOriginal);
@@ -217,7 +240,9 @@ const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
         onClick={
           isSubject && !isTeacherAdvisory
             ? () =>
-                push(getSubjectPageURL({ actualName: rowOriginal.actualName }))
+                router.push(
+                  getSubjectPageURL({ actualName: rowOriginal.actualName })
+                )
             : undefined //!
         }
         key={row.id}
@@ -250,28 +275,6 @@ const getRowRenderer: RowRendererFactory<ScheduleRow, [Router["push"]]> =
       </TableRow>
     );
   };
-export function ScheduleTable({
-  data: externalData,
-  isLoading = false,
-  isWeekdayShown,
-  shouldShowTimer,
-}: {
-  data?: ScheduleSubject[];
-  isLoading?: boolean;
-  isWeekdayShown?: boolean;
-  shouldShowTimer?: boolean;
-}) {
-  const data = useMemo(
-    () =>
-      isLoading
-        ? mockScheduleSubjects(5)
-        : prepareTableData(externalData as NonNullable<typeof externalData>),
-    [isLoading, externalData]
-  );
-  const { currentRowIndex, timeToNextSubject } = useTTNextSubject({
-    isLoading,
-    data,
-  });
   const getRowClassName = useMemo(
     () => (row: Row<ScheduleRow>) => {
       const shouldBeClickable =
@@ -284,13 +287,12 @@ export function ScheduleTable({
             row.original.endsAt
           ),
         "cursor-pointer": shouldBeClickable,
-        "[&>td]:py-2": !shouldBeClickable,
+        "[&>td]:py-2.5": !shouldBeClickable,
       });
     },
 
     [currentRowIndex]
   );
-  const router = useRouter();
   const table = useReactTable<ScheduleRow>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -330,7 +332,6 @@ export function ScheduleTable({
         table={table}
         columns={columns}
         rowRendererFactory={getRowRenderer}
-        rowRendererFactoryProps={[router.push]}
       />
     </>
   );

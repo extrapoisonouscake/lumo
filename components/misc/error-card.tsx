@@ -10,7 +10,7 @@ export function ErrorCard({
   emoji = "‼️",
 }: ErrorCardProps) {
   return (
-    <Card className="p-3 flex flex-col gap-1.5">
+    <Card className="p-3 flex flex-col gap-1.5 items-center">
       <AppleEmoji
         value={emoji}
         textClassName="text-3xl leading-none"

@@ -4,10 +4,18 @@ import { TermSelect, TermSelectSkeleton } from "@/components/misc/term-select";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 
 import { UserSettings } from "@/types/core";
-import {
-  SubjectAssignmentsTable,
-  SubjectAssignmentsTableSkeleton,
-} from "./table";
+import dynamic from "next/dynamic";
+import { ResponsiveAssignmentsSkeleton } from "./responsive-assignments";
+
+// Use dynamic import for the ResponsiveAssignments component
+const ResponsiveAssignments = dynamic(
+  () =>
+    import("./responsive-assignments").then((mod) => mod.ResponsiveAssignments),
+  {
+    ssr: false,
+    loading: () => <ResponsiveAssignmentsSkeleton />,
+  }
+);
 
 export function SubjectAssignmentsContent({
   assignments,
@@ -29,15 +37,17 @@ export function SubjectAssignmentsContent({
         shouldShowAllOption={false}
         shouldShowYearSelect={false}
       />
-      <SubjectAssignmentsTable data={assignments} settings={settings} />
+
+      <ResponsiveAssignments data={assignments} settings={settings} />
     </>
   );
 }
+
 export function SubjectAssignmentsSkeleton() {
   return (
     <>
       <TermSelectSkeleton shouldShowYearSelect={false} />
-      <SubjectAssignmentsTableSkeleton />
+      <ResponsiveAssignmentsSkeleton />
     </>
   );
 }

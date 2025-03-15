@@ -25,29 +25,33 @@ declare module "@tanstack/table-core" {
     getRowClassName?: (row: Row<TData>) => string;
   }
 }
-export type RowRendererFactory<T, Props extends any[] = any[]> = (
-  table: TableType<T>,
-  ...props: Props
+export type RowRendererFactory<T> = (
+  table: TableType<T>
 ) => (row: Row<T>) => ReactNode;
+
+// Define the type for the empty state
+export type EmptyStateProps = {
+  emoji?: string;
+  text?: string;
+};
+const NO_CONTENT_MESSAGE = "No content.";
 function TableRendererComponent<T>({
   table,
   columns,
   rowRendererFactory,
   containerClassName,
   tableContainerClassName,
-  rowRendererFactoryProps,
-  emptyText,
+  emptyState,
   ...props
 }: {
   table: TableType<T>;
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
   rowRendererFactory?: RowRendererFactory<T>;
-  rowRendererFactoryProps?: any[];
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
-  emptyText?: string;
+  emptyState?: EmptyStateProps | string;
 }) {
   return (
     <div className={cn("rounded-lg r border", containerClassName)}>
@@ -73,7 +77,7 @@ function TableRendererComponent<T>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map(
-              rowRendererFactory?.(table, ...(rowRendererFactoryProps || [])) ||
+              rowRendererFactory?.(table) ||
                 function (row) {
                   return (
                     <TableRow
@@ -95,9 +99,24 @@ function TableRendererComponent<T>({
                 }
             )
           ) : (
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <TableCell colSpan={columns.length} className="h-16 text-center">
-                {emptyText || "No content."}
+                {emptyState ? (
+                  typeof emptyState === "string" ? (
+                    emptyState || NO_CONTENT_MESSAGE
+                  ) : (
+                    <div className="flex flex-col items-center justify-center gap-1.5">
+                      {emptyState.emoji && (
+                        <span className="text-3xl leading-none">
+                          {emptyState.emoji}
+                        </span>
+                      )}
+                      <span>{emptyState?.text || NO_CONTENT_MESSAGE}</span>
+                    </div>
+                  )
+                ) : (
+                  NO_CONTENT_MESSAGE
+                )}
               </TableCell>
             </TableRow>
           )}
@@ -106,6 +125,7 @@ function TableRendererComponent<T>({
     </div>
   );
 }
+
 export const TableRenderer = memo(
   TableRendererComponent
 ) as typeof TableRendererComponent;
