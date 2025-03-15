@@ -2,6 +2,7 @@ import { getUserSettings } from "@/lib/settings/queries";
 import { UserSetting } from "@/types/core";
 import { SchoolPicker } from "./school-picker";
 import { SwitchField } from "./switch-field";
+import { ThemePicker } from "./theme-picker";
 const fields: Array<
   ({ custom: React.FC<{ initialValue: any }> } | { label: string }) & {
     key: UserSetting;
@@ -20,6 +21,7 @@ const fields: Array<
     label: "Highlight missing assignments",
     key: "shouldHighlightMissingAssignments",
   },
+  { custom: ThemePicker, key: "themeColor" },
 ];
 export function SettingsContent() {
   const userSettings = getUserSettings();

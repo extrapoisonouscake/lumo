@@ -115,6 +115,7 @@ const mockAssignments = (length: number) =>
         feedback: "",
         status: AssignmentStatus.Unknown,
         classAverage: 0,
+        categoryId: "",
       } satisfies Assignment)
   );
 export function SubjectAssignmentsTable({

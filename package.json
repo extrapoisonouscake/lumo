@@ -70,6 +70,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@trigger.dev/build": "3.3.17",
     "@types/crypto-js": "^4.2.2",
     "@types/d3": "^7.4.3",

@@ -26,22 +26,27 @@ export function CardList({
 interface ResponsiveAssignmentsProps {
   data: Assignment[];
   settings: UserSettings;
+  categoryId: string | "all";
 }
 
 export function ResponsiveAssignments({
   data,
   settings,
+  categoryId,
 }: ResponsiveAssignmentsProps) {
   const isMobile = useIsMobile();
   const { navigateToAssignment } = useAssignmentNavigation();
-
+  const filteredData =
+    categoryId === "all"
+      ? data
+      : data.filter((assignment) => assignment.categoryId === categoryId);
   if (isMobile) {
     return (
       <CardList>
-        {data.length === 0 ? (
+        {filteredData.length === 0 ? (
           <ErrorCard emoji="📚">{EMPTY_ASSIGNMENTS_MESSAGE}</ErrorCard>
         ) : (
-          data.map((assignment) => (
+          filteredData.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
               assignment={assignment}
@@ -54,7 +59,7 @@ export function ResponsiveAssignments({
     );
   }
 
-  return <SubjectAssignmentsTable data={data} settings={settings} />;
+  return <SubjectAssignmentsTable data={filteredData} settings={settings} />;
 }
 
 export function ResponsiveAssignmentsSkeleton() {

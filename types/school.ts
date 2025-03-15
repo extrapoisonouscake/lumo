@@ -79,6 +79,7 @@ export type Assignment = {
   weight?: number;
   feedback: string | null;
   classAverage: number | null;
+  categoryId: string;
 } & (
   | {
       status: AssignmentStatus.Graded;

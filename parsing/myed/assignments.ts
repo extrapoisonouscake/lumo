@@ -16,6 +16,7 @@ function convertAssignment({
   oid,
   scoreElements,
   remark,
+  categoryOid,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const { scoreLabel, score, pointMax } = scoreElements[0];
   const baseAssignment = {
@@ -25,6 +26,7 @@ function convertAssignment({
     assignedAt: new Date(assignedDate),
     classAverage: +classAverage.split(" ")[0] || null,
     feedback: remark ?? null,
+    categoryId: categoryOid,
   };
   let status = AssignmentStatus.Unknown;
   if (score && score !== "NaN") {

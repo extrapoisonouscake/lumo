@@ -1,6 +1,8 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSetting } from "@/lib/helpers/client";
-import { Percent, Type } from "lucide-react";
+import LetterA from "@/public/icons/letter-a.svg";
+import { Percent } from "lucide-react";
+
 function StyledToggleGroupItem({
   ...props
 }: React.ComponentProps<typeof ToggleGroupItem>) {
@@ -38,7 +40,7 @@ export function LetterGradeSwitch({
         <Percent />
       </StyledToggleGroupItem>
       <StyledToggleGroupItem value="on" aria-label="Toggle on">
-        <Type />
+        <LetterA />
       </StyledToggleGroupItem>
     </ToggleGroup>
   );

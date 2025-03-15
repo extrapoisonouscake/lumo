@@ -4,7 +4,7 @@ import { TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
-import { Label } from "../ui/label";
+import { Label } from "../../../components/ui/label";
 import {
   Select,
   SelectContent,
@@ -12,8 +12,8 @@ import {
   SelectSkeleton,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-export function TermSelect({
+} from "../../../components/ui/select";
+export function TermSelects({
   terms,
   initialYear = "current",
   initialTerm = "",
@@ -46,7 +46,7 @@ export function TermSelect({
   }, [initialTerm, initialYear]);
   if (!shouldShowTermSelect && !shouldShowYearSelect) return null;
   return (
-    <div className="flex flex-wrap gap-2">
+    <>
       {shouldShowYearSelect && (
         <div className="flex flex-col gap-2">
           <Label>Year</Label>
@@ -108,16 +108,16 @@ export function TermSelect({
           </Select>
         </div>
       )}
-    </div>
+    </>
   );
 }
-export function TermSelectSkeleton({
+export function TermSelectsSkeleton({
   shouldShowYearSelect = true,
 }: {
   shouldShowYearSelect?: boolean;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <>
       {shouldShowYearSelect && (
         <div className="flex flex-col gap-2">
           <Label>Year</Label>
@@ -128,6 +128,6 @@ export function TermSelectSkeleton({
         <Label>Term</Label>
         <SelectSkeleton value="Current" />
       </div>
-    </div>
+    </>
   );
 }

@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 };
 
 export interface SubjectPageProps {
-  searchParams: Pick<TermSearchParams, "term">;
+  searchParams: Pick<TermSearchParams, "term"> & { category?: string };
   params: { subjectIdOrName: string };
 }
 
 export default async function SubjectPage({
-  searchParams: { term },
+  searchParams: { term, category },
   params: { subjectIdOrName },
 }: SubjectPageProps) {
   const isQueryParamId = !subjectIdOrName.startsWith("n_");
@@ -36,14 +36,19 @@ export default async function SubjectPage({
 
   return (
     <>
-      <TitleManager title={summary.name} />
+      <TitleManager title={`${summary.name} - Classes`} />
       <SubjectNameReplacer id={summary.id} newName={summary.name} />
       <SubjectSummary
         {...summary}
         shouldShowLetterGrade={settings.shouldShowLetterGrade}
       />
       <Suspense fallback={<SubjectAssignmentsSkeleton />}>
-        <SubjectAssignments id={summary.id} termId={term} />
+        <SubjectAssignments
+          id={summary.id}
+          termId={term}
+          categoryId={category}
+          categories={summary.academics.categories}
+        />
       </Suspense>
     </>
   );

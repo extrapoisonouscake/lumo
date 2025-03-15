@@ -7,6 +7,7 @@ export interface UserSettings {
   shouldShowAssignmentScorePercentage: boolean;
   shouldHighlightMissingAssignments: boolean;
   shouldShowLetterGrade: boolean;
+  themeColor: string;
 }
 export type UserSetting = keyof UserSettings;
 export type PartialUserSettings = {

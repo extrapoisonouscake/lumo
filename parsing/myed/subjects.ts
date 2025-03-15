@@ -129,7 +129,7 @@ const convertAcademicCategory = (
   );
   return {
     id: item.categoryOid,
-    name: item.category,
+    name: prettifyEducationalName(item.category),
     average: normalizeMarkWithLetter(item.overall),
     terms: termsEntries.map(([key, value]) => ({
       name: key,
