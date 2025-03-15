@@ -10,7 +10,6 @@ const primaryColor = colors?.brand?.DEFAULT;
 export function TopLoader() {
   useEffect(() => {
     NProgress.configure({ parent: "#top-loader-container" });
-    NProgress.start();
   }, []);
   return (
     <>
