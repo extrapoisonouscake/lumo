@@ -40,7 +40,11 @@ export function AssignmentCard({
         <div>
           <p className="text-muted-foreground">Score</p>
           <div className="flex gap-1 items-center">
-            <p>
+            <p
+              className={
+                status === AssignmentStatus.Missing ? "text-red-500" : undefined
+              }
+            >
               {formatAssignmentScore(
                 assignment,
                 settings.shouldShowAssignmentScorePercentage
