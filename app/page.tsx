@@ -14,13 +14,6 @@ export default async function Home() {
       <div className="">
         <Suspense fallback={<AnnouncementsSkeleton />}>
           <Announcements />
-          <Announcements />
-          <Announcements />
-          <Announcements />
-          <Announcements />
-          <Announcements />
-          <Announcements />
-          <Announcements />
         </Suspense>
       </div>
     </PageDataProvider>
