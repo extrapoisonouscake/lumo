@@ -52,12 +52,11 @@ export function SchoolPicker({
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(initialValue);
 
-  const onSubmit = async () => {
+  const onSubmit = async (newValue: string) => {
     setIsOpen(false);
-
     await updateUserSettingViaServerAction({
       key: "schoolId",
-      value: value as KnownSchools | "other",
+      value: newValue as KnownSchools | "other",
     });
   };
 
@@ -106,9 +105,9 @@ export function SchoolPicker({
                     key={id}
                     value={id}
                     onSelect={() => {
+                      onSubmit(id);
                       setValue(id);
                       setIsOpen(false);
-                      onSubmit();
                     }}
                   >
                     <SchoolName logo={logo}>{name}</SchoolName>
