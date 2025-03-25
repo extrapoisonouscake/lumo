@@ -1,4 +1,4 @@
-import { Calendar, Home, Settings, Shapes } from "lucide-react";
+import { Calendar, Home, Library, Settings } from "lucide-react";
 import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
 
 export const WEBSITE_TITLE = "MyEd+";
@@ -19,7 +19,7 @@ export const guestAllowedPathnames = ["/", "/settings", "/announcements"];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { breadcrumb: [{ name: "Home" }], icon: Home },
   "/schedule": { breadcrumb: [{ name: "Schedule" }], icon: Calendar },
-  "/classes": { breadcrumb: [{ name: "Classes" }], icon: Shapes },
+  "/classes": { breadcrumb: [{ name: "Classes" }], icon: Library },
   "/settings": { breadcrumb: [{ name: "Settings" }], icon: Settings },
   "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
 };
