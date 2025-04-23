@@ -23,7 +23,7 @@ export const queryClient = new QueryClient({
 
 let refreshPromise: Promise<void> | null = null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
-const { NEXT_PUBLIC_VERCEL_URL } = process.env;
+const NEXT_PUBLIC_VERCEL_URL = process.env.NEXT_PUBLIC_VERCEL_URL; //no other syntax allowed due to Vercel
 
 const TRPC_URL = `${
   NEXT_PUBLIC_VERCEL_URL
