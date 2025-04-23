@@ -17,7 +17,7 @@ export function ErrorCard({
         imageClassName="size-[30px]"
       />
 
-      <p className="text-sm">{children}</p>
+      <p className="text-sm text-center">{children}</p>
     </Card>
   );
 }

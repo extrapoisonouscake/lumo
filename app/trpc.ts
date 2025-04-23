@@ -1,8 +1,12 @@
-"use client";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+
+import { clientAuthChecks } from "@/helpers/client-auth-checks";
+import type { AppRouter } from "@/lib/trpc";
 import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from "@tanstack/react-query";
+import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import superjson from "superjson";
 
 export const queryClient = new QueryClient({
@@ -17,18 +21,20 @@ export const queryClient = new QueryClient({
   },
 });
 
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
-
-import { clientAuthChecks } from "@/helpers/client-auth-checks";
-import type { AppRouter } from "@/lib/trpc";
-import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 let refreshPromise: Promise<void> | null = null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
+const { NEXT_PUBLIC_VERCEL_URL } = process.env;
+
+const TRPC_URL = `${
+  NEXT_PUBLIC_VERCEL_URL
+    ? `https://${NEXT_PUBLIC_VERCEL_URL}`
+    : "http://localhost:3000"
+}/api/trpc`;
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
       transformer: superjson,
-      url: getUrl(),
+      url: TRPC_URL,
       fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
         const url =
           typeof input === "string"
@@ -83,11 +89,4 @@ export function refreshSessionExpiresAt() {
     TOKEN_EXPIRY_LOCAL_STORAGE_KEY,
     `${Date.now() + 1000 * 60 * 6}`
   );
-}
-function getUrl() {
-  const base = (() => {
-    if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-    return "http://localhost:3000";
-  })();
-  return `${base}/api/trpc`;
 }
