@@ -1,4 +1,5 @@
 "use client";
+import { SidebarVisibilityProvider } from "@/components/layout/app-sidebar-wrapper";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { APIProvider } from "@vis.gl/react-google-maps";
 import { ReactNode } from "react";
@@ -16,7 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
         enableSystem
       >
         <APIProvider apiKey={GOOGLE_MAPS_API_KEY as string /*?!*/}>
-          {children}
+          <SidebarVisibilityProvider>{children}</SidebarVisibilityProvider>
         </APIProvider>
       </ThemeProvider>
     </QueryClientProvider>

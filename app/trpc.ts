@@ -23,7 +23,7 @@ import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 let refreshPromise: Promise<void> | null = null;
-
+const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
@@ -42,7 +42,9 @@ export const trpcClient = createTRPCClient<AppRouter>({
         ) {
           return fetch(input, init);
         }
-        const tokensExpiry = localStorage.getItem("auth.tokens_expiry");
+        const tokensExpiry = localStorage.getItem(
+          TOKEN_EXPIRY_LOCAL_STORAGE_KEY
+        );
         if (tokensExpiry) {
           const expiryTime = parseInt(tokensExpiry);
           const now = Date.now();
@@ -77,7 +79,10 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
   queryClient,
 });
 export function refreshSessionExpiresAt() {
-  localStorage.setItem("auth.tokens_expiry", `${Date.now() + 1000 * 60 * 6}`);
+  localStorage.setItem(
+    TOKEN_EXPIRY_LOCAL_STORAGE_KEY,
+    `${Date.now() + 1000 * 60 * 6}`
+  );
 }
 function getUrl() {
   const base = (() => {
