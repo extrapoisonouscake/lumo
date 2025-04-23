@@ -23,11 +23,11 @@ export const queryClient = new QueryClient({
 
 let refreshPromise: Promise<void> | null = null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
-const NEXT_PUBLIC_VERCEL_URL = process.env.NEXT_PUBLIC_VERCEL_URL; //no other syntax allowed due to Vercel
+const VERCEL_PROJECT_PRODUCTION_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
 
 const TRPC_URL = `${
-  NEXT_PUBLIC_VERCEL_URL
-    ? `https://${NEXT_PUBLIC_VERCEL_URL}`
+  VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000"
 }/api/trpc`;
 export const trpcClient = createTRPCClient<AppRouter>({
