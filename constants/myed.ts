@@ -1,3 +1,4 @@
+import { timezonedDayJS } from "@/instances/dayjs";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import { paths } from "@/types/myed-rest";
 import CallableInstance from "callable-instance";
@@ -230,19 +231,22 @@ export class Route<
 
 export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
-  schedule: new Route<{ day?: string }>()
+  schedule: new Route<{ date?: Date }>()
     .step({
       method: "GET",
       path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
       expect: "html",
     })
     .step(
-      ({ params: { day } }) => ({
-        method: "GET",
-        path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
-        expect: "html",
-      }),
-      ({ params: { day } }) => !!day
+      ({ params: { date } }) => {
+        const day = timezonedDayJS(date).format(MYED_DATE_FORMAT);
+        return {
+          method: "GET",
+          path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
+          expect: "html",
+        };
+      },
+      ({ params: { date } }) => !!date
     ),
   currentWeekday: new Route().step({
     method: "GET",

@@ -1,7 +1,7 @@
 import {
   TermSelects,
   TermSelectsSkeleton,
-} from "@/app/classes/[subjectIdOrName]/term-selects";
+} from "@/app/classes/[subjectId]/term-selects";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
 export function SubjectsPage({

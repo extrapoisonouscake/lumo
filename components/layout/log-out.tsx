@@ -1,23 +1,24 @@
 "use client";
 
+import { trpc } from "@/app/trpc";
 import { Spinner } from "@/components/ui/button";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { logOut } from "@/lib/auth/mutations";
+import { useMutation } from "@tanstack/react-query";
 import { LogOutIcon } from "lucide-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 export function LogOutButton() {
-  const [isLoading, setIsLoading] = useState(false);
+  const logOutMutation = useMutation(trpc.auth.logOut.mutationOptions());
+  const router = useRouter();
   return (
     <SidebarMenuButton
       shouldCloseSidebarOnMobile={false}
-      disabled={isLoading}
+      disabled={logOutMutation.isPending}
       onClick={async () => {
-        setIsLoading(true);
-        await logOut();
-        setIsLoading(false);
+        await logOutMutation.mutateAsync();
+        router.push("/login");
       }}
     >
-      {isLoading ? <Spinner /> : <LogOutIcon />}
+      {logOutMutation.isPending ? <Spinner /> : <LogOutIcon />}
       Log out
     </SidebarMenuButton>
   );

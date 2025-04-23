@@ -2,9 +2,11 @@
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { updateUserSettingViaServerAction } from "@/lib/settings/mutations";
+import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
+import { useUpdateUserSetting } from "@/hooks/trpc/use-update-user-setting";
+
 import { UserSetting } from "@/types/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export function SwitchField({
@@ -17,15 +19,23 @@ export function SwitchField({
   settingKey: UserSetting;
 }) {
   const [checked, setChecked] = useState(initialValue);
+  useEffect(() => {
+    if (initialValue !== checked) {
+      setChecked(initialValue);
+    }
+  }, [initialValue]);
+  const updateUserSettingMutation = useUpdateUserSetting();
   const onChangeHandler = async (checked: boolean) => {
     setChecked(checked);
+    updateUserSettingState(settingKey, checked);
     try {
-      await updateUserSettingViaServerAction({
+      await updateUserSettingMutation.mutateAsync({
         key: settingKey,
         value: checked,
       });
     } catch {
       setChecked(!checked);
+      updateUserSettingState(settingKey, !checked);
       toast.error("An error occurred.");
     }
   };

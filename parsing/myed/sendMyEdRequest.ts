@@ -23,8 +23,9 @@ export type SendMyEdRequestParameters<
   >;
   requestGroup?: string;
 } & ({ session?: string } | { queue: PrioritizedRequestQueue });
-const getUserAgent = () => {
-  const userAgent = headers().get("User-Agent") || USER_AGENT_FALLBACK;
+const getUserAgent = async () => {
+  const headersList = await headers();
+  const userAgent = headersList.get("User-Agent") || USER_AGENT_FALLBACK;
   return userAgent;
 };
 export async function sendMyEdRequest<Steps extends FlatRouteStep[]>(
@@ -51,7 +52,7 @@ export async function sendMyEdRequest<
       (name) => `${name}=${authCookies[name] || "aspen"}`
     ).join("; ");
   }
-  const userAgent = getUserAgent();
+  const userAgent = await getUserAgent();
   const initHeaders = {
     Cookie: cookiesString,
     "User-Agent": userAgent,

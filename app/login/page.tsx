@@ -2,14 +2,16 @@
 
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { forceLogin } from "@/lib/auth/mutations";
-import { loginSchema } from "@/lib/auth/public";
+
+import { loginSchema } from "@/lib/trpc/routes/auth/public";
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
+import { refreshSessionExpiresAt, trpc } from "../trpc";
 import { ChangePasswordModal } from "./change-password-modal";
-import { LoginForm } from "./login-form";
+import { LoginForm } from "./form";
 import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
 export default function Page() {
@@ -27,7 +29,9 @@ export default function Page() {
   const [temporaryAuthCookies, setTemporaryAuthCookies] = useState<
     AuthCookies | undefined
   >(undefined);
-
+  const forceLoginMutation = useMutation(
+    trpc.auth.forceLogin.mutationOptions()
+  );
   return (
     <>
       {!!registrationResult && (
@@ -70,7 +74,7 @@ export default function Page() {
             throw new Error("No temporary auth cookies");
           }
           form.handleSubmit(async (data) => {
-            await forceLogin({
+            await forceLoginMutation.mutateAsync({
               authCookies: temporaryAuthCookies,
               credentials: {
                 username: data.username,
@@ -78,6 +82,7 @@ export default function Page() {
               },
             });
             router.push("/");
+            refreshSessionExpiresAt();
           })();
         }}
         onClose={() => {

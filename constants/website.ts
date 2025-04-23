@@ -1,5 +1,5 @@
 import { Calendar, Home, Library, Settings } from "lucide-react";
-import { Params } from "next/dist/shared/lib/router/utils/route-matcher";
+import { Params } from "next/dist/server/request/params";
 
 export const WEBSITE_TITLE = "MyEd+";
 

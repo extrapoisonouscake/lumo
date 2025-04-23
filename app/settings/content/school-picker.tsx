@@ -18,10 +18,12 @@ import {
 } from "@/components/ui/popover";
 import { KnownSchools } from "@/constants/schools";
 import { cn } from "@/helpers/cn";
-import { updateUserSettingViaServerAction } from "@/lib/settings/mutations";
+import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
+import { useUpdateUserSetting } from "@/hooks/trpc/use-update-user-setting";
+
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 const defaultCmdkFilter = defaultFilter as NonNullable<typeof defaultFilter>;
 interface SchoolVisualData {
@@ -51,10 +53,16 @@ export function SchoolPicker({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(initialValue);
-
+  useEffect(() => {
+    if (initialValue !== value) {
+      setValue(initialValue);
+    }
+  }, [initialValue]);
+  const updateUserSettingMutation = useUpdateUserSetting();
   const onSubmit = async (newValue: string) => {
     setIsOpen(false);
-    await updateUserSettingViaServerAction({
+    updateUserSettingState("schoolId", newValue as KnownSchools | "other");
+    await updateUserSettingMutation.mutateAsync({
       key: "schoolId",
       value: newValue as KnownSchools | "other",
     });

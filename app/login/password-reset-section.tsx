@@ -10,11 +10,16 @@ import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { resetPassword } from "@/lib/auth/mutations";
-import { PasswordResetSchema, passwordResetSchema } from "@/lib/auth/public";
-import { isSuccessfulActionResponse } from "@/lib/helpers";
+
+import { isTRPCError } from "@/lib/trpc/helpers";
+import {
+  PasswordResetSchema,
+  passwordResetSchema,
+} from "@/lib/trpc/routes/auth/public";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "../trpc";
 
 export function PasswordResetSection({
   setLoginFormValues,
@@ -26,18 +31,21 @@ export function PasswordResetSection({
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
   const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
+  const resetPasswordMutation = useMutation(
+    trpc.auth.resetPassword.mutationOptions()
+  );
   const onSubmit = async (data: PasswordResetSchema) => {
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await resetPassword({
-      ...data,
-      securityQuestion: securityQuestion ?? undefined,
-    });
-    if (isSuccessfulActionResponse(response)) {
-      const securityQuestion = response?.data?.securityQuestion; //fix types
-      if (securityQuestion) {
-        setSecurityQuestion(securityQuestion);
+    try {
+      const response = await resetPasswordMutation.mutateAsync({
+        ...data,
+        securityQuestion: securityQuestion ?? undefined,
+      });
+      const newSecurityQuestion = response.securityQuestion; //fix types
+      if (newSecurityQuestion) {
+        setSecurityQuestion(newSecurityQuestion);
       } else {
         toast.success("A temporary password has been sent to your email.");
         setIsOpen(false);
@@ -46,8 +54,12 @@ export function PasswordResetSection({
         setLoginFormValues(data.username);
         form.reset();
       }
-    } else {
-      setErrorMessage(response?.data?.message ?? "An unknown error occurred.");
+    } catch (e) {
+      if (isTRPCError(e)) {
+        setErrorMessage(e.message);
+      } else {
+        setErrorMessage("An unknown error occurred.");
+      }
     }
   };
   const clearSecurityQuestion = () => {

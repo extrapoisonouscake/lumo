@@ -1,6 +1,6 @@
 import { FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AllowedRegistrationCountries } from "@/lib/auth/public";
+import { AllowedRegistrationCountries } from "@/lib/trpc/routes/auth/public";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useRef, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";

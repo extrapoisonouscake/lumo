@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
-import { locallyTimezonedDayJS } from "@/instances/dayjs";
+import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { Dayjs } from "dayjs";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
@@ -68,7 +68,7 @@ export function parseSchedule({
       const timeString = removeLineBreaks($(timeTd).find("td").text());
       const [startsAt, endsAt] = timeString.split(" - ");
       const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(
-        locallyTimezonedDayJS(initialParams.day).startOf("minute")
+        timezonedDayJS(initialParams.date).startOf("minute")
       );
 
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");

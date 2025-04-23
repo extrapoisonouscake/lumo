@@ -16,27 +16,26 @@ import {
   guestAllowedPathnames,
   websitePagesWithStaticPaths,
 } from "@/constants/website";
+import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import { cn } from "@/helpers/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 import { LogInButton } from "./log-in";
 import { LogOutButton } from "./log-out";
 import { ThemeToggle } from "./theme-toggle";
+import { UserHeader } from "./user-header";
 
-export function AppSidebar({
-  userHeader,
-  isGuest,
-  ...props
-}: { userHeader: ReactNode | null; isGuest: boolean } & React.ComponentProps<
-  typeof Sidebar
->) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const isGuest = clientAuthChecks.isInGuestMode();
   return (
     <Sidebar collapsible="icon" {...props}>
-      {userHeader && (
+      {!isGuest && (
         <SidebarHeader className="pb-1">
           <SidebarMenu>
-            <SidebarMenuItem>{userHeader}</SidebarMenuItem>
+            <SidebarMenuItem>
+              <UserHeader />
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
       )}

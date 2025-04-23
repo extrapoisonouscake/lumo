@@ -6,8 +6,13 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useEffect, useState, useTransition } from "react";
-import { convertQueryDayToDate } from "../[[...slug]]/helpers";
+import {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+  useTransition,
+} from "react";
 const formatDateToStandard = (date: Date | undefined) =>
   timezonedDayJS(date).format("MM-DD-YYYY");
 function ChevronButton(props: ButtonProps) {
@@ -21,13 +26,13 @@ function ChevronButton(props: ButtonProps) {
   );
 }
 type NavigationButtonsNames = "left" | "calendar" | "right";
-export function ScheduleDayPicker({ day }: { day?: string }) {
-  const [date, setDate] = useState(convertQueryDayToDate(day));
-  useEffect(() => {
-    const newDate = convertQueryDayToDate(day);
-    if (newDate?.getTime() === date?.getTime()) return;
-    setDate(newDate);
-  }, [day]);
+export function ScheduleDayPicker({
+  date,
+  setDate,
+}: {
+  date: Date;
+  setDate: Dispatch<SetStateAction<Date>>;
+}) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
@@ -35,18 +40,15 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
   const [loadingButtonName, setLoadingButtonName] =
     useState<NavigationButtonsNames | null>(null);
   const onDateChange = async (
-    newDate: Date | undefined,
+    newDate = new Date(),
     originButton: NavigationButtonsNames
   ) => {
-    const day = formatDateToStandard(newDate);
-    const dateToSet =
-      day === formatDateToStandard(new Date()) ? undefined : newDate;
-    setDate(dateToSet);
+    setDate(newDate);
     setLoadingButtonName(originButton);
     startTransition(() => {
       router.push(
         `/schedule${
-          dateToSet ? `/${day}` : ""
+          newDate ? `/${formatDateToStandard(newDate)}` : ""
         }?${currentSearchParams.toString()}`
       );
     });
@@ -74,7 +76,7 @@ export function ScheduleDayPicker({ day }: { day?: string }) {
         onOpenChange={setIsOpen}
         disabledModifier={{ dayOfWeek: [0, 6] }}
         isLoading={loadingButtonName === "calendar"}
-        date={date || new Date()}
+        date={date}
         keepTimezone={!!date}
         showWeekday
         setDate={(newDate) => onDateChange(newDate, "calendar")}

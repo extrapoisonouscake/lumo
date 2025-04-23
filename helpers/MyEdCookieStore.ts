@@ -12,12 +12,22 @@ export const cookieDefaultOptions: Partial<ResponseCookie> = {
   maxAge: COOKIE_MAX_AGE,
   httpOnly: true,
 };
-export type PlainCookieStore = ReturnType<typeof cookies> | ResponseCookies;
+
+export type PlainCookieStore =
+  | Awaited<ReturnType<typeof cookies>>
+  | ResponseCookies;
 export class MyEdCookieStore {
-  store: PlainCookieStore;
-  constructor(plainStore: PlainCookieStore = cookies()) {
-    this.store = plainStore;
+  private store: PlainCookieStore;
+
+  private constructor(store: PlainCookieStore) {
+    this.store = store;
   }
+
+  static async create(plainStore?: PlainCookieStore): Promise<MyEdCookieStore> {
+    const store = plainStore || (await cookies());
+    return new MyEdCookieStore(store);
+  }
+
   get: PlainCookieStore["get"] = (name: string) => {
     const rawValue = this.store.get(getFullCookieName(name));
     if (rawValue) {

@@ -5,7 +5,7 @@ export const USER_SETTINGS_COOKIE_PREFIX = "settings";
 export const USER_SETTINGS_KEYS = [
   "schoolId",
   "shouldShowNextSubjectTimer",
-  "shouldShowAssignmentScorePercentage",
+  "shouldShowPercentages",
   "shouldHighlightMissingAssignments",
   "shouldShowLetterGrade",
   "themeColor",
@@ -13,8 +13,8 @@ export const USER_SETTINGS_KEYS = [
 //TODO change type to ensure all keys are included
 export const USER_SETTINGS_DEFAULT_VALUES: Partial<Record<UserSetting, any>> = {
   shouldShowNextSubjectTimer: true,
-  shouldShowAssignmentScorePercentage: true,
+  shouldShowPercentages: true,
   shouldHighlightMissingAssignments: true,
   shouldShowLetterGrade: false,
   themeColor: "180 100% 25%",
-};
+} as const;

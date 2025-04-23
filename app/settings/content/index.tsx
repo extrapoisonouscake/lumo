@@ -1,4 +1,6 @@
-import { getUserSettings } from "@/lib/settings/queries";
+"use client";
+import { Spinner } from "@/components/ui/button";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { UserSetting } from "@/types/core";
 import { SchoolPicker } from "./school-picker";
 import { SwitchField } from "./switch-field";
@@ -15,7 +17,7 @@ const fields: Array<
   },
   {
     label: "Show percentage for assignment score",
-    key: "shouldShowAssignmentScorePercentage",
+    key: "shouldShowPercentages",
   },
   {
     label: "Highlight missing assignments",
@@ -24,7 +26,13 @@ const fields: Array<
   { custom: ThemePicker, key: "themeColor" },
 ];
 export function SettingsContent() {
-  const userSettings = getUserSettings();
+  const userSettings = useUserSettings(false);
+  if (!userSettings)
+    return (
+      <div className="flex w-full justify-center">
+        <Spinner />
+      </div>
+    );
   return fields.map((field) => {
     const initialValue = userSettings[field.key];
     if ("custom" in field) {

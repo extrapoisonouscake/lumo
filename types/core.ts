@@ -4,7 +4,7 @@ import { KnownSchools } from "@/constants/schools";
 export interface UserSettings {
   schoolId: KnownSchools | "other";
   shouldShowNextSubjectTimer: boolean;
-  shouldShowAssignmentScorePercentage: boolean;
+  shouldShowPercentages: boolean;
   shouldHighlightMissingAssignments: boolean;
   shouldShowLetterGrade: boolean;
   themeColor: string;

@@ -8,7 +8,8 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { cn } from "@/helpers/cn";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { register } from "@/lib/auth/mutations";
+
+import { isTRPCError } from "@/lib/trpc/helpers";
 import {
   allowedRegistrationCountries,
   AllowedRegistrationCountries,
@@ -16,9 +17,12 @@ import {
   registerSchema,
   registerTypeSchemas,
   RegistrationType,
-} from "@/lib/auth/public";
+} from "@/lib/trpc/routes/auth/public";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
+import { trpc } from "../trpc";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
 import { LoginSuggestionText } from "./login-suggestion-text";
 import { ExtendedFormPasswordInput } from "./password-input";
@@ -359,16 +363,25 @@ export function RegistrationForm({
 
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
+  const registerMutation = useMutation(trpc.auth.register.mutationOptions());
+  const router = useRouter();
   async function onSubmit(data: RegisterSchema) {
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await register(data);
-    if (!response?.data?.success) {
-      setErrorMessage(
-        response?.data?.message ||
-          "An unexpected error occurred. Try again later."
+    try {
+      const response = await registerMutation.mutateAsync(data);
+      router.push(
+        `/login?registration_result=${
+          response.canLoginImmediately ? "success" : "pending"
+        }`
       );
+    } catch (error) {
+      if (isTRPCError(error)) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("An unexpected error occurred. Try again later.");
+      }
     }
   }
   const type = form.watch("type");

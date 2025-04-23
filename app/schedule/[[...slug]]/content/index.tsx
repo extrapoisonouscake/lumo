@@ -1,17 +1,15 @@
+import { trpc } from "@/app/trpc";
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
+import { MultiQueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MYED_DATE_FORMAT } from "@/constants/myed";
-import {
-  dayjs,
-  locallyTimezonedDayJS,
-  timezonedDayJS,
-} from "@/instances/dayjs";
-import { getUserSettings } from "@/lib/settings/queries";
-import { getMyEd } from "@/parsing/myed/getMyEd";
-import { MyEdEndpointsParams } from "@/types/myed";
+import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { dayjs, timezonedDayJS } from "@/instances/dayjs";
+import { RouterOutput } from "@/lib/trpc/types";
+import { Subject } from "@/types/school";
+import { useQuery } from "@tanstack/react-query";
 import { Dayjs } from "dayjs";
-import { ComponentProps, ReactNode } from "react";
-import { SCHEDULE_QUERY_DATE_FORMAT } from "../constants";
+import { ReactNode } from "react";
 import { ScheduleTable } from "./table";
 const getWinterBreakDates = (date: Dayjs) => {
   const month = date.month();
@@ -50,10 +48,10 @@ const isDayJSObjectBetweenDates = (
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
 const visualizableErrors: Record<
   string,
-  ({ day }: { day: string | undefined }) => ErrorCardProps
+  ({ date }: { date: Date }) => ErrorCardProps
 > = {
-  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ day }) => {
-    const dateObject = locallyTimezonedDayJS(day);
+  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date }) => {
+    const dateObject = timezonedDayJS(date);
     let message,
       emoji = "😴";
     const winterBreakDates = getWinterBreakDates(dateObject);
@@ -78,57 +76,83 @@ const visualizableErrors: Record<
   },
 };
 interface Props {
-  day: string | undefined;
+  date: Date;
 }
-const getActualWeekdayIndex = (day: Props["day"]) =>
-  (day ? locallyTimezonedDayJS(day) : timezonedDayJS()).day();
-export async function ScheduleContent({ day }: Props) {
-  const params: MyEdEndpointsParams<"schedule"> = {};
+const getActualWeekdayIndex = (date: Props["date"]) =>
+  timezonedDayJS(date).day();
+export function Schedule({ date }: Props) {
   let currentDayObject = dayjs();
-  if (day) {
-    currentDayObject = locallyTimezonedDayJS(day, SCHEDULE_QUERY_DATE_FORMAT);
-    params.day = currentDayObject.format(MYED_DATE_FORMAT);
-  }
 
   if ([0, 6].includes(currentDayObject.day())) {
     return (
       <ErrorCard
-        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]({ day })}
+        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]({ date })}
       />
     );
   }
-  const data = await getMyEd("schedule", params);
-
-  if ("knownError" in data) {
-    return <ErrorCard {...visualizableErrors[data.knownError]?.({ day })} />;
+  return <Loader date={date} />;
+}
+function Loader({ date }: { date: Date }) {
+  const scheduleQuery = useQuery(
+    trpc.schedule.getSchedule.queryOptions({
+      date,
+    })
+  );
+  const subjectsDataQuery = useSubjectsData();
+  return (
+    <MultiQueryWrapper
+      queries={[scheduleQuery, subjectsDataQuery]}
+      skeleton={<ScheduleContentSkeleton date={date} />}
+    >
+      {([schedule, subjectsResponse]) => (
+        <Content
+          schedule={schedule}
+          date={date}
+          subjects={subjectsResponse.subjects.main}
+        />
+      )}
+    </MultiQueryWrapper>
+  );
+}
+function Content({
+  schedule,
+  date,
+  subjects,
+}: {
+  schedule: RouterOutput["schedule"]["getSchedule"];
+  date: Date;
+  subjects: Subject[];
+}) {
+  if ("knownError" in schedule) {
+    return (
+      <ErrorCard {...visualizableErrors[schedule.knownError]?.({ date })} />
+    );
   }
-  const userSettings = getUserSettings();
-  const shouldShowWeekday = getActualWeekdayIndex(day) === 5;
+  const userSettings = useUserSettings();
+  const shouldShowWeekday = getActualWeekdayIndex(date) === 5;
   return (
     <GridLayout>
       {shouldShowWeekday && (
         <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
-          Same as <span className="font-semibold">{data.weekday}</span>
+          Same as <span className="font-semibold">{schedule.weekday}</span>
         </h3>
       )}
       <ScheduleTable
         shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
         isWeekdayShown={shouldShowWeekday}
-        data={data.subjects}
+        data={schedule.subjects.map((subject) => ({
+          ...subject,
+          id: subjects.find((s) => s.actualName === subject.actualName)?.id,
+        }))}
       />
     </GridLayout>
   );
 }
-export function ScheduleContentSkeleton({
-  day,
-}: ComponentProps<typeof ScheduleContent>) {
-  const shouldShowTimer = timezonedDayJS().isSame(
-    locallyTimezonedDayJS(day),
-    "date"
-  );
+export function ScheduleContentSkeleton({ date }: { date: Date }) {
+  const shouldShowTimer = timezonedDayJS().isSame(timezonedDayJS(date), "date");
   return (
     <GridLayout>
-      {getActualWeekdayIndex(day) === 5 && (
+      {getActualWeekdayIndex(date) === 5 && (
         <div className="row-start-1 col-start-2 w-full flex justify-end [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:justify-start">
           <div className="flex items-center gap-2">
             <h3 className="text-sm">Same as</h3>

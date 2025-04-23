@@ -1,6 +1,6 @@
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 
 export const convertQueryDayToDate = (day?: string) =>
-  day
-    ? locallyTimezonedDayJS(day, "MM-DD-YYYY").startOf("date").toDate()
-    : undefined;
+  (day ? locallyTimezonedDayJS(day, "MM-DD-YYYY") : locallyTimezonedDayJS())
+    .startOf("day")
+    .toDate();

@@ -1,4 +1,4 @@
-import { RegistrationInternalFields } from "@/lib/auth/public";
+import { RegistrationInternalFields } from "@/lib/trpc/routes/auth/public";
 import { ParserFunctionArguments } from "./types";
 
 export function parseRegistrationFields({

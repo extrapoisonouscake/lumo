@@ -8,9 +8,8 @@ type PersonalDetailsParserArguments =
   ParserFunctionArguments<"personalDetails">;
 export function parsePersonalDetails({
   responses: [$main, $photoRoot],
-}: PersonalDetailsParserArguments): PersonalDetails | undefined {
+}: PersonalDetailsParserArguments): PersonalDetails {
   const mainDetails = parseMainDetails($main);
-  if (!mainDetails) return;
   const photoURL = parsePhotoURL($photoRoot);
   return { ...mainDetails, photoURL };
 }

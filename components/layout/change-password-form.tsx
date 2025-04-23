@@ -1,14 +1,15 @@
 import { ExtendedFormPasswordInput } from "@/app/register/password-input";
+import { trpc } from "@/app/trpc";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import { changePassword } from "@/lib/auth/mutations";
+import { isTRPCError } from "@/lib/trpc/helpers";
 import {
   changePasswordSchema,
   ChangePasswordSchema,
   LoginSchema,
-} from "@/lib/auth/public";
-import { isSuccessfulActionResponse } from "@/lib/helpers";
+} from "@/lib/trpc/routes/auth/public";
+import { useMutation } from "@tanstack/react-query";
 import { Form } from "../ui/form";
 import { FormInput } from "../ui/form-input";
 import { FormPasswordInput } from "../ui/form-password-input";
@@ -32,17 +33,22 @@ export function ChangePasswordForm({
   });
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
+  const changePasswordMutation = useMutation(
+    trpc.auth.changePassword.mutationOptions()
+  );
   const onSubmit = async (data: ChangePasswordSchema) => {
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await changePassword(data);
-    if (isSuccessfulActionResponse(response)) {
+    try {
+      const response = await changePasswordMutation.mutateAsync(data);
       onSuccess();
-    } else {
-      setErrorMessage(
-        response?.data?.message || "An unexpected error occurred."
-      );
+    } catch (e) {
+      if (isTRPCError(e)) {
+        setErrorMessage(e.message);
+      } else {
+        setErrorMessage("An unexpected error occurred.");
+      }
     }
   };
 

@@ -34,9 +34,10 @@ import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
 import { useTTNextSubject } from "./use-tt-next-subject";
 type RowType = "subject" | "short-break" | "long-break" | "lunch";
 type BreakRowType = Exclude<RowType, "subject">;
+type ExtendedScheduleSubject = ScheduleSubject & { id?: string };
 type ScheduleRowSubject = {
   type: Extract<RowType, "subject">;
-} & ScheduleSubject;
+} & ExtendedScheduleSubject;
 export type ScheduleRow =
   | ScheduleRowSubject
   | ({ type: BreakRowType } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
@@ -204,7 +205,7 @@ export function ScheduleTable({
   isWeekdayShown,
   shouldShowTimer,
 }: {
-  data?: ScheduleSubject[];
+  data?: ExtendedScheduleSubject[];
   isLoading?: boolean;
   isWeekdayShown?: boolean;
   shouldShowTimer?: boolean;
@@ -238,12 +239,15 @@ export function ScheduleTable({
     return (
       <TableRow
         onClick={
-          isSubject && !isTeacherAdvisory
+          isSubject && !isTeacherAdvisory && rowOriginal.id
             ? () =>
                 router.push(
-                  getSubjectPageURL({ actualName: rowOriginal.actualName })
+                  getSubjectPageURL({
+                    id: rowOriginal.id!,
+                    name: rowOriginal.name,
+                  })
                 )
-            : undefined //!
+            : undefined
         }
         key={row.id}
         data-state={row.getIsSelected() && "selected"}

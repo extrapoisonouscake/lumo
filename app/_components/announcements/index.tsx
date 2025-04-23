@@ -5,101 +5,69 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isKnownSchool } from "@/constants/schools";
-import { getUserSettings } from "@/lib/settings/queries";
 
+import { trpc } from "@/app/trpc";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
-import { isGuestMode } from "@/helpers/auth-statuses";
+import { QueryWrapper } from "@/components/ui/query-wrapper";
+import { isKnownSchool } from "@/constants/schools";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { redis } from "@/instances/redis";
-import {
-  getAnnouncementsPDFLinkRedisHashKey,
-  getAnnouncementsRedisKey,
-} from "@/parsing/announcements/getAnnouncements";
-import { getMyEd } from "@/parsing/myed/getMyEd";
-import { AnnouncementSection } from "@/types/school";
+import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/school-specific/public";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightIcon } from "lucide-react";
 import { AnnouncementsAccordions } from "./accordions";
 function AnnouncementsHeading() {
   return <h3 className="text-sm">Announcements</h3>;
 }
-export async function Announcements() {
+export function Announcements() {
+  const settings = useUserSettings(false);
+  if (!settings) return <AnnouncementsSkeleton />;
+  const { schoolId } = settings;
   const date = timezonedDayJS();
-
-  const { schoolId } = getUserSettings();
-  let content, pdfLink;
+  let error: AnnouncementsNotAvailableReason | undefined;
   if (!schoolId) {
-    content = (
-      <AnnouncementsNotAvailableCard
-        reason={AnnouncementsNotAvailableReason.SchoolNotSelected}
-      />
-    );
+    error = AnnouncementsNotAvailableReason.SchoolNotSelected;
   } else if (!isKnownSchool(schoolId)) {
-    content = (
-      <AnnouncementsNotAvailableCard
-        reason={AnnouncementsNotAvailableReason.SchoolNotAvailable}
-      />
-    );
+    error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
   } else if ([0, 6].includes(date.day())) {
-    content = (
-      <AnnouncementsNotAvailableCard
-        reason={AnnouncementsNotAvailableReason.NotAWeekday}
-      />
-    );
-  } else {
-    const redisKey = getAnnouncementsRedisKey(schoolId);
-
-    const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(new Date());
-    let data: AnnouncementSection[] = [];
-    let cachedData;
-    [cachedData, pdfLink] = await Promise.all([
-      redis.get(redisKey),
-
-      redis.hget(pdfLinkHashKey, schoolId) as Promise<string | null>,
-    ]);
-    let studentGrade;
-    if (cachedData) {
-      const parsedData =
-        process.env.NODE_ENV === "development"
-          ? JSON.parse(cachedData as string)
-          : cachedData;
-      data = parsedData;
-      const isGuest = isGuestMode();
-
-      if (!isGuest) {
-        const personalDetails = await getMyEd("personalDetails");
-        studentGrade = personalDetails?.grade;
-      }
-    }
-
-    content =
-      data.length > 0 ? (
-        <AnnouncementsAccordions
-          pdfURL={pdfLink ?? null}
-          data={data}
-          studentGrade={studentGrade}
-        />
-      ) : (
-        <AnnouncementsNotAvailableCard
-          reason={AnnouncementsNotAvailableReason.NoAnnouncements}
-        />
-      );
+    error = AnnouncementsNotAvailableReason.NotAWeekday;
   }
+  if (error) {
+    return <AnnouncementsNotAvailableCard reason={error} />;
+  }
+  return <Loader />;
+}
+function Loader() {
+  const query = useQuery(trpc.schoolSpecific.getAnnouncements.queryOptions());
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex justify-between gap-2 items-center">
-        <AnnouncementsHeading />
-        {!!pdfLink && (
-          <Link href={pdfLink} target="_blank">
-            <Button size="icon" variant="ghost" className="size-7">
-              <ArrowUpRightIcon />
-            </Button>
-          </Link>
-        )}
-      </div>
-      {content}
-    </div>
+    <QueryWrapper query={query} skeleton={<AnnouncementsSkeleton />}>
+      {(response) =>
+        "notAvailableReason" in response ? (
+          <AnnouncementsNotAvailableCard
+            reason={response.notAvailableReason!}
+          />
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="flex justify-between gap-2 items-center">
+              <AnnouncementsHeading />
+              {!!response.pdfLink && (
+                <Link href={response.pdfLink} target="_blank">
+                  <Button size="icon" variant="ghost" className="size-7">
+                    <ArrowUpRightIcon />
+                  </Button>
+                </Link>
+              )}
+            </div>
+            <AnnouncementsAccordions
+              pdfURL={response.pdfLink ?? null}
+              data={response.data!}
+              studentGrade={undefined} //!fix
+            />
+          </div>
+        )
+      }
+    </QueryWrapper>
   );
 }
 export function AnnouncementsSkeleton() {
@@ -123,12 +91,7 @@ export function AnnouncementsSkeleton() {
     </div>
   );
 }
-enum AnnouncementsNotAvailableReason {
-  SchoolNotSelected,
-  SchoolNotAvailable,
-  NoAnnouncements,
-  NotAWeekday,
-}
+
 const reasonToVisualData = {
   [AnnouncementsNotAvailableReason.SchoolNotSelected]: {
     emoji: "🏫",

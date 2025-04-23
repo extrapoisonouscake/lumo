@@ -1,7 +1,8 @@
 "use client";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/helpers/cn";
-import { updateUserSettingViaServerAction } from "@/lib/settings/mutations";
+import { useUpdateUserSetting } from "@/hooks/trpc/use-update-user-setting";
+
 import { Check } from "lucide-react";
 import { useState } from "react";
 
@@ -20,9 +21,14 @@ const AVAILABLE_THEMES = [
 
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [value, setValue] = useState(initialValue);
+  const updateUserSettingMutation = useUpdateUserSetting();
   const onChangeHandler = async (theme: string) => {
     setValue(theme);
-    await updateUserSettingViaServerAction({
+    (document.querySelector(":root") as HTMLElement).style.setProperty(
+      "--brand",
+      theme
+    );
+    await updateUserSettingMutation.mutateAsync({
       key: "themeColor",
       value: theme,
     });

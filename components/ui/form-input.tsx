@@ -11,25 +11,28 @@ import {
   FormMessage,
 } from "./form";
 import { Input, InputProps } from "./input";
+
 export type FormInputProps = WithRequired<InputProps, "name"> & {
   label: string;
   description?: string;
   shouldShowError?: boolean;
 };
+
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
   ({ name, description, label, shouldShowError = true, ...props }, ref) => {
-    //? reuse existing types?
     const context = useFormContext();
     let currentError: string | null = null;
     if (context) {
       currentError =
-        context.formState.errors[name]?.message?.toString() || null; //!too complicated??
+        context.formState.errors[name]?.message?.toString() || null;
     }
+
     return (
       <FormField
         control={context.control}
         name={name}
-        render={({ field: { ref: fieldRef, ...rest } }) => (
+        defaultValue={""}
+        render={({ field }) => (
           <FormItem>
             {label && (
               <FormLabel
@@ -41,9 +44,10 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
             )}
             <FormControl shouldShowError={shouldShowError}>
               <Input
-                {...rest}
+                {...field}
+                {...props}
                 ref={(e) => {
-                  fieldRef(e);
+                  field.ref(e);
                   if (ref) {
                     if ("current" in ref) {
                       ref.current = e;
@@ -52,9 +56,8 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                     }
                   }
                 }}
-                {...props}
                 onChange={(e) => {
-                  rest.onChange(e);
+                  field.onChange(e);
                   props.onChange?.(e);
                 }}
               />

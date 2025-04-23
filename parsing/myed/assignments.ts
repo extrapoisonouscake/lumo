@@ -44,7 +44,7 @@ function convertAssignment({
     ...baseAssignment,
     status,
     score: null,
-    maxScore: pointMax ? +pointMax : null,
+    maxScore: null,
   } as Assignment;
 }
 export function parseSubjectAssignments({

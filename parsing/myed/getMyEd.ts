@@ -9,7 +9,6 @@ import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
-import { redirect } from "next/navigation";
 import { cache } from "react";
 import "server-only";
 import { parseSubjectAssignment, parseSubjectAssignments } from "./assignments";
@@ -52,12 +51,12 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   const route = ENDPOINTS[endpoint];
   let authParameters, studentId;
   if (route.requiresAuth) {
-    const cookieStore = new MyEdCookieStore();
+    const cookieStore = await MyEdCookieStore.create();
     let authCookies;
     try {
       authCookies = getAuthCookies(cookieStore);
     } catch {
-      redirect("/log-out");
+      throw new Error("No session or studentId");
     }
     studentId = cookieStore.get("studentId")?.value;
     const session = authCookies.JSESSIONID;

@@ -1,23 +1,26 @@
 "use client";
 
+import { trpc } from "@/app/trpc";
 import { Spinner } from "@/components/ui/button";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { exitGuestMode } from "@/lib/auth/mutations";
+import { useMutation } from "@tanstack/react-query";
 import { LogInIcon } from "lucide-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 export function LogInButton() {
-  const [isLoading, setIsLoading] = useState(false);
+  const exitGuestModeMutation = useMutation(
+    trpc.auth.exitGuestMode.mutationOptions()
+  );
+  const router = useRouter();
   return (
     <SidebarMenuButton
       shouldCloseSidebarOnMobile={false}
-      disabled={isLoading}
+      disabled={exitGuestModeMutation.isPending}
       onClick={async () => {
-        setIsLoading(true);
-        await exitGuestMode();
-        setIsLoading(false);
+        await exitGuestModeMutation.mutateAsync();
+        router.push("/login");
       }}
     >
-      {isLoading ? <Spinner /> : <LogInIcon />}
+      {exitGuestModeMutation.isPending ? <Spinner /> : <LogInIcon />}
       Log in
     </SidebarMenuButton>
   );

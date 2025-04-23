@@ -1,24 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { SESSION_TTL_IN_SECONDS } from "./constants/auth";
-import { MYED_SESSION_COOKIE_NAME } from "./constants/myed";
 import {
   guestAllowedPathnames,
   unauthenticatedPathnames,
 } from "./constants/website";
-import { isGuestMode, isUserAuthenticated } from "./helpers/auth-statuses";
-import { getFullCookieName } from "./helpers/getFullCookieName";
-import { MyEdCookieStore } from "./helpers/MyEdCookieStore";
-import {
-  deleteSession,
-  fetchAuthCookiesAndStudentID,
-} from "./lib/auth/helpers";
-import {
-  isKnownLoginError,
-  LoginErrors,
-  loginSchema,
-  LoginSchema,
-} from "./lib/auth/public";
-import { encryption } from "./lib/encryption";
+import { serverAuthChecks } from "./helpers/server-auth-checks";
+import { deleteSession } from "./lib/trpc/routes/auth/helpers";
+import { isKnownLoginError, LoginErrors } from "./lib/trpc/routes/auth/public";
+
 async function getLoginRedirectResponse(
   request: NextRequest,
   errorMessage?: string
@@ -39,11 +27,13 @@ async function getLoginRedirectResponse(
 
   return redirectResponse;
 }
-export async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { cookies } = request;
-  try{const isGuest = isGuestMode(cookies);
-  const isAllowedGeneralAccess = isUserAuthenticated(cookies) || isGuest;
+
+  const isGuest = serverAuthChecks.isInGuestMode(cookies);
+  const isAllowedGeneralAccess =
+    serverAuthChecks.isLoggedIn(cookies) || isGuest;
   const { pathname } = request.nextUrl;
 
   if (pathname === "/log-out") {
@@ -61,57 +51,13 @@ export async function middleware(request: NextRequest) {
       !guestAllowedPathnames.some((p) => pathname.startsWith(p))
     ) {
       return Response.redirect(new URL("/", request.url));
-    } else {
-      const cookieWritableStore = new MyEdCookieStore(response.cookies);
-      const username = encryption.decrypt(
-        cookies.get(getFullCookieName("username"))?.value || ""
-      ); //? workaround
-      const password = encryption.decrypt(
-        cookies.get(getFullCookieName("password"))?.value || ""
-      ); //? workaround
-      if (
-        !cookies.has(getFullCookieName(MYED_SESSION_COOKIE_NAME)) &&
-        username &&
-        password
-      ) {
-        const formData = {
-          username,
-          password: decodeURIComponent(password),
-        } as LoginSchema;
-
-        try {
-          loginSchema.parse(formData);
-
-          const { cookies: cookiesToAdd } = await fetchAuthCookiesAndStudentID(
-            formData.username,
-            formData.password
-          );
-          for (const [name, value] of Object.entries(cookiesToAdd)) {
-            cookieWritableStore.set(name, value, {
-              maxAge: SESSION_TTL_IN_SECONDS,
-            });
-          }
-        } catch (e: any) {
-          const redirectResponse = await getLoginRedirectResponse(
-            request,
-            e.message
-          );
-
-          return redirectResponse;
-        }
-      }
     }
   } else {
     if (!isOnUnauthenticatedPage) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }
-  return response;}catch{const redirectResponse = await getLoginRedirectResponse(
-            request,
-            "unexpected-error"
-          );
-
-          return redirectResponse;}
+  return response;
 }
 
 export const config = {
