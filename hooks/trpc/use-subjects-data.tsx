@@ -1,12 +1,14 @@
 import { trpc } from "@/app/trpc";
 import { useQuery } from "@tanstack/react-query";
-export function useSubjectsData({
-  isPreviousYear = false,
-  termId,
-}: {
-  isPreviousYear?: boolean;
-  termId?: string;
-} = {}) {
+export function useSubjectsData(
+  {
+    isPreviousYear,
+    termId,
+  }: {
+    isPreviousYear: boolean;
+    termId?: string;
+  } = { isPreviousYear: false, termId: undefined }
+) {
   const query = useQuery(
     trpc.subjects.getSubjects.queryOptions({
       isPreviousYear,
