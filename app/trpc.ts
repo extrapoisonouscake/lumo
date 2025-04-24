@@ -1,4 +1,4 @@
-import { createTRPCClient, httpLink } from "@trpc/client";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
@@ -34,7 +34,7 @@ const TRPC_URL = `${
 }/api/trpc`;
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
-    httpLink({
+    httpBatchLink({
       transformer: superjson,
       url: TRPC_URL,
       fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
