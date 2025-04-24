@@ -1,5 +1,6 @@
 import { QueryObserverResult } from "@tanstack/react-query";
 import { ReactNode } from "react";
+import { ErrorCard } from "../misc/error-card";
 
 interface QueryWrapperProps<TData, TError> {
   query: QueryObserverResult<TData, TError>;
@@ -18,8 +19,8 @@ export function QueryWrapper<TData, TError>({
     return <>{skeleton}</>;
   }
 
-  if (query.isError && onError) {
-    return <>{onError}</>;
+  if (query.isError) {
+    return <>{onError || <ErrorCard />}</>;
   }
 
   if (query.data) {

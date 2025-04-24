@@ -1,4 +1,8 @@
-import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
+import {
+  AUTH_COOKIES_NAMES,
+  COOKIE_MAX_AGE,
+  shouldSecureCookies,
+} from "@/constants/auth";
 import { encryption } from "@/lib/encryption";
 import {
   ResponseCookie,
@@ -16,6 +20,8 @@ export const cookieDefaultOptions: Partial<ResponseCookie> = {
 export type PlainCookieStore =
   | Awaited<ReturnType<typeof cookies>>
   | ResponseCookies;
+type AuthCookieName =
+  (typeof AUTH_COOKIES_NAMES)[keyof typeof AUTH_COOKIES_NAMES];
 export class MyEdCookieStore {
   private store: PlainCookieStore;
 
@@ -28,7 +34,7 @@ export class MyEdCookieStore {
     return new MyEdCookieStore(store);
   }
 
-  get: PlainCookieStore["get"] = (name: string) => {
+  get = (name: AuthCookieName): ReturnType<PlainCookieStore["get"]> => {
     const rawValue = this.store.get(getFullCookieName(name));
     if (rawValue) {
       return {
@@ -39,7 +45,7 @@ export class MyEdCookieStore {
       return undefined;
     }
   };
-  has: PlainCookieStore["has"] = (name: string) => {
+  has = (name: AuthCookieName): ReturnType<PlainCookieStore["has"]> => {
     return this.store.has(getFullCookieName(name));
   };
   set: PlainCookieStore["set"] = (...props) => {

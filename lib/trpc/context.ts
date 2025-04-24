@@ -1,18 +1,22 @@
+import { hashString } from "@/helpers/hashString";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
-import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies, headers } from "next/headers";
 type AuthenticatedTRPCContext = {
   isGuest: false;
   studentId: string;
+  studentHashedId: string;
   credentials: string; //temporary non-undefined
   tokens?: string;
 };
-export const createTRPCContext = async ({
-  req,
-}: FetchCreateContextFnOptions) => {
+export const createTRPCContext = async () => {
   const store = await cookies();
   const cookieStore = await MyEdCookieStore.create(store);
   const studentId = cookieStore.get("studentId")?.value;
+  let studentHashedId;
+  if (studentId) {
+    studentHashedId = hashString(studentId);
+  }
   const credentials = cookieStore.get("credentials")?.value;
   const tokens = cookieStore.get("tokens")?.value;
   const isGuest = !!store.get("isGuest")?.value;
@@ -22,14 +26,17 @@ export const createTRPCContext = async ({
   return {
     isGuest,
     studentId,
+    studentHashedId,
     credentials,
     tokens,
     ip,
-    cookieStore,
-  } as { ip: string; cookieStore: MyEdCookieStore } & (
-    | { isGuest: true }
-    | AuthenticatedTRPCContext
-  );
+    authCookieStore: cookieStore,
+    cookieStore: store,
+  } as {
+    ip: string;
+    cookieStore: ReadonlyRequestCookies;
+    authCookieStore: MyEdCookieStore;
+  } & ({ isGuest: true } | AuthenticatedTRPCContext);
 };
 
 export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;

@@ -366,12 +366,11 @@ export const authRouter = router({
 
     const { tokens } = await fetchAuthCookiesAndStudentID(username, password);
 
-    // Apply cookies
-    ctx.cookieStore.set(
+    ctx.authCookieStore.set(
       AUTH_COOKIES_NAMES.tokens,
       convertObjectToCookieString(tokens, false),
       {
-        maxAge: 3600, // 1 hour
+        maxAge: 60 * 60,
       }
     );
   }),

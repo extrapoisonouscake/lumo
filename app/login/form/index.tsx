@@ -8,7 +8,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 
-import { useSidebarVisibility } from "@/components/layout/app-sidebar-wrapper";
+import { useAuthStatus } from "@/components/providers/auth-status-provider";
 import {
   loginErrorIDToMessageMap,
   LoginErrors,
@@ -39,7 +39,7 @@ export function LoginForm({
     );
   const loginMutation = useMutation(trpc.auth.login.mutationOptions());
   const router = useRouter();
-  const { setIsSidebarVisible } = useSidebarVisibility();
+  const { refreshAuthStatus } = useAuthStatus();
   async function onSubmit(data: LoginSchema) {
     if (errorMessage) {
       setErrorMessage(null);
@@ -48,7 +48,7 @@ export function LoginForm({
     if (response.success) {
       refreshSessionExpiresAt();
       router.push("/");
-      setIsSidebarVisible(true);
+      refreshAuthStatus();
     } else {
       const message = response.message;
       if (

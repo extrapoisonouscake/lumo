@@ -2,20 +2,25 @@ import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/helpers/cn";
 
-import { getUserSettings } from "@/lib/trpc/routes/user/queries";
 import { GeistSans } from "geist/font/sans";
 import { Viewport } from "next";
 import { ReactNode } from "react";
+import { Providers } from "../components/providers";
 import "./globals.css";
-import { Providers } from "./providers";
+
+import { createCaller } from "@/lib/trpc";
+
+import { createTRPCContext } from "@/lib/trpc/context";
 
 export const viewport: Viewport = { maximumScale: 1 };
+
 export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  const userSettings = await getUserSettings();
+  const caller = createCaller(await createTRPCContext());
+  const userSettings = await caller.user.getSettings();
   const themeColor = userSettings.themeColor;
 
   return (

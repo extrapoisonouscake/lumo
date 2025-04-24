@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { isKnownSchool } from "@/constants/schools";
+import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/school-specific/public";
@@ -40,33 +41,47 @@ export function Announcements() {
 }
 function Loader() {
   const query = useQuery(trpc.schoolSpecific.getAnnouncements.queryOptions());
+  const personalDetailsQuery = useStudentDetails();
   return (
-    <QueryWrapper query={query} skeleton={<AnnouncementsSkeleton />}>
-      {(response) =>
-        "notAvailableReason" in response ? (
-          <AnnouncementsNotAvailableCard
-            reason={response.notAvailableReason!}
-          />
-        ) : (
-          <div className="flex flex-col gap-2">
-            <div className="flex justify-between gap-2 items-center">
-              <AnnouncementsHeading />
-              {!!response.pdfLink && (
-                <Link href={response.pdfLink} target="_blank">
-                  <Button size="icon" variant="ghost" className="size-7">
-                    <ArrowUpRightIcon />
-                  </Button>
-                </Link>
-              )}
-            </div>
+    <QueryWrapper
+      query={query}
+      onError={
+        <div className="flex flex-col gap-2">
+          <AnnouncementsHeading />
+          <ErrorCard />
+        </div>
+      }
+      skeleton={<AnnouncementsSkeleton />}
+    >
+      {(response) => (
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between gap-2 items-center">
+            <AnnouncementsHeading />
+            {!!response.pdfLink && (
+              <Link href={response.pdfLink} target="_blank">
+                <Button size="icon" variant="ghost" className="size-7">
+                  <ArrowUpRightIcon />
+                </Button>
+              </Link>
+            )}
+          </div>
+          {"notAvailableReason" in response ? (
+            <AnnouncementsNotAvailableCard
+              reason={response.notAvailableReason!}
+            />
+          ) : response.data.length > 0 ? (
             <AnnouncementsAccordions
               pdfURL={response.pdfLink ?? null}
-              data={response.data!}
-              studentGrade={undefined} //!fix
+              data={response.data}
+              studentGrade={personalDetailsQuery.data?.grade}
             />
-          </div>
-        )
-      }
+          ) : (
+            <AnnouncementsNotAvailableCard
+              reason={AnnouncementsNotAvailableReason.NoAnnouncements}
+            />
+          )}
+        </div>
+      )}
     </QueryWrapper>
   );
 }

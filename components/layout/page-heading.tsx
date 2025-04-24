@@ -7,6 +7,7 @@ import {
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAuthStatus } from "../providers/auth-status-provider";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +19,6 @@ import {
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
-import { useSidebarVisibility } from "./app-sidebar-wrapper";
 const PageDataContext = createContext<{
   pageData: WebsitePage | null;
   setPageData: (pageData: WebsitePage) => void;
@@ -69,10 +69,10 @@ export const usePageData = () => {
 
 export function PageHeading() {
   const { pageData } = usePageData();
-  const { isSidebarVisible } = useSidebarVisibility();
+  const { isLoggedIn, isGuest } = useAuthStatus();
   return (
     <div className="flex items-center gap-2">
-      {isSidebarVisible && <SidebarTrigger />}
+      {(isLoggedIn || isGuest) && <SidebarTrigger />}
       <Separator orientation="vertical" className="mr-1 h-4" />
 
       {pageData ? (

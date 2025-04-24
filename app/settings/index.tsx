@@ -4,13 +4,19 @@ import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { UserSetting } from "@/types/core";
 import { SchoolPicker } from "./school-picker";
 import { SwitchField } from "./switch-field";
+import { SyncSettingsSwitch } from "./sync-settings-switch";
 import { ThemePicker } from "./theme-picker";
+import { UserSettingsWithDerivedFields } from "./types";
 const fields: Array<
-  ({ custom: React.FC<{ initialValue: any }> } | { label: string }) & {
-    key: UserSetting;
-  }
+  | {
+      custom: React.FC<{ initialValue: any }>;
+      key: keyof UserSettingsWithDerivedFields;
+    }
+  | { label: string; key: UserSetting }
 > = [
   { custom: SchoolPicker, key: "schoolId" },
+  { custom: ThemePicker, key: "themeColor" },
+  { custom: SyncSettingsSwitch, key: "isSynced" },
   {
     label: "Show countdown timer on schedule",
     key: "shouldShowNextSubjectTimer",
@@ -23,7 +29,6 @@ const fields: Array<
     label: "Highlight missing assignments",
     key: "shouldHighlightMissingAssignments",
   },
-  { custom: ThemePicker, key: "themeColor" },
 ];
 export function SettingsContent() {
   const userSettings = useUserSettings(false);

@@ -3,7 +3,7 @@ import { TitleManager } from "@/components/misc/title-manager";
 
 import { useParams, useSearchParams } from "next/navigation";
 
-import { MultiQueryWrapper } from "@/components/ui/query-wrapper";
+import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { useSubjectAssignments } from "@/hooks/trpc/use-subject-assignments";
 import { useSubjectSummary } from "@/hooks/trpc/use-subject-summary";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
@@ -24,26 +24,30 @@ export default function SubjectPage() {
   const assignments = useSubjectAssignments(subjectId, term);
   return (
     <>
-      <MultiQueryWrapper
-        queries={[summary, assignments]}
-        skeleton={<SubjectPageSkeleton />}
-      >
-        {([summary, assignments]) => (
+      <QueryWrapper query={summary} skeleton={<SubjectPageSkeleton />}>
+        {(summary) => (
           <>
             <TitleManager title={`${summary.name} - Classes`} />
             <SubjectSummary
               {...summary}
               shouldShowLetterGrade={settings.shouldShowLetterGrade}
             />
-            <SubjectAssignments
-              {...assignments}
-              term={term ?? undefined}
-              categories={summary.academics.categories}
-              categoryId={category}
-            />
+            <QueryWrapper
+              query={assignments}
+              skeleton={<SubjectAssignmentsSkeleton />}
+            >
+              {(assignments) => (
+                <SubjectAssignments
+                  {...assignments}
+                  term={term ?? undefined}
+                  categories={summary.academics.categories}
+                  categoryId={category}
+                />
+              )}
+            </QueryWrapper>
           </>
         )}
-      </MultiQueryWrapper>
+      </QueryWrapper>
     </>
   );
 }

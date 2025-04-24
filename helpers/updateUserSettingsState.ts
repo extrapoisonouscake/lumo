@@ -1,11 +1,12 @@
+import { UserSettingsWithDerivedFields } from "@/app/settings/types";
 import { queryClient, trpc } from "@/app/trpc";
-import { UserSetting, UserSettings } from "@/types/core";
 export function updateUserSettingState(
-  key: UserSetting,
-  value: UserSettings[typeof key]
+  key: keyof UserSettingsWithDerivedFields,
+  value: UserSettingsWithDerivedFields[typeof key]
 ) {
   const queryKey = trpc.user.getSettings.queryKey();
-  const currentState = queryClient.getQueryData<UserSettings>(queryKey);
+  const currentState =
+    queryClient.getQueryData<UserSettingsWithDerivedFields>(queryKey);
   if (!currentState) {
     return;
   }

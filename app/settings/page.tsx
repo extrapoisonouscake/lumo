@@ -3,7 +3,7 @@ import {
   PageHeading,
 } from "@/components/layout/page-heading";
 import { Metadata } from "next";
-import { SettingsContent } from "./content";
+import { SettingsContent } from ".";
 export const metadata: Metadata = {
   title: "Settings",
 };

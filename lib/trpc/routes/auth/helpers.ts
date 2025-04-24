@@ -7,7 +7,6 @@ import {
   FlatRouteStep,
   MYED_AUTHENTICATION_COOKIES_NAMES,
   MYED_HTML_TOKEN_INPUT_NAME,
-  MYED_SESSION_COOKIE_NAME,
   MyEdAuthenticationCookiesName,
   parseHTMLToken,
 } from "@/constants/myed";
@@ -230,7 +229,7 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
   const cookiePlainStore = externalStore ?? (await cookies());
   const cookieStore = await MyEdCookieStore.create(cookiePlainStore);
 
-  const session = cookieStore.get(MYED_SESSION_COOKIE_NAME)?.value;
+  const session = cookieStore.get(AUTH_COOKIES_NAMES.tokens)?.value;
   if (session) {
     after(() =>
       sendMyEdRequest({
@@ -239,10 +238,10 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
         authCookies: getAuthCookies(cookieStore),
       })
     );
+    cookieStore.delete(AUTH_COOKIES_NAMES.tokens);
   }
   cookieStore.delete(AUTH_COOKIES_NAMES.credentials);
   cookieStore.delete(AUTH_COOKIES_NAMES.studentId);
-  cookieStore.delete(AUTH_COOKIES_NAMES.tokens);
   cookiePlainStore.delete(IS_LOGGED_IN_COOKIE_NAME);
   for (const setting of USER_SETTINGS_KEYS) {
     cookiePlainStore.delete(`${USER_SETTINGS_COOKIE_PREFIX}.${setting}`);

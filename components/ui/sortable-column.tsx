@@ -33,7 +33,7 @@ export function SortableColumn<TableObject, CellValue>({
           rotate: 0,
         }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="ml-2 h-4 w-4"
+        className="size-4"
       >
         <Icon />
       </motion.div>

@@ -1,4 +1,4 @@
-import { router } from "./base";
+import { createCallerFactory, router } from "./base";
 import { authRouter } from "./routes/auth";
 import { scheduleRouter } from "./routes/schedule";
 import { schoolSpecificRouter } from "./routes/school-specific";
@@ -13,3 +13,4 @@ export const appRouter = router({
   schedule: scheduleRouter,
   subjects: subjectsRouter,
 });
+export const createCaller = createCallerFactory(appRouter);

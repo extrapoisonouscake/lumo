@@ -3,7 +3,7 @@ import {
   stringToColor,
 } from "@/helpers/stringToColor";
 
-import { usePersonalDetails } from "@/hooks/trpc/usePersonalDetails";
+import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { QueryWrapper } from "../ui/query-wrapper";
@@ -11,7 +11,7 @@ import { SidebarMenuButton } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
 
 export function UserHeader() {
-  const query = usePersonalDetails();
+  const query = useStudentDetails();
   return (
     <QueryWrapper query={query} skeleton={<UserHeaderSkeleton />}>
       {(data) => {

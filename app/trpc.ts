@@ -1,4 +1,4 @@
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { createTRPCClient, httpLink } from "@trpc/client";
 
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
@@ -13,6 +13,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
+      retry: false,
     },
     dehydrate: {
       shouldDehydrateQuery: (query) =>
@@ -33,7 +34,7 @@ const TRPC_URL = `${
 }/api/trpc`;
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
-    httpBatchLink({
+    httpLink({
       transformer: superjson,
       url: TRPC_URL,
       fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -88,6 +89,6 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 export function refreshSessionExpiresAt() {
   localStorage.setItem(
     TOKEN_EXPIRY_LOCAL_STORAGE_KEY,
-    `${Date.now() + 1000 * 60 * 6}`
+    `${Date.now() + 1000 * 60 * 60}`
   );
 }

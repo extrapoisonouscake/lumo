@@ -9,15 +9,15 @@ import { AnnouncementSection } from "@/types/school";
 import { TRPCError } from "@trpc/server";
 import { router } from "../../base";
 import { atLeastGuestProcedure } from "../../procedures";
-import { getUserSettings } from "../user/queries";
+import { getUserSettings } from "../user";
 import { AnnouncementsNotAvailableReason } from "./public";
 
 export const schoolSpecificRouter = router({
-  getAnnouncements: atLeastGuestProcedure.query(async () => {
+  getAnnouncements: atLeastGuestProcedure.query(async ({ ctx }) => {
     const date = timezonedDayJS();
 
     let pdfLink;
-    const { schoolId } = await getUserSettings();
+    const { schoolId } = await getUserSettings(ctx);
     if (!schoolId || !isKnownSchool(schoolId) || [0, 6].includes(date.day())) {
       throw new TRPCError({
         code: "NOT_FOUND",

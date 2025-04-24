@@ -6,10 +6,13 @@ import { authenticatedProcedure } from "../../procedures";
 export const subjectsRouter = router({
   getSubjects: authenticatedProcedure
     .input(
-      z.object({
-        isPreviousYear: z.boolean(),
-        termId: z.string().optional(),
-      })
+      z
+        .object({
+          isPreviousYear: z.boolean().optional().default(false),
+          termId: z.string().optional(),
+        })
+        .optional()
+        .default({})
     )
     .query(async ({ input }) => {
       return getMyEd("subjects", input);
