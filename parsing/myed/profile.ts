@@ -30,20 +30,28 @@ const detailLabelsMap: Record<string, keyof PersonalDetails> = {
   "License Plate #": "licensePlateNumber",
 };
 function parseMainDetails($: CheerioAPI) {
-  const rawDetailsEntries = $('tr[id^="Property|"]')
-    .toArray()
-    .map((el) => {
-      const $row = $(el);
-      const name = $row.find(".detailProperty > span").text();
-      const value = $row.find(".detailValue > span").text();
-      return [removeLineBreaks(name), removeLineBreaks(value)];
-    });
+  const rawDetails = Object.fromEntries(
+    $('tr[id^="Property|"]')
+      .toArray()
+      .map((el) => {
+        const $row = $(el);
+        const name = $row.find(".detailProperty > span").text();
+        const value = $row.find(".detailValue > span").text();
+        return [removeLineBreaks(name), removeLineBreaks(value)];
+      })
+  );
   const result: any = {}; //!
-  for (const [key, value] of rawDetailsEntries) {
-    const propertyName = detailLabelsMap[key];
-    if (!key) continue;
+  for (const [label, key] of Object.entries(detailLabelsMap)) {
+    const value = rawDetails[label];
+    if (!value) {
+      if (value === undefined) {
+        throw new Error("No value");
+      } else {
+        continue;
+      }
+    }
     const valueAsNumber = Number(value);
-    result[propertyName] = isNaN(valueAsNumber) ? value : valueAsNumber;
+    result[key] = isNaN(valueAsNumber) ? value : valueAsNumber;
   }
   return result as Omit<PersonalDetails, "photoURL">;
 }
