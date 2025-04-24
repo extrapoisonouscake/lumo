@@ -49,14 +49,14 @@ export function parseSchedule({
   responses: [$initial, $dateAdjusted],
 }: ParserFunctionArguments<"schedule">):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
-  | { knownError: string }
-  | null {
+  | { knownError: string } {
   const $ = $dateAdjusted || $initial;
   const $tableBody = getTableBody($);
-  if (!$tableBody) return null;
+  if (!$tableBody) throw new Error("No table body");
   if ("knownError" in $tableBody) return $tableBody;
 
-  if ($tableBody.find(".listNoRecordsText").length > 0) return null;
+  if ($tableBody.find(".listNoRecordsText").length > 0)
+    throw new Error("No records");
 
   const subjects = $tableBody
     .children("tr")

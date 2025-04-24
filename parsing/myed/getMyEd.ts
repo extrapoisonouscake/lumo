@@ -39,10 +39,18 @@ const endpointToParsingFunction = {
     args: ParserFunctionArguments<K>
   ) => any;
 };
-const processResponse = async (response: Response, value: FlatRouteStep) => {
-  return value.expect === "html"
-    ? cheerio.load(await response.text())
-    : await response.json();
+const processResponse = async (
+  response: Response,
+  value: FlatRouteStep,
+  path: string
+) => {
+  if (value.expect === "html") {
+    const text = await response.text();
+    console.log(path, text);
+    return cheerio.load(text);
+  } else {
+    return await response.json();
+  }
 };
 export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
   endpoint: Endpoint,
@@ -82,7 +90,8 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
         for (let i = 0; i < response.length; i++) {
           const r = response[i];
           //optimize
-          const processedData = await processResponse(r, value[i]);
+          //@ts-expect-error jic
+          const processedData = await processResponse(r, value[i], step.value);
           if (!processedData) throw new Error("No processed data");
           responses.push(processedData);
         }
@@ -91,7 +100,8 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
           //@ts-expect-error jic
           response,
 
-          value as FlatRouteStep
+          value as FlatRouteStep,
+          step.value
         );
         if (!processedData) throw new Error("No processed data");
         responses.push(processedData);
