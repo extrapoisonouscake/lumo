@@ -29,7 +29,7 @@ export function NotificationsControlsComponent({
     const permissionGranted = await requestNotificationPermission();
     if (!permissionGranted) return;
 
-    const registration = await registerServiceWorker();
+    const registration = await waitForServiceWorker();
     const subscription = await subscribeToPush(registration);
     const { endpoint, keys } = subscription.toJSON();
     if (!endpoint || !keys) {
@@ -80,8 +80,12 @@ export function NotificationsControlsComponent({
     </div>
   );
 }
-const registerServiceWorker = async () => {
-  return await navigator.serviceWorker.register("/notifications-sw.js");
+const waitForServiceWorker = async () => {
+  const registration = await navigator.serviceWorker.register(
+    "/notifications-sw.js"
+  );
+  await navigator.serviceWorker.ready;
+  return registration;
 };
 const requestNotificationPermission = async () => {
   const permission = await Notification.requestPermission();
