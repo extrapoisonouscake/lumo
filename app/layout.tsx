@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/helpers/cn";
 
 import { GeistSans } from "geist/font/sans";
-import { Viewport } from "next";
+import { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
 import { Providers } from "../components/providers";
 import "./globals.css";
@@ -16,7 +16,9 @@ import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
 
 export const viewport: Viewport = { maximumScale: 1 };
-
+export const metadata: Metadata = {
+  manifest: "/manifest.json",
+};
 export default async function RootLayout({
   children,
 }: {
@@ -46,7 +48,6 @@ export default async function RootLayout({
               `,
             }}
           />
-          <link rel="manifest" href="/manifest.json" />
         </head>
         <body
           className={cn("flex justify-center min-h-full", GeistSans.className)}
