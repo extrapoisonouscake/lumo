@@ -1,5 +1,6 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
+import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 
 import LetterA from "@/public/icons/letter-a.svg";
 import { Percent } from "lucide-react";

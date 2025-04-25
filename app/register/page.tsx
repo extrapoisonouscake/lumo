@@ -8,7 +8,7 @@ import { RegistrationForm } from "./form";
 import { LoginSuggestionText } from "./login-suggestion-text";
 ip3country.init();
 export default function Page() {
-  const query = useQuery(trpc.auth.getRegistrationFields.queryOptions());
+  const query = useQuery(trpc.myed.auth.getRegistrationFields.queryOptions());
   return (
     <QueryWrapper query={query} onError={<RegistrationInitError />}>
       {(data) => (

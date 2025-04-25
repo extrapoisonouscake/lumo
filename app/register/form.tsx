@@ -363,7 +363,9 @@ export function RegistrationForm({
 
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
-  const registerMutation = useMutation(trpc.auth.register.mutationOptions());
+  const registerMutation = useMutation(
+    trpc.myed.auth.register.mutationOptions()
+  );
   const router = useRouter();
   async function onSubmit(data: RegisterSchema) {
     if (errorMessage) {

@@ -8,7 +8,7 @@ import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStatus } from "../providers/auth-status-provider";
 export function LogOutButton() {
-  const logOutMutation = useMutation(trpc.auth.logOut.mutationOptions());
+  const logOutMutation = useMutation(trpc.myed.auth.logOut.mutationOptions());
   const router = useRouter();
   const { refreshAuthStatus } = useAuthStatus();
   return (

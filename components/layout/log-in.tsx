@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStatus } from "../providers/auth-status-provider";
 export function LogInButton() {
   const exitGuestModeMutation = useMutation(
-    trpc.auth.exitGuestMode.mutationOptions()
+    trpc.myed.auth.exitGuestMode.mutationOptions()
   );
   const router = useRouter();
   const { refreshAuthStatus } = useAuthStatus();

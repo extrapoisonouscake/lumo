@@ -32,7 +32,7 @@ export function PasswordResetSection({
     useFormErrorMessage();
   const [securityQuestion, setSecurityQuestion] = useState<string | null>(null);
   const resetPasswordMutation = useMutation(
-    trpc.auth.resetPassword.mutationOptions()
+    trpc.myed.auth.resetPassword.mutationOptions()
   );
   const onSubmit = async (data: PasswordResetSchema) => {
     if (errorMessage) {
