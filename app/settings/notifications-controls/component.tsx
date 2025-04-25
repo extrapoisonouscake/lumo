@@ -59,7 +59,8 @@ export function NotificationsControlsComponent({
             } else {
               await unsubscribeFromNotificationsMutation.mutateAsync();
             }
-          } catch {
+          } catch (e) {
+            console.error(e);
             updateUserSettingState("notificationsEnabled", !newValue);
           }
         }}
