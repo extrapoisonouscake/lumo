@@ -1,6 +1,7 @@
 "use client";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/helpers/cn";
+import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { Check } from "lucide-react";
 import { useState } from "react";
@@ -27,10 +28,15 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
       "--brand",
       theme
     );
-    await updateUserSettingMutation.mutateAsync({
-      key: "themeColor",
-      value: theme,
-    });
+    updateUserSettingState("themeColor", theme);
+    try {
+      await updateUserSettingMutation.mutateAsync({
+        key: "themeColor",
+        value: theme,
+      });
+    } catch (e) {
+      updateUserSettingState("themeColor", initialValue);
+    }
   };
   return (
     <div className="flex flex-col gap-2">
