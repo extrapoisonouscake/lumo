@@ -8,12 +8,11 @@
     "start": "next start",
     "lint": "next lint",
     "openapi:generate-ts:myed-rest": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
-    "postinstall": "npm run openapi:generate-ts:myed-rest && npm run db:push",
+    "postinstall": "npm run openapi:generate-ts:myed-rest && npm run db:update",
     "trigger:dev": "npx trigger.dev@latest dev",
     "knip": "knip",
     "redis:dev": "docker run -it -d -p 8080:80 --name srh -e SRH_MODE=env -e SRH_TOKEN=token -e SRH_CONNECTION_STRING=\"redis://127.0.0.1:6379\" hiett/serverless-redis-http:latest",
-    "db:generate": "drizzle-kit generate",
-    "db:push": "drizzle-kit push"
+    "db:update": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
