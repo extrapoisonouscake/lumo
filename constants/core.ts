@@ -17,4 +17,4 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldHighlightMissingAssignments: true,
   shouldShowLetterGrade: false,
   themeColor: "180 100% 25%",
-} as const;
+};

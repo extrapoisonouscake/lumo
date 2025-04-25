@@ -10,6 +10,7 @@ import "./globals.css";
 
 import { createCaller } from "@/lib/trpc";
 
+import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
@@ -21,12 +22,15 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const caller = createCaller(await createTRPCContext());
-  const userSettings = await caller.core.settings.getSettings();
-  const themeColor = userSettings.themeColor;
   const store = await cookies();
   const isLoggedIn = serverAuthChecks.isLoggedIn(store);
   const isGuest = serverAuthChecks.isInGuestMode(store);
+  let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
+  if (isLoggedIn || isGuest) {
+    const caller = createCaller(await createTRPCContext());
+    const userSettings = await caller.core.settings.getSettings();
+    themeColor = userSettings.themeColor;
+  }
   const isSidebarExpanded = store.get("sidebar:state")?.value === "true";
   return (
     <>
