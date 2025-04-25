@@ -1,11 +1,14 @@
 import { trpc } from "@/app/trpc";
-import { UpdateUserSettingSchema } from "@/lib/trpc/routes/user/public";
+
+import { UpdateUserSettingSchema } from "@/lib/trpc/routes/core/settings/public";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useUserSettings } from "./use-user-settings";
 
-export function useUpdateUserSetting() {
-  const mutation = useMutation(trpc.user.updateUserSetting.mutationOptions());
+export function useUpdateGenericUserSetting() {
+  const mutation = useMutation(
+    trpc.core.settings.updateGenericUserSetting.mutationOptions()
+  );
   const settings = useUserSettings(false);
   return {
     ...mutation,

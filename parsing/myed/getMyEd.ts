@@ -11,10 +11,10 @@ import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
 import { cache } from "react";
 import "server-only";
+
 import { parseSubjectAssignment, parseSubjectAssignments } from "./assignments";
 import { parsePersonalDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
-import { clientQueueManager } from "./requests-queue";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import {
@@ -39,14 +39,9 @@ const endpointToParsingFunction = {
     args: ParserFunctionArguments<K>
   ) => any;
 };
-const processResponse = async (
-  response: Response,
-  value: FlatRouteStep,
-  path: string
-) => {
+const processResponse = async (response: Response, value: FlatRouteStep) => {
   if (value.expect === "html") {
     const text = await response.text();
-    console.log(path, text);
     return cheerio.load(text);
   } else {
     return await response.json();
@@ -70,54 +65,47 @@ export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
     const session = authCookies.JSESSIONID;
     if (!session || !studentId) throw new Error("No session or studentId");
     const requestGroup = `${endpoint}-${Date.now()}`;
-    const queue = clientQueueManager.getQueue(session);
-    authParameters = { queue, authCookies, requestGroup };
+
+    authParameters = { authCookies, requestGroup };
   }
 
   //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
   const steps = route(studentId, ...rest); //!
-  try {
-    for (const step of steps) {
-      const value = step.value;
-      const response = await sendMyEdRequest({
-        //@ts-expect-error FIX THIS
-        step: value,
-        ...authParameters,
-      });
-      const responses = [];
-      const isArray = Array.isArray(response) && Array.isArray(value);
-      if (isArray) {
-        for (let i = 0; i < response.length; i++) {
-          const r = response[i];
-          //optimize
-          //@ts-expect-error jic
-          const processedData = await processResponse(r, value[i], step.value);
-          if (!processedData) throw new Error("No processed data");
-          responses.push(processedData);
-        }
-      } else {
-        const processedData = await processResponse(
-          //@ts-expect-error jic
-          response,
-
-          value as FlatRouteStep,
-          step.value
-        );
+  for (const step of steps) {
+    const value = step.value;
+    const response = await sendMyEdRequest({
+      //@ts-expect-error FIX THIS
+      step: value,
+      ...authParameters,
+    });
+    const responses = [];
+    const isArray = Array.isArray(response) && Array.isArray(value);
+    if (isArray) {
+      for (let i = 0; i < response.length; i++) {
+        const r = response[i];
+        //optimize
+        const processedData = await processResponse(r, value[i]);
         if (!processedData) throw new Error("No processed data");
         responses.push(processedData);
       }
-      steps.addResponse(isArray ? responses : responses[0]);
+    } else {
+      const processedData = await processResponse(
+        //@ts-expect-error jic
+        response,
+
+        value as FlatRouteStep
+      );
+      if (!processedData) throw new Error("No processed data");
+      responses.push(processedData);
     }
-    authParameters?.queue?.ensureUnlock();
-    return endpointToParsingFunction[endpoint]({
-      params: rest[0] as unknown as any,
-      responses: steps.responses as any,
-      metadata: steps.metadata,
-    }) as MyEdEndpointResponse<Endpoint>;
-  } catch (e) {
-    authParameters?.queue?.ensureUnlock();
-    throw e;
+    steps.addResponse(isArray ? responses : responses[0]);
   }
+
+  return endpointToParsingFunction[endpoint]({
+    params: rest[0] as unknown as any,
+    responses: steps.responses as any,
+    metadata: steps.metadata,
+  }) as MyEdEndpointResponse<Endpoint>;
 });
 
 export type MyEdEndpointResponse<T extends MyEdEndpoint> = Exclude<

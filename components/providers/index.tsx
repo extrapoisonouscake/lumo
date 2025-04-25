@@ -7,7 +7,13 @@ import { queryClient } from "../../app/trpc";
 import { AuthStatusProvider } from "./auth-status-provider";
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 if (!GOOGLE_MAPS_API_KEY) throw new Error("No Google Maps API key provided");
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  initialCookieValues,
+}: {
+  children: ReactNode;
+  initialCookieValues: { isLoggedIn: boolean; isGuest: boolean };
+}) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
@@ -17,7 +23,9 @@ export function Providers({ children }: { children: ReactNode }) {
         enableSystem
       >
         <APIProvider apiKey={GOOGLE_MAPS_API_KEY!}>
-          <AuthStatusProvider>{children}</AuthStatusProvider>
+          <AuthStatusProvider initialCookieValues={initialCookieValues}>
+            {children}
+          </AuthStatusProvider>
         </APIProvider>
       </ThemeProvider>
     </QueryClientProvider>

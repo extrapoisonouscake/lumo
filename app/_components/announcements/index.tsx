@@ -14,7 +14,7 @@ import { isKnownSchool } from "@/constants/schools";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/school-specific/public";
+import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-specific/public";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightIcon } from "lucide-react";
 import { AnnouncementsAccordions } from "./accordions";
@@ -40,7 +40,9 @@ export function Announcements() {
   return <Loader />;
 }
 function Loader() {
-  const query = useQuery(trpc.schoolSpecific.getAnnouncements.queryOptions());
+  const query = useQuery(
+    trpc.core.schoolSpecific.getAnnouncements.queryOptions()
+  );
   const personalDetailsQuery = useStudentDetails();
   return (
     <QueryWrapper

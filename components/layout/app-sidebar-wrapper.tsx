@@ -1,5 +1,4 @@
 "use client";
-import Cookies from "js-cookie";
 import { ReactNode } from "react";
 import { useAuthStatus } from "../providers/auth-status-provider";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
@@ -19,7 +18,13 @@ const Inset = ({
   </SidebarInset>
 );
 
-export function AppSidebarWrapper({ children }: { children: ReactNode }) {
+export function AppSidebarWrapper({
+  children,
+  initialIsExpanded,
+}: {
+  children: ReactNode;
+  initialIsExpanded: boolean;
+}) {
   const { isLoggedIn, isGuest } = useAuthStatus();
   if (!isLoggedIn && !isGuest)
     return (
@@ -27,9 +32,9 @@ export function AppSidebarWrapper({ children }: { children: ReactNode }) {
         <Inset topLoader={<TopLoader />}>{children}</Inset>
       </>
     );
-  const defaultOpen = Cookies.get("sidebar:state") === "true";
+
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={initialIsExpanded}>
       <AppSidebar />
 
       <Inset topLoader={<TopLoader />}>{children}</Inset>

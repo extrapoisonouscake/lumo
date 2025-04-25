@@ -235,11 +235,11 @@ export function ScheduleTable({
     }
     const isTeacherAdvisory =
       isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
-
+    const shouldRedirect = isSubject && !isTeacherAdvisory && rowOriginal.id;
     return (
       <TableRow
         onClick={
-          isSubject && !isTeacherAdvisory && rowOriginal.id
+          shouldRedirect
             ? () =>
                 router.push(
                   getSubjectPageURL({
@@ -257,7 +257,7 @@ export function ScheduleTable({
         {isSubject ? (
           cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
+            const showArrow = shouldRedirect && i === cells.length - 1;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}

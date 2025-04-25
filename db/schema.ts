@@ -1,11 +1,12 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { sql } from "drizzle-orm";
+import { InferSelectModel, sql } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
+import { createSelectSchema } from "drizzle-zod";
 export const users = table(
   "users",
   {
-    hashedId: t.text("hashed_id").primaryKey(),
+    id: t.text("id").primaryKey(), //user student id
     username: t.text().unique(),
     password: t.text(),
   },
@@ -20,9 +21,9 @@ export const users = table(
 );
 export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
-  hashedId: t
-    .text("hashed_id")
-    .references(() => users.hashedId)
+  userId: t
+    .text("user_id")
+    .references(() => users.id)
     .unique(),
   updatedAt: t.timestamp("updated_at").defaultNow(),
   schoolId: t.text("school_id"),
@@ -47,11 +48,45 @@ export const user_settings = table("user_settings", {
     .notNull()
     .default(USER_SETTINGS_DEFAULT_VALUES.themeColor),
 });
+
+export type UserSettingsSelectModel = InferSelectModel<typeof user_settings>;
+export const notifications_settings = table("notifications_settings", {
+  id: t.uuid().defaultRandom().primaryKey(),
+  userId: t
+    .text("user_id")
+    .references(() => users.id)
+    .unique(),
+  newAssignments: t.boolean("new_assignments").notNull().default(true),
+});
+
+export const notifications_subscriptions = table(
+  "notifications_subscriptions",
+  {
+    id: t.uuid().defaultRandom().primaryKey(),
+    userId: t
+      .text("user_id")
+      .references(() => users.id)
+      .unique()
+      .notNull(),
+    endpointUrl: t.text("endpoint_url").unique().notNull(),
+    deviceId: t.text("device_id").unique().notNull(),
+    publicKey: t.text("public_key").notNull(),
+    authKey: t.text("auth_key").notNull(),
+    createdAt: t.timestamp("created_at").defaultNow().notNull(),
+    lastSeenAt: t.timestamp("last_seen_at").defaultNow().notNull(),
+  }
+);
+export type NotificationsSubscriptionSelectModel = InferSelectModel<
+  typeof notifications_subscriptions
+>;
+export const notificationSubscriptionSchema = createSelectSchema(
+  notifications_subscriptions
+);
 export const recent_school_data = table("recent_school_data", {
   id: t.uuid().defaultRandom().primaryKey(),
-  hashedId: t
-    .text("hashed_id")
-    .references(() => users.hashedId)
+  userId: t
+    .text("user_id")
+    .references(() => users.id)
     .unique(),
   assignments: t.jsonb(),
 });

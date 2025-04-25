@@ -1,8 +1,8 @@
 import { timezonedDayJS } from "@/instances/dayjs";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { z } from "zod";
-import { router } from "../../base";
-import { authenticatedProcedure } from "../../procedures";
+import { router } from "../../../base";
+import { authenticatedProcedure } from "../../../procedures";
 
 export const scheduleRouter = router({
   getSchedule: authenticatedProcedure

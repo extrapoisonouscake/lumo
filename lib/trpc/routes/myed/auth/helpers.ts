@@ -234,7 +234,6 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
     after(() =>
       sendMyEdRequest({
         step: logoutStep,
-        session,
         authCookies: getAuthCookies(cookieStore),
       })
     );

@@ -8,7 +8,7 @@ import {
   changePasswordSchema,
   ChangePasswordSchema,
   LoginSchema,
-} from "@/lib/trpc/routes/auth/public";
+} from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import { Form } from "../ui/form";
 import { FormInput } from "../ui/form-input";
@@ -34,7 +34,7 @@ export function ChangePasswordForm({
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
   const changePasswordMutation = useMutation(
-    trpc.auth.changePassword.mutationOptions()
+    trpc.myed.auth.changePassword.mutationOptions()
   );
   const onSubmit = async (data: ChangePasswordSchema) => {
     if (errorMessage) {

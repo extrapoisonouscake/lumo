@@ -6,6 +6,9 @@ export function useSubjectAssignment(
   assignmentId: Assignment["id"]
 ) {
   return useQuery(
-    trpc.subjects.getSubjectAssignment.queryOptions({ subjectId, assignmentId })
+    trpc.myed.subjects.getSubjectAssignment.queryOptions({
+      subjectId,
+      assignmentId,
+    })
   );
 }

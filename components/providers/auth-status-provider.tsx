@@ -23,16 +23,29 @@ const getAuthStatuses = () => {
   const isGuest = clientAuthChecks.isInGuestMode();
   return { isLoggedIn, isGuest };
 };
-export function AuthStatusProvider({ children }: { children: ReactNode }) {
-  const [statuses, setStatuses] = useState(getAuthStatuses());
+export function AuthStatusProvider({
+  children,
+  initialCookieValues,
+}: {
+  children: ReactNode;
+  initialCookieValues: { isLoggedIn: boolean; isGuest: boolean };
+}) {
+  const [statuses, setStatuses] = useState(initialCookieValues);
   const refreshAuthStatus = () => {
     setStatuses(getAuthStatuses());
   };
   useEffect(() => {
     if (statuses.isLoggedIn) {
-      queryClient.prefetchQuery(trpc.user.getStudentDetails.queryOptions());
-      queryClient.prefetchQuery(trpc.user.getSettings.queryOptions());
-      queryClient.prefetchQuery(trpc.subjects.getSubjects.queryOptions());
+      queryClient.prefetchQuery(
+        trpc.myed.user.getStudentDetails.queryOptions()
+      );
+      queryClient.prefetchQuery(trpc.core.settings.getSettings.queryOptions());
+      queryClient.prefetchQuery(
+        trpc.myed.subjects.getSubjects.queryOptions({
+          isPreviousYear: false,
+          termId: undefined,
+        })
+      );
     }
   }, [statuses]);
   return (

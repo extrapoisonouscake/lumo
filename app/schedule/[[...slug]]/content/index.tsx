@@ -1,6 +1,6 @@
 import { trpc } from "@/app/trpc";
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
-import { MultiQueryWrapper } from "@/components/ui/query-wrapper";
+import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
@@ -94,24 +94,24 @@ export function Schedule({ date }: Props) {
 }
 function Loader({ date }: { date: Date }) {
   const scheduleQuery = useQuery(
-    trpc.schedule.getSchedule.queryOptions({
+    trpc.myed.schedule.getSchedule.queryOptions({
       date,
     })
   );
   const subjectsDataQuery = useSubjectsData();
   return (
-    <MultiQueryWrapper
-      queries={[scheduleQuery, subjectsDataQuery]}
+    <QueryWrapper
+      query={scheduleQuery}
       skeleton={<ScheduleContentSkeleton date={date} />}
     >
-      {([schedule, subjectsResponse]) => (
+      {(schedule) => (
         <Content
           schedule={schedule}
           date={date}
-          subjects={subjectsResponse.subjects.main}
+          subjects={subjectsDataQuery.data?.subjects.main}
         />
       )}
-    </MultiQueryWrapper>
+    </QueryWrapper>
   );
 }
 function Content({
@@ -119,9 +119,9 @@ function Content({
   date,
   subjects,
 }: {
-  schedule: RouterOutput["schedule"]["getSchedule"];
+  schedule: RouterOutput["myed"]["schedule"]["getSchedule"];
   date: Date;
-  subjects: Subject[];
+  subjects?: Subject[];
 }) {
   if ("knownError" in schedule) {
     return (
@@ -142,7 +142,7 @@ function Content({
         isWeekdayShown={shouldShowWeekday}
         data={schedule.subjects.map((subject) => ({
           ...subject,
-          id: subjects.find((s) => s.actualName === subject.actualName)?.id,
+          id: subjects?.find((s) => s.actualName === subject.actualName)?.id,
         }))}
       />
     </GridLayout>

@@ -2,25 +2,25 @@
 
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 
 import { Spinner } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { UserSettingsWithDerivedFields } from "./types";
 
 export function AsyncSwitchField({
   label,
   description,
   initialValue,
-  settingKey,
   onChange,
+  settingKey,
+  disabled,
 }: {
   label: string;
   description?: string;
   onChange: (checked: boolean) => Promise<void>;
   initialValue?: boolean;
-  settingKey: keyof UserSettingsWithDerivedFields;
+  settingKey: string;
+  disabled?: boolean;
 }) {
   const [checked, setChecked] = useState(initialValue);
   const [isLoading, setIsLoading] = useState(false);
@@ -32,12 +32,10 @@ export function AsyncSwitchField({
   const onChangeHandler = async (checked: boolean) => {
     setIsLoading(true);
     setChecked(checked);
-    updateUserSettingState(settingKey, checked);
     try {
       await onChange(checked);
     } catch {
       setChecked(!checked);
-      updateUserSettingState(settingKey, !checked);
       toast.error("An error occurred.");
     } finally {
       setIsLoading(false);
@@ -55,7 +53,7 @@ export function AsyncSwitchField({
             checked={checked}
             onCheckedChange={onChangeHandler}
             id={settingKey}
-            disabled={isLoading}
+            disabled={isLoading || disabled}
           />
         </div>
       </div>

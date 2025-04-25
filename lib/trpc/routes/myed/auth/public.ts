@@ -2,7 +2,7 @@ import { AuthCookieName } from "@/helpers/getAuthCookies";
 import { zodEnum } from "@/types/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { z, ZodType } from "zod";
-import { passwordZodType } from "../../../zod";
+import { passwordZodType } from "../../../../zod";
 export enum LoginErrors {
   accountDisabled = "account-disabled",
   invalidAuth = "invalid-auth",

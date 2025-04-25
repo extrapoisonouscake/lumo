@@ -2,8 +2,8 @@ import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieStri
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import * as cheerio from "cheerio";
 import { z } from "zod";
-import { publicProcedure, router } from "../../base";
-import { authenticatedProcedure, guestProcedure } from "../../procedures";
+import { publicProcedure, router } from "../../../base";
+import { authenticatedProcedure, guestProcedure } from "../../../procedures";
 import {
   deleteSession,
   fetchStudentID,
@@ -38,7 +38,7 @@ import {
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { TRPCError } from "@trpc/server";
 import { cookies } from "next/headers";
-import { isAuthenticatedContext } from "../../context";
+import { isAuthenticatedContext } from "../../../context";
 import { fetchAuthCookiesAndStudentID } from "./helpers";
 
 const convertObjectToWeirdStringRepresentation = (

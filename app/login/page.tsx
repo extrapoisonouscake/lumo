@@ -3,7 +3,7 @@
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
 
-import { loginSchema } from "@/lib/trpc/routes/auth/public";
+import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -30,7 +30,7 @@ export default function Page() {
     AuthCookies | undefined
   >(undefined);
   const forceLoginMutation = useMutation(
-    trpc.auth.forceLogin.mutationOptions()
+    trpc.myed.auth.forceLogin.mutationOptions()
   );
   return (
     <>

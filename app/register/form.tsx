@@ -17,7 +17,7 @@ import {
   registerSchema,
   registerTypeSchemas,
   RegistrationType,
-} from "@/lib/trpc/routes/auth/public";
+} from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";

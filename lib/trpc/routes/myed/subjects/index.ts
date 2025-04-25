@@ -1,7 +1,7 @@
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { z } from "zod";
-import { router } from "../../base";
-import { authenticatedProcedure } from "../../procedures";
+import { router } from "../../../base";
+import { authenticatedProcedure } from "../../../procedures";
 
 export const subjectsRouter = router({
   getSubjects: authenticatedProcedure

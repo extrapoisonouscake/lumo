@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AuthCookies } from "@/helpers/getAuthCookies";
-import { LoginSchema } from "@/lib/trpc/routes/auth/public";
+import { LoginSchema } from "@/lib/trpc/routes/myed/auth/public";
 
 export function ChangePasswordModal({
   isOpen,

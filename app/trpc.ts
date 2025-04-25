@@ -1,5 +1,6 @@
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import { createTRPCClient, httpLink } from "@trpc/client";
 
+import { PrioritizedRequestQueue } from "@/app/requests-queue";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import {
@@ -32,9 +33,27 @@ const TRPC_URL = `${
     ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000"
 }/api/trpc`;
+const queue = new PrioritizedRequestQueue();
+
+const fetchWithQueue: typeof fetch = async (input, init) => {
+  const url =
+    typeof input === "string"
+      ? new URL(input)
+      : input instanceof URL
+      ? input
+      : new URL(input.url);
+  const pathParts = url.pathname.split("/");
+  const lastPart = pathParts[pathParts.length - 1];
+  // skipping the queueing if no call is made to the original API
+  if (!lastPart.startsWith("myed")) {
+    return fetch(input, init);
+  }
+  return queue.enqueue(() => fetch(input, init));
+};
+
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
-    httpBatchLink({
+    httpLink({
       transformer: superjson,
       url: TRPC_URL,
       fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -48,7 +67,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
           !clientAuthChecks.isLoggedIn() ||
           url.pathname.includes("auth.ensureValidSession")
         ) {
-          return fetch(input, init);
+          return fetchWithQueue(input, init);
         }
         const tokensExpiry = localStorage.getItem(
           TOKEN_EXPIRY_LOCAL_STORAGE_KEY
@@ -59,13 +78,13 @@ export const trpcClient = createTRPCClient<AppRouter>({
 
           if (now < expiryTime) {
             // Session is still valid, proceed with request
-            return fetch(input, init);
+            return fetchWithQueue(input, init);
           }
         }
 
         // Session needs refresh
         if (!refreshPromise) {
-          refreshPromise = trpcClient.auth.ensureValidSession
+          refreshPromise = trpcClient.myed.auth.ensureValidSession
             .mutate()
             .then(() => {
               refreshPromise = null;
@@ -77,7 +96,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         await refreshPromise;
 
         // Now proceed with the original request
-        return fetch(input, init);
+        return fetchWithQueue(input, init);
       },
     }),
   ],

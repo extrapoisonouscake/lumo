@@ -13,7 +13,7 @@ import {
   loginErrorIDToMessageMap,
   LoginErrors,
   LoginSchema,
-} from "@/lib/trpc/routes/auth/public";
+} from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { refreshSessionExpiresAt, trpc } from "../../trpc";
@@ -37,7 +37,7 @@ export function LoginForm({
     useFormErrorMessage(
       initialErrorCode ? getFullErrorMessage(initialErrorCode) : null
     );
-  const loginMutation = useMutation(trpc.auth.login.mutationOptions());
+  const loginMutation = useMutation(trpc.myed.auth.login.mutationOptions());
   const router = useRouter();
   const { refreshAuthStatus } = useAuthStatus();
   async function onSubmit(data: LoginSchema) {

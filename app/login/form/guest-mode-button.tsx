@@ -5,7 +5,7 @@ import { trpc } from "../../trpc";
 
 export function GuestModeButton() {
   const enterGuestModeMutation = useMutation(
-    trpc.auth.enterGuestMode.mutationOptions()
+    trpc.myed.auth.enterGuestMode.mutationOptions()
   );
   const { refreshAuthStatus } = useAuthStatus();
   return (

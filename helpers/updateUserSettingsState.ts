@@ -1,10 +1,8 @@
 import { UserSettingsWithDerivedFields } from "@/app/settings/types";
 import { queryClient, trpc } from "@/app/trpc";
-export function updateUserSettingState(
-  key: keyof UserSettingsWithDerivedFields,
-  value: UserSettingsWithDerivedFields[typeof key]
-) {
-  const queryKey = trpc.user.getSettings.queryKey();
+import set from "lodash/set";
+export function updateUserSettingState(key: string, value: any) {
+  const queryKey = trpc.core.settings.getSettings.queryKey();
   const currentState =
     queryClient.getQueryData<UserSettingsWithDerivedFields>(queryKey);
   if (!currentState) {
@@ -12,7 +10,7 @@ export function updateUserSettingState(
   }
   const newState = {
     ...currentState,
-    [key]: value,
   };
+  set(newState, key, value);
   queryClient.setQueryData(queryKey, newState);
 }

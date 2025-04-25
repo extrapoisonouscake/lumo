@@ -4,7 +4,7 @@ import { InferSelectModel } from "drizzle-orm";
 
 export type UserSettings = Omit<
   InferSelectModel<typeof user_settings>,
-  "id" | "hashedId" | "updatedAt"
+  "id" | "userId" | "updatedAt" | "notificationsSettingsId"
 >;
 export type UserSetting = keyof UserSettings;
 export type PartialUserSettings = {

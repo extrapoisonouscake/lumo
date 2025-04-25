@@ -6,7 +6,13 @@ import {
 } from "@/constants/website";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  Fragment,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useAuthStatus } from "../providers/auth-status-provider";
 import {
   Breadcrumb,
@@ -81,8 +87,8 @@ export function PageHeading() {
             {pageData.breadcrumb.map(({ href, name }, i) => {
               const isLast = i === pageData.breadcrumb.length - 1;
               return (
-                <>
-                  <BreadcrumbItem key={name}>
+                <Fragment key={name}>
+                  <BreadcrumbItem>
                     {isLast ? (
                       <BreadcrumbPage>{name}</BreadcrumbPage>
                     ) : (
@@ -92,7 +98,7 @@ export function PageHeading() {
                     )}
                   </BreadcrumbItem>
                   {!isLast && <BreadcrumbSeparator />}
-                </>
+                </Fragment>
               );
             })}
           </BreadcrumbList>

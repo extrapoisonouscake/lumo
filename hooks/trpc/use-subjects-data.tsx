@@ -10,7 +10,7 @@ export function useSubjectsData(
   } = { isPreviousYear: false, termId: undefined }
 ) {
   const query = useQuery(
-    trpc.subjects.getSubjects.queryOptions({
+    trpc.myed.subjects.getSubjects.queryOptions({
       isPreviousYear,
       termId,
     })

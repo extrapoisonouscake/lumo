@@ -7,9 +7,9 @@ import {
 } from "@/parsing/announcements/getAnnouncements";
 import { AnnouncementSection } from "@/types/school";
 import { TRPCError } from "@trpc/server";
-import { router } from "../../base";
-import { atLeastGuestProcedure } from "../../procedures";
-import { getUserSettings } from "../user";
+import { router } from "../../../base";
+import { atLeastGuestProcedure } from "../../../procedures";
+import { getUserSettings } from "../settings";
 import { AnnouncementsNotAvailableReason } from "./public";
 
 export const schoolSpecificRouter = router({

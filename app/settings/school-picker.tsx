@@ -19,7 +19,7 @@ import {
 import { KnownSchools } from "@/constants/schools";
 import { cn } from "@/helpers/cn";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useUpdateUserSetting } from "@/hooks/trpc/use-update-user-setting";
+import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -58,7 +58,7 @@ export function SchoolPicker({
       setValue(initialValue);
     }
   }, [initialValue]);
-  const updateUserSettingMutation = useUpdateUserSetting();
+  const updateUserSettingMutation = useUpdateGenericUserSetting();
   const onSubmit = async (newValue: string) => {
     setIsOpen(false);
     updateUserSettingState("schoolId", newValue as KnownSchools | "other");

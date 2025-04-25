@@ -8,7 +8,6 @@ import { headers } from "next/headers";
 import "server-only";
 
 import { fetchMyEd } from "@/instances/fetchMyEd";
-import { clientQueueManager, PrioritizedRequestQueue } from "./requests-queue";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
@@ -21,8 +20,7 @@ export type SendMyEdRequestParameters<
     (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
     string | undefined
   >;
-  requestGroup?: string;
-} & ({ session?: string } | { queue: PrioritizedRequestQueue });
+};
 const getUserAgent = async () => {
   const headersList = await headers();
   const userAgent = headersList.get("User-Agent") || USER_AGENT_FALLBACK;
@@ -36,18 +34,9 @@ export async function sendMyEdRequest<Steps extends FlatRouteStep>(
 ): Promise<Response>;
 export async function sendMyEdRequest<
   Steps extends FlatRouteStep | FlatRouteStep[]
->({
-  authCookies,
-  step: stepOrSteps,
-
-  requestGroup,
-  ...sessionOrQueue
-}: SendMyEdRequestParameters<Steps>) {
-  const isQueue = "queue" in sessionOrQueue;
-  const isSession = !isQueue && sessionOrQueue.session;
-  const isAuthenticated = isQueue || isSession;
+>({ authCookies, step: stepOrSteps }: SendMyEdRequestParameters<Steps>) {
   let cookiesString = "";
-  if (isAuthenticated) {
+  if (authCookies) {
     cookiesString = MYED_AUTHENTICATION_COOKIES_NAMES.map(
       (name) => `${name}=${authCookies[name] || "aspen"}`
     ).join("; ");
@@ -105,24 +94,9 @@ export async function sendMyEdRequest<
     argumentsArray.push(args);
   }
 
-  const queue = isQueue
-    ? sessionOrQueue.queue
-    : isSession
-    ? clientQueueManager.getQueue(sessionOrQueue.session as string)
-    : undefined;
-  const requestFunction = isMultipleSteps
-    ? () => Promise.all(argumentsArray.map((args) => fetchMyEd(...args)))
-    : () => fetchMyEd(...argumentsArray[0]);
-  let response;
-  if (queue) {
-    response = await queue.enqueue<Response | Response[]>(
-      requestFunction,
-      requestGroup
-    );
-  } else {
-    response = await requestFunction();
-  }
-
+  const response = isMultipleSteps
+    ? await Promise.all(argumentsArray.map((args) => fetchMyEd(...args)))
+    : await fetchMyEd(...argumentsArray[0]);
   return response;
 }
 function removeNullableProperties<T extends Record<string, any>>(

@@ -4,8 +4,11 @@ import {
   unauthenticatedPathnames,
 } from "./constants/website";
 import { serverAuthChecks } from "./helpers/server-auth-checks";
-import { deleteSession } from "./lib/trpc/routes/auth/helpers";
-import { isKnownLoginError, LoginErrors } from "./lib/trpc/routes/auth/public";
+import { deleteSession } from "./lib/trpc/routes/myed/auth/helpers";
+import {
+  isKnownLoginError,
+  LoginErrors,
+} from "./lib/trpc/routes/myed/auth/public";
 
 async function getLoginRedirectResponse(
   request: NextRequest,

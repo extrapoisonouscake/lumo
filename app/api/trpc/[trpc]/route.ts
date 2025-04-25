@@ -8,7 +8,7 @@ const handler = (req: Request) =>
     req,
     router: appRouter,
     onError: (opts) => {
-      console.error(opts.error);
+      console.trace(opts.error);
     },
     createContext: createTRPCContext,
   });
