@@ -19,7 +19,7 @@ export function NotificationsControlsComponent({
     trpc.core.settings.unsubscribeFromNotifications.mutationOptions()
   );
   const notificationsPermissionDenied =
-    window.Notification.permission === "denied";
+    !isIOS && window.Notification.permission === "denied";
   const initPush = async () => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       toast.error("Push notifications are not supported on this browser");
