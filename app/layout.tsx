@@ -46,6 +46,7 @@ export default async function RootLayout({
               `,
             }}
           />
+          <link rel="manifest" href="/manifest.json" />
         </head>
         <body
           className={cn("flex justify-center min-h-full", GeistSans.className)}
