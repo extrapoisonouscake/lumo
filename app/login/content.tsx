@@ -8,8 +8,8 @@ import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useState } from "react";
-import { refreshSessionExpiresAt, trpc } from "../trpc";
+import { useEffect, useState } from "react";
+import { queryClient, refreshSessionExpiresAt, trpc } from "../trpc";
 import { ChangePasswordModal } from "./change-password-modal";
 import { LoginForm } from "./form";
 import { PasswordResetSection } from "./password-reset-section";
@@ -32,6 +32,9 @@ export function LoginPageContent() {
   const forceLoginMutation = useMutation(
     trpc.myed.auth.forceLogin.mutationOptions()
   );
+  useEffect(() => {
+    queryClient.removeQueries();
+  }, []);
   return (
     <>
       {!!registrationResult && (

@@ -26,11 +26,14 @@ import {
   USER_SETTINGS_KEYS,
 } from "@/constants/core";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
+import { hashString } from "@/helpers/hashString";
+import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import { cookies } from "next/headers";
 import { after } from "next/server";
 import "server-only";
+import { runNotificationUnsubscriptionDBCalls } from "../../core/settings";
 import { genericErrorMessageVariableRegex } from "./public";
 export class LoginError extends Error {
   authCookies?: AuthCookies;
@@ -232,12 +235,22 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
 
   const session = cookieStore.get(AUTH_COOKIES_NAMES.tokens)?.value;
   if (session) {
+    const authCookies = getAuthCookies(cookieStore);
     after(() =>
       sendMyEdRequest({
         step: logoutStep,
-        authCookies: getAuthCookies(cookieStore),
+        authCookies,
       })
     );
+    const deviceId = cookiePlainStore.get(DEVICE_ID_COOKIE_NAME)?.value;
+    const studentId = cookieStore.get(AUTH_COOKIES_NAMES.studentId)?.value;
+    if (deviceId && studentId) {
+      const studentHashedId = hashString(studentId);
+      after(() =>
+        runNotificationUnsubscriptionDBCalls(studentHashedId, deviceId)
+      );
+      cookiePlainStore.delete(DEVICE_ID_COOKIE_NAME);
+    }
     cookieStore.delete(AUTH_COOKIES_NAMES.tokens);
   }
   cookieStore.delete(AUTH_COOKIES_NAMES.credentials);

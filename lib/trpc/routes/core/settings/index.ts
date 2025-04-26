@@ -126,13 +126,16 @@ export const settingsRouter = router({
       }) => {
         await createUserRecord(studentHashedId, credentials);
         const deviceId = await sha256(endpointUrl);
-        await db.insert(notifications_subscriptions).values({
-          userId: studentHashedId,
-          endpointUrl,
-          deviceId,
-          publicKey,
-          authKey,
-        });
+        await db
+          .insert(notifications_subscriptions)
+          .values({
+            userId: studentHashedId,
+            endpointUrl,
+            deviceId,
+            publicKey,
+            authKey,
+          })
+          .onConflictDoNothing();
         cookieStore.set(DEVICE_ID_COOKIE_NAME, deviceId, settingsCookieOptions);
       }
     ),
@@ -145,44 +148,51 @@ export const settingsRouter = router({
           message: "Device ID not found",
         });
       }
-      await db
-        .delete(notifications_subscriptions)
-        .where(
-          and(
-            eq(notifications_subscriptions.userId, studentHashedId),
-            eq(notifications_subscriptions.deviceId, deviceId)
-          )
-        );
-      const [existingSubscription, userSettings] = await Promise.all([
-        db.query.notifications_subscriptions.findFirst({
-          where: and(
-            eq(notifications_subscriptions.userId, studentHashedId),
-            eq(notifications_subscriptions.deviceId, deviceId)
-          ),
-        }),
-        getGenericUserSettingsFromDB(studentHashedId),
-      ]);
-      if (!existingSubscription) {
-        await db
-          .delete(tracked_subjects)
-          .where(eq(tracked_subjects.userId, studentHashedId));
-
-        if (userSettings) {
-          await db
-            .update(users)
-            .set({
-              username: null,
-              password: null,
-            })
-            .where(eq(users.id, studentHashedId));
-        } else {
-          await db.delete(users).where(eq(users.id, studentHashedId));
-        }
-      }
+      await runNotificationUnsubscriptionDBCalls(studentHashedId, deviceId);
       cookieStore.delete(DEVICE_ID_COOKIE_NAME);
     }
   ),
 });
+export const runNotificationUnsubscriptionDBCalls = async (
+  studentHashedId: string,
+  deviceId: string
+) => {
+  console.log("unsubscribeFromNotificationsAction", studentHashedId, deviceId);
+  await db
+    .delete(notifications_subscriptions)
+    .where(
+      and(
+        eq(notifications_subscriptions.userId, studentHashedId),
+        eq(notifications_subscriptions.deviceId, deviceId)
+      )
+    );
+  const [existingSubscription, userSettings] = await Promise.all([
+    db.query.notifications_subscriptions.findFirst({
+      where: and(
+        eq(notifications_subscriptions.userId, studentHashedId),
+        eq(notifications_subscriptions.deviceId, deviceId)
+      ),
+    }),
+    getGenericUserSettingsFromDB(studentHashedId),
+  ]);
+  if (!existingSubscription) {
+    await db
+      .delete(tracked_subjects)
+      .where(eq(tracked_subjects.userId, studentHashedId));
+
+    if (userSettings) {
+      await db
+        .update(users)
+        .set({
+          username: null,
+          password: null,
+        })
+        .where(eq(users.id, studentHashedId));
+    } else {
+      await db.delete(users).where(eq(users.id, studentHashedId));
+    }
+  }
+};
 const createUserRecord = async (
   userId: string,
   credentials?: { username: string; password: string }
