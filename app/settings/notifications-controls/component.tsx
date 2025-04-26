@@ -80,10 +80,12 @@ export function NotificationsControlsComponent({
     </div>
   );
 }
+const SW_PATH = "/notifications-sw.js";
 const waitForServiceWorker = async () => {
-  const registration = await navigator.serviceWorker.register(
-    "/notifications-sw.js"
-  );
+  let registration = await navigator.serviceWorker.getRegistration();
+  if (!registration) {
+    registration = await navigator.serviceWorker.register(SW_PATH);
+  }
   await navigator.serviceWorker.ready;
   return registration;
 };
@@ -92,13 +94,17 @@ const requestNotificationPermission = async () => {
   return permission === "granted";
 };
 const subscribeToPush = async (registration: ServiceWorkerRegistration) => {
-  const convertedVapidKey = urlBase64ToUint8Array(
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
-  );
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: convertedVapidKey,
-  });
+  let subscription = await registration.pushManager.getSubscription();
+
+  if (!subscription) {
+    const convertedVapidKey = urlBase64ToUint8Array(
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!
+    );
+    subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: convertedVapidKey,
+    });
+  }
   return subscription;
 };
 function urlBase64ToUint8Array(base64String: string) {
