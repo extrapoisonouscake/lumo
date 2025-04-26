@@ -1,5 +1,4 @@
 import { timezonedDayJS } from "@/instances/dayjs";
-import { getMyEd } from "@/parsing/myed/getMyEd";
 import { z } from "zod";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
@@ -11,7 +10,7 @@ export const scheduleRouter = router({
         date: z.date().optional(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx: { getMyEd } }) => {
       const currentDate = timezonedDayJS().startOf("day");
       return getMyEd("schedule", {
         date: !currentDate.isSame(input.date, "day") ? input.date : undefined,

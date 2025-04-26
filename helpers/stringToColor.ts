@@ -51,7 +51,7 @@ function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
 // Contrast checker function based on luminance
 export function getTextColorForBackground(hsl: string): string {
   const [h, s, l] = hsl.match(/\d+/g)!.map(Number);
-  const rgb = hslToRgb(h, s / 100, l / 100);
+  const rgb = hslToRgb(h!, s! / 100, l! / 100);
 
   // Calculate relative luminance using the WCAG formula
   const luminance =

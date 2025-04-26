@@ -63,7 +63,7 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
 
       if (!element || actualHeadingsValues.has(element.text)) {
         if (accumulatedElements.length > 0 || tableData.length > 0) {
-          const currentHeading = referenceHeadings[currentSectionIndex];
+          const currentHeading = referenceHeadings[currentSectionIndex]!;
           sections.push({
             heading: currentHeading.displayName,
             emoji: currentHeading.emoji,
@@ -88,7 +88,7 @@ export const parseMarkIsfeldSecondaryDailyAnnouncements: DailyAnnouncementsParsi
           const rowData: string[] = [];
 
           for (const cell of $table(row).find("th, td").toArray()) {
-            const cellText = $table(cell).text().trim().split("\n")[0];
+            const cellText = $table(cell).text().trim().split("\n")[0]!;
 
             rowData.push(cellText.replaceAll("|", ""));
           }

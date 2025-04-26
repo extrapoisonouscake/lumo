@@ -9,8 +9,8 @@ type PersonalDetailsParserArguments =
 export function parsePersonalDetails({
   responses: [$main, $photoRoot],
 }: PersonalDetailsParserArguments): PersonalDetails {
-  const mainDetails = parseMainDetails($main);
-  const photoURL = parsePhotoURL($photoRoot);
+  const mainDetails = parseMainDetails($main!);
+  const photoURL = parsePhotoURL($photoRoot!);
   return { ...mainDetails, photoURL };
 }
 

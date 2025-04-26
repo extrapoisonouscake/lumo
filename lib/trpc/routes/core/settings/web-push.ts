@@ -1,5 +1,8 @@
 import { db } from "@/db";
-import { notifications_subscriptions } from "@/db/schema";
+import {
+  notifications_subscriptions,
+  NotificationsSubscriptionSelectModel,
+} from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import webpush from "web-push";
 const { NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY } = process.env;
@@ -19,13 +22,16 @@ export const sendNotification = async (
   await webpush.sendNotification(subscription, JSON.stringify({ title, body }));
 };
 export const broadcastNotification = async (
-  userId: string,
+  userIdOrSubscriptions: string | NotificationsSubscriptionSelectModel[],
   title: string,
   body: string
 ) => {
-  const subscriptions = await db.query.notifications_subscriptions.findMany({
-    where: eq(notifications_subscriptions.userId, userId),
-  });
+  const subscriptions =
+    typeof userIdOrSubscriptions === "string"
+      ? await db.query.notifications_subscriptions.findMany({
+          where: eq(notifications_subscriptions.userId, userIdOrSubscriptions),
+        })
+      : userIdOrSubscriptions;
   let erroredSubscriptionsIds: string[] = [];
   await Promise.all(
     subscriptions.map(async (subscription) => {

@@ -5,7 +5,7 @@ import {
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
   notificationSubscriptionSchema,
-  recent_school_data,
+  tracked_subjects,
   users,
 } from "@/db/schema";
 
@@ -19,6 +19,7 @@ import { db } from "@/db";
 import { user_settings } from "@/db/schema";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
 import { sha256 } from "@/helpers/sha256";
+import { encryption } from "@/lib/encryption";
 import { router } from "@/lib/trpc/base";
 import {
   atLeastGuestProcedure,
@@ -120,10 +121,10 @@ export const settingsRouter = router({
     )
     .mutation(
       async ({
-        ctx: { studentId, cookieStore, studentHashedId },
+        ctx: { studentId, cookieStore, studentHashedId, credentials },
         input: { endpointUrl, publicKey, authKey },
       }) => {
-        await createUserRecord(studentHashedId);
+        await createUserRecord(studentHashedId, credentials);
         const deviceId = await sha256(endpointUrl);
         await db.insert(notifications_subscriptions).values({
           userId: studentHashedId,
@@ -163,10 +164,18 @@ export const settingsRouter = router({
       ]);
       if (!existingSubscription) {
         await db
-          .delete(recent_school_data)
-          .where(eq(recent_school_data.userId, studentHashedId));
+          .delete(tracked_subjects)
+          .where(eq(tracked_subjects.userId, studentHashedId));
 
-        if (!userSettings) {
+        if (userSettings) {
+          await db
+            .update(users)
+            .set({
+              username: null,
+              password: null,
+            })
+            .where(eq(users.id, studentHashedId));
+        } else {
           await db.delete(users).where(eq(users.id, studentHashedId));
         }
       }
@@ -174,8 +183,23 @@ export const settingsRouter = router({
     }
   ),
 });
-const createUserRecord = async (userId: string) => {
-  await db.insert(users).values({ id: userId }).onConflictDoNothing();
+const createUserRecord = async (
+  userId: string,
+  credentials?: { username: string; password: string }
+) => {
+  const call = db.insert(users).values({ id: userId, ...credentials });
+  if (credentials) {
+    call.onConflictDoUpdate({
+      target: users.id,
+      set: {
+        username: encryption.encrypt(credentials.username),
+        password: encryption.encrypt(credentials.password),
+      },
+    });
+  } else {
+    call.onConflictDoNothing();
+  }
+  return await call;
 };
 export const getGenericUserSettingsFromCookies = (
   store: ReadonlyRequestCookies

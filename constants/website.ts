@@ -24,7 +24,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
 };
 export const getWebsitePageData = (pathname: string, params: Params) => {
-  const exactMatch = websitePagesWithStaticPaths[pathname];
+  const exactMatch = websitePagesWithStaticPaths[pathname]!;
   if (exactMatch) return exactMatch;
   const segments = pathname.split("/").slice(1);
   let data = null;
@@ -32,7 +32,7 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
     let lastPathname = "/classes";
     data = {
       breadcrumb: [{ name: "Classes", href: lastPathname }],
-      icon: websitePagesWithStaticPaths["/classes"].icon,
+      icon: websitePagesWithStaticPaths["/classes"]!.icon,
     };
     const assignmentId = segments[3];
     if (segments[1]) {
@@ -56,7 +56,7 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
     return data;
   }
   if (segments[0] === "schedule") {
-    return websitePagesWithStaticPaths["/schedule"];
+    return websitePagesWithStaticPaths["/schedule"]!;
   }
   return null;
 };

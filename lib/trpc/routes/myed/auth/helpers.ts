@@ -115,7 +115,7 @@ export async function getFreshAuthCookiesAndHTMLToken() {
 
   const cookiesToAdd = Object.fromEntries(
     cookiesPairs
-      .map((pair) => pair.split(";")[0].split("="))
+      .map((pair) => (pair.split(";")[0] as string).split("="))
       .filter(([name]) =>
         MYED_AUTHENTICATION_COOKIES_NAMES.includes(
           name as MyEdAuthenticationCookiesName
@@ -176,7 +176,8 @@ export async function fetchStudentID(cookies: AuthCookies) {
     headers: { Cookie: convertObjectToCookieString(cookies) },
   }).then((response) => response.json());
 
-  const studentID = studentsData[0].studentOid;
+  const studentID = studentsData[0]?.studentOid;
+  if (!studentID) throw new LoginError(LoginErrors.invalidAuth);
   return studentID;
 }
 export const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
@@ -191,7 +192,7 @@ export function parseAuthGenericErrorMessage($: cheerio.CheerioAPI) {
 
     const match = scriptContent.match(genericErrorMessageVariableRegex);
     if (match) {
-      errorMessage = match[2];
+      errorMessage = match[2] ?? null;
       return false;
     }
   });

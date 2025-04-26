@@ -8,6 +8,27 @@
       "when": 1745554435195,
       "tag": "0000_pretty_doomsday",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1745613972722,
+      "tag": "0001_old_sheva_callister",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1745621227761,
+      "tag": "0002_tearful_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1745648158388,
+      "tag": "0003_acoustic_forge",
+      "breakpoints": true
     }
   ]
 }

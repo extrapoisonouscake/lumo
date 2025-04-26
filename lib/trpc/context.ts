@@ -1,12 +1,14 @@
+import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { hashString } from "@/helpers/hashString";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies, headers } from "next/headers";
 type AuthenticatedTRPCContext = {
   isGuest: false;
   studentId: string;
   studentHashedId: string;
-  credentials: string; //temporary non-undefined
+  credentials: { username: string; password: string };
   tokens?: string;
 };
 export const createTRPCContext = async () => {
@@ -18,24 +20,36 @@ export const createTRPCContext = async () => {
     studentHashedId = hashString(studentId);
   }
   const credentials = cookieStore.get("credentials")?.value;
+  const [username, password] =
+    credentials?.split("|").map(decodeURIComponent) ?? [];
   const tokens = cookieStore.get("tokens")?.value;
   const isGuest = !!store.get("isGuest")?.value;
   const ip = ((await headers()).get("x-forwarded-for") ?? "127.0.0.1").split(
     ","
   )[0];
+  const getMyEdWithParameters = getMyEd(
+    tokens
+      ? {
+          authCookies: getAuthCookies(cookieStore),
+          studentId: studentId!,
+        }
+      : undefined
+  );
   return {
     isGuest,
     studentId,
     studentHashedId,
-    credentials,
+    credentials: { username, password },
     tokens,
     ip,
     authCookieStore: cookieStore,
     cookieStore: store,
+    getMyEd: getMyEdWithParameters,
   } as {
     ip: string;
     cookieStore: ReadonlyRequestCookies;
     authCookieStore: MyEdCookieStore;
+    getMyEd: ReturnType<typeof getMyEd>;
   } & ({ isGuest: true } | AuthenticatedTRPCContext);
 };
 

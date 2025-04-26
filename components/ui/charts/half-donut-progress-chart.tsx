@@ -36,7 +36,7 @@ export function HalfDonutProgressChart({
   isLoading?: boolean;
 }) {
   // Create the background arc (empty portion)
-  const emptyArc = pieLayout([{ value: 100 }])[0];
+  const emptyArc = pieLayout([{ value: 100 }])[0]!;
 
   // Create the progress arc that overlays the background
   const progressPieLayout = pie<Item>()
@@ -45,7 +45,7 @@ export function HalfDonutProgressChart({
     .endAngle(-Math.PI * 0.68 + Math.PI * 1.36 * (value / 100))
     .sort(null);
 
-  const progressArc = progressPieLayout([{ value: 100 }])[0];
+  const progressArc = progressPieLayout([{ value: 100 }])[0]!;
 
   return (
     <svg

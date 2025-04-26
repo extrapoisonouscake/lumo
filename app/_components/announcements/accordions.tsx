@@ -31,8 +31,8 @@ const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
       if (
         numbers[i] === targetGrade ||
         (i + 1 < numbers.length &&
-          numbers[i] <= targetGrade &&
-          targetGrade <= numbers[i + 1])
+          numbers[i]! <= targetGrade &&
+          targetGrade <= numbers[i + 1]!)
       ) {
         hasOneRelevant = true;
         break;
@@ -61,7 +61,7 @@ export function AnnouncementsAccordions({
     const personalAnnouncementsItems = [];
     const accordionItems: React.ReactNode[] = [];
     for (let i = 0; i < data.length; i++) {
-      const { heading, emoji, ...props } = data[i];
+      const { heading, emoji, ...props } = data[i]!;
       let content;
       const isItemsView = "items" in props;
 

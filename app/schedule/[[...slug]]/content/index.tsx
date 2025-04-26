@@ -86,7 +86,7 @@ export function Schedule({ date }: Props) {
   if ([0, 6].includes(currentDayObject.day())) {
     return (
       <ErrorCard
-        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]({ date })}
+        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({ date })}
       />
     );
   }

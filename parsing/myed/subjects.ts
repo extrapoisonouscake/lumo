@@ -66,7 +66,7 @@ const convertSubject = ({
   teachers: relSscMstOid_mstStaffView.map((item) => item.name),
   room: relSscMstOid_mstRoomView ?? null,
   average: normalizeMarkWithLetter(cfTermAverage),
-  term: sscTermView ? termRawValueToNormalized[sscTermView] : null,
+  term: sscTermView ? termRawValueToNormalized[sscTermView]! : null,
 });
 export function parseSubjects({
   responses: [gradeTerms, data],
@@ -151,7 +151,7 @@ export function parseSubjectSummary({
   const result: SubjectSummary = {
     id: section.oid,
     name: prettifyEducationalName(section.relSscMstOid_mstDescription),
-    term: termRawValueToNormalized[section.sscTermView],
+    term: termRawValueToNormalized[section.sscTermView]!,
     academics: {
       average: null,
       posted: null,
@@ -171,9 +171,9 @@ export function parseSubjectSummary({
     const categories = averageSummary.filter(
       (_, index) => index !== gradebookAverageIndex
     );
-    const overallPostedGrade = postedSummary[0].overall;
+    const overallPostedGrade = postedSummary[0]!.overall;
     const academics: SubjectSummary["academics"] = {
-      average: normalizeMarkWithLetter(gradebookAverage.overall),
+      average: normalizeMarkWithLetter(gradebookAverage!.overall),
       posted: overallPostedGrade ? +overallPostedGrade : null,
       categories: categories.map(convertAcademicCategory),
     };

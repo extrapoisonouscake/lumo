@@ -137,7 +137,7 @@ class ResolvedRoute<Params extends RouteParams> {
   }
   *[Symbol.iterator]() {
     for (let i = 0; i < this.steps.length; i++) {
-      let nextStep = this.steps[i];
+      let nextStep = this.steps[i]!;
       const predicate = this.predicates[i];
       if (
         predicate &&
@@ -163,7 +163,7 @@ class ResolvedRoute<Params extends RouteParams> {
       }
       if (Array.isArray(nextStep)) {
         for (let i = 0; i < nextStep.length; i++) {
-          const step = nextStep[i];
+          const step = nextStep[i]!;
           processStep(this, step);
         }
       } else {
@@ -345,7 +345,7 @@ export const myEdRestEndpoints = {
       generateSubjectsListStepParams(studentID, { termId: "all" })
     )
     .metadata(({ params: { name }, responses, metadata }) => {
-      const targetResponse = responses[0];
+      const targetResponse = responses[0]!;
       metadata.subjectId = findSubjectIdByName(targetResponse, name as string);
       if (!metadata.subjectId) {
         metadata.shouldSearchInPreviousYear = true;
@@ -362,7 +362,7 @@ export const myEdRestEndpoints = {
     )
     .metadata(
       ({ responses, metadata, params: { name } }) => {
-        const targetResponse = responses[1];
+        const targetResponse = responses[1]!;
 
         metadata.subjectId = findSubjectIdByName(
           targetResponse,
@@ -394,7 +394,7 @@ export const myEdRestEndpoints = {
           -1
         ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
         if (typeof foundTerms.currentTermIndex === "number") {
-          selectedTermOid = foundTerms.terms[foundTerms.currentTermIndex].oid;
+          selectedTermOid = foundTerms.terms[foundTerms.currentTermIndex]!.oid;
         }
       }
 

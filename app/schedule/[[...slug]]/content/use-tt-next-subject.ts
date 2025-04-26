@@ -32,7 +32,7 @@ export function useTTNextSubject({
       const now = timezonedDayJS();
       if (
         data.length === 0 ||
-        !now.isBetween(data[0].startsAt, data.at(-1)?.endsAt)
+        !now.isBetween(data[0]!.startsAt, data.at(-1)!.endsAt)
       ) {
         setNullValues();
         return;
@@ -47,13 +47,13 @@ export function useTTNextSubject({
       }
       setCurrentRowIndex(newCurrentRowIndex);
       let nextRowStartingTimestamp, visibleNextRowStartingTimestamp;
-      const currentRow = data[newCurrentRowIndex];
-      const nextRow = data[newCurrentRowIndex + 1];
+      const currentRow = data[newCurrentRowIndex]!;
+      const nextRow = data[newCurrentRowIndex + 1]!;
       if (newCurrentRowIndex === data.length - 1) {
         nextRowStartingTimestamp = currentRow.endsAt;
         visibleNextRowStartingTimestamp = nextRowStartingTimestamp;
       } else {
-        let rowsToSkip = 1;
+        let rowsToSkip;
         if (
           isRowScheduleSubject(nextRow) &&
           nextRow.name === TEACHER_ADVISORY_ABBREVIATION
@@ -64,10 +64,12 @@ export function useTTNextSubject({
           currentRow.name === TEACHER_ADVISORY_ABBREVIATION
         ) {
           rowsToSkip = 2;
+        } else {
+          rowsToSkip = 1;
         }
         nextRowStartingTimestamp = nextRow.startsAt;
         visibleNextRowStartingTimestamp =
-          data[newCurrentRowIndex + rowsToSkip].startsAt; //TA is never the last class, no need to check for undefined
+          data[newCurrentRowIndex + rowsToSkip]!.startsAt; //TA is never the last class, no need to check for undefined
       }
       const timeToNextRow = timezonedDayJS(nextRowStartingTimestamp);
       const visibleTimeToNextRow = timezonedDayJS(

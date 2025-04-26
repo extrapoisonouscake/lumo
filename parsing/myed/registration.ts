@@ -5,8 +5,8 @@ export function parseRegistrationFields({
   responses: [$],
 }: ParserFunctionArguments<"registrationFields">) {
   const getSelectOptions = (name: string) =>
-    $(`[name=${name}] option`)
-      .map((_, el) => $(el).val())
+    $!(`[name=${name}] option`)
+      .map((_, el) => $!(el).val())
       .toArray();
   const schoolDistrictOptions = getSelectOptions(
     RegistrationInternalFields.schoolDistrict

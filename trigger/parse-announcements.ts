@@ -1,6 +1,6 @@
 import { KnownSchools, knownSchoolsIDs } from "@/constants/schools";
 import { getMidnight } from "@/helpers/getMidnight";
-import { timezonedDayJS } from "@/instances/dayjs";
+import { INSTANTIATED_TIMEZONE, timezonedDayJS } from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
 import {
@@ -121,7 +121,7 @@ export const checkAllAnnouncementsTask = schedules.task({
   id: "check-for-all-announcements",
 
   cron: {
-    timezone: "America/Vancouver",
+    timezone: INSTANTIATED_TIMEZONE,
     pattern: "0 9 * 1-6,9-12 1-5",
   },
   run: async () => {

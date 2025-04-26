@@ -7,6 +7,7 @@ import {
 import { headers } from "next/headers";
 import "server-only";
 
+import { AuthCookies } from "@/helpers/getAuthCookies";
 import { fetchMyEd } from "@/instances/fetchMyEd";
 
 const USER_AGENT_FALLBACK =
@@ -16,15 +17,16 @@ export type SendMyEdRequestParameters<
 > = {
   step: Steps;
 
-  authCookies: Record<
-    (typeof MYED_AUTHENTICATION_COOKIES_NAMES)[number],
-    string | undefined
-  >;
+  authCookies?: AuthCookies;
 };
 const getUserAgent = async () => {
-  const headersList = await headers();
-  const userAgent = headersList.get("User-Agent") || USER_AGENT_FALLBACK;
-  return userAgent;
+  try {
+    const headersList = await headers();
+    const userAgent = headersList.get("User-Agent") || USER_AGENT_FALLBACK;
+    return userAgent;
+  } catch (error) {
+    return USER_AGENT_FALLBACK;
+  }
 };
 export async function sendMyEdRequest<Steps extends FlatRouteStep[]>(
   params: SendMyEdRequestParameters<Steps>
@@ -96,7 +98,9 @@ export async function sendMyEdRequest<
 
   const response = isMultipleSteps
     ? await Promise.all(argumentsArray.map((args) => fetchMyEd(...args)))
-    : await fetchMyEd(...argumentsArray[0]);
+    : await fetchMyEd(
+        ...(argumentsArray[0] as (typeof argumentsArray)[number])
+      );
   return response;
 }
 function removeNullableProperties<T extends Record<string, any>>(

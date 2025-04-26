@@ -156,12 +156,12 @@ const prepareTableData = (data: ScheduleSubject[]) => {
   const filledIntervals: ScheduleRow[] = [];
   let wasLunchFound = false;
   for (let i = 0; i < preparedData.length; i++) {
-    const currentElement = preparedData[i];
+    const currentElement = preparedData[i]!;
     filledIntervals.push({ type: "subject", ...currentElement });
 
     if (i < preparedData.length - 1) {
       const currentEnd = currentElement.endsAt;
-      const nextStart = preparedData[i + 1].startsAt;
+      const nextStart = preparedData[i + 1]!.startsAt;
 
       if (currentEnd < nextStart) {
         let type: BreakRowType;
@@ -320,8 +320,8 @@ export function ScheduleTable({
             isBreak={
               !!(
                 typeof currentRowIndex === "number" &&
-                (data[currentRowIndex].type !== "subject" ||
-                  data[currentRowIndex].name === TEACHER_ADVISORY_ABBREVIATION)
+                (data[currentRowIndex]!.type !== "subject" ||
+                  data[currentRowIndex]!.name === TEACHER_ADVISORY_ABBREVIATION)
               )
             }
           />

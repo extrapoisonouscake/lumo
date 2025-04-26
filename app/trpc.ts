@@ -43,7 +43,7 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
       ? input
       : new URL(input.url);
   const pathParts = url.pathname.split("/");
-  const lastPart = pathParts[pathParts.length - 1];
+  const lastPart = pathParts[pathParts.length - 1]!;
   // skipping the queueing if no call is made to the original API
   if (!lastPart.startsWith("myed")) {
     return fetch(input, init);

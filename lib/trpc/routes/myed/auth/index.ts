@@ -35,7 +35,6 @@ import {
   cookieDefaultOptions,
   MyEdCookieStore,
 } from "@/helpers/MyEdCookieStore";
-import { getMyEd } from "@/parsing/myed/getMyEd";
 import { TRPCError } from "@trpc/server";
 import { cookies } from "next/headers";
 import { isAuthenticatedContext } from "../../../context";
@@ -345,7 +344,7 @@ export const authRouter = router({
     (await cookies()).delete("isGuest");
   }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
-    const fields = await getMyEd("registrationFields");
+    const fields = await ctx.getMyEd("registrationFields");
     return { ip: ctx.ip, ...fields };
   }),
   register,
@@ -360,11 +359,10 @@ export const authRouter = router({
       return; // Session is valid, no need to refresh
     }
 
-    const [username, password] = ctx.credentials
-      .split("|")
-      .map(decodeURIComponent);
-
-    const { tokens } = await fetchAuthCookiesAndStudentID(username, password);
+    const { tokens } = await fetchAuthCookiesAndStudentID(
+      ctx.credentials.username,
+      ctx.credentials.password
+    );
 
     ctx.authCookieStore.set(
       AUTH_COOKIES_NAMES.tokens,

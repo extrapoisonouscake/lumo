@@ -77,7 +77,7 @@ function PagesMenu({ isGuest }: { isGuest: boolean }) {
           >
             <Link href={url}>
               <page.icon />
-              {page.breadcrumb[0].name}
+              {page.breadcrumb[0]!.name}
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

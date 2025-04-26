@@ -18,13 +18,15 @@ function convertAssignment({
   remark,
   categoryOid,
 }: components["schemas"]["StudentAssignment"]): Assignment {
-  const { scoreLabel, score, pointMax } = scoreElements[0];
+  const scoreElement = scoreElements[0];
+  if (!scoreElement) throw new Error("No score element");
+  const { scoreLabel, score, pointMax } = scoreElement;
   const baseAssignment = {
     id: oid,
     name: prettifyEducationalName(name),
     dueAt: new Date(dueDate),
     assignedAt: new Date(assignedDate),
-    classAverage: +classAverage.split(" ")[0] || null,
+    classAverage: +(classAverage.split(" ")[0] as string) || null,
     feedback: remark ?? null,
     categoryId: categoryOid,
   };

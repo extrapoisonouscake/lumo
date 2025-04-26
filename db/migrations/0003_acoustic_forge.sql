@@ -1,0 +1,1 @@
+ALTER TABLE "tracked_subjects" ADD CONSTRAINT "tracked_subjects_user_id_subject_id_uniqueConstraint" UNIQUE("user_id","subject_id");

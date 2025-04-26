@@ -5,11 +5,9 @@ import {
   MyEdParsingRoute,
   MyEdRestEndpoint,
 } from "@/constants/myed";
-import { getAuthCookies } from "@/helpers/getAuthCookies";
-import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
+import { AuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
-import { cache } from "react";
 import "server-only";
 
 import { parseSubjectAssignment, parseSubjectAssignments } from "./assignments";
@@ -47,66 +45,57 @@ const processResponse = async (response: Response, value: FlatRouteStep) => {
     return await response.json();
   }
 };
-export const getMyEd = cache(async function <Endpoint extends MyEdEndpoint>(
-  endpoint: Endpoint,
-  ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
-) {
-  const route = ENDPOINTS[endpoint];
-  let authParameters, studentId;
-  if (route.requiresAuth) {
-    const cookieStore = await MyEdCookieStore.create();
-    let authCookies;
-    try {
-      authCookies = getAuthCookies(cookieStore);
-    } catch {
-      throw new Error("No session or studentId");
-    }
-    studentId = cookieStore.get("studentId")?.value;
-    const session = authCookies.JSESSIONID;
-    if (!session || !studentId) throw new Error("No session or studentId");
-    const requestGroup = `${endpoint}-${Date.now()}`;
+export const getMyEd = (props?: {
+  authCookies: AuthCookies;
+  studentId: string;
+}) =>
+  async function <Endpoint extends MyEdEndpoint>(
+    endpoint: Endpoint,
+    ...rest: MyEdEndpointsParamsAsOptional<Endpoint>
+  ) {
+    const route = ENDPOINTS[endpoint];
 
-    authParameters = { authCookies, requestGroup };
-  }
+    //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
+    const steps = route(props?.studentId, ...rest); //!
+    for (const step of steps) {
+      const value = step.value;
+      const response = await sendMyEdRequest({
+        // @ts-expect-error intentional
+        step: value,
+        authCookies: props?.authCookies,
+      });
+      const responses = [];
+      const isArray = Array.isArray(response) && Array.isArray(value);
+      if (isArray) {
+        for (let i = 0; i < response.length; i++) {
+          const r = response[i] as Response;
+          //optimize
+          const processedData = await processResponse(
+            r,
+            value[i] as FlatRouteStep
+          );
+          if (!processedData) throw new Error("No processed data");
+          responses.push(processedData);
+        }
+      } else {
+        const processedData = await processResponse(
+          //@ts-expect-error jic
+          response,
 
-  //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
-  const steps = route(studentId, ...rest); //!
-  for (const step of steps) {
-    const value = step.value;
-    const response = await sendMyEdRequest({
-      //@ts-expect-error FIX THIS
-      step: value,
-      ...authParameters,
-    });
-    const responses = [];
-    const isArray = Array.isArray(response) && Array.isArray(value);
-    if (isArray) {
-      for (let i = 0; i < response.length; i++) {
-        const r = response[i];
-        //optimize
-        const processedData = await processResponse(r, value[i]);
+          value as FlatRouteStep
+        );
         if (!processedData) throw new Error("No processed data");
         responses.push(processedData);
       }
-    } else {
-      const processedData = await processResponse(
-        //@ts-expect-error jic
-        response,
-
-        value as FlatRouteStep
-      );
-      if (!processedData) throw new Error("No processed data");
-      responses.push(processedData);
+      steps.addResponse(isArray ? responses : responses[0]);
     }
-    steps.addResponse(isArray ? responses : responses[0]);
-  }
 
-  return endpointToParsingFunction[endpoint]({
-    params: rest[0] as unknown as any,
-    responses: steps.responses as any,
-    metadata: steps.metadata,
-  }) as MyEdEndpointResponse<Endpoint>;
-});
+    return endpointToParsingFunction[endpoint]({
+      params: rest[0] as unknown as any,
+      responses: steps.responses as any,
+      metadata: steps.metadata,
+    }) as MyEdEndpointResponse<Endpoint>;
+  };
 
 export type MyEdEndpointResponse<T extends MyEdEndpoint> = Exclude<
   ReturnType<(typeof endpointToParsingFunction)[T]>,

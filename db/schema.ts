@@ -1,14 +1,14 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { InferSelectModel, sql } from "drizzle-orm";
+import { InferSelectModel, relations, sql } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
-import { pgTable as table } from "drizzle-orm/pg-core";
+import { pgTable as table, unique } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 export const users = table(
   "users",
   {
     id: t.text("id").primaryKey(), //user student id
-    username: t.text().unique(),
-    password: t.text(),
+    username: t.text().unique(), //encrypted
+    password: t.text(), //encrypted
   },
   (table) => {
     return [
@@ -19,6 +19,10 @@ export const users = table(
     ];
   }
 );
+export const usersRelations = relations(users, ({ many }) => ({
+  notifications_subscriptions: many(notifications_subscriptions),
+  tracked_subjects: many(tracked_subjects),
+}));
 export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
   userId: t
@@ -76,17 +80,48 @@ export const notifications_subscriptions = table(
     lastSeenAt: t.timestamp("last_seen_at").defaultNow().notNull(),
   }
 );
+export const notifications_subscriptionsRelations = relations(
+  notifications_subscriptions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [notifications_subscriptions.userId],
+      references: [users.id],
+    }),
+  })
+);
 export type NotificationsSubscriptionSelectModel = InferSelectModel<
   typeof notifications_subscriptions
 >;
 export const notificationSubscriptionSchema = createSelectSchema(
   notifications_subscriptions
 );
-export const recent_school_data = table("recent_school_data", {
-  id: t.uuid().defaultRandom().primaryKey(),
-  userId: t
-    .text("user_id")
-    .references(() => users.id)
-    .unique(),
-  assignments: t.jsonb(),
-});
+export const tracked_subjects = table(
+  "tracked_subjects",
+  {
+    id: t.uuid().defaultRandom().primaryKey(),
+    userId: t
+      .text("user_id")
+      .references(() => users.id)
+      .notNull(),
+    subjectId: t.text("subject_id").notNull(),
+    lastAssignmentId: t.text("last_assignment_id").notNull(),
+    updatedAt: t.timestamp("updated_at").defaultNow(),
+  },
+  (t) => ({
+    tracked_subjects_user_id_subject_id_uniqueConstraint: unique(
+      "tracked_subjects_user_id_subject_id_uniqueConstraint"
+    ).on(t.userId, t.subjectId),
+  })
+);
+export type TrackedSubjectSelectModel = InferSelectModel<
+  typeof tracked_subjects
+>;
+export const tracked_subjectsRelations = relations(
+  tracked_subjects,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [tracked_subjects.userId],
+      references: [users.id],
+    }),
+  })
+);

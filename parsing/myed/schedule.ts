@@ -34,7 +34,8 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
 export function parseCurrentWeekday({
   responses: [$initial, $dateAdjusted],
 }: ParserFunctionArguments<"currentWeekday">) {
-  const $ = $dateAdjusted || $initial;
+  const $ = ($dateAdjusted || $initial)!;
+
   const $tableBody = getTableBody($);
   if (!$tableBody) return null;
   if ("knownError" in $tableBody) return $tableBody;
@@ -50,7 +51,7 @@ export function parseSchedule({
 }: ParserFunctionArguments<"schedule">):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string } {
-  const $ = $dateAdjusted || $initial;
+  const $ = ($dateAdjusted || $initial)!;
   const $tableBody = getTableBody($);
   if (!$tableBody) throw new Error("No table body");
   if ("knownError" in $tableBody) return $tableBody;
@@ -76,11 +77,11 @@ export function parseSchedule({
       const [subjectId, name, teachersString, room] =
         removeLineBreaks(contentCellHTML).split("<br>");
       const subject = {
-        startsAt: getDateFromSubjectTimeStringWithDay(startsAt),
-        endsAt: getDateFromSubjectTimeStringWithDay(endsAt),
-        name: prettifyEducationalName(name),
+        startsAt: getDateFromSubjectTimeStringWithDay(startsAt!),
+        endsAt: getDateFromSubjectTimeStringWithDay(endsAt!),
+        name: prettifyEducationalName(name!),
         actualName: name,
-        teachers: teachersString.split("; "),
+        teachers: teachersString!.split("; "),
         room: room || null,
       };
       if (!subject.name) return;

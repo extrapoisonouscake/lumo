@@ -38,8 +38,8 @@ export function NotificationsControlsComponent({
     }
     await subscribeToNotificationsMutation.mutateAsync({
       endpointUrl: endpoint,
-      publicKey: keys.p256dh,
-      authKey: keys.auth,
+      publicKey: keys.p256dh!,
+      authKey: keys.auth!,
     });
   };
   return (

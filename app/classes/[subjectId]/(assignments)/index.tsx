@@ -6,7 +6,6 @@ import {
 } from "@/app/classes/[subjectId]/term-selects";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 
-import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { SubjectSummary } from "@/types/school";
 import dynamic from "next/dynamic";
 import { useState } from "react";
@@ -35,7 +34,6 @@ export function SubjectAssignments({
   categoryId: string | "all";
   categories: SubjectSummary["academics"]["categories"];
 }) {
-  const settings = useUserSettings();
   const [categoryId, setCategoryId] = useState(initialCategoryId);
   return (
     <>
@@ -43,7 +41,7 @@ export function SubjectAssignments({
         <TermSelects
           terms={terms}
           initialTerm={
-            term || (currentTermIndex ? terms[currentTermIndex].id : undefined)
+            term || (currentTermIndex ? terms[currentTermIndex]!.id : undefined)
           }
           shouldShowAllOption={false}
           shouldShowYearSelect={false}

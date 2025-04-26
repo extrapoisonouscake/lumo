@@ -8,7 +8,7 @@ export function getAuthCookies(store: MyEdCookieStore) {
   if (!tokens) throw new Error("No tokens");
   const tokensObject = tokens.split(";").map((token) => {
     const [key, value] = token.split("=");
-    return [key, decodeURIComponent(value)];
+    return [key, decodeURIComponent(value!)];
   });
   return Object.fromEntries(tokensObject) as AuthCookies;
 }
