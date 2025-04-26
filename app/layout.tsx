@@ -11,6 +11,7 @@ import "./globals.css";
 import { createCaller } from "@/lib/trpc";
 
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import { WEBSITE_TITLE } from "@/constants/website";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
@@ -18,7 +19,12 @@ import { cookies } from "next/headers";
 export const viewport: Viewport = { maximumScale: 1 };
 export const metadata: Metadata = {
   manifest: "/manifest.json",
+  title: {
+    default: WEBSITE_TITLE,
+    template: `%s | ${WEBSITE_TITLE}`,
+  },
 };
+
 export default async function RootLayout({
   children,
 }: {

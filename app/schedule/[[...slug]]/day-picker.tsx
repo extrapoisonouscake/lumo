@@ -13,8 +13,9 @@ import {
   useState,
   useTransition,
 } from "react";
+import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
 const formatDateToStandard = (date: Date | undefined) =>
-  timezonedDayJS(date).format("MM-DD-YYYY");
+  timezonedDayJS(date).format(SCHEDULE_QUERY_DATE_FORMAT);
 function ChevronButton(props: ButtonProps) {
   return (
     <Button

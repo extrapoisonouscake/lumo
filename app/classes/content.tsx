@@ -1,10 +1,36 @@
+"use client";
 import {
   TermSelects,
   TermSelectsSkeleton,
 } from "@/app/classes/[subjectId]/term-selects";
+import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
-export function SubjectsPage({
+
+import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
+import { useSearchParams } from "next/navigation";
+
+export function SubjectsPageContent() {
+  const searchParams = useSearchParams();
+  const year = searchParams.get("year") ?? undefined;
+  const term = searchParams.get("term") ?? undefined;
+  const query = useSubjectsData({
+    isPreviousYear: year === "previous",
+    termId: term,
+  });
+  return (
+    <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
+      {(response) => (
+        <LoadedContent response={response} year={year} term={term} />
+      )}
+    </QueryWrapper>
+  );
+}
+function SubjectsPageSkeleton() {
+  return <LoadedContent />;
+}
+
+function LoadedContent({
   response,
   year,
   term,

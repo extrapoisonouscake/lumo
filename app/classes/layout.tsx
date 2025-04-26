@@ -7,7 +7,7 @@ import { Metadata } from "next";
 import { ReactNode } from "react";
 export const metadata: Metadata = {
   title: {
-    default: WEBSITE_TITLE,
+    default: "Classes",
     template: `%s - Classes | ${WEBSITE_TITLE}`,
   },
 };

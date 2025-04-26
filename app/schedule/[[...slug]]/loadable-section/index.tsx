@@ -80,7 +80,7 @@ interface Props {
 }
 const getActualWeekdayIndex = (date: Props["date"]) =>
   timezonedDayJS(date).day();
-export function Schedule({ date }: Props) {
+export function ScheduleLoadableSection({ date }: Props) {
   let currentDayObject = timezonedDayJS(date);
 
   if ([0, 6].includes(currentDayObject.day())) {
