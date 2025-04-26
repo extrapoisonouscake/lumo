@@ -120,9 +120,6 @@ const sendNotificationsToUser = async (
           assignmentsToAssign = assignments;
         }
         if (!assignmentsToAssign) return null;
-        const trackedSubject = trackedSubjects.find(
-          (ts) => ts.subjectId === subject.id
-        );
         let newAssignments;
         const lastSavedAssignmentId =
           currentSubjectToAssignmentIdMap[subject.id];
@@ -130,7 +127,7 @@ const sendNotificationsToUser = async (
           const lastSavedAssignmentIndex = assignmentsToAssign.findIndex(
             (a) => a.id === lastSavedAssignmentId
           );
-          //check if the assignment wasn't deleted, uncomment if resolved
+          //check if the assignment wasn't deleted
           if (lastSavedAssignmentIndex > -1) {
             newAssignments = assignmentsToAssign.slice(
               0,

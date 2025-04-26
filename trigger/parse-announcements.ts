@@ -119,7 +119,6 @@ export const savePDFLink = async (
 };
 export const checkAllAnnouncementsTask = schedules.task({
   id: "check-for-all-announcements",
-
   cron: {
     timezone: INSTANTIATED_TIMEZONE,
     pattern: "0 9 * 1-6,9-12 1-5",

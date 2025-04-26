@@ -14,7 +14,6 @@ export const clearPDFsTask = schemaTask({
     const pdfIDHashKey = getAnnouncementsPDFIDRedisHashKey(date);
     const allPDFIDs = await redis.hgetall(pdfIDHashKey);
     if (!allPDFIDs) return;
-
     await utapi.deleteFiles(Object.values(allPDFIDs) as string[]);
     await redis.del(pdfIDHashKey);
   },
