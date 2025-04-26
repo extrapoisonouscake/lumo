@@ -6,11 +6,13 @@ on:
       - main
     paths:
       - trigger/**
-
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -21,7 +23,8 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-
+        env:
+          SKIP_POSTINSTALL: true
       - name: 🚀 Deploy Trigger.dev
         env:
           TRIGGER_ACCESS_TOKEN: ${{ secrets.TRIGGER_ACCESS_TOKEN }}
