@@ -29,6 +29,13 @@
       "when": 1745648158388,
       "tag": "0003_acoustic_forge",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1745650699370,
+      "tag": "0004_fair_virginia_dare",
+      "breakpoints": true
     }
   ]
 }

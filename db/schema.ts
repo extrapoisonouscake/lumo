@@ -70,7 +70,6 @@ export const notifications_subscriptions = table(
     userId: t
       .text("user_id")
       .references(() => users.id)
-      .unique()
       .notNull(),
     endpointUrl: t.text("endpoint_url").unique().notNull(),
     deviceId: t.text("device_id").unique().notNull(),
