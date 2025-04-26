@@ -4,7 +4,7 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
-import { dayjs, timezonedDayJS } from "@/instances/dayjs";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { RouterOutput } from "@/lib/trpc/types";
 import { Subject } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
@@ -81,7 +81,7 @@ interface Props {
 const getActualWeekdayIndex = (date: Props["date"]) =>
   timezonedDayJS(date).day();
 export function Schedule({ date }: Props) {
-  let currentDayObject = dayjs();
+  let currentDayObject = timezonedDayJS(date);
 
   if ([0, 6].includes(currentDayObject.day())) {
     return (
