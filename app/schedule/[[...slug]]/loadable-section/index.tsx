@@ -94,9 +94,12 @@ export function ScheduleLoadableSection({ date }: Props) {
 }
 function Loader({ date }: { date: Date }) {
   const scheduleQuery = useQuery(
-    trpc.myed.schedule.getSchedule.queryOptions({
-      date,
-    })
+    trpc.myed.schedule.getSchedule.queryOptions(
+      {
+        date,
+      },
+      { trpc: { abortOnUnmount: true } }
+    )
   );
   const subjectsDataQuery = useSubjectsData();
   return (
