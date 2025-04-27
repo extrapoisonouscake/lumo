@@ -64,6 +64,12 @@ export default async function RootLayout({
             name="theme-color"
             id={THEME_COLOR_TAG_ID}
             content={`hsl(${themeColor})`}
+            media="(prefers-color-scheme: light)"
+          />
+          <meta
+            name="theme-color"
+            media="(prefers-color-scheme: dark)"
+            content="black"
           />
         </head>
         <body
