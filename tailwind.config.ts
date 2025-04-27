@@ -143,6 +143,12 @@ const config = {
     "text-yellow-400",
     "text-orange-500",
     "text-zinc-200",
+    "text-blue-600",
+    "text-green-600",
+    "text-purple-600",
+    "bg-blue-100",
+    "bg-green-100",
+    "bg-purple-100",
   ],
 } satisfies Config;
 export default config;

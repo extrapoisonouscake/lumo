@@ -13,11 +13,13 @@ export function AsyncSwitchField({
   initialValue,
   onChange,
   settingKey,
+  checked: externalChecked,
   disabled,
 }: {
   label: string;
   description?: string;
   onChange: (checked: boolean) => Promise<void>;
+  checked?: boolean;
   initialValue?: boolean;
   settingKey: string;
   disabled?: boolean;
@@ -50,7 +52,7 @@ export function AsyncSwitchField({
         <div className="flex items-center gap-2 sm:flex-row-reverse">
           {isLoading && <Spinner className="text-brand size-4" />}
           <Switch
-            checked={checked}
+            checked={externalChecked ?? checked}
             onCheckedChange={onChangeHandler}
             id={settingKey}
             disabled={isLoading || disabled}

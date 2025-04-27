@@ -82,7 +82,7 @@ export function ScheduleDayPicker({
         showWeekday
         setDate={(newDate) => onDateChange(newDate, "calendar")}
         bottomContent={
-          date && (
+          !timezonedDayJS(date).isSame(timezonedDayJS(), "date") && (
             <div className="p-2 pt-0">
               <Button
                 onClick={() => {

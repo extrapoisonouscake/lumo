@@ -1,8 +1,10 @@
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "../../trpc";
 import { AsyncSwitchField } from "../async-switch-field";
+import { HelpDrawer } from "./help-drawer";
 const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
@@ -18,6 +20,7 @@ export function NotificationsControlsComponent({
   const unsubscribeFromNotificationsMutation = useMutation(
     trpc.core.settings.unsubscribeFromNotifications.mutationOptions()
   );
+  const [checked, setChecked] = useState(initialValue);
   const notificationsPermissionDenied =
     !isIOS && window.Notification.permission === "denied";
   const initPush = async () => {
@@ -42,42 +45,46 @@ export function NotificationsControlsComponent({
       authKey: keys.auth!,
     });
   };
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const shouldShowHelpDrawer = isIOS && !isPWA;
   return (
-    <div className="flex flex-col gap-2">
-      <AsyncSwitchField
-        label="Receive notifications"
-        disabled={
-          notificationsPermissionDenied ||
-          (isIOS && !isPWA) ||
-          notificationsPermissionDenied
-        }
-        onChange={async (newValue) => {
-          updateUserSettingState("notificationsEnabled", newValue);
-          try {
-            if (newValue) {
-              await initPush();
-            } else {
-              await unsubscribeFromNotificationsMutation.mutateAsync();
+    <>
+      <div className="flex flex-col gap-2">
+        <AsyncSwitchField
+          label="Receive notifications"
+          disabled={notificationsPermissionDenied}
+          checked={checked}
+          onChange={async (newValue) => {
+            if (newValue === true && shouldShowHelpDrawer) {
+              setDrawerOpen(true);
+              return;
             }
-          } catch (e) {
-            console.error(e);
-            updateUserSettingState("notificationsEnabled", !newValue);
-          }
-        }}
-        initialValue={initialValue}
-        settingKey="notificationsEnabled"
-      />
-      {notificationsPermissionDenied ? (
-        <p className="text-sm text-gray-500">
-          Notifications are disabled. Please enable them in your browser
-          settings.
-        </p>
-      ) : isIOS && !isPWA ? (
-        <p className="text-sm text-gray-500">
-          Install the app to receive notifications.
-        </p>
-      ) : null}
-    </div>
+            setChecked(newValue);
+            updateUserSettingState("notificationsEnabled", newValue);
+            try {
+              if (newValue) {
+                await initPush();
+              } else {
+                await unsubscribeFromNotificationsMutation.mutateAsync();
+              }
+            } catch (e) {
+              console.error(e);
+              setChecked(initialValue);
+              updateUserSettingState("notificationsEnabled", !newValue);
+            }
+          }}
+          initialValue={initialValue}
+          settingKey="notificationsEnabled"
+        />
+        {notificationsPermissionDenied && (
+          <p className="text-sm text-gray-500">
+            Permission to receive notifications was denied. Please enable them
+            in your browser settings.
+          </p>
+        )}
+      </div>
+      <HelpDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+    </>
   );
 }
 const SW_PATH = "/notifications-sw.js";
