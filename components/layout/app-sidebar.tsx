@@ -90,7 +90,7 @@ function PagesMenu({ isGuest }: { isGuest: boolean }) {
             isActive={url === "/" ? url === pathname : pathname.startsWith(url)}
             className={cn(
               isMobile &&
-                "flex-col h-full justify-center gap-1 text-xs px-2 py-1"
+                "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5"
             )}
           >
             <Link href={url}>

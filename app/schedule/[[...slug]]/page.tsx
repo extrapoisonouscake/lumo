@@ -25,9 +25,7 @@ export default async function Page({ params }: Props) {
   return (
     <PageDataProvider>
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between items-start gap-2">
-          <PageHeading />
-        </div>
+        <PageHeading />
         <SchedulePageContent initialDay={day} />
       </div>
     </PageDataProvider>
