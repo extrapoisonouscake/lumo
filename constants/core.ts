@@ -16,5 +16,5 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldShowPercentages: true,
   shouldHighlightMissingAssignments: true,
   shouldShowLetterGrade: false,
-  themeColor: "180 100% 25%",
+  themeColor: "162 23% 49%",
 };

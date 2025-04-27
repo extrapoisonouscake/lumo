@@ -24,9 +24,11 @@ const Inset = ({
 export function AppSidebarWrapper({
   children,
   initialIsExpanded,
+  initialThemeColor,
 }: {
   children: ReactNode;
   initialIsExpanded: boolean;
+  initialThemeColor: string;
 }) {
   const { isLoggedIn, isGuest } = useAuthStatus();
   if (!isLoggedIn && !isGuest)
@@ -38,9 +40,12 @@ export function AppSidebarWrapper({
 
   return (
     <SidebarProvider defaultOpen={initialIsExpanded}>
-      <AppSidebar />
+      <AppSidebar initialThemeColor={initialThemeColor} />
 
-      <Inset topLoader={<TopLoader />} className="pb-16 sm:pb-0">
+      <Inset
+        topLoader={<TopLoader />}
+        className="pb-[calc(4rem+env(safe-area-inset-bottom)/2)] sm:pb-0"
+      >
         {children}
       </Inset>
     </SidebarProvider>

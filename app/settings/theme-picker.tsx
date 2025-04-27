@@ -1,6 +1,8 @@
 "use client";
 import { Label } from "@/components/ui/label";
+import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { cn } from "@/helpers/cn";
+import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { Check } from "lucide-react";
@@ -8,12 +10,11 @@ import { useState } from "react";
 import { THEME_COLOR_TAG_ID } from "../constants";
 
 const AVAILABLE_THEMES = [
-  "180 100% 25%",
+  USER_SETTINGS_DEFAULT_VALUES.themeColor,
   "356 83% 41%",
   "31 100% 48%",
   "40 97% 64%",
   "90 34% 63%",
-  "162 23% 49%",
   "201 51% 69%",
   "206 46% 37%",
   "239 77% 70%",
@@ -30,9 +31,8 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
       theme
     );
     updateUserSettingState("themeColor", theme);
-    (
-      document.getElementById(THEME_COLOR_TAG_ID) as HTMLMetaElement
-    ).content = `hsl(${theme})`;
+    (document.getElementById(THEME_COLOR_TAG_ID) as HTMLMetaElement).content =
+      prepareThemeColor(theme);
   };
   const onChangeHandler = async (theme: string) => {
     updateThemeLocally(theme);
@@ -59,7 +59,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
                   value === theme,
               }
             )}
-            style={{ backgroundColor: `hsl(${theme})` }}
+            style={{ backgroundColor: prepareThemeColor(theme) }}
             onClick={() => onChangeHandler(theme)}
           >
             {value === theme && (

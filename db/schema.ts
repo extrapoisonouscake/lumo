@@ -47,10 +47,7 @@ export const user_settings = table("user_settings", {
     .boolean("should_show_letter_grade")
     .notNull()
     .default(USER_SETTINGS_DEFAULT_VALUES.shouldShowLetterGrade),
-  themeColor: t
-    .text("theme_color")
-    .notNull()
-    .default(USER_SETTINGS_DEFAULT_VALUES.themeColor),
+  themeColor: t.text("theme_color"),
 });
 
 export type UserSettingsSelectModel = InferSelectModel<typeof user_settings>;

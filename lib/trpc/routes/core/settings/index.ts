@@ -245,7 +245,10 @@ export const getGenericUserSettingsFromDB = async (studentHashedId: string) => {
     }),
   ]);
   if (settings) {
-    return { ...settings, notifications: notificationsSettings };
+    return {
+      ...settings,
+      notifications: notificationsSettings,
+    };
   }
 };
 const getNotificationsSubscriptionByDeviceId = async (deviceId: string) => {
@@ -253,7 +256,7 @@ const getNotificationsSubscriptionByDeviceId = async (deviceId: string) => {
     where: eq(notifications_subscriptions.deviceId, deviceId),
   });
 };
-export const getGenericUserSettings = async (ctx: TRPCContext) => {
+const getGenericUserSettings = async (ctx: TRPCContext) => {
   if (!ctx.isGuest) {
     //?!
     const dbSettings = await getGenericUserSettingsFromDB(ctx.studentHashedId);
@@ -266,7 +269,10 @@ export const getGenericUserSettings = async (ctx: TRPCContext) => {
     }
   }
   const settings = getGenericUserSettingsFromCookies(ctx.cookieStore);
-  return { ...settings, isSynced: false };
+  return {
+    ...settings,
+    isSynced: false,
+  };
 };
 export const getUserSettings = async (ctx: TRPCContext) => {
   const promises: Promise<any>[] = [getGenericUserSettings(ctx)];
@@ -283,5 +289,7 @@ export const getUserSettings = async (ctx: TRPCContext) => {
   return {
     ...genericSettings,
     notificationsEnabled: !!notificationsSubscription,
+    themeColor:
+      genericSettings.themeColor || USER_SETTINGS_DEFAULT_VALUES.themeColor,
   };
 };

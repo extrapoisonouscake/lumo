@@ -12,6 +12,7 @@ import { createCaller } from "@/lib/trpc";
 
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { WEBSITE_TITLE } from "@/constants/website";
+import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
@@ -63,7 +64,7 @@ export default async function RootLayout({
           <meta
             name="theme-color"
             id={THEME_COLOR_TAG_ID}
-            content={`hsl(${themeColor})`}
+            content={prepareThemeColor(themeColor)}
             media="(prefers-color-scheme: light)"
           />
           <meta
@@ -77,7 +78,10 @@ export default async function RootLayout({
         >
           <Providers initialCookieValues={{ isLoggedIn, isGuest }}>
             <Toaster />
-            <AppSidebarWrapper initialIsExpanded={isSidebarExpanded}>
+            <AppSidebarWrapper
+              initialIsExpanded={isSidebarExpanded}
+              initialThemeColor={themeColor}
+            >
               {children}
             </AppSidebarWrapper>
           </Providers>

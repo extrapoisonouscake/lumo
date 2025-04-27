@@ -18,6 +18,8 @@ import {
 } from "@/constants/website";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import { cn } from "@/helpers/cn";
+import { prepareThemeColor } from "@/helpers/prepare-theme-color";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,14 +29,17 @@ import { LogOutButton } from "./log-out";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  initialThemeColor,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { initialThemeColor: string }) {
   const isGuest = clientAuthChecks.isInGuestMode();
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Sidebar {...props}>
-        <PagesMenu isGuest={isGuest} />
+        <PagesMenu initialThemeColor={initialThemeColor} isGuest={isGuest} />
       </Sidebar>
     );
   }
@@ -70,7 +75,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 }
 
-function PagesMenu({ isGuest }: { isGuest: boolean }) {
+function PagesMenu({
+  initialThemeColor,
+  isGuest,
+}: {
+  initialThemeColor?: string;
+  isGuest: boolean;
+}) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const pages = useMemo(() => {
@@ -80,26 +91,37 @@ function PagesMenu({ isGuest }: { isGuest: boolean }) {
         (!isGuest || guestAllowedPathnames.includes(url))
     );
   }, [isGuest]);
-
+  const themeColor = useUserSettings(false)?.themeColor ?? initialThemeColor;
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
-      {pages.map(([url, page]) => (
-        <SidebarMenuItem key={url} className={cn(isMobile && "flex-1")}>
-          <SidebarMenuButton
-            asChild
-            isActive={url === "/" ? url === pathname : pathname.startsWith(url)}
-            className={cn(
-              isMobile &&
-                "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5"
-            )}
-          >
-            <Link href={url}>
-              <page.icon className="size-5" />
-              {page.breadcrumb[0]!.name}
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      ))}
+      {pages.map(([url, page]) => {
+        const isActive =
+          url === "/" ? url === pathname : pathname.startsWith(url);
+        console.log(initialThemeColor);
+        return (
+          <SidebarMenuItem key={url} className={cn(isMobile && "flex-1")}>
+            <SidebarMenuButton
+              asChild
+              isActive={isActive}
+              className={cn(
+                isMobile &&
+                  "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:bg-transparent transition-colors"
+              )}
+              style={{
+                color:
+                  isMobile && isActive && themeColor
+                    ? prepareThemeColor(themeColor)
+                    : undefined,
+              }}
+            >
+              <Link href={url}>
+                <page.icon className="size-5" />
+                {page.breadcrumb[0]!.name}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
     </SidebarMenu>
   );
 }

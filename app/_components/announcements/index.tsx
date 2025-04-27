@@ -98,7 +98,7 @@ export function Announcements() {
 }
 export function AnnouncementsSkeleton() {
   return [...Array(3)].map((_, i) => (
-    <Accordion type="multiple">
+    <Accordion type="multiple" key={i}>
       <AccordionItem value={`${i}`} className="pointer-events-none">
         <AccordionTrigger>
           <Skeleton>wowowowo</Skeleton>
