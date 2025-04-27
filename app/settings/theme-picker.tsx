@@ -5,6 +5,7 @@ import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { THEME_COLOR_TAG_ID } from "../constants";
 
 const AVAILABLE_THEMES = [
   "180 100% 25%",
@@ -22,20 +23,26 @@ const AVAILABLE_THEMES = [
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [value, setValue] = useState(initialValue);
   const updateUserSettingMutation = useUpdateGenericUserSetting();
-  const onChangeHandler = async (theme: string) => {
+  const updateThemeLocally = (theme: string) => {
     setValue(theme);
     (document.querySelector(":root") as HTMLElement).style.setProperty(
       "--brand",
       theme
     );
     updateUserSettingState("themeColor", theme);
+    (
+      document.getElementById(THEME_COLOR_TAG_ID) as HTMLMetaElement
+    ).content = `hsl(${theme})`;
+  };
+  const onChangeHandler = async (theme: string) => {
+    updateThemeLocally(theme);
     try {
       await updateUserSettingMutation.mutateAsync({
         key: "themeColor",
         value: theme,
       });
     } catch (e) {
-      updateUserSettingState("themeColor", initialValue);
+      updateThemeLocally(initialValue);
     }
   };
   return (

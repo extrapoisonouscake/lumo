@@ -19,7 +19,7 @@ export function TopLoader() {
         color={primaryColor}
         showSpinner={false}
       />
-      <div className="fixed md:sticky md:h-0 md:overflow-visible top-0 left-0 w-full z-50">
+      <div className="fixed sm:sticky sm:h-0 sm:overflow-visible top-0 left-0 w-full z-50">
         <div
           className="relative size-full h-[3px] -top-full"
           id="top-loader-container"

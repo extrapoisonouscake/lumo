@@ -36,7 +36,6 @@ export function AuthStatusProvider({
   };
   useEffect(() => {
     if (statuses.isLoggedIn) {
-      console.log("prefetching queries");
       queryClient.prefetchQuery(
         trpc.myed.user.getStudentDetails.queryOptions()
       );

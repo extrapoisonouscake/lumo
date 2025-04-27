@@ -66,8 +66,8 @@ export function ResponsiveAssignments({
 export function ResponsiveAssignmentsSkeleton() {
   return (
     <>
-      <SubjectAssignmentsTableSkeleton className="hidden md:block" />
-      <CardList className="md:hidden">
+      <SubjectAssignmentsTableSkeleton className="hidden sm:block" />
+      <CardList className="sm:hidden">
         {[...Array(5)].map((_, index) => (
           <AssignmentCardSkeleton key={index} />
         ))}

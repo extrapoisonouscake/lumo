@@ -23,90 +23,89 @@ function AnnouncementsHeading() {
 }
 export function Announcements() {
   const settings = useUserSettings(false);
-  if (!settings) return <AnnouncementsSkeleton />;
-  const { schoolId } = settings;
-  const date = timezonedDayJS();
+  let shouldFetch = !!settings;
   let error: AnnouncementsNotAvailableReason | undefined;
-  if (!schoolId) {
-    error = AnnouncementsNotAvailableReason.SchoolNotSelected;
-  } else if (!isKnownSchool(schoolId)) {
-    error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
-  } else if ([0, 6].includes(date.day())) {
-    error = AnnouncementsNotAvailableReason.NotAWeekday;
+  if (settings) {
+    const { schoolId } = settings;
+    const date = timezonedDayJS();
+    if (!schoolId) {
+      error = AnnouncementsNotAvailableReason.SchoolNotSelected;
+    } else if (!isKnownSchool(schoolId)) {
+      error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
+    } else if ([0, 6].includes(date.day())) {
+      error = AnnouncementsNotAvailableReason.NotAWeekday;
+    }
+    if (error) {
+      shouldFetch = false;
+    }
   }
-  if (error) {
-    return <AnnouncementsNotAvailableCard reason={error} />;
-  }
-  return <Loader />;
-}
-function Loader() {
-  const query = useQuery(
-    trpc.core.schoolSpecific.getAnnouncements.queryOptions()
-  );
-  const personalDetailsQuery = useStudentDetails();
-  return (
-    <QueryWrapper
-      query={query}
-      onError={
-        <div className="flex flex-col gap-2">
-          <AnnouncementsHeading />
-          <ErrorCard />
-        </div>
-      }
-      skeleton={<AnnouncementsSkeleton />}
-    >
-      {(response) => (
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between gap-2 items-center">
-            <AnnouncementsHeading />
-            {!!response.pdfLink && (
-              <Link href={response.pdfLink} target="_blank">
-                <Button size="icon" variant="ghost" className="size-7">
-                  <ArrowUpRightIcon />
-                </Button>
-              </Link>
+  const query = useQuery({
+    ...trpc.core.schoolSpecific.getAnnouncements.queryOptions(),
+    enabled: shouldFetch,
+  });
+  const personalDetailsQuery = useStudentDetails({
+    enabled: shouldFetch,
+  });
+  let content;
+  if (!settings) {
+    content = <AnnouncementsSkeleton />;
+  } else if (error) {
+    content = <AnnouncementsNotAvailableCard reason={error} />;
+  } else {
+    content = (
+      <QueryWrapper
+        query={query}
+        onError={<ErrorCard />}
+        skeleton={<AnnouncementsSkeleton />}
+      >
+        {(response) => (
+          <>
+            {"notAvailableReason" in response ? (
+              <AnnouncementsNotAvailableCard
+                reason={response.notAvailableReason!}
+              />
+            ) : response.data.length > 0 ? (
+              <AnnouncementsAccordions
+                pdfURL={response.pdfLink ?? null}
+                data={response.data}
+                studentGrade={personalDetailsQuery.data?.grade}
+              />
+            ) : (
+              <AnnouncementsNotAvailableCard
+                reason={AnnouncementsNotAvailableReason.NoAnnouncements}
+              />
             )}
-          </div>
-          {"notAvailableReason" in response ? (
-            <AnnouncementsNotAvailableCard
-              reason={response.notAvailableReason!}
-            />
-          ) : response.data.length > 0 ? (
-            <AnnouncementsAccordions
-              pdfURL={response.pdfLink ?? null}
-              data={response.data}
-              studentGrade={personalDetailsQuery.data?.grade}
-            />
-          ) : (
-            <AnnouncementsNotAvailableCard
-              reason={AnnouncementsNotAvailableReason.NoAnnouncements}
-            />
-          )}
-        </div>
-      )}
-    </QueryWrapper>
-  );
-}
-export function AnnouncementsSkeleton() {
+          </>
+        )}
+      </QueryWrapper>
+    );
+  }
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between gap-2 items-center">
         <AnnouncementsHeading />
-        <Skeleton>
-          <Button size="icon" className="size-7" />
-        </Skeleton>
+        {!!query.data?.pdfLink && (
+          <Link href={query.data.pdfLink} target="_blank">
+            <Button size="icon" variant="ghost" className="size-7">
+              <ArrowUpRightIcon />
+            </Button>
+          </Link>
+        )}
       </div>
-      {[...Array(3)].map((_, i) => (
-        <Accordion type="multiple">
-          <AccordionItem value={`${i}`} className="pointer-events-none">
-            <AccordionTrigger>
-              <Skeleton>wowowowo</Skeleton>
-            </AccordionTrigger>
-          </AccordionItem>
-        </Accordion>
-      ))}
+      {content}
     </div>
   );
+}
+export function AnnouncementsSkeleton() {
+  return [...Array(3)].map((_, i) => (
+    <Accordion type="multiple">
+      <AccordionItem value={`${i}`} className="pointer-events-none">
+        <AccordionTrigger>
+          <Skeleton>wowowowo</Skeleton>
+        </AccordionTrigger>
+      </AccordionItem>
+    </Accordion>
+  ));
 }
 
 const reasonToVisualData = {

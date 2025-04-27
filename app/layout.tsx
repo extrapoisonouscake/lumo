@@ -15,8 +15,14 @@ import { WEBSITE_TITLE } from "@/constants/website";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
+import { THEME_COLOR_TAG_ID } from "./constants";
 
-export const viewport: Viewport = { maximumScale: 1 };
+export const viewport: Viewport = {
+  maximumScale: 1,
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 export const metadata: Metadata = {
   manifest: "/manifest.json",
   title: {
@@ -53,6 +59,11 @@ export default async function RootLayout({
                 }
               `,
             }}
+          />
+          <meta
+            name="theme-color"
+            id={THEME_COLOR_TAG_ID}
+            content={`hsl(${themeColor})`}
           />
         </head>
         <body

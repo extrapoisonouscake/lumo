@@ -43,11 +43,11 @@ export function AsyncSwitchField({
   };
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-3 justify-between md:justify-start items-center">
+      <div className="flex gap-3 justify-between sm:justify-start items-center">
         <Label htmlFor={settingKey} className="cursor-pointer font-normal">
           {label}
         </Label>
-        <div className="flex items-center gap-2 md:flex-row-reverse">
+        <div className="flex items-center gap-2 sm:flex-row-reverse">
           {isLoading && <Spinner className="text-brand size-4" />}
           <Switch
             checked={checked}

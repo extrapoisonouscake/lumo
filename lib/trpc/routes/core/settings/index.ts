@@ -157,7 +157,6 @@ export const runNotificationUnsubscriptionDBCalls = async (
   studentHashedId: string,
   deviceId: string
 ) => {
-  console.log("unsubscribeFromNotificationsAction", studentHashedId, deviceId);
   await db
     .delete(notifications_subscriptions)
     .where(

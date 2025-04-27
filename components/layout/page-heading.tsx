@@ -13,6 +13,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { cn } from "../../helpers/cn";
 import { useAuthStatus } from "../providers/auth-status-provider";
 import {
   Breadcrumb,
@@ -25,6 +26,7 @@ import {
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
+import { UserHeader } from "./user-header";
 const PageDataContext = createContext<{
   pageData: WebsitePage | null;
   setPageData: (pageData: WebsitePage) => void;
@@ -77,35 +79,47 @@ export function PageHeading() {
   const { pageData } = usePageData();
   const { isLoggedIn, isGuest } = useAuthStatus();
   return (
-    <div className="flex items-center gap-2">
-      {(isLoggedIn || isGuest) && <SidebarTrigger />}
-      <Separator orientation="vertical" className="mr-1 h-4" />
+    <div className="flex justify-between gap-4 items-center">
+      <div className="flex items-center gap-2">
+        {(isLoggedIn || isGuest) && (
+          <div className="hidden sm:flex items-center gap-2">
+            <SidebarTrigger />
+            <Separator orientation="vertical" className="mr-1 h-4" />
+          </div>
+        )}
 
-      {pageData ? (
-        <Breadcrumb>
-          <BreadcrumbList>
-            {pageData.breadcrumb.map(({ href, name }, i) => {
-              const isLast = i === pageData.breadcrumb.length - 1;
-              return (
-                <Fragment key={name}>
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage>{name}</BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink asChild>
-                        <Link href={href ?? ""}>{name}</Link>
-                      </BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                  {!isLast && <BreadcrumbSeparator />}
-                </Fragment>
-              );
-            })}
-          </BreadcrumbList>
-        </Breadcrumb>
-      ) : (
-        <Skeleton className="leading-none">Some Page</Skeleton>
-      )}
+        {pageData ? (
+          <Breadcrumb>
+            <BreadcrumbList>
+              {pageData.breadcrumb.map(({ href, name }, i) => {
+                const isLast = i === pageData.breadcrumb.length - 1;
+                return (
+                  <Fragment key={name}>
+                    <BreadcrumbItem>
+                      {isLast ? (
+                        <BreadcrumbPage
+                          className={cn({ "font-semibold": i === 0 })}
+                        >
+                          {name}
+                        </BreadcrumbPage>
+                      ) : (
+                        <BreadcrumbLink asChild>
+                          <Link href={href ?? ""}>{name}</Link>
+                        </BreadcrumbLink>
+                      )}
+                    </BreadcrumbItem>
+                    {!isLast && <BreadcrumbSeparator />}
+                  </Fragment>
+                );
+              })}
+            </BreadcrumbList>
+          </Breadcrumb>
+        ) : (
+          <Skeleton className="leading-none">Some Page</Skeleton>
+        )}
+      </div>
+
+      <UserHeader className="block sm:hidden w-fit" />
     </div>
   );
 }
