@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { LoginPageContent } from "./content";
 export const metadata: Metadata = {
-  title: "Login",
+  title: "Log In",
 };
 export default function Page() {
   return <LoginPageContent />;
