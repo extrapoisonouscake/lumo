@@ -21,6 +21,7 @@ export default function SubjectPage() {
   const category = searchParams.get("category") ?? "all";
   const settings = useUserSettings();
   const summary = useSubjectSummary(subjectId);
+
   const assignments = useSubjectAssignments(subjectId, term);
   return (
     <>

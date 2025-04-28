@@ -119,7 +119,7 @@ export function PageHeading() {
         )}
       </div>
 
-      <UserHeader className="block sm:hidden w-fit" />
+      {isLoggedIn && <UserHeader className="block sm:hidden w-fit" />}
     </div>
   );
 }

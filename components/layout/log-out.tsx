@@ -17,8 +17,8 @@ export function LogOutButton() {
       disabled={logOutMutation.isPending}
       onClick={async () => {
         await logOutMutation.mutateAsync();
-        router.push("/login");
         refreshAuthStatus();
+        router.push("/login");
       }}
     >
       {logOutMutation.isPending ? <Spinner /> : <LogOutIcon />}
