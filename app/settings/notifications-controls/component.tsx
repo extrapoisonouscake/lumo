@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { trpc } from "../../trpc";
 import { AsyncSwitchField } from "../async-switch-field";
 import { HelpDrawer } from "./help-drawer";
-const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const {userAgent}=navigator
+const isIOS = /iphone|ipad|ipod/i.test(userAgent) || (userAgent.includes("Mac") && "ontouchend" in document);
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as any).standalone === true;
