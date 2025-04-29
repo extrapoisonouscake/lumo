@@ -345,7 +345,7 @@ const subjectAssignmentsRoute = new Route<
       const termLabelsToSearch = subjectTermToGradeLabelsMap[rest.term];
       if (!termLabelsToSearch) throw new Error("Invalid term");
       termIdsToSearch = [];
-      console.log({ termLabelsToSearch, termsResponse });
+
       for (const termLabel of termLabelsToSearch) {
         const foundTerm = termsResponse.terms.find(
           (term) => term.gradeTermId === termLabel
@@ -362,7 +362,6 @@ const subjectAssignmentsRoute = new Route<
       }
     }
 
-    console.log({ termIdsToSearch, id, rest });
     if (!termIdsToSearch) throw new Error("No term ids to search");
     return termIdsToSearch.flatMap((termId) => [
       {

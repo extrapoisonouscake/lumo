@@ -35,7 +35,7 @@ export function Announcements() {
     } else if ([0, 6].includes(date.day())) {
       error = AnnouncementsNotAvailableReason.NotAWeekday;
     }
-    if (error) {
+    if (error !== undefined) {
       shouldFetch = false;
     }
   }
@@ -49,7 +49,7 @@ export function Announcements() {
   let content;
   if (!settings) {
     content = <AnnouncementsSkeleton />;
-  } else if (error) {
+  } else if (error !== undefined) {
     content = <AnnouncementsNotAvailableCard reason={error} />;
   } else {
     content = (

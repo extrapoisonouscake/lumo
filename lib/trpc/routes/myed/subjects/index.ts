@@ -47,7 +47,6 @@ export const subjectsRouter = router({
         input: { id, termId, term },
         ctx: { getMyEd, studentHashedId },
       }) => {
-        console.log(id, termId, term);
         const response = await getMyEd("subjectAssignments", {
           id,
           termId,

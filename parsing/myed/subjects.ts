@@ -66,7 +66,7 @@ const convertSubject = ({
   teachers: relSscMstOid_mstStaffView.map((item) => item.name),
   room: relSscMstOid_mstRoomView ?? null,
   average: normalizeMarkWithLetter(cfTermAverage),
-  term: sscTermView ? termRawValueToNormalized[sscTermView]! : null,
+  term: sscTermView ? termRawValueToNormalized[sscTermView] : undefined,
 });
 export function parseSubjects({
   responses: [gradeTerms, data],

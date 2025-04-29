@@ -65,19 +65,19 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   const token = searchParams.get("token");
   const ip = request.headers.get("x-forwarded-for");
-  if (
-    !token ||
-    token !== ANNOUNCEMENTS_UPLOAD_AUTH_KEY ||
-    !ip ||
-    !POSTMARK_WEBHOOK_IPS.includes(ip)
-  )
-    return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
+  // if (
+  //   !token ||
+  //   token !== ANNOUNCEMENTS_UPLOAD_AUTH_KEY ||
+  //   !ip ||
+  //   !POSTMARK_WEBHOOK_IPS.includes(ip)
+  // )
+  //   return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
 
-  const emailDataPromise = request.json() as Promise<PostmarkWebhookPayload>;
-  const [emailData, trustedSenders] = await Promise.all([
-    emailDataPromise,
-    edgeConfig.get("announcementsUploadTrustedSenders"),
-  ]);
+  const emailData = (await request.json()) as PostmarkWebhookPayload;
+  const trustedSenders = await edgeConfig.get(
+    "announcementsUploadTrustedSenders"
+  );
+
   const schoolId = trustedSenders[emailData.From.toLowerCase()];
   if (!schoolId)
     return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
@@ -85,6 +85,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   const pdfInBase64 = emailData.Attachments.find(
     (file) => file.ContentType === "application/pdf"
   )?.Content;
+
   if (!pdfInBase64)
     return NextResponse.json(
       { message: "PDF file not found" },

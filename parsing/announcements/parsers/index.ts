@@ -1,10 +1,33 @@
 import { KnownSchools } from "@/constants/schools";
-import { parseMarkIsfeldSecondaryDailyAnnouncements } from "./mark-isfeld-secondary";
-import { DailyAnnouncementsParsingFunction } from "./types";
 
-export const dailyAnnouncementsFileParser: Record<
+export const dailyAnnouncementsRichTitlesData: Record<
   KnownSchools,
-  DailyAnnouncementsParsingFunction
+  { title: string; emoji: string }[]
 > = {
-  [KnownSchools.MarkIsfeld]: parseMarkIsfeldSecondaryDailyAnnouncements,
+  [KnownSchools.MarkIsfeld]: [
+    {
+      title: "Today",
+      emoji: "✨",
+    },
+    {
+      title: "Meetings & Practices",
+      emoji: "🧩",
+    },
+    {
+      title: "Re-runs",
+      emoji: "📆",
+    },
+    {
+      title: "Career Centre",
+      emoji: "💼",
+    },
+    {
+      title: "Bursaries & Scholarships",
+      emoji: "💵",
+    },
+    {
+      title: "Grads",
+      emoji: "🧑‍🎓",
+    },
+  ],
 };

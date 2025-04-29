@@ -61,55 +61,41 @@ export function AnnouncementsAccordions({
     const personalAnnouncementsItems = [];
     const accordionItems: React.ReactNode[] = [];
     for (let i = 0; i < data.length; i++) {
-      const { heading, emoji, ...props } = data[i]!;
-      let content;
-      const isItemsView = "items" in props;
+      const { title, emoji, type, content } = data[i]!;
+      let elements;
 
-      if (isItemsView) {
-        if (props.items.length > 0) {
+      if (type === "list") {
+        if (content.length > 0) {
           let listItems;
           if (hasRelevantGrade) {
             listItems = [];
-            const priorityItems = [];
-            for (const item of props.items) {
+            for (const item of content) {
               const hasOneRelevant = hasRelevantGrade(item);
-              const element = <li className="list-disc list-inside">{item}</li>;
+              const element = <li>{item}</li>;
               if (hasOneRelevant) {
-                if (heading === "Today") {
-                  personalAnnouncementsItems.push(element);
-                } else {
-                  priorityItems.push(element);
-                }
+                personalAnnouncementsItems.push(element);
               } else {
                 listItems.push(element);
               }
             }
-            listItems = [...priorityItems, ...listItems];
           } else {
-            listItems = props.items;
+            listItems = content;
           }
-          content = (
-            <ul className="flex flex-col gap-1.5 leading-6">{listItems}</ul>
-          );
+          elements = <AnnouncementList>{listItems}</AnnouncementList>;
         } else {
-          content = <p>No announcements in this section.</p>;
+          elements = <p>No announcements in this section.</p>;
         }
       } else {
-        content = (
-          <AnnouncementsSectionTable
-            pdfURL={pdfURL}
-            rows={heading === "Meetings & Practices" ? [] : props.table}
-          />
-        );
+        elements = <AnnouncementsSectionTable pdfURL={pdfURL} rows={content} />;
       }
       accordionItems.push(
         <AnnouncementItem
           emoji={emoji}
-          heading={heading}
-          isItemsView={isItemsView}
+          heading={title}
+          isListView={type === "list"}
           index={i}
         >
-          {content}
+          {elements}
         </AnnouncementItem>
       );
     }
@@ -125,29 +111,35 @@ export function AnnouncementsAccordions({
         <AnnouncementItem
           emoji="👋"
           heading="Personal"
-          isItemsView={true}
+          isListView={true}
           index={-1}
         >
-          <ul className="flex flex-col gap-1.5 leading-6">
-            {personalAnnouncementsItems}
-          </ul>
+          <AnnouncementList>{personalAnnouncementsItems}</AnnouncementList>
         </AnnouncementItem>
       )}
       {accordionItems}
     </Accordion>
   );
 }
+
+function AnnouncementList({ children }: { children: React.ReactNode }) {
+  return (
+    <ul className="flex flex-col gap-1.5 leading-6 list-disc list-inside">
+      {children}
+    </ul>
+  );
+}
 function AnnouncementItem({
   children,
   emoji,
   heading,
-  isItemsView,
+  isListView,
   index,
 }: {
   children: React.ReactNode;
   emoji: string;
   heading: string;
-  isItemsView: boolean;
+  isListView: boolean;
   index: number;
 }) {
   return (
@@ -160,10 +152,10 @@ function AnnouncementItem({
       </AccordionTrigger>
       <AccordionContent
         className={cn("pt-2.5 pb-3", {
-          "p-0": !isItemsView,
+          "p-0": !isListView,
         })}
         containerClassName={cn("pb-0 border-t", {
-          "p-0": !isItemsView,
+          "p-0": !isListView,
         })}
       >
         {children}

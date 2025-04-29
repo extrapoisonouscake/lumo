@@ -14,7 +14,7 @@ export function SyncSettingsSwitch({
   );
   return (
     <AsyncSwitchField
-      label="Sync settings"
+      label="Sync settings across devices"
       settingKey="isSynced"
       onChange={async (newValue) => {
         updateUserSettingState("isSynced", newValue);
@@ -25,7 +25,6 @@ export function SyncSettingsSwitch({
           updateUserSettingState("isSynced", !newValue);
         }
       }}
-      description="When enabled, your student number is securely stored on our servers."
       initialValue={initialValue}
     />
   );

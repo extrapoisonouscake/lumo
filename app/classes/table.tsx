@@ -88,10 +88,10 @@ const mockSubjects = (length: number) =>
   [...Array(length)].map(
     () =>
       ({
-        average: 0,
+        average: { mark: 0, letter: "" },
         teachers: [],
         name: "",
-        term: "",
+        term: undefined,
         room: "",
         id: "",
         actualName: "",

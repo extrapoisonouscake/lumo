@@ -31,6 +31,9 @@ const smallWords = new Set([
   "up",
   "with",
 ]);
+export const capitalize = (word: string) => {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};
 export const prettifyEducationalName = (name: string) => {
   const lowerCaseName = name.toLowerCase();
   const replacement = directReplacements[lowerCaseName];
@@ -48,7 +51,7 @@ export const prettifyEducationalName = (name: string) => {
         (i === 0 || !smallWords.has(word)) &&
         !/^\d+(st|nd|rd|th)$/i.test(word)
       ) {
-        return word.charAt(0).toUpperCase() + word.slice(1);
+        return capitalize(word);
       } else {
         return word;
       }

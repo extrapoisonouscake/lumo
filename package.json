@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
+    "@mistralai/mistralai": "^1.6.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.2",
@@ -96,6 +97,7 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^8",
     "eslint-config-next": "^15.2.4",
+    "ioredis": "^5.6.1",
     "js-yaml": "^4.1.0",
     "knip": "^5.50.5",
     "openapi-typescript": "^7.5.2",

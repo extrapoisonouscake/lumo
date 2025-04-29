@@ -90,12 +90,14 @@ const sendNotificationsToUser = async (
           () =>
             getMyEdWithParameters("subjectAssignments", {
               id: subject.id,
+              term: subject.term,
             })
         );
         if (
           assignments.length === 0 &&
           currentTermIndex !== null &&
-          currentTermIndex > 0
+          currentTermIndex > 0 &&
+          terms
         ) {
           for (let termIndex = currentTermIndex; termIndex--; termIndex >= 0) {
             const previousTermId = terms[termIndex]?.id;

@@ -5,7 +5,7 @@ export interface Subject {
   room: string | null;
   actualName: string;
   average: SubjectGrade | null;
-  term: SubjectTerm | null;
+  term?: SubjectTerm;
 }
 //? name?
 export type ScheduleSubject = Omit<Subject, "average" | "id" | "term"> & {
@@ -45,13 +45,13 @@ export interface SubjectSummary {
     dismissed: number;
   };
 }
-export type AnnouncementSectionItemsFragment = {
-  items: string[];
-};
+export type AnnouncementSectionData =
+  | { type: "list"; content: string[] }
+  | { type: "table"; content: string[][] };
 export type AnnouncementSection = {
-  heading: string;
+  title: string;
   emoji: string;
-} & (AnnouncementSectionItemsFragment | { table: string[][] });
+} & AnnouncementSectionData;
 export interface PersonalDetails {
   firstName: string;
   middleName?: string;
