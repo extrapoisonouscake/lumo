@@ -1,7 +1,6 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
-
+import { useDebouncedUserSetting } from "@/hooks/trpc/use-debounced-user-setting";
 import LetterA from "@/public/icons/letter-a.svg";
 import { Percent } from "lucide-react";
 
@@ -16,6 +15,7 @@ function StyledToggleGroupItem({
     />
   );
 }
+
 export function LetterGradeSwitch({
   value,
   onValueChange,
@@ -23,16 +23,17 @@ export function LetterGradeSwitch({
   value: boolean;
   onValueChange?: (value: boolean) => void;
 }) {
-  const updateUserSettingMutation = useUpdateGenericUserSetting();
-  async function handleValueChange(value: string) {
-    const newIsLetterGradeToggled = value === "on";
+  const updateUserSettingMutation = useDebouncedUserSetting(
+    "shouldShowLetterGrade"
+  );
+
+  async function handleValueChange(newValue: string) {
+    const newIsLetterGradeToggled = newValue === "on";
     onValueChange?.(newIsLetterGradeToggled);
     updateUserSettingState("shouldShowLetterGrade", newIsLetterGradeToggled);
-    await updateUserSettingMutation.mutateAsync({
-      key: "shouldShowLetterGrade",
-      value: newIsLetterGradeToggled,
-    });
+    updateUserSettingMutation.mutateAsync(newIsLetterGradeToggled);
   }
+
   return (
     <ToggleGroup
       type="single"

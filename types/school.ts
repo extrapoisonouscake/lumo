@@ -4,8 +4,8 @@ export interface Subject {
   teachers: string[];
   room: string | null;
   actualName: string;
-  average: number | null;
-  term: string | null;
+  average: SubjectGrade | null;
+  term: SubjectTerm | null;
 }
 //? name?
 export type ScheduleSubject = Omit<Subject, "average" | "id" | "term"> & {
@@ -17,21 +17,25 @@ export enum SubjectTerm {
   SecondSemester = "SECOND_SEMESTER",
   FullYear = "FULL_YEAR",
 }
+export type SubjectGrade = {
+  mark: number;
+  letter?: string;
+};
 export interface SubjectSummary {
   id: string;
   name: string;
   term: SubjectTerm;
   academics: {
-    average: number | null;
-    posted: number | null;
+    average: SubjectGrade | null;
+    posted: SubjectGrade | null;
     categories: {
       id: string;
       name: string;
-      average: number | null;
+      average: SubjectGrade | null;
       terms: {
         name: string;
-        weight: number;
-        average: number;
+        weight: number | null;
+        average: SubjectGrade | null;
       }[];
     }[];
   };

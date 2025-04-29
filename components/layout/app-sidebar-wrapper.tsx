@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/helpers/cn";
 import { ReactNode } from "react";
-import { useAuthStatus } from "../providers/auth-status-provider";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { TopLoader } from "./top-loader";
@@ -30,7 +29,7 @@ export function AppSidebarWrapper({
   initialIsExpanded: boolean;
   initialThemeColor: string;
 }) {
-  const { isLoggedIn, isGuest } = useAuthStatus();
+  const { isLoggedIn, isGuest } = { isLoggedIn: true, isGuest: false };
   if (!isLoggedIn && !isGuest)
     return (
       <>

@@ -10,7 +10,7 @@ import { HalfDonutProgressChart } from "@/components/ui/charts/half-donut-progre
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { UserSettings } from "@/types/core";
-import { SubjectTerm, type SubjectSummary } from "@/types/school";
+import { SubjectGrade, SubjectTerm, type SubjectSummary } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { LetterGradeSwitch } from "./letter-grade-switch";
@@ -24,9 +24,9 @@ const GRADES_CONFIG = [
   { threshold: 0, color: "red-600", letter: "F" },
 ];
 
-function getGradeInfo(value: number) {
+function getGradeInfo(value: SubjectGrade) {
   return (
-    GRADES_CONFIG.find((grade) => value >= grade.threshold) ||
+    GRADES_CONFIG.find((grade) => value.mark >= grade.threshold) ||
     GRADES_CONFIG[GRADES_CONFIG.length - 1]
   );
 }
@@ -76,7 +76,7 @@ export function SubjectSummary({
             )}
             <div>
               <HalfDonutProgressChart
-                value={gradePercentage || 0}
+                value={gradePercentage?.mark || 0}
                 filledClassName={`fill-${fillColor}`}
               />
             </div>
@@ -96,10 +96,10 @@ export function SubjectSummary({
                   "leading-none"
                 )}
               >
-                {typeof gradePercentage === "number"
+                {gradePercentage !== null
                   ? isLetterGradeShown
-                    ? gradeInfo?.letter
-                    : gradePercentage
+                    ? gradePercentage.letter ?? gradeInfo?.letter
+                    : gradePercentage.mark
                   : "-"}
               </span>
               {!isLetterGradeShown && (

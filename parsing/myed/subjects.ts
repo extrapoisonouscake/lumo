@@ -12,11 +12,11 @@ import { DeepWithRequired } from "@/types/utils";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
-const normalizeMarkWithLetter = (string?: string) => {
+const normalizeMarkWithLetter = (string?: string | null) => {
   if (!string) return null;
-  const result = string.match(gpaRegex);
-  if (!result) return null;
-  return +result[0];
+  const [mark, letter] = string.split(" ");
+  if (!mark) return null;
+  return { mark: +mark, letter };
 };
 
 // const parseSubjectTeachersString = (string: string) => {
@@ -121,6 +121,7 @@ const convertAttendanceSummary = (
   }
   return result;
 };
+const NOT_APPLICABLE_MARK = "N/A";
 const convertAcademicCategory = (
   item: SubjectSummaryResponse["averageSummary"][number]
 ): SubjectSummary["academics"]["categories"][number] => {
@@ -131,14 +132,19 @@ const convertAcademicCategory = (
     id: item.categoryOid,
     name: prettifyEducationalName(item.category),
     average: normalizeMarkWithLetter(item.overall),
-    terms: termsEntries.map(([key, value]) => ({
-      name: key,
-      weight: +(item[`percentage${key}` as keyof typeof item] as string).slice(
-        0,
-        -1
-      ),
-      average: +value,
-    })),
+    terms: termsEntries.map(([key, value]) => {
+      const percentage = item[`percentage${key}` as keyof typeof item];
+      const avgView = item[`avgView${key}` as keyof typeof item];
+      return {
+        name: key,
+        weight:
+          percentage && percentage !== NOT_APPLICABLE_MARK
+            ? +percentage.slice(0, -1)
+            : null,
+        average:
+          normalizeMarkWithLetter(value) || normalizeMarkWithLetter(avgView),
+      };
+    }),
   };
 };
 export function parseSubjectSummary({
@@ -174,7 +180,7 @@ export function parseSubjectSummary({
     const overallPostedGrade = postedSummary[0]!.overall;
     const academics: SubjectSummary["academics"] = {
       average: normalizeMarkWithLetter(gradebookAverage!.overall),
-      posted: overallPostedGrade ? +overallPostedGrade : null,
+      posted: normalizeMarkWithLetter(overallPostedGrade),
       categories: categories.map(convertAcademicCategory),
     };
     result.academics = academics;

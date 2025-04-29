@@ -46,6 +46,7 @@ export default async function RootLayout({
     const userSettings = await caller.core.settings.getSettings();
     themeColor = userSettings.themeColor;
   }
+
   const isSidebarExpanded = store.get("sidebar:state")?.value === "true";
   return (
     <>
