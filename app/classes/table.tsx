@@ -43,10 +43,10 @@ const columns = [
       return <SortableColumn {...column}>Average</SortableColumn>;
     },
 
-    cell: ({ row }) => {
-      const average = row.getValue("average");
+    cell: ({ cell }) => {
+      const average = cell.getValue();
       if (!average) return NULL_VALUE_DISPLAY_FALLBACK;
-      return fractionFormatter.format((average as NonNullable<typeof average>).mark);
+      return fractionFormatter.format(average.mark);
     },
     sortUndefined: "last",
   }),
