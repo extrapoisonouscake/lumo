@@ -17,12 +17,16 @@ export default function SubjectPage() {
   const searchParams = useSearchParams();
   const params = useParams();
   const subjectId = params.subjectId as string;
-  const term = searchParams.get("term") ?? undefined;
+  const termId = searchParams.get("term") ?? undefined;
   const category = searchParams.get("category") ?? "all";
   const settings = useUserSettings();
   const summary = useSubjectSummary(subjectId);
 
-  const assignments = useSubjectAssignments(subjectId, term);
+  const assignments = useSubjectAssignments({
+    id: subjectId,
+    term: summary.data?.term,
+    termId,
+  });
   return (
     <>
       <QueryWrapper query={summary} skeleton={<SubjectPageSkeleton />}>
@@ -40,7 +44,7 @@ export default function SubjectPage() {
               {(assignments) => (
                 <SubjectAssignments
                   {...assignments}
-                  term={term ?? undefined}
+                  term={termId ?? undefined}
                   categories={summary.academics.categories}
                   categoryId={category}
                 />

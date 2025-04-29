@@ -19,7 +19,7 @@ import {
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
-import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { useThemeColor } from "@/hooks/trpc/use-theme-color";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -91,13 +91,12 @@ function PagesMenu({
         (!isGuest || guestAllowedPathnames.includes(url))
     );
   }, [isGuest]);
-  const themeColor = useUserSettings(false)?.themeColor ?? initialThemeColor;
+  const themeColor = useThemeColor(initialThemeColor);
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
       {pages.map(([url, page]) => {
         const isActive =
           url === "/" ? url === pathname : pathname.startsWith(url);
-        console.log(initialThemeColor);
         return (
           <SidebarMenuItem key={url} className={cn(isMobile && "flex-1")}>
             <SidebarMenuButton

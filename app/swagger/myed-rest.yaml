@@ -434,25 +434,59 @@ paths:
                         categoryOid:
                           type: string
                         overall:
-                          $ref: "#/components/schemas/NumberAsString"
+                          $ref: "#/components/schemas/GradeAsString"
                         category:
                           type: string
                         Q1:
-                          $ref: "#/components/schemas/NumberAsString"
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         percentageQ1:
-                          $ref: "#/components/schemas/PercentageAsString"
+                          oneOf:
+                            - $ref: "#/components/schemas/PercentageAsString"
+                            - $ref: "#/components/schemas/NAString"
+                        avgViewQ1:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         Q2:
-                          $ref: "#/components/schemas/NumberAsString"
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         percentageQ2:
-                          $ref: "#/components/schemas/PercentageAsString"
+                          oneOf:
+                            - $ref: "#/components/schemas/PercentageAsString"
+                            - $ref: "#/components/schemas/NAString"
+                        avgViewQ2:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         Q3:
-                          $ref: "#/components/schemas/NumberAsString"
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         percentageQ3:
-                          $ref: "#/components/schemas/PercentageAsString"
+                          oneOf:
+                            - $ref: "#/components/schemas/PercentageAsString"
+                            - $ref: "#/components/schemas/NAString"
+                        avgViewQ3:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         Q4:
-                          $ref: "#/components/schemas/NumberAsString"
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
                         percentageQ4:
-                          $ref: "#/components/schemas/PercentageAsString"
+                          oneOf:
+                            - $ref: "#/components/schemas/PercentageAsString"
+                            - $ref: "#/components/schemas/NAString"
+                        avgViewQ4:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
+                        S1:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
+                        S2:
+                          $ref: "#/components/schemas/GradeAsString"
+                          nullable: true
+                        percentage:
+                          oneOf:
+                            - $ref: "#/components/schemas/PercentageAsString"
+                            - $ref: "#/components/schemas/NAString"
 
                   attendanceSummary:
                     type: array
@@ -654,9 +688,16 @@ components:
     NumberAsString:
       type: string
       format: int32
+    GradeAsString:
+      type: string
+      pattern: ^\d+(\.\d+)?\s[A-Za-z]$
     PercentageAsString:
       type: string
       pattern: ^\d{1,3}\.\d{1,2}%$
+    NAString:
+      type: string
+      enum:
+        - "N/A"
     WeekDay:
       type: integer
       #starts from Sunday

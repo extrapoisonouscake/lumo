@@ -55,18 +55,21 @@ export function parseSubjectAssignments({
 }: ParserFunctionArguments<"subjectAssignments">): {
   subjectId?: string;
   assignments: Assignment[];
-  terms: TermEntry[];
+  terms: TermEntry[] | null;
   currentTermIndex: number | null;
 } | null {
-  const [termsData, [pastDue, upcoming]] = responses.slice(-2) as [
+  const [termsData, assignmentsSegments] = responses.slice(-2) as [
     OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">,
-    [
-      OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/pastDue">,
-      OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
-    ]
+    Array<
+      | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/pastDue">
+      | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
+    >
   ];
-  const allAssignments = [...pastDue, ...upcoming];
-  const preparedAssignments = allAssignments.map(convertAssignment);
+
+  const preparedAssignments = assignmentsSegments
+    .flat()
+    .sort((a, b) => b.dueDate - a.dueDate)
+    .map(convertAssignment);
   const { terms, currentTermIndex } = termsData;
   const preparedTerms = terms
     .filter((item) => item.gradeTermId !== "Term")
@@ -76,7 +79,7 @@ export function parseSubjectAssignments({
     }));
   return {
     assignments: preparedAssignments,
-    terms: preparedTerms,
+    terms: assignmentsSegments.length === 1 ? preparedTerms : null,
     currentTermIndex:
       preparedTerms.length === terms.length ? currentTermIndex || null : null,
   };

@@ -83,11 +83,9 @@ export const checkSchoolAnnouncementsTask = schemaTask({
 
       needToSetPDFURL = true;
     }
-    const fileResponse = await fetch(directUrl);
-    if (!fileResponse.ok) throw new Error("Failed to fetch file");
-    const buffer = await fileResponse.arrayBuffer();
+
     try {
-      await parseAnnouncements(buffer, school, date);
+      await parseAnnouncements(directUrl, school, date);
     } catch (e) {
       const now = timezonedDayJS();
       if (

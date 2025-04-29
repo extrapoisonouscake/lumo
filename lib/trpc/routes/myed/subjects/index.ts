@@ -1,3 +1,4 @@
+import { SubjectTerm } from "@/types/school";
 import { after } from "next/server";
 import { z } from "zod";
 import { router } from "../../../base";
@@ -29,17 +30,32 @@ export const subjectsRouter = router({
     }),
   getSubjectAssignments: authenticatedProcedure
     .input(
-      z.object({
-        id: z.string(),
-        termId: z.string().optional(),
-      })
+      z
+        .object({
+          term: z.nativeEnum(SubjectTerm).optional(),
+          termId: z.string().optional(),
+        })
+        .partial()
+        .merge(z.object({ id: z.string() }))
+        .refine(
+          (data) => !!data.term || !!data.termId,
+          "Either term or termId should be filled in."
+        )
     )
     .query(
-      async ({ input: { id, termId }, ctx: { getMyEd, studentHashedId } }) => {
-        const response = await getMyEd("subjectAssignments", { id, termId });
+      async ({
+        input: { id, termId, term },
+        ctx: { getMyEd, studentHashedId },
+      }) => {
+        const response = await getMyEd("subjectAssignments", {
+          id,
+          termId,
+          term,
+        });
         if (
-          response.currentTermIndex &&
-          (!termId || termId === response.terms[response.currentTermIndex]?.id)
+          term ||
+          (response.currentTermIndex &&
+            termId === response.terms![response.currentTermIndex]?.id)
         ) {
           const lastAssignmentId = response.assignments[0]?.id;
 

@@ -5,7 +5,8 @@ import {
   getAnnouncementsPDFLinkRedisHashKey,
   getAnnouncementsRedisKey,
 } from "@/parsing/announcements/getAnnouncements";
-import { AnnouncementSection } from "@/types/school";
+import { dailyAnnouncementsRichTitlesData } from "@/parsing/announcements/parsers";
+import { AnnouncementSection, AnnouncementSectionData } from "@/types/school";
 import { TRPCError } from "@trpc/server";
 import { router } from "../../../base";
 import { atLeastGuestProcedure } from "../../../procedures";
@@ -18,6 +19,7 @@ export const schoolSpecificRouter = router({
 
     let pdfLink;
     const { schoolId } = await getUserSettings(ctx);
+
     if (!schoolId || !isKnownSchool(schoolId) || [0, 6].includes(date.day())) {
       throw new TRPCError({
         code: "NOT_FOUND",
@@ -35,11 +37,16 @@ export const schoolSpecificRouter = router({
       redis.hget(pdfLinkHashKey, schoolId) as Promise<string | null>,
     ]);
     if (cachedData) {
-      const parsedData =
+      const richData = dailyAnnouncementsRichTitlesData[schoolId];
+      const parsedData = (
         process.env.NODE_ENV === "development"
           ? JSON.parse(cachedData as string)
-          : cachedData;
-      data = parsedData;
+          : cachedData
+      ) as AnnouncementSectionData[];
+      data = parsedData.map((item, i) => ({
+        ...item,
+        ...richData[i]!,
+      }));
     }
     if (data.length === 0) {
       return {

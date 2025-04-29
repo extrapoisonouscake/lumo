@@ -1,6 +1,7 @@
 import { timezonedDayJS } from "@/instances/dayjs";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import { paths } from "@/types/myed-rest";
+import { SubjectTerm } from "@/types/school";
 import CallableInstance from "callable-instance";
 import * as cheerio from "cheerio";
 
@@ -309,6 +310,79 @@ const findSubjectIdByName = (subjects: RouteResponse, name: string) => {
   ).find((subject) => subject.relSscMstOid_mstDescription === name)?.oid;
 };
 
+const subjectTermToGradeLabelsMap: Record<
+  SubjectTerm,
+  OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"][]
+> = {
+  [SubjectTerm.FirstSemester]: ["Q1", "Q2"],
+  [SubjectTerm.SecondSemester]: ["Q3", "Q4"],
+  [SubjectTerm.FullYear]: ["Q1", "Q2", "Q3", "Q4"],
+};
+const subjectAssignmentsRoute = new Route<
+  {
+    id: string;
+  } & ({ termId?: string } | { term: SubjectTerm; termId?: string })
+>()
+  .step(({ params: { id } }) => {
+    return {
+      method: "GET",
+      path: `rest/studentSchedule/${id}/gradeTerms`,
+      expect: "json",
+    };
+  })
+  .multiple(({ responses, params: { id, ...rest } }) => {
+    const termsResponse = responses.at(
+      -1
+    ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
+    let termIdsToSearch;
+
+    //runtime check, TODO: change to type check
+    if ("term" in rest && typeof rest.term !== "string") {
+      throw new Error("Invalid term");
+    }
+
+    if ("term" in rest) {
+      const termLabelsToSearch = subjectTermToGradeLabelsMap[rest.term];
+      if (!termLabelsToSearch) throw new Error("Invalid term");
+      termIdsToSearch = [];
+
+      for (const termLabel of termLabelsToSearch) {
+        const foundTerm = termsResponse.terms.find(
+          (term) => term.gradeTermId === termLabel
+        );
+        if (foundTerm) termIdsToSearch.push(foundTerm.oid);
+      }
+    } else {
+      if (rest.termId) {
+        termIdsToSearch = [rest.termId];
+      } else if (typeof termsResponse.currentTermIndex === "number") {
+        termIdsToSearch = [
+          termsResponse.terms[termsResponse.currentTermIndex]!.oid,
+        ];
+      }
+    }
+
+    if (!termIdsToSearch) throw new Error("No term ids to search");
+    return termIdsToSearch.flatMap((termId) => [
+      {
+        method: "GET",
+        path: `rest/studentSchedule/${id}/categoryDetails/pastDue`,
+        body: {
+          gradeTermOid: termId,
+        },
+        expect: "json",
+      },
+      {
+        method: "GET",
+        path: `rest/studentSchedule/${id}/categoryDetails/upcoming`,
+        body: {
+          gradeTermOid: termId,
+        },
+        expect: "json",
+      },
+    ]);
+  });
+
 export const myEdRestEndpoints = {
   subjects: new Route<{
     isPreviousYear?: boolean;
@@ -376,47 +450,7 @@ export const myEdRestEndpoints = {
         shouldSearchInPreviousYear
     ),
   //TODO add ability to reuse steps in other steps
-  subjectAssignments: new Route<{
-    id: string;
-    termId?: string;
-  }>()
-    .step(({ params: { id } }) => {
-      return {
-        method: "GET",
-        path: `rest/studentSchedule/${id}/gradeTerms`,
-        expect: "json",
-      };
-    })
-    .multiple(({ responses, params: { id, termId } }) => {
-      let selectedTermOid = termId;
-      if (!selectedTermOid) {
-        const foundTerms = responses.at(
-          -1
-        ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
-        if (typeof foundTerms.currentTermIndex === "number") {
-          selectedTermOid = foundTerms.terms[foundTerms.currentTermIndex]!.oid;
-        }
-      }
-
-      return [
-        {
-          method: "GET",
-          path: `rest/studentSchedule/${id}/categoryDetails/pastDue`,
-          body: {
-            gradeTermOid: selectedTermOid,
-          },
-          expect: "json",
-        },
-        {
-          method: "GET",
-          path: `rest/studentSchedule/${id}/categoryDetails/upcoming`,
-          body: {
-            gradeTermOid: selectedTermOid,
-          },
-          expect: "json",
-        },
-      ];
-    }),
+  subjectAssignments: subjectAssignmentsRoute,
   subjectAssignment: new Route<{
     assignmentId: string;
   }>().step(({ studentID, params: { assignmentId } }) => ({

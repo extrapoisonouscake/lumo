@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  TermSelects,
-  TermSelectsSkeleton,
-} from "@/app/classes/[subjectId]/term-selects";
+import { TermSelects } from "@/app/classes/[subjectId]/term-selects";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 
 import { SubjectSummary } from "@/types/school";
@@ -38,14 +35,17 @@ export function SubjectAssignments({
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <TermSelects
-          terms={terms}
-          initialTerm={
-            term || (currentTermIndex ? terms[currentTermIndex]!.id : undefined)
-          }
-          shouldShowAllOption={false}
-          shouldShowYearSelect={false}
-        />
+        {terms && (
+          <TermSelects
+            terms={terms}
+            initialTerm={
+              term ||
+              (currentTermIndex ? terms[currentTermIndex]!.id : undefined)
+            }
+            shouldShowAllOption={false}
+            shouldShowYearSelect={false}
+          />
+        )}
         <CategorySelect
           value={categoryId}
           onChange={setCategoryId}
@@ -62,7 +62,6 @@ export function SubjectAssignmentsSkeleton() {
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <TermSelectsSkeleton shouldShowYearSelect={false} />
         <CategorySelectSkeleton />
       </div>
       <ResponsiveAssignmentsSkeleton />

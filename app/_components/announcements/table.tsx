@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { capitalize } from "@/helpers/prettifyEducationalName";
 import { AnnouncementSection } from "@/types/school";
 
 export function AnnouncementsSectionTable({
@@ -14,7 +15,7 @@ export function AnnouncementsSectionTable({
   pdfURL,
 }: {
   pdfURL: string | null;
-  rows: Extract<AnnouncementSection, { table: any }>["table"];
+  rows: Extract<AnnouncementSection, { type: "table" }>["content"];
 }) {
   const [header, ...contentRows] = rows;
   return (
@@ -23,7 +24,9 @@ export function AnnouncementsSectionTable({
         <TableHeader>
           <TableRow>
             {header.map((column) => (
-              <TableHead key={column}>{column}</TableHead>
+              <TableHead key={column}>
+                {column.split("/").map(capitalize).join(" / ")}
+              </TableHead>
             ))}
           </TableRow>
         </TableHeader>

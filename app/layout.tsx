@@ -46,7 +46,8 @@ export default async function RootLayout({
     const userSettings = await caller.core.settings.getSettings();
     themeColor = userSettings.themeColor;
   }
-  const isSidebarExpanded = store.get("sidebar:state")?.value === "true";
+  const sidebarState = store.get("sidebar:state")?.value;
+  const isSidebarExpanded = sidebarState ? sidebarState === "true" : true;
   return (
     <>
       <html lang="en" suppressHydrationWarning>
