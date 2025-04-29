@@ -46,7 +46,7 @@ const columns = [
     cell: ({ row }) => {
       const average = row.getValue("average");
       if (!average) return NULL_VALUE_DISPLAY_FALLBACK;
-      return fractionFormatter.format(average as number);
+      return fractionFormatter.format((average as NonNullable<typeof average>).mark);
     },
     sortUndefined: "last",
   }),
