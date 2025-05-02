@@ -1,5 +1,5 @@
 {
-  "id": "bde5d05d-f59e-4323-9413-9a6f48e6b208",
+  "id": "3fbce16f-fb11-4884-9a08-f349669889cb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -133,13 +133,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "notifications_subscriptions_user_id_unique": {
-          "name": "notifications_subscriptions_user_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
-        },
         "notifications_subscriptions_endpoint_url_unique": {
           "name": "notifications_subscriptions_endpoint_url_unique",
           "nullsNotDistinct": false,
@@ -159,8 +152,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.recent_school_data": {
-      "name": "recent_school_data",
+    "public.tracked_school_data": {
+      "name": "tracked_school_data",
       "schema": "",
       "columns": {
         "id": {
@@ -174,20 +167,27 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "assignments": {
-          "name": "assignments",
+        "subjects": {
+          "name": "subjects",
           "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "recent_school_data_user_id_users_id_fk": {
-          "name": "recent_school_data_user_id_users_id_fk",
-          "tableFrom": "recent_school_data",
+        "tracked_school_data_user_id_users_id_fk": {
+          "name": "tracked_school_data_user_id_users_id_fk",
+          "tableFrom": "tracked_school_data",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -201,8 +201,8 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "recent_school_data_user_id_unique": {
-          "name": "recent_school_data_user_id_unique",
+        "tracked_school_data_user_id_unique": {
+          "name": "tracked_school_data_user_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "user_id"
@@ -275,8 +275,7 @@
           "name": "theme_color",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "default": "'180 100% 25%'"
+          "notNull": false
         }
       },
       "indexes": {},

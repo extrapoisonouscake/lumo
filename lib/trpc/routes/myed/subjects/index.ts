@@ -1,9 +1,10 @@
+import { prepareAssignmentForDBStorage } from "@/trigger/send-notifications";
 import { SubjectTerm } from "@/types/school";
 import { after } from "next/server";
 import { z } from "zod";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
-import { updateSubjectLastAssignmentId } from "../../core/settings/helpers";
+import { updateSubjectLastAssignments } from "../../core/settings/helpers";
 
 export const subjectsRouter = router({
   getSubjects: authenticatedProcedure
@@ -57,17 +58,13 @@ export const subjectsRouter = router({
           (response.currentTermIndex &&
             termId === response.terms![response.currentTermIndex]?.id)
         ) {
-          const lastAssignmentId = response.assignments[0]?.id;
-
-          if (lastAssignmentId) {
-            after(
-              updateSubjectLastAssignmentId(
-                studentHashedId,
-                id,
-                lastAssignmentId
-              )
-            );
-          }
+          after(
+            updateSubjectLastAssignments(
+              studentHashedId,
+              id,
+              response.assignments.map(prepareAssignmentForDBStorage)
+            )
+          );
         }
         return response;
       }

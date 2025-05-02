@@ -435,6 +435,8 @@ paths:
                           type: string
                         overall:
                           $ref: "#/components/schemas/GradeAsString"
+                        running:
+                          $ref: "#/components/schemas/GradeAsString"
                         category:
                           type: string
                         Q1:

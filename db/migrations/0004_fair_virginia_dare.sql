@@ -1,1 +1,0 @@
-ALTER TABLE "notifications_subscriptions" DROP CONSTRAINT "notifications_subscriptions_user_id_unique";

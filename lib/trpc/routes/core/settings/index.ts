@@ -5,7 +5,7 @@ import {
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
   notificationSubscriptionSchema,
-  tracked_subjects,
+  tracked_school_data,
   users,
 } from "@/db/schema";
 
@@ -176,8 +176,8 @@ export const runNotificationUnsubscriptionDBCalls = async (
   ]);
   if (!existingSubscription) {
     await db
-      .delete(tracked_subjects)
-      .where(eq(tracked_subjects.userId, studentHashedId));
+      .delete(tracked_school_data)
+      .where(eq(tracked_school_data.userId, studentHashedId));
 
     if (userSettings) {
       await db
@@ -196,14 +196,18 @@ const createUserRecord = async (
   userId: string,
   credentials?: { username: string; password: string }
 ) => {
-  const call = db.insert(users).values({ id: userId, ...credentials });
-  if (credentials) {
-    call.onConflictDoUpdate({
-      target: users.id,
-      set: {
+  const encryptedCredentials = credentials
+    ? {
         username: encryption.encrypt(credentials.username),
         password: encryption.encrypt(credentials.password),
-      },
+      }
+    : undefined;
+  const call = db.insert(users).values({ id: userId, ...encryptedCredentials });
+
+  if (encryptedCredentials) {
+    call.onConflictDoUpdate({
+      target: users.id,
+      set: encryptedCredentials,
     });
   } else {
     call.onConflictDoNothing();

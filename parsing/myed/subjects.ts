@@ -179,7 +179,7 @@ export function parseSubjectSummary({
     );
     const overallPostedGrade = postedSummary[0]!.overall;
     const academics: SubjectSummary["academics"] = {
-      average: normalizeMarkWithLetter(gradebookAverage!.overall),
+      average: normalizeMarkWithLetter(gradebookAverage!.running),
       posted: normalizeMarkWithLetter(overallPostedGrade),
       categories: categories.map(convertAcademicCategory),
     };

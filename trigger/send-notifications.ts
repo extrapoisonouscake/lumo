@@ -3,8 +3,9 @@ import { db } from "@/db";
 import {
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
-  tracked_subjects,
-  TrackedSubjectSelectModel,
+  tracked_school_data,
+  TrackedSchoolDataSelectModel,
+  TrackedSubject,
 } from "@/db/schema";
 import { hashString } from "@/helpers/hashString";
 import { INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
@@ -27,7 +28,7 @@ export const sendNotificationsTask = schedules.task({
     const users = await db.query.users.findMany({
       with: {
         notifications_subscriptions: true,
-        tracked_subjects: true,
+        tracked_school_data: true,
       },
       where: (users) =>
         and(
@@ -47,21 +48,22 @@ export const sendNotificationsTask = schedules.task({
           username,
           password,
           notifications_subscriptions,
-          tracked_subjects,
+          tracked_school_data,
         }) =>
           sendNotificationsToUser(
             { username: username!, password: password! },
             notifications_subscriptions,
-            tracked_subjects
+            tracked_school_data
           )
       )
     );
   },
 });
+
 const sendNotificationsToUser = async (
   credentials: { username: string; password: string },
   subscriptions: NotificationsSubscriptionSelectModel[],
-  trackedSubjects: TrackedSubjectSelectModel[]
+  trackedSchoolData: TrackedSchoolDataSelectModel | null
 ) => {
   const { tokens, studentID } = await fetchAuthCookiesAndStudentID(
     encryption.decrypt(credentials.username),
@@ -71,142 +73,148 @@ const sendNotificationsToUser = async (
     authCookies: tokens,
     studentId: studentID,
   });
-  const currentSubjectToAssignmentIdMap = trackedSubjects.reduce(
-    (acc, subject) => {
-      acc[subject.subjectId] = subject.lastAssignmentId;
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  console.log({
+    trackedSchoolData,
+  });
+  const subjectsSavedAssignments = trackedSchoolData
+    ? Object.fromEntries(
+        Object.entries(
+          trackedSchoolData.subjects as Record<string, TrackedSubject>
+        ).map(([subjectId, subject]) => [
+          subjectId,
+          Object.fromEntries(
+            subject.assignments.map(({ id, ...assignment }) => [id, assignment])
+          ),
+        ])
+      )
+    : null;
   const subjectsResponse = await getMyEdWithParameters("subjects", {
     isPreviousYear: false,
   });
   const queue = new PrioritizedRequestQueue();
-  const subjectsWithAssignments = (
-    await Promise.all(
-      subjectsResponse.subjects.main.map(async (subject) => {
-        let assignmentsToAssign;
-        const { assignments, terms, currentTermIndex } = await queue.enqueue(
-          () =>
-            getMyEdWithParameters("subjectAssignments", {
-              id: subject.id,
-              term: subject.term,
-            })
-        );
-        if (
-          assignments.length === 0 &&
-          currentTermIndex !== null &&
-          currentTermIndex > 0 &&
-          terms
-        ) {
-          for (let termIndex = currentTermIndex; termIndex--; termIndex >= 0) {
-            const previousTermId = terms[termIndex]?.id;
-            if (!previousTermId) continue;
-            try {
-              const { assignments: previousAssignments } = await queue.enqueue(
-                () =>
-                  getMyEdWithParameters("subjectAssignments", {
-                    id: subject.id,
-                    termId: previousTermId,
-                  })
-              );
-              if (previousAssignments.length > 0) {
-                assignmentsToAssign = previousAssignments;
-                break;
-              }
-            } catch {
-              break;
-            }
-          }
-        } else {
-          assignmentsToAssign = assignments;
-        }
-        if (!assignmentsToAssign) return null;
-        let newAssignments;
-        const lastSavedAssignmentId =
-          currentSubjectToAssignmentIdMap[subject.id];
-        if (lastSavedAssignmentId) {
-          const lastSavedAssignmentIndex = assignmentsToAssign.findIndex(
-            (a) => a.id === lastSavedAssignmentId
-          );
-          //check if the assignment wasn't deleted
-          if (lastSavedAssignmentIndex > -1) {
-            newAssignments = assignmentsToAssign.slice(
-              0,
-              lastSavedAssignmentIndex
-            );
-          } else {
-            newAssignments = assignmentsToAssign;
-            delete currentSubjectToAssignmentIdMap[subject.id];
-          }
-        } else {
-          newAssignments = assignmentsToAssign;
-        }
-        if (newAssignments.length === 0) return null;
-        return { ...subject, newAssignments };
-      })
-    )
-  ).filter(Boolean) as (Subject & { newAssignments: Assignment[] })[];
+  const subjectsWithAssignments = await Promise.all(
+    subjectsResponse.subjects.main.map(async (subject) => {
+      const { assignments } = await queue.enqueue(() =>
+        getMyEdWithParameters("subjectAssignments", {
+          id: subject.id,
+          term: subject.term,
+        })
+      );
+      return { ...subject, assignments };
+    })
+  );
 
-  const subjectsWithNewAssignments = [];
+  const notifications: Array<{
+    type: NotificationType;
+    subject: Subject;
+    assignment: Assignment;
+  }> = [];
   const unsavedSubjects = [];
-  for (const subject of subjectsWithAssignments) {
-    const currentLastAssignmentId = currentSubjectToAssignmentIdMap[subject.id];
-    if (currentLastAssignmentId) {
-      subjectsWithNewAssignments.push(subject);
-    } else {
-      unsavedSubjects.push(subject);
+  if (subjectsSavedAssignments) {
+    for (const subject of subjectsWithAssignments) {
+      const savedAssignments = subjectsSavedAssignments[subject.id];
+      if (savedAssignments) {
+        for (const assignment of subject.assignments) {
+          const savedAssignment = savedAssignments[assignment.id];
+          if (savedAssignment) {
+            const { score } = savedAssignment;
+            if (
+              typeof score === "number" &&
+              typeof assignment.score === "number" &&
+              score !== assignment.score
+            ) {
+              notifications.push({
+                type: NotificationType.MarkUpdated,
+                subject,
+                assignment,
+              });
+            }
+          } else {
+            notifications.push({
+              type: NotificationType.NewAssignment,
+              subject,
+              assignment,
+            });
+          }
+        }
+      } else {
+        unsavedSubjects.push(subject);
+      }
     }
   }
-  const broadcastSubjectNewAssignmentsToSubscriptions =
-    broadcastSubjectNewAssignments(subscriptions);
+  console.log({
+    unsavedSubjects,
+    notifications,
+  });
+  const broadcastNotificationWithSubscriptions =
+    broadcastNotificationToSubscriptions(subscriptions);
 
   const promises = [
-    Promise.all(
-      subjectsWithNewAssignments.map((subject) =>
-        broadcastSubjectNewAssignmentsToSubscriptions(
-          subject,
-          subject.newAssignments
-        )
-      )
-    ),
+    Promise.all(notifications.map(broadcastNotificationWithSubscriptions)),
   ];
-  const subjectsToUpsert = [...unsavedSubjects, ...subjectsWithNewAssignments];
-  if (subjectsToUpsert.length > 0) {
+
+  if (!subjectsSavedAssignments || notifications.length > 0) {
     promises.push(
       db
-        .insert(tracked_subjects)
-        .values(
-          [...unsavedSubjects, ...subjectsWithNewAssignments].map(
-            (subject) => ({
-              subjectId: subject.id,
-              lastAssignmentId: subject.newAssignments[0]!.id,
-              userId: hashString(studentID),
-            })
-          )
-        )
+        .insert(tracked_school_data)
+        .values({
+          userId: hashString(studentID),
+          subjects: Object.fromEntries(
+            subjectsWithAssignments.map((subject) => [
+              subject.id,
+              {
+                assignments: subject.assignments.map(
+                  prepareAssignmentForDBStorage
+                ),
+              } satisfies TrackedSubject,
+            ])
+          ),
+        })
         .onConflictDoUpdate({
-          target: [tracked_subjects.userId, tracked_subjects.subjectId],
+          target: tracked_school_data.userId,
           set: {
-            lastAssignmentId: sql.raw(
-              `excluded.${tracked_subjects.lastAssignmentId.name}`
-            ),
+            subjects: sql.raw(`excluded.${tracked_school_data.subjects.name}`),
           },
         })
     );
   }
   await Promise.all(promises);
 };
-const broadcastSubjectNewAssignments =
+enum NotificationType {
+  NewAssignment = "new-assignment",
+  MarkUpdated = "mark-updated",
+}
+const generators: Record<
+  NotificationType,
+  (notification: { subject: Subject; assignment: Assignment }) => {
+    title: string;
+    body: string;
+  }
+> = {
+  [NotificationType.NewAssignment]: ({ subject, assignment }) => ({
+    title: `📝 New assignment for ${subject.name}`,
+    body: `A new assignment '${assignment.name}' has been posted.`,
+  }),
+  [NotificationType.MarkUpdated]: ({ subject, assignment }) => ({
+    title: `⭐ Grade posted for ${assignment.name}`,
+    body: `You scored ${assignment.score} on '${assignment.name}' in ${subject.name}.`,
+  }),
+};
+const broadcastNotificationToSubscriptions =
   (subscriptions: NotificationsSubscriptionSelectModel[]) =>
-  async (subject: Subject, newAssignments: Assignment[]) => {
-    await Promise.all(
-      newAssignments.map((assignment) =>
-        broadcastNotification(
-          subscriptions,
-          `New assignment for ${subject.name}`,
-          `The assignment ${assignment.name} has been released.`
-        )
-      )
-    );
+  async ({
+    type,
+    subject,
+    assignment,
+  }: {
+    type: NotificationType;
+    subject: Subject;
+    assignment: Assignment;
+  }) => {
+    const { title, body } = generators[type]({ subject, assignment });
+    await broadcastNotification(subscriptions, title, body);
   };
+export const prepareAssignmentForDBStorage = (assignment: Assignment) => ({
+  id: assignment.id,
+  score: typeof assignment.score === "number" ? assignment.score : undefined,
+});

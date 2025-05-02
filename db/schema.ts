@@ -1,7 +1,7 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { InferSelectModel, relations, sql } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
-import { pgTable as table, unique } from "drizzle-orm/pg-core";
+import { pgTable as table } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 export const users = table(
   "users",
@@ -19,9 +19,9 @@ export const users = table(
     ];
   }
 );
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   notifications_subscriptions: many(notifications_subscriptions),
-  tracked_subjects: many(tracked_subjects),
+  tracked_school_data: one(tracked_school_data),
 }));
 export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
@@ -91,32 +91,34 @@ export type NotificationsSubscriptionSelectModel = InferSelectModel<
 export const notificationSubscriptionSchema = createSelectSchema(
   notifications_subscriptions
 );
-export const tracked_subjects = table(
-  "tracked_subjects",
-  {
-    id: t.uuid().defaultRandom().primaryKey(),
-    userId: t
-      .text("user_id")
-      .references(() => users.id)
-      .notNull(),
-    subjectId: t.text("subject_id").notNull(),
-    lastAssignmentId: t.text("last_assignment_id").notNull(),
-    updatedAt: t.timestamp("updated_at").defaultNow(),
-  },
-  (t) => ({
-    tracked_subjects_user_id_subject_id_uniqueConstraint: unique(
-      "tracked_subjects_user_id_subject_id_uniqueConstraint"
-    ).on(t.userId, t.subjectId),
-  })
-);
-export type TrackedSubjectSelectModel = InferSelectModel<
-  typeof tracked_subjects
+export const tracked_school_data = table("tracked_school_data", {
+  id: t.uuid().defaultRandom().primaryKey(),
+  userId: t
+    .text("user_id")
+    .references(() => users.id)
+    .notNull()
+    .unique(),
+  subjects: t.jsonb("subjects").notNull(),
+  updatedAt: t
+    .timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+export type TrackedSchoolDataSelectModel = InferSelectModel<
+  typeof tracked_school_data
 >;
-export const tracked_subjectsRelations = relations(
-  tracked_subjects,
+export type TrackedSubject = {
+  assignments: Array<{
+    id: string;
+    score?: number;
+  }>;
+};
+export const tracked_school_dataRelations = relations(
+  tracked_school_data,
   ({ one }) => ({
     user: one(users, {
-      fields: [tracked_subjects.userId],
+      fields: [tracked_school_data.userId],
       references: [users.id],
     }),
   })
