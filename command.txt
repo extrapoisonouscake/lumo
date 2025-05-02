@@ -1,1 +1,0 @@
- pg_ctl -D "C:\Users\2815281\AppData\Roaming\postgresql-17.4-2-windows-x64-binaries\pgsql\mydata" -l logfile start
