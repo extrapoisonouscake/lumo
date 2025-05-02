@@ -10,7 +10,7 @@ import { AnnouncementSection, PersonalDetails } from "@/types/school";
 import { useMemo } from "react";
 import { AnnouncementsSectionTable } from "./table";
 const gradeRegex =
-  /\b(?:grade|grades|gr\.?)\s*(?:\d+(?:['’]?s)?(?:\s*(?:[-\/]|\s+to\s+)\s*\d+(?:['’]?s)?|\s*,\s*\d+(?:['’]?s)?)*(?:\s*(?:,?\s+(?:and|&)\s+)?\d+(?:['’]?s)?)?)\b/gi;
+  /\b(?:grade|grades|gr\.?)\s*(?:\d+(?:['’]?s)?(?:\s?(?:[-\/]|\s+to\s+)\s?\d+(?:['’]?s)?|\s*,\s*\d+(?:['’]?s)?)*(?:\s?(?:,?\s+(?:and|&)\s+)?\d+(?:['’]?s)?)?)\b/gi;
 const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
   let lastIndex = 0;
 
