@@ -282,6 +282,7 @@ export function ScheduleTable({
   const getRowClassName = useMemo(
     () => (row: Row<ScheduleRow>) => {
       const shouldBeClickable =
+        !isLoading &&
         row.original.type === "subject" &&
         !(row.original.name === TEACHER_ADVISORY_ABBREVIATION);
       return cn({
@@ -295,7 +296,7 @@ export function ScheduleTable({
       });
     },
 
-    [currentRowIndex]
+    [currentRowIndex, isLoading]
   );
   const table = useReactTable<ScheduleRow>({
     getCoreRowModel: getCoreRowModel(),

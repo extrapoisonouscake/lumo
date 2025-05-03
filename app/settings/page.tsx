@@ -11,9 +11,8 @@ export default function Page() {
   return (
     <PageDataProvider>
       <PageHeading />
-      <div className="flex flex-col gap-4">
-        <SettingsContent />
-      </div>
+
+      <SettingsContent />
     </PageDataProvider>
   );
 }

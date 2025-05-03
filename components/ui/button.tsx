@@ -33,15 +33,18 @@ const buttonVariants = cva(
     },
   }
 );
-
+type IntrinsicButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<IntrinsicButtonProps, "onClick">,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   isLoading?: boolean;
   shouldShowChildrenOnLoading?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  onClick?: (
+    ...props: Parameters<Exclude<IntrinsicButtonProps["onClick"], undefined>>
+  ) => void | Promise<void>;
 }
 export const Spinner = ({ className }: { className?: string }) => (
   <svg

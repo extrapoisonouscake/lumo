@@ -22,10 +22,14 @@ import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { useThemeColor } from "@/hooks/trpc/use-theme-color";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { useAuthStatus } from "../providers/auth-status-provider";
 import { LogInButton } from "./log-in";
-import { LogOutButton } from "./log-out";
+
+import { useLogOut } from "@/hooks/trpc/use-log-out";
+import { LogOutIcon } from "lucide-react";
+import { Spinner } from "../ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
@@ -122,5 +126,20 @@ function PagesMenu({
         );
       })}
     </SidebarMenu>
+  );
+}
+function LogOutButton() {
+  const router = useRouter();
+  const { refreshAuthStatus } = useAuthStatus();
+  const logOutMutation = useLogOut(router.push, refreshAuthStatus);
+  return (
+    <SidebarMenuButton
+      shouldCloseSidebarOnMobile={false}
+      disabled={logOutMutation.isPending}
+      onClick={() => logOutMutation.mutateAsync()}
+    >
+      {logOutMutation.isPending ? <Spinner /> : <LogOutIcon />}
+      Log out
+    </SidebarMenuButton>
   );
 }

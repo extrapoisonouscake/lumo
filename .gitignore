@@ -39,3 +39,5 @@ next-env.d.ts
 .trigger
 *.txt
 logfile
+# Sentry Config File
+.env.sentry-build-plugin
