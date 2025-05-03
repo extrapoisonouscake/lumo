@@ -5,8 +5,11 @@ import { toast } from "sonner";
 import { trpc } from "../../trpc";
 import { AsyncSwitchField } from "../async-switch-field";
 import { HelpDrawer } from "./help-drawer";
-const {userAgent}=navigator
-const isIOS = /iphone|ipad|ipod/i.test(userAgent) || (userAgent.includes("Mac") && "ontouchend" in document);
+const { userAgent } = navigator;
+const isIOS =
+  /iphone|ipad|ipod/i.test(userAgent) ||
+  (userAgent.includes("Mac") && "ontouchend" in document);
+const areNotificationsSupported = "Notification" in window;
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as any).standalone === true;
@@ -23,7 +26,9 @@ export function NotificationsControlsComponent({
   );
   const [checked, setChecked] = useState(initialValue);
   const notificationsPermissionDenied =
-    !isIOS && window.Notification.permission === "denied";
+    !isIOS &&
+    areNotificationsSupported &&
+    window.Notification.permission === "denied";
   const initPush = async () => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       toast.error("Push notifications are not supported on this browser");
@@ -53,7 +58,7 @@ export function NotificationsControlsComponent({
       <div className="flex flex-col gap-2">
         <AsyncSwitchField
           label="Receive notifications"
-          disabled={notificationsPermissionDenied}
+          disabled={!areNotificationsSupported || notificationsPermissionDenied}
           checked={checked}
           onChange={async (newValue) => {
             if (newValue === true && shouldShowHelpDrawer) {
@@ -81,6 +86,11 @@ export function NotificationsControlsComponent({
           <p className="text-sm text-gray-500">
             Permission to receive notifications was denied. Please enable them
             in your browser settings.
+          </p>
+        )}
+        {!areNotificationsSupported && (
+          <p className="text-sm text-gray-500">
+            Notifications are not supported on this browser.
           </p>
         )}
       </div>
