@@ -18,3 +18,4 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldShowLetterGrade: false,
   themeColor: "162 23% 49%",
 };
+export const isDevelopment = process.env.NODE_ENV === "development";

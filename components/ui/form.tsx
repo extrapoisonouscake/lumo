@@ -78,7 +78,7 @@ const useFormField = () => {
     id,
     name: fieldContext.name,
     formItemId: `${id}-form-item`,
-    formDescriptionId: `${id}-form-item-description`,
+    DescriptionTextId: `${id}-form-item-description`,
     formMessageId: `${id}-form-item-message`,
     ...fieldState,
   };
@@ -138,7 +138,7 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot> & { shouldShowError?: boolean }
 >(({ shouldShowError = true, ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } =
+  const { error, formItemId, DescriptionTextId, formMessageId } =
     useFormField();
   const isShowingError = shouldShowError && !!error;
   return (
@@ -147,8 +147,8 @@ const FormControl = React.forwardRef<
       id={formItemId}
       aria-describedby={
         !isShowingError
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
+          ? `${DescriptionTextId}`
+          : `${DescriptionTextId} ${formMessageId}`
       }
       aria-invalid={isShowingError}
       {...props}
@@ -157,22 +157,22 @@ const FormControl = React.forwardRef<
 });
 FormControl.displayName = "FormControl";
 
-const FormDescription = React.forwardRef<
+const DescriptionText = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => {
-  const { formDescriptionId } = useFormField();
+  const { DescriptionTextId } = useFormField();
 
   return (
     <p
       ref={ref}
-      id={formDescriptionId}
+      id={DescriptionTextId}
       className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
   );
 });
-FormDescription.displayName = "FormDescription";
+DescriptionText.displayName = "DescriptionText";
 
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
@@ -199,9 +199,9 @@ const FormMessage = React.forwardRef<
 FormMessage.displayName = "FormMessage";
 
 export {
+  DescriptionText,
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

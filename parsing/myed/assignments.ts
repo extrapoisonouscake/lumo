@@ -11,6 +11,7 @@ const scoreLabelToStatus: Record<string, AssignmentStatus> = {
 function convertAssignment({
   name,
   dueDate,
+  totalPoints,
   assignedDate,
   classAverage,
   oid,
@@ -19,9 +20,8 @@ function convertAssignment({
   categoryOid,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const scoreElement = scoreElements[0];
-  if (!scoreElement) throw new Error("No score element");
-  const { scoreLabel, score, pointMax } = scoreElement;
-  const baseAssignment = {
+  console.log({ scoreElement });
+  const baseAssignment: Omit<Assignment, "status" | "score"> = {
     id: oid,
     name: prettifyEducationalName(name),
     dueAt: new Date(dueDate),
@@ -29,25 +29,37 @@ function convertAssignment({
     classAverage: +(classAverage.split(" ")[0] as string) || null,
     feedback: remark ?? null,
     categoryId: categoryOid,
+    maxScore: totalPoints,
   };
-  let status = AssignmentStatus.Unknown;
-  if (score && score !== "NaN") {
+  if (scoreElement) {
+    const { scoreLabel, score, pointMax } = scoreElement;
+
+    if (score && score !== "NaN") {
+      return {
+        ...baseAssignment,
+        status: AssignmentStatus.Graded,
+        score: +score,
+      };
+    } else if (scoreLabel) {
+      const status = scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Unknown;
+      return {
+        ...baseAssignment,
+        status: status as Exclude<AssignmentStatus, AssignmentStatus.Graded>,
+        score: null,
+      };
+    }
+  } else {
     return {
       ...baseAssignment,
-      status: AssignmentStatus.Graded,
-      score: +score,
-      maxScore: pointMax ? +pointMax : null,
-    } as Assignment;
-  }
-  if (status === AssignmentStatus.Unknown && scoreLabel) {
-    status = scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Unknown;
+      status: AssignmentStatus.Ungraded,
+      score: null,
+    };
   }
   return {
     ...baseAssignment,
-    status,
+    status: AssignmentStatus.Unknown,
     score: null,
-    maxScore: null,
-  } as Assignment;
+  };
 }
 export function parseSubjectAssignments({
   responses,
@@ -65,7 +77,7 @@ export function parseSubjectAssignments({
       | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
     >
   ];
-
+  console.log(assignmentsSegments);
   const preparedAssignments = assignmentsSegments
     .flat()
     .sort((a, b) => b.dueDate - a.dueDate)

@@ -1,3 +1,4 @@
+import { DescriptionText } from "@/components/ui/form";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -30,20 +31,27 @@ export function NotificationsControlsComponent({
     areNotificationsSupported &&
     window.Notification.permission === "denied";
   const initPush = async () => {
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+    if (
+      !areNotificationsSupported ||
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window)
+    ) {
       toast.error("Push notifications are not supported on this browser");
-      return;
+      throw new Error("Unsupported browser");
     }
 
     const permissionGranted = await requestNotificationPermission();
-    if (!permissionGranted) return;
+    if (!permissionGranted) {
+      toast.error("Please allow push notifications in your browser settings.");
+      throw new Error("Permission denied");
+    }
 
     const registration = await waitForServiceWorker();
     const subscription = await subscribeToPush(registration);
     const { endpoint, keys } = subscription.toJSON();
     if (!endpoint || !keys) {
-      toast.error("Push notifications are not supported on this browser");
-      return;
+      toast.error("Push notifications are not supported on this browser.");
+      throw new Error("Unsupported browser");
     }
     await subscribeToNotificationsMutation.mutateAsync({
       endpointUrl: endpoint,
@@ -83,15 +91,15 @@ export function NotificationsControlsComponent({
           settingKey="notificationsEnabled"
         />
         {notificationsPermissionDenied && (
-          <p className="text-sm text-gray-500">
+          <DescriptionText>
             Permission to receive notifications was denied. Please enable them
             in your browser settings.
-          </p>
+          </DescriptionText>
         )}
         {!areNotificationsSupported && (
-          <p className="text-sm text-gray-500">
+          <DescriptionText>
             Notifications are not supported on this browser.
-          </p>
+          </DescriptionText>
         )}
       </div>
       <HelpDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
@@ -108,6 +116,9 @@ const waitForServiceWorker = async () => {
   return registration;
 };
 const requestNotificationPermission = async () => {
+  if (Notification.permission === "granted") {
+    return true;
+  }
   const permission = await Notification.requestPermission();
   return permission === "granted";
 };

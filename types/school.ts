@@ -84,16 +84,15 @@ export type Assignment = {
   feedback: string | null;
   classAverage: number | null;
   categoryId: string;
+  maxScore: number;
 } & (
   | {
       status: AssignmentStatus.Graded;
       score: number;
-      maxScore: number;
     }
   | {
       status: Exclude<AssignmentStatus, AssignmentStatus.Graded>;
       score: number | null;
-      maxScore: number | null;
     }
 );
 export interface TermEntry {

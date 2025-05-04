@@ -1,8 +1,8 @@
 import { SelectProps } from "@radix-ui/react-select";
 import { FieldValues, useFormContext } from "react-hook-form";
 import {
+  DescriptionText,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -68,7 +68,7 @@ export function FormSelect<T extends FieldValues>({
                 ))}
               </SelectContent>
             </Select>
-            {description && <FormDescription>{description}</FormDescription>}
+            {description && <DescriptionText>{description}</DescriptionText>}
             <FormMessage />
           </FormItem>
         );

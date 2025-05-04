@@ -55,9 +55,7 @@ export function AssignmentCard({
           </div>
         </div>
 
-        {[AssignmentStatus.Graded, AssignmentStatus.Unknown].includes(
-          status
-        ) && (
+        {assignment.classAverage && (
           <div>
             <p className="text-muted-foreground">Class Average</p>
             <p>{formatClassAverage(assignment, shouldShowPercentages)}</p>
