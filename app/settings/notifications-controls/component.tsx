@@ -1,4 +1,3 @@
-import { DescriptionText } from "@/components/ui/form";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -91,15 +90,15 @@ export function NotificationsControlsComponent({
           settingKey="notificationsEnabled"
         />
         {notificationsPermissionDenied && (
-          <DescriptionText>
+          <p className="text-sm text-muted-foreground">
             Permission to receive notifications was denied. Please enable them
             in your browser settings.
-          </DescriptionText>
+          </p>
         )}
         {!areNotificationsSupported && (
-          <DescriptionText>
+          <p className="text-sm text-muted-foreground">
             Notifications are not supported on this browser.
-          </DescriptionText>
+          </p>
         )}
       </div>
       <HelpDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />

@@ -3,8 +3,8 @@ import { useFormContext } from "react-hook-form";
 import { forwardRef } from "react";
 import { WithRequired } from "../../types/utils";
 import {
-  DescriptionText,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -62,7 +62,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                 }}
               />
             </FormControl>
-            {description && <DescriptionText>{description}</DescriptionText>}
+            {description && <FormDescription>{description}</FormDescription>}
             {shouldShowError && <FormMessage />}
           </FormItem>
         )}
