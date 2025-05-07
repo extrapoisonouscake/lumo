@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/helpers/cn";
 import { AnnouncementSection, PersonalDetails } from "@/types/school";
+import Linkify from "linkify-react";
 import { useMemo } from "react";
 import { AnnouncementsSectionTable } from "./table";
 const gradeRegex =
@@ -125,7 +126,7 @@ export function AnnouncementsAccordions({
 function AnnouncementList({ children }: { children: React.ReactNode }) {
   return (
     <ul className="flex flex-col gap-1.5 leading-6 list-disc list-inside">
-      {children}
+      <Linkify>{children}</Linkify>
     </ul>
   );
 }

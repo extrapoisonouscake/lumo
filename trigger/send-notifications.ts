@@ -117,12 +117,11 @@ const sendNotificationsToUser = async (
         for (const assignment of subject.assignments) {
           const savedAssignment = savedAssignments[assignment.id];
           if (savedAssignment) {
-            const { score } = savedAssignment;
-            if (
-              typeof score === "number" &&
+            const isScoreUpdated =
+              typeof savedAssignment.score === "number" &&
               typeof assignment.score === "number" &&
-              score !== assignment.score
-            ) {
+              savedAssignment.score !== assignment.score;
+            if (isScoreUpdated) {
               notifications.push({
                 type: NotificationType.MarkUpdated,
                 subject,
@@ -130,8 +129,12 @@ const sendNotificationsToUser = async (
               });
             }
           } else {
+            const notificationType =
+              typeof assignment.score === "number"
+                ? NotificationType.MarkUpdated
+                : NotificationType.NewAssignment;
             notifications.push({
-              type: NotificationType.NewAssignment,
+              type: notificationType,
               subject,
               assignment,
             });
@@ -197,7 +200,7 @@ const generators: Record<
   }),
   [NotificationType.MarkUpdated]: ({ subject, assignment }) => ({
     title: `⭐ Grade posted for ${assignment.name}`,
-    body: `You scored ${assignment.score} on '${assignment.name}' in ${subject.name}.`,
+    body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
   }),
 };
 const broadcastNotificationToSubscriptions =
