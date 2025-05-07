@@ -126,7 +126,9 @@ export function AnnouncementsAccordions({
 function AnnouncementList({ children }: { children: React.ReactNode }) {
   return (
     <ul className="flex flex-col gap-1.5 leading-6 list-disc list-inside">
-      <Linkify>{children}</Linkify>
+      <Linkify options={{ target: "_blank", className: "text-blue-500" }}>
+        {children}
+      </Linkify>
     </ul>
   );
 }
