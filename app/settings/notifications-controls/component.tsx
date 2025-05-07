@@ -10,7 +10,7 @@ const isIOS =
   /iphone|ipad|ipod/i.test(userAgent) ||
   (userAgent.includes("Mac") && "ontouchend" in document);
 const areNotificationsAvailable = "Notification" in window;
-const areNotificationsSupported=!isIOS&&!areNotificationsAvailable;
+const areNotificationsSupported=(isIOS&&!isPWA)||areNotificationsAvailable
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as any).standalone === true;
@@ -27,7 +27,6 @@ export function NotificationsControlsComponent({
   );
   const [checked, setChecked] = useState(initialValue);
   const notificationsPermissionDenied =
-    !isIOS &&
     areNotificationsSupported &&
     window.Notification.permission === "denied";
   const initPush = async () => {
