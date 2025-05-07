@@ -286,7 +286,7 @@ export function ScheduleTable({
         row.original.type === "subject" &&
         !(row.original.name === TEACHER_ADVISORY_ABBREVIATION);
       return cn({
-        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-0 bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
           timezonedDayJS().isBetween(
             row.original.startsAt,
             row.original.endsAt
