@@ -9,11 +9,12 @@ const { userAgent } = navigator;
 const isIOS =
   /iphone|ipad|ipod/i.test(userAgent) ||
   (userAgent.includes("Mac") && "ontouchend" in document);
-const areNotificationsAvailable = "Notification" in window;
-const areNotificationsSupported=(isIOS&&!isPWA)||areNotificationsAvailable
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as any).standalone === true;
+const areNotificationsAvailable = "Notification" in window;
+const areNotificationsSupported=(isIOS&&!isPWA)||areNotificationsAvailable
+
 export function NotificationsControlsComponent({
   initialValue,
 }: {
