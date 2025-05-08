@@ -30,4 +30,28 @@ export const dailyAnnouncementsRichTitlesData: Record<
       emoji: "🧑‍🎓",
     },
   ],
+
+  [KnownSchools.GPVanier]: [
+    {
+      title: "Today",
+      emoji: "✨",
+    },
+    {
+      title: "Meetings & Practices",
+      emoji: "🧩",
+    },
+
+    {
+      title: "Volunteer / Careers",
+      emoji: "💼",
+    },
+    {
+      title: "Bursaries & Scholarships",
+      emoji: "💵",
+    },
+    {
+      title: "Older News",
+      emoji: "📆",
+    },
+  ],
 };

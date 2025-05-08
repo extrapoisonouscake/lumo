@@ -12,8 +12,10 @@ const isIOS =
 const isPWA =
   window.matchMedia("(display-mode: standalone)").matches ||
   (window.navigator as any).standalone === true;
-const areNotificationsAvailable = "Notification" in window;
-const areNotificationsSupported=(isIOS&&!isPWA)||areNotificationsAvailable
+//assuming notifications are supported if iOS and not in PWA
+const areNotificationsSupported = (isIOS && !isPWA) || "Notification" in window;
+const areNotificationsAvailable =
+  areNotificationsSupported && (!isIOS || isPWA);
 
 export function NotificationsControlsComponent({
   initialValue,
@@ -28,8 +30,7 @@ export function NotificationsControlsComponent({
   );
   const [checked, setChecked] = useState(initialValue);
   const notificationsPermissionDenied =
-    areNotificationsSupported &&
-    window.Notification.permission === "denied";
+    areNotificationsAvailable && window.Notification.permission === "denied";
   const initPush = async () => {
     if (
       !areNotificationsSupported ||
@@ -92,8 +93,8 @@ export function NotificationsControlsComponent({
         />
         {notificationsPermissionDenied && (
           <p className="text-sm text-muted-foreground">
-            Permission to receive notifications was denied. Please enable them
-            in your browser settings.
+            The permission to receive notifications has been denied. Please
+            grant it in the browser settings.
           </p>
         )}
         {!areNotificationsSupported && (

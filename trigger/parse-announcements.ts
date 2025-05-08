@@ -18,12 +18,11 @@ import {
 } from "@trigger.dev/sdk/v3";
 import * as cheerio from "cheerio";
 import { z } from "zod";
-const directURLFunctionsBySchool: Record<
+export const directURLFunctionsBySchool: Record<
   KnownSchools,
   (date?: Date) => Promise<string>
 > = {
   [KnownSchools.MarkIsfeld]: async (date) => {
-    //TODO Add email files check
     const parsedDate = timezonedDayJS(date);
     let homePageResponse;
     try {
@@ -44,6 +43,37 @@ const directURLFunctionsBySchool: Record<
     if (!directURL) throw new Error("PDF link element not found");
 
     return directURL;
+  },
+  [KnownSchools.GPVanier]: async (date) => {
+    const parsedDate = timezonedDayJS(date);
+    let homePageResponse;
+    try {
+      homePageResponse = await fetch(
+        "https://www.comoxvalleyschools.ca/gp-vanier-secondary/"
+      );
+    } catch {
+      throw new Error("Failed to fetch home page");
+    }
+    const html = await homePageResponse.text();
+    const $ = cheerio.load(html);
+
+    const parsedURL = $(
+      `h3:has(strong:contains("Daily Announcements:")) + h3 a:contains("Announcements for ${parsedDate.format(
+        "MMMM D"
+      )}")`
+    ).prop("href");
+    if (!parsedURL) {
+      const directURL = `https://www.comoxvalleyschools.ca/gp-vanier-secondary/wp-content/uploads/sites/29/${parsedDate.year()}/${parsedDate.format(
+        "MM"
+      )}/Announcements-for-${parsedDate.format("MMMM-D")}.pdf`;
+      const response = await fetch(directURL);
+      if (!response.ok) {
+        throw new Error("Failed to fetch PDF");
+      }
+      return directURL;
+    }
+
+    return parsedURL;
   },
 };
 const delayMinutes = 20;

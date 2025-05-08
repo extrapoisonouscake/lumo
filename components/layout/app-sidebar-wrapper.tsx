@@ -44,7 +44,7 @@ export function AppSidebarWrapper({
 
       <Inset
         topLoader={<TopLoader />}
-        className="pb-[calc(4rem+env(safe-area-inset-bottom)/2)] sm:pb-0"
+        className="pb-[--mobile-menu-height] sm:pb-0"
       >
         {children}
       </Inset>

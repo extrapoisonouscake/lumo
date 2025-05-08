@@ -35,11 +35,14 @@ const schema = z.object({
     .enum(["other", ...(Object.values(KnownSchools) as string[])])
     .optional(),
 });
-type FormFields = z.infer<typeof schema>;
 const schoolsVisualData: Record<KnownSchools | "other", SchoolVisualData> = {
   [KnownSchools.MarkIsfeld]: {
-    name: "Mark R. Isfeld Secondary",
+    name: "Mark R. Isfeld",
     logo: "mark-r-isfeld-secondary",
+  },
+  [KnownSchools.GPVanier]: {
+    name: "GP Vanier",
+    logo: "gp-vanier-secondary",
   },
   other: { name: "Other" },
 };
