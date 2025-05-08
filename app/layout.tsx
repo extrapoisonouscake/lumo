@@ -11,12 +11,10 @@ import "./globals.css";
 import { createCaller } from "@/lib/trpc";
 
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { KnownSchools } from "@/constants/schools";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
-import { directURLFunctionsBySchool } from "@/trigger/parse-announcements";
 import { cookies } from "next/headers";
 import { THEME_COLOR_TAG_ID } from "./constants";
 
@@ -50,7 +48,6 @@ export default async function RootLayout({
   }
   const sidebarState = store.get("sidebar:state")?.value;
   const isSidebarExpanded = sidebarState ? sidebarState === "true" : true;
-  const r = await directURLFunctionsBySchool[KnownSchools.GPVanier]();
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -87,7 +84,6 @@ export default async function RootLayout({
               initialThemeColor={themeColor}
             >
               {children}
-              <pre>{r}</pre>
             </AppSidebarWrapper>
           </Providers>
         </body>
