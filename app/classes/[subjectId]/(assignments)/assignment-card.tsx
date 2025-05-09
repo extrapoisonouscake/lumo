@@ -44,7 +44,12 @@ export function AssignmentCard({
         <div>
           <p className="text-muted-foreground">Score</p>
           <div className="flex gap-1 items-center">
-            <p className={isMissing ? "text-red-500" : undefined}>
+            <p
+              className={cn(
+                { "text-red-500": isMissing },
+                { "text-blue-500/70": status === AssignmentStatus.Exempt }
+              )}
+            >
               {formatAssignmentScore(assignment, shouldShowPercentages)}
             </p>
             <ScoreIcon

@@ -187,6 +187,7 @@ export function parseSubjectSummary({
   }
   const attendance = convertAttendanceSummary(attendanceSummary);
   result.attendance = attendance;
+
   return result;
 }
 export function parseSubjectIdByName({

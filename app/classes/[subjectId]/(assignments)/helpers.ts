@@ -50,12 +50,8 @@ export function formatClassAverage(
 ): string {
   const { classAverage, maxScore } = assignment;
 
-  if (typeof maxScore !== "number") {
-    if (typeof classAverage !== "number") {
-      return NULL_VALUE_DISPLAY_FALLBACK;
-    } else {
-      return numberFormatter.format(classAverage);
-    }
+  if (typeof classAverage !== "number") {
+    return NULL_VALUE_DISPLAY_FALLBACK;
   }
 
   let baseString = `${classAverage} / ${maxScore}`;
