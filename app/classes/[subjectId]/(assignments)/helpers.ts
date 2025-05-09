@@ -37,10 +37,7 @@ export function formatAssignmentScore(
       return NULL_VALUE_DISPLAY_FALLBACK;
   }
 }
-const numberFormatter = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
+
 /**
  * Formats the class average for an assignment
  */
