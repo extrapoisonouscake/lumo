@@ -43,7 +43,7 @@ export async function parseAnnouncements(
   date?: Date
 ) {
   const redisKey = getAnnouncementsRedisKey(school, date);
-
+  console.log("STARTING PARSING", school, fileUrl);
   const chatResponse = await mistral.chat.complete({
     model: "mistral-small-latest",
     messages: [
@@ -62,7 +62,7 @@ export async function parseAnnouncements(
       },
     ],
   });
-
+  console.log("PARSING DONE", school, fileUrl);
   const elements = chatResponse.choices?.find(
     (choice) => choice.finishReason === FinishReason.Stop
   )?.message.content as string | undefined;

@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useDebouncedUserSetting } from "@/hooks/trpc/use-debounced-user-setting";
+import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 
 import { UserSetting } from "@/types/core";
 import { useEffect, useState } from "react";
@@ -24,7 +24,8 @@ export function SwitchField({
       setChecked(initialValue);
     }
   }, [initialValue]);
-  const updateUserSettingMutation = useDebouncedUserSetting(settingKey);
+  const updateUserSettingMutation =
+    useDebouncedUpdateGenericUserSetting(settingKey);
   const onChangeHandler = async (checked: boolean) => {
     setChecked(checked);
     updateUserSettingState(settingKey, checked);

@@ -4,7 +4,7 @@ import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useDebouncedUserSetting } from "@/hooks/trpc/use-debounced-user-setting";
+import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { THEME_COLOR_TAG_ID } from "../constants";
@@ -23,7 +23,8 @@ const AVAILABLE_THEMES = [
 
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [value, setValue] = useState(initialValue);
-  const updateUserSettingMutation = useDebouncedUserSetting("themeColor");
+  const updateUserSettingMutation =
+    useDebouncedUpdateGenericUserSetting("themeColor");
   const updateThemeLocally = (theme: string) => {
     setValue(theme);
     (document.querySelector(":root") as HTMLElement).style.setProperty(

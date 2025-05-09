@@ -20,7 +20,7 @@ function convertAssignment({
   categoryOid,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const scoreElement = scoreElements[0];
-  console.log({ scoreElement });
+
   const baseAssignment: Omit<Assignment, "status" | "score"> = {
     id: oid,
     name: prettifyEducationalName(name),
@@ -77,7 +77,7 @@ export function parseSubjectAssignments({
       | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
     >
   ];
-  console.log(assignmentsSegments);
+
   const preparedAssignments = assignmentsSegments
     .flat()
     .sort((a, b) => b.dueDate - a.dueDate)

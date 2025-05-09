@@ -1,6 +1,6 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useDebouncedUserSetting } from "@/hooks/trpc/use-debounced-user-setting";
+import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 import LetterA from "@/public/icons/letter-a.svg";
 import { Percent } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function LetterGradeSwitch({
   value: boolean;
   onValueChange?: (value: boolean) => void;
 }) {
-  const updateUserSettingMutation = useDebouncedUserSetting(
+  const updateUserSettingMutation = useDebouncedUpdateGenericUserSetting(
     "shouldShowLetterGrade"
   );
 

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useUpdateGenericUserSetting } from "./use-update-generic-user-setting";
 
-export function useDebouncedUserSetting(key: UserSetting) {
+export function useDebouncedUpdateGenericUserSetting(key: UserSetting) {
   const [pendingValue, setPendingValue] = useState<{
     value: any;
     resolve?: (value: any) => void;

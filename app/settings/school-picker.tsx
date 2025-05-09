@@ -19,12 +19,14 @@ import {
 import { KnownSchools } from "@/constants/schools";
 import { cn } from "@/helpers/cn";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useDebouncedUserSetting } from "@/hooks/trpc/use-debounced-user-setting";
+import { useQueryClient } from "@tanstack/react-query";
 
+import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { defaultFilter } from "cmdk";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { trpc } from "../trpc";
 const defaultCmdkFilter = defaultFilter as NonNullable<typeof defaultFilter>;
 interface SchoolVisualData {
   name: string;
@@ -61,13 +63,19 @@ export function SchoolPicker({
       setValue(initialValue);
     }
   }, [initialValue]);
-  const updateUserSettingMutation = useDebouncedUserSetting("schoolId");
+  const updateUserSettingMutation = useUpdateGenericUserSetting();
+  const queryClient = useQueryClient();
   const onSubmit = async (newValue: string) => {
     setIsOpen(false);
     updateUserSettingState("schoolId", newValue as KnownSchools | "other");
-    await updateUserSettingMutation.mutateAsync(
-      newValue as KnownSchools | "other"
-    );
+
+    queryClient.removeQueries({
+      queryKey: trpc.core.schoolSpecific.getAnnouncements.queryKey(),
+    });
+    await updateUserSettingMutation.mutateAsync({
+      key: "schoolId",
+      value: newValue as KnownSchools | "other",
+    });
   };
 
   let buttonContent = <>Click to select...</>;
@@ -154,6 +162,7 @@ function SchoolName({
         <ImageWithPlaceholder
           width={20}
           height={20}
+          className="max-h-[20px]"
           alt={`${name} logo`}
           src={`/schools_logos/${logo}.png`}
         />

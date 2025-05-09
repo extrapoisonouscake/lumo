@@ -14,7 +14,7 @@ import { broadcastNotification } from "@/lib/trpc/routes/core/settings/web-push"
 import { fetchAuthCookiesAndStudentID } from "@/lib/trpc/routes/myed/auth/helpers";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
-import { schedules } from "@trigger.dev/sdk/v3";
+import { logger, schedules } from "@trigger.dev/sdk/v3";
 import { and, eq, exists, isNotNull, sql } from "drizzle-orm";
 
 export const sendNotificationsTask = schedules.task({
@@ -73,7 +73,7 @@ const sendNotificationsToUser = async (
     authCookies: tokens,
     studentId: studentID,
   });
-  console.log({
+  logger.info("logs 1", {
     trackedSchoolData,
   });
   const subjectsSavedAssignments = trackedSchoolData
@@ -145,7 +145,7 @@ const sendNotificationsToUser = async (
       }
     }
   }
-  console.log({
+  logger.info("logs", {
     unsavedSubjects,
     notifications,
   });

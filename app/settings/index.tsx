@@ -52,7 +52,7 @@ export function SettingsContent() {
   if (!userSettings)
     return (
       <div className="flex w-full justify-center">
-        <Spinner />
+        <Spinner className="text-muted-foreground" />
       </div>
     );
   return (
