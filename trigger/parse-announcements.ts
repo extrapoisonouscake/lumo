@@ -1,6 +1,10 @@
 import { KnownSchools, knownSchoolsIDs } from "@/constants/schools";
 import { getMidnight } from "@/helpers/getMidnight";
-import { INSTANTIATED_TIMEZONE, timezonedDayJS } from "@/instances/dayjs";
+import {
+  dayjs,
+  INSTANTIATED_TIMEZONE,
+  timezonedDayJS,
+} from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
 import {
@@ -46,34 +50,34 @@ export const directURLFunctionsBySchool: Record<
   },
   [KnownSchools.GPVanier]: async (date) => {
     const parsedDate = timezonedDayJS(date);
-    let homePageResponse;
-    try {
-      homePageResponse = await fetch(
-        "https://www.comoxvalleyschools.ca/gp-vanier-secondary/"
-      );
-    } catch {
-      throw new Error("Failed to fetch home page");
-    }
-    const html = await homePageResponse.text();
-    const $ = cheerio.load(html);
+    const directURL = `https://www.comoxvalleyschools.ca/gp-vanier-secondary/wp-content/uploads/sites/29/${parsedDate.year()}/${parsedDate.format(
+      "MM"
+    )}/Announcements-for-${parsedDate.format("MMMM-D")}.pdf`;
+    const response = await fetch(directURL);
+    if (!response.ok) {
+      let homePageResponse;
+      try {
+        homePageResponse = await fetch(
+          "https://www.comoxvalleyschools.ca/gp-vanier-secondary/"
+        );
+      } catch {
+        throw new Error("Failed to fetch home page");
+      }
+      const html = await homePageResponse.text();
+      const $ = cheerio.load(html);
 
-    const parsedURL = $(
-      `h3:has(strong:contains("Daily Announcements:")) + h3 a:contains("Announcements for ${parsedDate.format(
-        "MMMM D"
-      )}")`
-    ).prop("href");
-    if (!parsedURL) {
-      const directURL = `https://www.comoxvalleyschools.ca/gp-vanier-secondary/wp-content/uploads/sites/29/${parsedDate.year()}/${parsedDate.format(
-        "MM"
-      )}/Announcements-for-${parsedDate.format("MMMM-D")}.pdf`;
-      const response = await fetch(directURL);
-      if (!response.ok) {
+      const parsedURL = $(
+        `h3:has(strong:contains("Daily Announcements:")) + h3 a:contains("Announcements for ${parsedDate.format(
+          "MMMM D"
+        )}")`
+      ).prop("href");
+      if (!parsedURL) {
         throw new Error("Failed to fetch PDF");
       }
-      return directURL;
+      return parsedURL;
     }
 
-    return parsedURL;
+    return directURL;
   },
 };
 const delayMinutes = 20;
@@ -154,7 +158,7 @@ export const checkAllAnnouncementsTask = schedules.task({
   run: async () => {
     await checkSchoolAnnouncementsTask.batchTrigger(
       knownSchoolsIDs.map((id) => ({
-        payload: { school: id, date: new Date() },
+        payload: { school: id, date: dayjs().subtract(1, "day").toDate() },
       }))
     );
   },

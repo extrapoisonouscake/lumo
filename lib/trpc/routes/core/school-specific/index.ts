@@ -20,14 +20,13 @@ export const schoolSpecificRouter = router({
     let pdfLink;
     const { schoolId } = await getUserSettings(ctx);
 
-    if (!schoolId || !isKnownSchool(schoolId) || [0, 6].includes(date.day())) {
+    if (!schoolId || !isKnownSchool(schoolId)) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Announcements not available",
       });
     }
     const redisKey = getAnnouncementsRedisKey(schoolId);
-
     const pdfLinkHashKey = getAnnouncementsPDFLinkRedisHashKey(new Date());
     let data: AnnouncementSection[] = [];
     let cachedData;

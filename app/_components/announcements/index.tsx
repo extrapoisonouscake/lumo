@@ -32,9 +32,10 @@ export function Announcements() {
       error = AnnouncementsNotAvailableReason.SchoolNotSelected;
     } else if (!isKnownSchool(schoolId)) {
       error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
-    } else if ([0, 6].includes(date.day())) {
-      error = AnnouncementsNotAvailableReason.NotAWeekday;
     }
+    // } else if ([0, 6].includes(date.day())) {
+    //   error = AnnouncementsNotAvailableReason.NotAWeekday;
+    // }
     if (error !== undefined) {
       shouldFetch = false;
     }
