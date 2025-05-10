@@ -97,6 +97,9 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     school: z.enum(zodEnum(knownSchoolsIDs)),
     date: z.date(),
   }),
+handleError:async(payload, error)=>{
+console.error(error)
+},
   run: async ({ school, date }, { ctx }) => {
     const redisKey = getAnnouncementsRedisKey(school, date);
     const cachedAnnouncements = await redis.get(redisKey);
