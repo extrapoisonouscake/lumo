@@ -20,7 +20,7 @@ export const schoolSpecificRouter = router({
     let pdfLink;
     const { schoolId } = await getUserSettings(ctx);
 
-    if (!schoolId || !isKnownSchool(schoolId)) {
+    if (!schoolId || !isKnownSchool(schoolId) || [0, 6].includes(date.day())) {
       throw new TRPCError({
         code: "NOT_FOUND",
         message: "Announcements not available",

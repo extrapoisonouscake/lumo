@@ -15,9 +15,9 @@ import { WEBSITE_TITLE } from "@/constants/website";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
+import { Analytics } from "@vercel/analytics/next";
 import { cookies } from "next/headers";
 import { THEME_COLOR_TAG_ID } from "./constants";
-
 export const viewport: Viewport = {
   maximumScale: 1,
   width: "device-width",
@@ -86,6 +86,7 @@ export default async function RootLayout({
               {children}
             </AppSidebarWrapper>
           </Providers>
+          <Analytics />
         </body>
       </html>
     </>

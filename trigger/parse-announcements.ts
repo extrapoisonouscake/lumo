@@ -1,10 +1,6 @@
 import { KnownSchools, knownSchoolsIDs } from "@/constants/schools";
 import { getMidnight } from "@/helpers/getMidnight";
-import {
-  dayjs,
-  INSTANTIATED_TIMEZONE,
-  timezonedDayJS,
-} from "@/instances/dayjs";
+import { INSTANTIATED_TIMEZONE, timezonedDayJS } from "@/instances/dayjs";
 import { redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
 import {
@@ -97,9 +93,9 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     school: z.enum(zodEnum(knownSchoolsIDs)),
     date: z.date(),
   }),
-handleError:async(payload, error)=>{
-console.error(error)
-},
+  handleError: async (payload, error) => {
+    console.error(error);
+  },
   run: async ({ school, date }, { ctx }) => {
     const redisKey = getAnnouncementsRedisKey(school, date);
     const cachedAnnouncements = await redis.get(redisKey);
@@ -161,7 +157,7 @@ export const checkAllAnnouncementsTask = schedules.task({
   run: async () => {
     await checkSchoolAnnouncementsTask.batchTrigger(
       knownSchoolsIDs.map((id) => ({
-        payload: { school: id, date: dayjs().subtract(1, "day").toDate() },
+        payload: { school: id, date: new Date() },
       }))
     );
   },
