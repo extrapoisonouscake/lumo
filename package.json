@@ -12,7 +12,8 @@
     "trigger:dev": "npx trigger.dev@latest dev",
     "knip": "knip",
     "redis:dev": "docker run -it -d -p 8080:80 --name srh -e SRH_MODE=env -e SRH_TOKEN=token -e SRH_CONNECTION_STRING=\"redis://127.0.0.1:6379\" hiett/serverless-redis-http:latest",
-    "db:update": "drizzle-kit generate && drizzle-kit migrate"
+    "db:update": "drizzle-kit generate && drizzle-kit migrate",
+    "prepare": "husky"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -86,6 +87,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@svgr/webpack": "^8.1.0",
     "@types/crypto-js": "^4.2.2",
     "@types/d3": "^7.4.3",
@@ -99,6 +102,7 @@
     "@types/web-push": "^3.6.4",
     "eslint": "^8",
     "eslint-config-next": "^15.2.4",
+    "husky": "^9.1.7",
     "ioredis": "^5.6.1",
     "js-yaml": "^4.1.0",
     "knip": "^5.50.5",
