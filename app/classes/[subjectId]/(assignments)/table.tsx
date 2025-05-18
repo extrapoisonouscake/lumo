@@ -157,6 +157,7 @@ export function SubjectAssignmentsTable({
     const cells = row.getVisibleCells();
     return (
       <TableRow
+        key={row.id}
         onClick={() => navigateToAssignment(row.original)}
         style={table.options.meta?.getRowStyles?.(row)}
         className={cn(
