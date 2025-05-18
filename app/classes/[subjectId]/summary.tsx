@@ -83,7 +83,7 @@ export function SubjectSummary({
               >
                 {gradePercentage !== null
                   ? isLetterGradeShown
-                    ? gradePercentage.letter ?? gradeInfo?.letter
+                    ? gradePercentage.letter ?? gradeInfo!.letter
                     : gradePercentage.mark
                   : "-"}
               </span>

@@ -142,7 +142,7 @@ export function SubjectAssignmentsTable({
       settings.shouldHighlightMissingAssignments
         ? (row: Row<Assignment>) => {
             return cn({
-              "bg-red-200/25 hover:bg-red-200/25":
+              "bg-red-100/30 dark:bg-red-100/20 hover:bg-red-100/40 dark:hover:bg-red-100/30 text-red-500":
                 row.original.status === AssignmentStatus.Missing,
             });
           }
