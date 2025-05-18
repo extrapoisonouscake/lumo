@@ -35,7 +35,6 @@ import {
 } from "@/helpers/tables";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { UserSettings } from "@/types/core";
-import { useRouter } from "nextjs-toploader/app";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
 import { formatAssignmentScore, formatClassAverage } from "./helpers";
 import { useAssignmentNavigation } from "./use-assignment-navigation";
@@ -194,7 +193,6 @@ export function SubjectAssignmentsTable({
     manualPagination: true,
     columns,
   });
-  const router = useRouter();
   return (
     <TableRenderer
       emptyState={{ text: EMPTY_ASSIGNMENTS_MESSAGE, emoji: "📚" }}

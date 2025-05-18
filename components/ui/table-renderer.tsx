@@ -9,6 +9,7 @@ import {
 
 import { cn } from "@/helpers/cn";
 import { memo, ReactNode } from "react";
+import { AppleEmoji } from "../misc/apple-emoji";
 import {
   Table,
   TableBody,
@@ -108,7 +109,7 @@ function TableRendererComponent<T>({
                     <div className="flex flex-col items-center justify-center gap-1.5">
                       {emptyState.emoji && (
                         <span className="text-3xl leading-none">
-                          {emptyState.emoji}
+                          <AppleEmoji value={emptyState.emoji} />
                         </span>
                       )}
                       <span>{emptyState?.text || NO_CONTENT_MESSAGE}</span>
