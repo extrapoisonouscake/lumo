@@ -26,6 +26,7 @@ import {
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
+import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 const PageDataContext = createContext<{
   pageData: WebsitePage | null;
@@ -119,7 +120,10 @@ export function PageHeading() {
         )}
       </div>
 
-      {isLoggedIn && <UserHeader className="block sm:hidden w-fit" />}
+      <div className="w-fit flex sm:hidden gap-1 items-center">
+        <ThemeToggle isInSidebar={false} shouldShowText={false} />
+        {isLoggedIn && <UserHeader className="w-fit" />}
+      </div>
     </div>
   );
 }

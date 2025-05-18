@@ -68,7 +68,7 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <ThemeToggle />
+          <ThemeToggle isInSidebar />
           <SidebarMenuItem>
             {isGuest ? <LogInButton /> : <LogOutButton />}
           </SidebarMenuItem>
