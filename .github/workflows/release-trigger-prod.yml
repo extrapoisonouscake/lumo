@@ -7,6 +7,8 @@ on:
       - main
     paths:
       - trigger/**
+      - db/**
+      - trigger.config.ts
 permissions:
   contents: read
 concurrency:
