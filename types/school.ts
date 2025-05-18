@@ -4,7 +4,6 @@ export interface Subject {
   teachers: string[];
   room: string | null;
   actualName: string;
-  average: SubjectGrade | null;
   term?: SubjectTerm;
 }
 //? name?

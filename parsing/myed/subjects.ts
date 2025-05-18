@@ -65,7 +65,6 @@ const convertSubject = ({
   name: prettifyEducationalName(relSscMstOid_mstDescription),
   teachers: relSscMstOid_mstStaffView.map((item) => item.name),
   room: relSscMstOid_mstRoomView ?? null,
-  average: normalizeMarkWithLetter(cfTermAverage),
   term: sscTermView ? termRawValueToNormalized[sscTermView] : undefined,
 });
 export function parseSubjects({

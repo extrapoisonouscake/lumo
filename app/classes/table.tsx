@@ -22,15 +22,20 @@ import { fractionFormatter } from "@/constants/intl";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
-import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
-import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
+import {
+  CellSkeleton,
+  makeTableColumnsSkeletons,
+} from "@/helpers/makeTableColumnsSkeletons";
+
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
-import { renderTableCell } from "@/helpers/tables";
-import { Subject } from "@/types/school";
+import { renderTableCell, sortColumnWithNullablesLast } from "@/helpers/tables";
+import { Subject, SubjectGrade } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
+import { getGradeInfo } from "./[subjectId]/helpers";
 
-const columnHelper = createColumnHelper<Subject>();
+type SubjectWithAverage = Subject & { average?: SubjectGrade | null };
+const columnHelper = createColumnHelper<SubjectWithAverage>();
 const columns = [
   columnHelper.accessor("name", {
     header: "Name",
@@ -42,11 +47,16 @@ const columns = [
     header: ({ column }) => {
       return <SortableColumn {...column}>Average</SortableColumn>;
     },
-
+    sortingFn: sortColumnWithNullablesLast<"average", SubjectWithAverage>(
+      (a, b) => b!.mark - a!.mark
+    ),
     cell: ({ cell }) => {
       const average = cell.getValue();
-      if (!average) return NULL_VALUE_DISPLAY_FALLBACK;
-      return fractionFormatter.format(average.mark);
+      if (average === undefined) return <CellSkeleton length={5} />;
+      if (average === null) return NULL_VALUE_DISPLAY_FALLBACK;
+      return `${fractionFormatter.format(average.mark)} ${
+        average.letter ?? getGradeInfo(average).letter
+      }`;
     },
     sortUndefined: "last",
   }),
@@ -95,7 +105,7 @@ const mockSubjects = (length: number) =>
         room: "",
         id: "",
         actualName: "",
-      } satisfies Subject)
+      } satisfies SubjectWithAverage)
   );
 export function SubjectsTable({
   data: externalData,
@@ -103,16 +113,15 @@ export function SubjectsTable({
   isLoading = false,
 }: {
   shownColumns?: string[];
-  data?: Subject[];
+  data?: SubjectWithAverage[];
   isLoading?: boolean;
 }) {
   const data = useMemo(
     () =>
       isLoading
         ? mockSubjects(5)
-        : prepareTableDataForSorting(
-            externalData as NonNullable<typeof externalData>
-          ),
+        : (externalData as NonNullable<typeof externalData>),
+
     [isLoading, externalData]
   );
   const columnVisibility = shownColumns
@@ -124,39 +133,41 @@ export function SubjectsTable({
       )
     : {};
   const router = useRouter();
-  const getRowRenderer: RowRendererFactory<Subject> = (table) => (row) => {
-    const cells = row.getVisibleCells();
-    const isTeacherAdvisory =
-      row.original.name === TEACHER_ADVISORY_ABBREVIATION;
-    return (
-      <TableRow
-        onClick={
-          !isTeacherAdvisory
-            ? () => router.push(getSubjectPageURL(row.original))
-            : undefined
-        }
-        data-state={row.getIsSelected() && "selected"}
-        style={table.options.meta?.getRowStyles?.(row)}
-        className={cn(table.options.meta?.getRowClassName?.(row), {
-          "cursor-pointer": !isTeacherAdvisory,
-        })}
-      >
-        {cells.map((cell, i) => {
-          const content = renderTableCell(cell);
-          const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
-          return showArrow ? (
-            <TableCellWithRedirectIcon key={cell.id}>
-              {content}
-            </TableCellWithRedirectIcon>
-          ) : (
-            <TableCell key={cell.id}>{content}</TableCell>
-          );
-        })}
-      </TableRow>
-    );
-  };
+  const getRowRenderer: RowRendererFactory<SubjectWithAverage> =
+    (table) => (row) => {
+      const cells = row.getVisibleCells();
+      const isTeacherAdvisory =
+        row.original.name === TEACHER_ADVISORY_ABBREVIATION;
+      return (
+        <TableRow
+          key={row.id}
+          onClick={
+            !isTeacherAdvisory
+              ? () => router.push(getSubjectPageURL(row.original))
+              : undefined
+          }
+          data-state={row.getIsSelected() && "selected"}
+          style={table.options.meta?.getRowStyles?.(row)}
+          className={cn(table.options.meta?.getRowClassName?.(row), {
+            "cursor-pointer": !isTeacherAdvisory,
+          })}
+        >
+          {cells.map((cell, i) => {
+            const content = renderTableCell(cell);
+            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
+            return showArrow ? (
+              <TableCellWithRedirectIcon key={cell.id}>
+                {content}
+              </TableCellWithRedirectIcon>
+            ) : (
+              <TableCell key={cell.id}>{content}</TableCell>
+            );
+          })}
+        </TableRow>
+      );
+    };
 
-  const table = useReactTable<Subject>({
+  const table = useReactTable<SubjectWithAverage>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -166,6 +177,7 @@ export function SubjectsTable({
       columnVisibility,
     },
     data,
+    sortDescFirst: false,
     manualPagination: true,
     columns: isLoading ? columnsSkeletons : columns,
   });

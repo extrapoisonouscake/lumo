@@ -1,6 +1,7 @@
 import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/helpers/cn";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 import { GeistSans } from "geist/font/sans";
 import { Metadata, Viewport } from "next";
@@ -15,7 +16,6 @@ import { WEBSITE_TITLE } from "@/constants/website";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
-import { Analytics } from "@vercel/analytics/next";
 import { cookies } from "next/headers";
 import { THEME_COLOR_TAG_ID } from "./constants";
 export const viewport: Viewport = {
@@ -86,7 +86,9 @@ export default async function RootLayout({
               {children}
             </AppSidebarWrapper>
           </Providers>
-          <Analytics />
+          <GoogleAnalytics
+            gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}
+          />
         </body>
       </html>
     </>

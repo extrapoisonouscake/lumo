@@ -13,11 +13,25 @@ export function makeTableColumnsSkeletons<T extends RowData>(
   return columns.map((column) => ({
     ...column,
     cell: ({ cell }) => (
-      <div className="flex items-center">
-        <Skeleton shouldShrink={shouldShrink}>
-          <p>{"1".repeat(lengths?.[cell.column.id as keyof T] || 5)}</p>
-        </Skeleton>
-      </div>
+      <CellSkeleton
+        length={lengths?.[cell.column.id as keyof T] || 5}
+        shouldShrink={shouldShrink}
+      />
     ),
   })) as typeof columns;
+}
+export function CellSkeleton({
+  length,
+  shouldShrink,
+}: {
+  length: number;
+  shouldShrink?: boolean;
+}) {
+  return (
+    <div className="flex items-center">
+      <Skeleton shouldShrink={shouldShrink}>
+        <p>{"1".repeat(length)}</p>
+      </Skeleton>
+    </div>
+  );
 }

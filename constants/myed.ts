@@ -282,6 +282,29 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 export type MyEdRestEndpointURL = keyof paths;
 
+const subjectTermToGradeLabelsMap: Record<
+  SubjectTerm,
+  Array<{
+    name: OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"];
+    index: number;
+  }>
+> = {
+  [SubjectTerm.FirstSemester]: [
+    { name: "Q1", index: 0 },
+    { name: "Q2", index: 1 },
+  ],
+  [SubjectTerm.SecondSemester]: [
+    { name: "Q3", index: 2 },
+    { name: "Q4", index: 3 },
+  ],
+  [SubjectTerm.FullYear]: [
+    { name: "Q1", index: 0 },
+    { name: "Q2", index: 1 },
+    { name: "Q3", index: 2 },
+    { name: "Q4", index: 3 },
+  ],
+};
+
 const generateSubjectsListStepParams = (
   studentID: string,
   params?: {
@@ -310,14 +333,6 @@ const findSubjectIdByName = (subjects: RouteResponse, name: string) => {
   ).find((subject) => subject.relSscMstOid_mstDescription === name)?.oid;
 };
 
-const subjectTermToGradeLabelsMap: Record<
-  SubjectTerm,
-  OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"][]
-> = {
-  [SubjectTerm.FirstSemester]: ["Q1", "Q2"],
-  [SubjectTerm.SecondSemester]: ["Q3", "Q4"],
-  [SubjectTerm.FullYear]: ["Q1", "Q2", "Q3", "Q4"],
-};
 const subjectAssignmentsRoute = new Route<
   {
     id: string;
@@ -348,7 +363,7 @@ const subjectAssignmentsRoute = new Route<
 
       for (const termLabel of termLabelsToSearch) {
         const foundTerm = termsResponse.terms.find(
-          (term) => term.gradeTermId === termLabel
+          (term) => term.gradeTermId === termLabel.name
         );
         if (foundTerm) termIdsToSearch.push(foundTerm.oid);
       }

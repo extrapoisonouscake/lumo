@@ -8,6 +8,7 @@ import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
 
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
+import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
 import { useSearchParams } from "next/navigation";
 
 export function SubjectsPageContent() {
@@ -18,11 +19,29 @@ export function SubjectsPageContent() {
     isPreviousYear: year === "previous",
     termId: term,
   });
+  const subjectSummaries = useSubjectSummaries({
+    ids: query.data?.subjects.main.map((subject) => subject.id),
+  });
   return (
     <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
-      {(response) => (
-        <LoadedContent response={response} year={year} term={term} />
-      )}
+      {(response) => {
+        return (
+          <LoadedContent
+            response={{
+              ...response,
+              subjects: {
+                ...response.subjects,
+                main: response.subjects.main.map((subject) => ({
+                  ...subject,
+                  average: subjectSummaries.data[subject.id]?.academics.average,
+                })),
+              },
+            }}
+            year={year}
+            term={term}
+          />
+        );
+      }}
     </QueryWrapper>
   );
 }

@@ -10,26 +10,11 @@ import { HalfDonutProgressChart } from "@/components/ui/charts/half-donut-progre
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { UserSettings } from "@/types/core";
-import { SubjectGrade, SubjectTerm, type SubjectSummary } from "@/types/school";
+import { SubjectTerm, type SubjectSummary } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { getGradeInfo } from "./helpers";
 import { LetterGradeSwitch } from "./letter-grade-switch";
-
-// Define a structured grades configuration
-const GRADES_CONFIG = [
-  { threshold: 80, color: "green-500", letter: "A" },
-  { threshold: 70, color: "yellow-400", letter: "B" },
-  { threshold: 60, color: "orange-500", letter: "C" },
-  { threshold: 50, color: "red-500", letter: "D" },
-  { threshold: 0, color: "red-600", letter: "F" },
-];
-
-function getGradeInfo(value: SubjectGrade) {
-  return (
-    GRADES_CONFIG.find((grade) => value.mark >= grade.threshold) ||
-    GRADES_CONFIG[GRADES_CONFIG.length - 1]
-  );
-}
 
 const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FirstSemester]: "Semester I",

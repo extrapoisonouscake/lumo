@@ -5,7 +5,6 @@ import {
   ArrowUpDown,
   ArrowUpWideNarrow,
 } from "lucide-react";
-import { Button } from "./button";
 
 export function SortableColumn<TableObject, CellValue>({
   children,
@@ -15,16 +14,19 @@ export function SortableColumn<TableObject, CellValue>({
   let Icon;
   switch (sortingDirection) {
     case "asc":
-      Icon = ArrowDownNarrowWide;
+      Icon = ArrowUpWideNarrow;
       break;
     case "desc":
-      Icon = ArrowUpWideNarrow;
+      Icon = ArrowDownNarrowWide;
       break;
     default:
       Icon = ArrowUpDown;
   }
   return (
-    <Button variant="ghost" onClick={() => column.toggleSorting()}>
+    <div
+      className="flex items-center gap-1.5 cursor-pointer"
+      onClick={() => column.toggleSorting()}
+    >
       {children}
       <motion.div
         key={`${sortingDirection}`}
@@ -35,8 +37,8 @@ export function SortableColumn<TableObject, CellValue>({
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="size-4"
       >
-        <Icon />
+        <Icon className="size-4" />
       </motion.div>
-    </Button>
+    </div>
   );
 }
