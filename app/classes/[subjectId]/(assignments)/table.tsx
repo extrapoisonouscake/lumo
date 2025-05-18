@@ -190,6 +190,7 @@ export function SubjectAssignmentsTable({
       getRowClassName,
     },
     data,
+    sortDescFirst: false,
     manualPagination: true,
     columns,
   });

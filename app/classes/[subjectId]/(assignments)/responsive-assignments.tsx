@@ -1,13 +1,14 @@
-import { Assignment } from "@/types/school";
+import { Assignment, AssignmentStatus } from "@/types/school";
 import { AssignmentCard, AssignmentCardSkeleton } from "./assignment-card";
 
 import { cn } from "@/helpers/cn";
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { useIsMobile } from "../../../../hooks/use-mobile";
 
 import { ErrorCard } from "@/components/misc/error-card";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
+
 import {
   SubjectAssignmentsTable,
   SubjectAssignmentsTableSkeleton,
@@ -37,19 +38,29 @@ export function ResponsiveAssignments({
   const settings = useUserSettings();
   const isMobile = useIsMobile();
   const { navigateToAssignment } = useAssignmentNavigation();
-  const filteredData =
-    categoryId === "all"
-      ? data
-      : data.filter((assignment) => assignment.categoryId === categoryId);
+
+  const preparedData = useMemo(() => {
+    const filteredData =
+      categoryId === "all"
+        ? data
+        : data.filter((assignment) => assignment.categoryId === categoryId);
+    if (settings.shouldHighlightMissingAssignments) {
+      return sortAssignmentsWithMissingFirst(filteredData);
+    }
+    return filteredData;
+  }, [data, settings.shouldHighlightMissingAssignments]);
   if (isMobile) {
     return (
       <CardList>
-        {filteredData.length === 0 ? (
+        {preparedData.length === 0 ? (
           <ErrorCard emoji="📚">{EMPTY_ASSIGNMENTS_MESSAGE}</ErrorCard>
         ) : (
-          filteredData.map((assignment) => (
+          preparedData.map((assignment) => (
             <AssignmentCard
               key={assignment.id}
+              shouldHighlightIfMissing={
+                settings.shouldHighlightMissingAssignments
+              }
               shouldShowPercentages={settings.shouldShowPercentages}
               assignment={assignment}
               onClick={() => navigateToAssignment(assignment)}
@@ -60,7 +71,7 @@ export function ResponsiveAssignments({
     );
   }
 
-  return <SubjectAssignmentsTable data={filteredData} />;
+  return <SubjectAssignmentsTable data={preparedData} />;
 }
 
 export function ResponsiveAssignmentsSkeleton() {
@@ -74,4 +85,17 @@ export function ResponsiveAssignmentsSkeleton() {
       </CardList>
     </>
   );
+}
+function sortAssignmentsWithMissingFirst(assignments: Assignment[]) {
+  return assignments.sort((a, b) => {
+    const isAMissing = a.status === AssignmentStatus.Missing;
+    const isBMissing = b.status === AssignmentStatus.Missing;
+    if (isAMissing && !isBMissing) {
+      return -1;
+    }
+    if (!isAMissing && isBMissing) {
+      return 1;
+    }
+    return 0;
+  });
 }

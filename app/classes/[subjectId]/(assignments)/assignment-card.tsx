@@ -11,12 +11,14 @@ import { formatAssignmentScore, formatClassAverage } from "./helpers";
 interface AssignmentCardProps {
   assignment: Assignment;
   shouldShowPercentages: boolean;
+  shouldHighlightIfMissing: boolean;
   onClick?: () => void;
 }
 
 export function AssignmentCard({
   assignment,
   shouldShowPercentages,
+  shouldHighlightIfMissing,
   onClick,
 }: AssignmentCardProps) {
   const { name, dueAt, status, weight, feedback } = assignment;
@@ -26,7 +28,10 @@ export function AssignmentCard({
       onClick={onClick}
       className={cn(
         "p-4 cursor-pointer transition-colors gap-2 hover:bg-muted/50",
-        { "border-red-500/50 dark:border-red-500/40": isMissing }
+        {
+          "border-red-500/50 dark:border-red-500/40":
+            shouldHighlightIfMissing && isMissing,
+        }
       )}
     >
       <h3 className="font-medium text-base">{name}</h3>
