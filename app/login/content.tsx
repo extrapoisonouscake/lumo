@@ -2,8 +2,8 @@
 
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
-
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
+import MyEducationBCLogo from "@/public/myeducationbc.svg";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -43,28 +43,51 @@ export function LoginPageContent() {
           setResult={setRegistrationResult}
         />
       )}
-      <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto gap-3">
-        <div className="w-full flex flex-col gap-3">
-          <LoginForm
-            setTemporaryAuthCookies={setTemporaryAuthCookies}
-            form={form}
-          />
-
-          <div className="flex items-center justify-between gap-2">
-            <PasswordResetSection
-              setLoginFormValues={(newUsername) => {
-                form.setValue("username", newUsername);
-                form.setValue("password", "");
-              }}
+      <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto gap-5">
+        <div className="flex flex-col items-center gap-3 w-full">
+          <div className="flex flex-col gap-2 items-center">
+            <div className="size-12 p-3 rounded-full bg-muted flex items-center justify-center">
+              <MyEducationBCLogo className="size-full" />
+            </div>
+            <div className="text-center space-y-1">
+              <h2 className="text-lg font-medium">
+                Sign In with MyEducationBC
+              </h2>
+              <p className="text-sm text-muted-foreground text-center max-w-[350px]">
+                Use your official MyEducationBC username and password to access
+                your account. All data is securely synchronized with the school
+                portal.
+              </p>
+            </div>
+          </div>
+          <div className="w-full flex flex-col gap-3">
+            <LoginForm
+              setTemporaryAuthCookies={setTemporaryAuthCookies}
+              form={form}
             />
-            <Link
-              href="/register"
-              className="text-sm text-secondary-foreground"
-            >
-              Register
-            </Link>
+
+            <div className="flex items-center justify-between gap-2">
+              <PasswordResetSection
+                setLoginFormValues={(newUsername) => {
+                  form.setValue("username", newUsername);
+                  form.setValue("password", "");
+                }}
+              />
+              <Link
+                href="/register"
+                className="text-sm text-secondary-foreground"
+              >
+                Register
+              </Link>
+            </div>
           </div>
         </div>
+        <p className="text-xs text-muted-foreground text-center">
+          MyEducationBC is a trademark of the Government of British Columbia.
+          Its logo is used here solely to indicate auth integration
+          compatibility. This use does not imply any affiliation with or
+          endorsement by the Government of British Columbia.
+        </p>
       </div>
       <ChangePasswordModal
         getCredentials={() => ({
