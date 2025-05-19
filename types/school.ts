@@ -15,6 +15,10 @@ export enum SubjectTerm {
   FirstSemester = "FIRST_SEMESTER",
   SecondSemester = "SECOND_SEMESTER",
   FullYear = "FULL_YEAR",
+FirstQuarter="FIRST_QUARTER",
+SecondQuarter="SECOND_QUARTER",
+ThirdQuarter="THIRD_QUARTER",
+FourthQuarter="FOURTH_QUARTER"
 }
 export type SubjectGrade = {
   mark: number;
