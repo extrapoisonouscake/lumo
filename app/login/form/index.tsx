@@ -68,7 +68,7 @@ export function LoginForm({
       <FormPasswordInput name="password" />
       <div className="flex flex-col gap-2">
         <SubmitButton isLoading={form.formState.isSubmitting}>
-          Sign in
+          Sign In
         </SubmitButton>
         <GuestModeButton />
       </div>

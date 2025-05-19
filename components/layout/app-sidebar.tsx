@@ -139,7 +139,7 @@ function LogOutButton() {
       onClick={() => logOutMutation.mutateAsync()}
     >
       {logOutMutation.isPending ? <Spinner /> : <LogOutIcon />}
-      Sign out
+      Sign Out
     </SidebarMenuButton>
   );
 }

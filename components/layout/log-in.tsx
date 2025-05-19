@@ -24,7 +24,7 @@ export function LogInButton() {
       }}
     >
       {exitGuestModeMutation.isPending ? <Spinner /> : <LogInIcon />}
-      Sign in
+      Sign In
     </SidebarMenuButton>
   );
 }

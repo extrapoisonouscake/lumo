@@ -20,7 +20,7 @@ export function GuestModeButton() {
         router.push("/");
       }}
     >
-      Continue as guest
+      Continue as Guest
     </Button>
   );
 }
