@@ -50,6 +50,10 @@ const termRawValueToNormalized: Record<string, SubjectTerm> = {
   FY: SubjectTerm.FullYear,
   S1: SubjectTerm.FirstSemester,
   S2: SubjectTerm.SecondSemester,
+Q1:SubjectTerm.FirstQuarter,
+Q2:SubjectTerm.SecondQuarter,
+Q3:SubjectTerm.ThirdQuarter,
+Q4:SubjectTerm.FourthQuarter
 };
 
 const convertSubject = ({
