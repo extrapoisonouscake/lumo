@@ -284,26 +284,17 @@ export type MyEdRestEndpointURL = keyof paths;
 
 const subjectTermToGradeLabelsMap: Record<
   SubjectTerm,
-  Array<OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]>
+  Array<
+    OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]
+  >
 > = {
-  [SubjectTerm.FirstSemester]: [
-    "Q1",
-    "Q2"
-  ],
-  [SubjectTerm.SecondSemester]: [
-    "Q3",
-    "Q4"
-  ],
-  [SubjectTerm.FullYear]: [
-    "Q1",
-    "Q2",
-    "Q3",
-    "Q4",
-  ],
-[SubjectTerm.FirstQuarter]:["Q1"],
-[SubjectTerm.SecondQuarter]:["Q2"],
-[SubjectTerm.ThirdQuarter]:["Q3"],
-[SubjectTerm.FourthQuarter]:["Q4"]
+  [SubjectTerm.FirstSemester]: ["Q1", "Q2"],
+  [SubjectTerm.SecondSemester]: ["Q3", "Q4"],
+  [SubjectTerm.FullYear]: ["Q1", "Q2", "Q3", "Q4"],
+  [SubjectTerm.FirstQuarter]: ["Q1"],
+  [SubjectTerm.SecondQuarter]: ["Q2"],
+  [SubjectTerm.ThirdQuarter]: ["Q3"],
+  [SubjectTerm.FourthQuarter]: ["Q4"],
 };
 
 const generateSubjectsListStepParams = (
@@ -350,7 +341,6 @@ const subjectAssignmentsRoute = new Route<
     const termsResponse = responses.at(
       -1
     ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
-console.log({termsResponse},rest)
     let termIdsToSearch;
 
     //runtime check, TODO: change to type check

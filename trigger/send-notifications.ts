@@ -42,7 +42,7 @@ export const sendNotificationsTask = schedules.task({
           isNotNull(users.password)
         ),
     });
-    await Promise.all(
+    await Promise.allSettled(
       users.map(
         ({
           username,
@@ -92,17 +92,16 @@ const sendNotificationsToUser = async (
     isPreviousYear: false,
   });
   const queue = new PrioritizedRequestQueue();
-  const subjectsWithAssignments = await Promise.all(
-    subjectsResponse.subjects.main.map(async (subject) => {
-      const { assignments } = await queue.enqueue(() =>
-        getMyEdWithParameters("subjectAssignments", {
-          id: subject.id,
-          term: subject.term,
-        })
-      );
-      return { ...subject, assignments };
-    })
-  );
+  const subjectsWithAssignments = [];
+  for (const subject of subjectsResponse.subjects.main) {
+    const { assignments } = await queue.enqueue(() =>
+      getMyEdWithParameters("subjectAssignments", {
+        id: subject.id,
+        term: subject.term,
+      })
+    );
+    subjectsWithAssignments.push({ ...subject, assignments });
+  }
 
   const notifications: Array<{
     type: NotificationType;
