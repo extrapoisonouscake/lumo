@@ -349,6 +349,7 @@ const subjectAssignmentsRoute = new Route<
     const termsResponse = responses.at(
       -1
     ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
+console.log({termsResponse},rest)
     let termIdsToSearch;
 
     //runtime check, TODO: change to type check
