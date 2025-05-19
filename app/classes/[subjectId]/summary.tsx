@@ -20,6 +20,10 @@ const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FirstSemester]: "Semester I",
   [SubjectTerm.SecondSemester]: "Semester II",
   [SubjectTerm.FullYear]: "Full Year",
+[SubjectTerm.FirstQuarter]:"Quarter I",
+[SubjectTerm.SecondQuarter]:"Quarter II",
+[SubjectTerm.ThirdQuarter]:"Quarter III",
+[SubjectTerm.FourthQuarter]:"Quarter IV"
 };
 export function SubjectSummary({
   term,
