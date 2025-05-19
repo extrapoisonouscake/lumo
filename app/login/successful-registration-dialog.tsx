@@ -36,7 +36,7 @@ export function SuccessfulRegistrationDialog({
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
           {result === "success"
-            ? "A confirmation email will be sent to the address you specified. You may now log into MyEducationBC. Use your email address and the password you provided during the request process."
+            ? "A confirmation email will be sent to the address you specified. You may now sign into MyEdPlus. Use your email address and the password you provided during the request process."
             : "A verification email will be sent to the email address you specified. Please click on the confirmation link in the email to activate your account. Check your spam folder if you don't see it in your inbox."}
         </p>
       </DialogContent>

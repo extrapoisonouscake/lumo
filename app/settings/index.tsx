@@ -92,7 +92,7 @@ function LogOutButton() {
       leftIcon={<LogOutIcon />}
       shouldShowChildrenOnLoading
     >
-      Log out
+      Sign out
     </Button>
   );
 }
