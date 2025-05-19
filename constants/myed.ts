@@ -284,25 +284,26 @@ export type MyEdRestEndpointURL = keyof paths;
 
 const subjectTermToGradeLabelsMap: Record<
   SubjectTerm,
-  Array<{
-    name: OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"];
-    index: number;
-  }>
+  Array<OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]>
 > = {
   [SubjectTerm.FirstSemester]: [
-    { name: "Q1", index: 0 },
-    { name: "Q2", index: 1 },
+    "Q1",
+    "Q2"
   ],
   [SubjectTerm.SecondSemester]: [
-    { name: "Q3", index: 2 },
-    { name: "Q4", index: 3 },
+    "Q3",
+    "Q4"
   ],
   [SubjectTerm.FullYear]: [
-    { name: "Q1", index: 0 },
-    { name: "Q2", index: 1 },
-    { name: "Q3", index: 2 },
-    { name: "Q4", index: 3 },
+    "Q1",
+    "Q2",
+    "Q3",
+    "Q4",
   ],
+[SubjectTerm.FirstQuarter]:["Q1"],
+[SubjectTerm.SecondQuarter]:["Q2"],
+[SubjectTerm.ThirdQuarter]:["Q3"],
+[SubjectTerm.FourthQuarter]:["Q4"]
 };
 
 const generateSubjectsListStepParams = (
@@ -364,7 +365,7 @@ console.log({termsResponse},rest)
 
       for (const termLabel of termLabelsToSearch) {
         const foundTerm = termsResponse.terms.find(
-          (term) => term.gradeTermId === termLabel.name
+          (term) => term.gradeTermId === termLabel
         );
         if (foundTerm) termIdsToSearch.push(foundTerm.oid);
       }
