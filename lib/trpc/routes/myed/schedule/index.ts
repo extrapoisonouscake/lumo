@@ -12,8 +12,10 @@ export const scheduleRouter = router({
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
       const currentDate = timezonedDayJS().startOf("day");
-      return getMyEd("schedule", {
+      const response = getMyEd("schedule", {
         date: !currentDate.isSame(input.date, "day") ? input.date : undefined,
       });
+      console.log({ response });
+      return response;
     }),
 });
