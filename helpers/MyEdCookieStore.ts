@@ -90,7 +90,7 @@ export class MyEdCookieStore {
         value: encryption.decrypt(cookie.value),
       }));
     } catch {
-      return undefined;
+      return [];
     }
   };
   delete: PlainCookieStore["delete"] = (name: string) => {
