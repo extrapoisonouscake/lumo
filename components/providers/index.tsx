@@ -12,7 +12,7 @@ export function Providers({
   initialCookieValues,
 }: {
   children: ReactNode;
-  initialCookieValues: { isLoggedIn: boolean; isGuest: boolean };
+  initialCookieValues: { isLoggedIn: boolean };
 }) {
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,6 +1,6 @@
 CREATE TABLE "notifications_settings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" text,
+	"user_id" text NOT NULL,
 	"new_assignments" boolean DEFAULT true NOT NULL,
 	CONSTRAINT "notifications_settings_user_id_unique" UNIQUE("user_id")
 );
@@ -28,7 +28,7 @@ CREATE TABLE "tracked_school_data" (
 --> statement-breakpoint
 CREATE TABLE "user_settings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"user_id" text,
+	"user_id" text NOT NULL,
 	"updated_at" timestamp DEFAULT now(),
 	"school_id" text,
 	"should_show_next_subject_timer" boolean DEFAULT true NOT NULL,

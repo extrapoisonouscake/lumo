@@ -78,11 +78,11 @@ export const usePageData = () => {
 
 export function PageHeading() {
   const { pageData } = usePageData();
-  const { isLoggedIn, isGuest } = useAuthStatus();
+  const { isLoggedIn } = useAuthStatus();
   return (
     <div className="flex justify-between gap-4 items-center">
       <div className="flex items-center gap-2">
-        {(isLoggedIn || isGuest) && (
+        {isLoggedIn && (
           <div className="hidden sm:flex items-center gap-2">
             <SidebarTrigger />
             <Separator orientation="vertical" className="mr-1 h-4" />

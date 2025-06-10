@@ -12,20 +12,14 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  guestAllowedPathnames,
-  websitePagesWithStaticPaths,
-} from "@/constants/website";
-import { clientAuthChecks } from "@/helpers/client-auth-checks";
+import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { useThemeColor } from "@/hooks/trpc/use-theme-color";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { useAuthStatus } from "../providers/auth-status-provider";
-import { LogInButton } from "./log-in";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { LogOutIcon } from "lucide-react";
@@ -37,32 +31,30 @@ export function AppSidebar({
   initialThemeColor,
   ...props
 }: React.ComponentProps<typeof Sidebar> & { initialThemeColor: string }) {
-  const isGuest = clientAuthChecks.isInGuestMode();
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Sidebar {...props}>
-        <PagesMenu initialThemeColor={initialThemeColor} isGuest={isGuest} />
+        <PagesMenu initialThemeColor={initialThemeColor} />
       </Sidebar>
     );
   }
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      {!isGuest && (
-        <SidebarHeader className="pb-1">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <UserHeader />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarHeader>
-      )}
+      <SidebarHeader className="pb-1">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <UserHeader />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+
       <SidebarContent className="pb-1">
-        <SidebarGroup className={cn("py-0", { "pt-2": isGuest })}>
+        <SidebarGroup className={cn("py-0")}>
           <SidebarGroupContent>
-            <PagesMenu isGuest={isGuest} />
+            <PagesMenu />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
@@ -70,7 +62,7 @@ export function AppSidebar({
         <SidebarMenu>
           <ThemeToggle isInSidebar />
           <SidebarMenuItem>
-            {isGuest ? <LogInButton /> : <LogOutButton />}
+            <LogOutButton />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
@@ -79,22 +71,12 @@ export function AppSidebar({
   );
 }
 
-function PagesMenu({
-  initialThemeColor,
-  isGuest,
-}: {
-  initialThemeColor?: string;
-  isGuest: boolean;
-}) {
+function PagesMenu({ initialThemeColor }: { initialThemeColor?: string }) {
   const pathname = usePathname();
   const isMobile = useIsMobile();
-  const pages = useMemo(() => {
-    return Object.entries(websitePagesWithStaticPaths).filter(
-      ([url, page]) =>
-        !page.isHiddenInSidebar &&
-        (!isGuest || guestAllowedPathnames.includes(url))
-    );
-  }, [isGuest]);
+  const pages = Object.entries(websitePagesWithStaticPaths).filter(
+    ([url, page]) => !page.isHiddenInSidebar
+  );
   const themeColor = useThemeColor(initialThemeColor);
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>

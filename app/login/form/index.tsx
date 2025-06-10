@@ -17,7 +17,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { refreshSessionExpiresAt, trpc } from "../../trpc";
-import { GuestModeButton } from "./guest-mode-button";
 function getFullErrorMessage(error: string | null | undefined) {
   return (
     loginErrorIDToMessageMap[error as LoginErrors] ||
@@ -66,12 +65,9 @@ export function LoginForm({
       {errorMessageNode}
       <FormInput placeholder="1234567" name="username" label="Username" />
       <FormPasswordInput name="password" />
-      <div className="flex flex-col gap-2">
-        <SubmitButton isLoading={form.formState.isSubmitting}>
-          Sign In
-        </SubmitButton>
-        <GuestModeButton />
-      </div>
+      <SubmitButton isLoading={form.formState.isSubmitting}>
+        Sign In
+      </SubmitButton>
     </Form>
   );
 }

@@ -27,7 +27,8 @@ export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
   userId: t
     .text("user_id")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull()
     .unique(),
   updatedAt: t.timestamp("updated_at").defaultNow(),
   schoolId: t.text("school_id"),
@@ -55,7 +56,8 @@ export const notifications_settings = table("notifications_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
   userId: t
     .text("user_id")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
+    .notNull()
     .unique(),
   newAssignments: t.boolean("new_assignments").notNull().default(true),
 });
@@ -66,7 +68,7 @@ export const notifications_subscriptions = table(
     id: t.uuid().defaultRandom().primaryKey(),
     userId: t
       .text("user_id")
-      .references(() => users.id)
+      .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     endpointUrl: t.text("endpoint_url").unique().notNull(),
     deviceId: t.text("device_id").unique().notNull(),
@@ -95,7 +97,7 @@ export const tracked_school_data = table("tracked_school_data", {
   id: t.uuid().defaultRandom().primaryKey(),
   userId: t
     .text("user_id")
-    .references(() => users.id)
+    .references(() => users.id, { onDelete: "cascade" })
     .notNull()
     .unique(),
   subjects: t.jsonb("subjects").notNull(),

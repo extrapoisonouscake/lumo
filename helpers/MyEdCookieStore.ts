@@ -37,10 +37,14 @@ export class MyEdCookieStore {
   get = (name: AuthCookieName): ReturnType<PlainCookieStore["get"]> => {
     const rawValue = this.store.get(getFullCookieName(name));
     if (rawValue) {
-      return {
-        ...rawValue,
-        value: encryption.decrypt(rawValue.value),
-      };
+      try {
+        return {
+          ...rawValue,
+          value: encryption.decrypt(rawValue.value),
+        };
+      } catch {
+        return undefined;
+      }
     } else {
       return undefined;
     }
@@ -80,10 +84,14 @@ export class MyEdCookieStore {
     if (props[0]) {
       props[0] = getFullCookieName(props[0]);
     }
-    return this.store.getAll(...props).map((cookie) => ({
-      ...cookie,
-      value: encryption.decrypt(cookie.value),
-    }));
+    try {
+      return this.store.getAll(...props).map((cookie) => ({
+        ...cookie,
+        value: encryption.decrypt(cookie.value),
+      }));
+    } catch {
+      return undefined;
+    }
   };
   delete: PlainCookieStore["delete"] = (name: string) => {
     return this.store.delete(getFullCookieName(name));

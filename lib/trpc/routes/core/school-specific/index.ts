@@ -9,12 +9,11 @@ import { dailyAnnouncementsRichTitlesData } from "@/parsing/announcements/parser
 import { AnnouncementSection, AnnouncementSectionData } from "@/types/school";
 import { TRPCError } from "@trpc/server";
 import { router } from "../../../base";
-import { atLeastGuestProcedure } from "../../../procedures";
+import { authenticatedProcedure } from "../../../procedures";
 import { getUserSettings } from "../settings";
 import { AnnouncementsNotAvailableReason } from "./public";
-
 export const schoolSpecificRouter = router({
-  getAnnouncements: atLeastGuestProcedure.query(async ({ ctx }) => {
+  getAnnouncements: authenticatedProcedure.query(async ({ ctx }) => {
     const date = timezonedDayJS();
 
     let pdfLink;

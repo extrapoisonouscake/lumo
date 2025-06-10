@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import {
-  guestAllowedPathnames,
-  unauthenticatedPathnames,
-} from "./constants/website";
+import { unauthenticatedPathnames } from "./constants/website";
 import { serverAuthChecks } from "./helpers/server-auth-checks";
 import { deleteSession } from "./lib/trpc/routes/myed/auth/helpers";
 import {
@@ -34,9 +31,7 @@ export default async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const { cookies } = request;
 
-  const isGuest = serverAuthChecks.isInGuestMode(cookies);
-  const isAllowedGeneralAccess =
-    serverAuthChecks.isLoggedIn(cookies) || isGuest;
+  const isAllowedGeneralAccess = serverAuthChecks.isLoggedIn(cookies);
   const { pathname } = request.nextUrl;
 
   if (pathname === "/log-out") {
@@ -48,11 +43,6 @@ export default async function middleware(request: NextRequest) {
   );
   if (isAllowedGeneralAccess) {
     if (isOnUnauthenticatedPage) {
-      return Response.redirect(new URL("/", request.url));
-    } else if (
-      isGuest &&
-      !guestAllowedPathnames.some((p) => pathname.startsWith(p))
-    ) {
       return Response.redirect(new URL("/", request.url));
     }
   } else {

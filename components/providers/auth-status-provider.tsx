@@ -10,25 +10,22 @@ import {
 
 const AuthStatusContext = createContext<{
   isLoggedIn: boolean;
-  isGuest: boolean;
 
   refreshAuthStatus: () => void;
 }>({
   isLoggedIn: false,
-  isGuest: false,
   refreshAuthStatus: () => {},
 });
 const getAuthStatuses = () => {
   const isLoggedIn = clientAuthChecks.isLoggedIn();
-  const isGuest = clientAuthChecks.isInGuestMode();
-  return { isLoggedIn, isGuest };
+  return { isLoggedIn };
 };
 export function AuthStatusProvider({
   children,
   initialCookieValues,
 }: {
   children: ReactNode;
-  initialCookieValues: { isLoggedIn: boolean; isGuest: boolean };
+  initialCookieValues: { isLoggedIn: boolean };
 }) {
   const [statuses, setStatuses] = useState(initialCookieValues);
   const refreshAuthStatus = () => {

@@ -10,6 +10,7 @@ import {
   MyEdAuthenticationCookiesName,
   parseHTMLToken,
 } from "@/constants/myed";
+import { db } from "@/db";
 import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
 import { LoginErrors, LoginSchema } from "./public";
 
@@ -21,19 +22,18 @@ import {
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
 
-import {
-  USER_SETTINGS_COOKIE_PREFIX,
-  USER_SETTINGS_KEYS,
-} from "@/constants/core";
+import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import { user_settings, users } from "@/db/schema";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { hashString } from "@/helpers/hashString";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
+import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { after } from "next/server";
 import "server-only";
-import { runNotificationUnsubscriptionDBCalls } from "../../core/settings";
+import { runNotificationUnsubscriptionDBCalls } from "../../core/settings/helpers";
 import { genericErrorMessageVariableRegex } from "./public";
 export class LoginError extends Error {
   authCookies?: AuthCookies;
@@ -43,6 +43,25 @@ export class LoginError extends Error {
     this.authCookies = authCookies;
   }
 }
+const upsertUserRecords = async (studentId: string) => {
+  const hashedStudentId = hashString(studentId);
+  const existingUser = await db.query.users.findFirst({
+    where: eq(users.id, hashedStudentId),
+  });
+  if (existingUser) return;
+  await db.insert(users).values({ id: hashedStudentId });
+
+  // const encryptedCredentials = credentials
+  // ? {
+  //     username: encryption.encrypt(credentials.username),
+  //     password: encryption.encrypt(credentials.password),
+  //   }
+  // : undefined;
+  await db.insert(user_settings).values({
+    userId: hashedStudentId,
+    ...USER_SETTINGS_DEFAULT_VALUES,
+  });
+};
 export async function performLogin(
   formData: LoginSchema,
   store?: PlainCookieStore
@@ -58,7 +77,7 @@ export async function performLogin(
     password
   );
 
-  setUpLogin({
+  await setUpLogin({
     tokens,
     studentID,
     credentials: formData,
@@ -96,6 +115,7 @@ export async function setUpLogin({
     ...cookieDefaultOptions,
     httpOnly: false,
   });
+  await upsertUserRecords(studentID);
 }
 const loginDefaultParams = {
   userEvent: "930",
@@ -256,7 +276,4 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
   cookieStore.delete(AUTH_COOKIES_NAMES.credentials);
   cookieStore.delete(AUTH_COOKIES_NAMES.studentId);
   cookiePlainStore.delete(IS_LOGGED_IN_COOKIE_NAME);
-  for (const setting of USER_SETTINGS_KEYS) {
-    cookiePlainStore.delete(`${USER_SETTINGS_COOKIE_PREFIX}.${setting}`);
-  }
 }

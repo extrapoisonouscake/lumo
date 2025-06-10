@@ -30,8 +30,8 @@ export function AppSidebarWrapper({
   initialIsExpanded: boolean;
   initialThemeColor: string;
 }) {
-  const { isLoggedIn, isGuest } = useAuthStatus();
-  if (!isLoggedIn && !isGuest)
+  const { isLoggedIn } = useAuthStatus();
+  if (!isLoggedIn)
     return (
       <>
         <Inset topLoader={<TopLoader />}>{children}</Inset>

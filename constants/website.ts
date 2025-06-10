@@ -15,7 +15,6 @@ interface StaticWebsitePage extends WebsitePage {
   isHiddenInSidebar?: boolean;
 }
 export const unauthenticatedPathnames = ["/login", "/register"];
-export const guestAllowedPathnames = ["/", "/settings", "/announcements"];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { breadcrumb: [{ name: "Home" }], icon: Home },
   "/schedule": { breadcrumb: [{ name: "Schedule" }], icon: Calendar },

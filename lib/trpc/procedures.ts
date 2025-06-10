@@ -1,24 +1,13 @@
 import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "./base";
+import { deleteSession } from "./routes/myed/auth/helpers";
 
-export const atLeastGuestProcedure = publicProcedure.use(
+export const authenticatedProcedure = publicProcedure.use(
   async ({ ctx, next }) => {
-    if (!ctx.isGuest && !ctx.studentId)
+    if (!ctx.studentId) {
+      await deleteSession();
       throw new TRPCError({ code: "UNAUTHORIZED" });
-    return next({ ctx });
-  }
-);
-
-export const guestProcedure = atLeastGuestProcedure.use(
-  async ({ ctx, next }) => {
-    if (!ctx.isGuest) throw new TRPCError({ code: "UNAUTHORIZED" });
-    return next({ ctx });
-  }
-);
-
-export const authenticatedProcedure = atLeastGuestProcedure.use(
-  async ({ ctx, next }) => {
-    if (ctx.isGuest === true) throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
     return next({ ctx });
   }
 );

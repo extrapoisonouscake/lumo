@@ -3,7 +3,7 @@ import { fetchMyEd } from "@/instances/fetchMyEd";
 import * as cheerio from "cheerio";
 import { z } from "zod";
 import { publicProcedure, router } from "../../../base";
-import { authenticatedProcedure, guestProcedure } from "../../../procedures";
+import { authenticatedProcedure } from "../../../procedures";
 import {
   deleteSession,
   fetchStudentID,
@@ -31,12 +31,8 @@ import {
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
 import { MYED_HTML_TOKEN_INPUT_NAME } from "@/constants/myed";
 import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
-import {
-  cookieDefaultOptions,
-  MyEdCookieStore,
-} from "@/helpers/MyEdCookieStore";
+import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { TRPCError } from "@trpc/server";
-import { cookies } from "next/headers";
 import { isAuthenticatedContext } from "../../../context";
 import { fetchAuthCookiesAndStudentID } from "./helpers";
 
@@ -328,21 +324,12 @@ export const authRouter = router({
     )
     .mutation(async ({ input: { authCookies, credentials } }) => {
       const studentID = await fetchStudentID(authCookies);
-      setUpLogin({
+      await setUpLogin({
         tokens: authCookies,
         credentials,
         studentID,
       });
     }),
-  enterGuestMode: publicProcedure.mutation(async () => {
-    (await cookies()).set("isGuest", "true", {
-      ...cookieDefaultOptions,
-      httpOnly: false,
-    });
-  }),
-  exitGuestMode: guestProcedure.mutation(async () => {
-    (await cookies()).delete("isGuest");
-  }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
     const fields = await ctx.getMyEd("registrationFields");
     return { ip: ctx.ip, ...fields };

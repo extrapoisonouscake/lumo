@@ -7,6 +7,7 @@ export function useDebouncedUpdateGenericUserSetting(key: UserSetting) {
   const [pendingValue, setPendingValue] = useState<{
     value: any;
     resolve?: (value: any) => void;
+    reject?: (value: any) => void;
   } | null>(null);
   const [debouncedValue] = useDebounce(pendingValue, 1000);
   const updateUserSettingMutation = useUpdateGenericUserSetting();
@@ -19,8 +20,13 @@ export function useDebouncedUpdateGenericUserSetting(key: UserSetting) {
         key,
         value: debouncedValue.value,
       })
-      .finally(() => {
+      .then(() => {
         debouncedValue.resolve?.(debouncedValue.value);
+      })
+      .catch((e) => {
+        debouncedValue.reject?.(e);
+      })
+      .finally(() => {
         setPendingValue(null);
       });
   }, [debouncedValue, key]);
@@ -32,10 +38,11 @@ export function useDebouncedUpdateGenericUserSetting(key: UserSetting) {
       }));
     },
     mutateAsync: (value: any) => {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         setPendingValue({
           value,
           resolve,
+          reject,
         });
       });
     },

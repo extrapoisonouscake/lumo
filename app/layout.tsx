@@ -39,9 +39,8 @@ export default async function RootLayout({
 }) {
   const store = await cookies();
   const isLoggedIn = serverAuthChecks.isLoggedIn(store);
-  const isGuest = serverAuthChecks.isInGuestMode(store);
   let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
-  if (isLoggedIn || isGuest) {
+  if (isLoggedIn) {
     const caller = createCaller(await createTRPCContext());
     const userSettings = await caller.core.settings.getSettings();
     themeColor = userSettings.themeColor;
@@ -77,7 +76,7 @@ export default async function RootLayout({
         <body
           className={cn("flex justify-center min-h-full", GeistSans.className)}
         >
-          <Providers initialCookieValues={{ isLoggedIn, isGuest }}>
+          <Providers initialCookieValues={{ isLoggedIn }}>
             <Toaster />
             <AppSidebarWrapper
               initialIsExpanded={isSidebarExpanded}

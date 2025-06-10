@@ -1,5 +1,5 @@
 {
-  "id": "3fbce16f-fb11-4884-9a08-f349669889cb",
+  "id": "6ab2d1a5-bfd7-4559-8e0c-5dfe733d833d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -19,7 +19,7 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "new_assignments": {
           "name": "new_assignments",
@@ -228,7 +228,7 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
