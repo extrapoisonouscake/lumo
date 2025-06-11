@@ -42,7 +42,13 @@ export default async function RootLayout({
   let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
   if (isLoggedIn) {
     const caller = createCaller(await createTRPCContext());
-    const userSettings = await caller.core.settings.getSettings();
+    let userSettings;
+    try {
+      userSettings = await caller.core.settings.getSettings();
+    } catch {
+      //in case of invalid tokens
+      userSettings = USER_SETTINGS_DEFAULT_VALUES;
+    }
     themeColor = userSettings.themeColor;
   }
   const sidebarState = store.get("sidebar:state")?.value;

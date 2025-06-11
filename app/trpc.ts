@@ -1,4 +1,4 @@
-import { createTRPCClient, httpLink } from "@trpc/client";
+import { createTRPCClient, httpLink, retryLink } from "@trpc/client";
 
 import { PrioritizedRequestQueue } from "@/app/requests-queue";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
@@ -53,6 +53,16 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
 
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
+    retryLink({
+      retry: (opts) => {
+        const code = opts.error.data?.code;
+
+        if (code === "UNAUTHORIZED") {
+          window.location.href = "/login";
+        }
+        return false; // Never retry
+      },
+    }),
     httpLink({
       transformer: superjson,
       url: TRPC_URL,
