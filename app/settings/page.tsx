@@ -4,6 +4,7 @@ import {
 } from "@/components/layout/page-heading";
 import {LogOutButton} from "./log-out-button"
 import { SettingsContent } from ".";
+import {Metadata} from "next";
 export const metadata: Metadata = {
   title: "Settings",
 };
