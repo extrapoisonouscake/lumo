@@ -346,17 +346,21 @@ export const authRouter = router({
       return; // Session is valid, no need to refresh
     }
 
-    const { tokens } = await fetchAuthCookiesAndStudentID(
-      ctx.credentials.username,
-      ctx.credentials.password
-    );
+    try {
+      const { tokens } = await fetchAuthCookiesAndStudentID(
+        ctx.credentials.username,
+        ctx.credentials.password
+      );
 
-    ctx.authCookieStore.set(
-      AUTH_COOKIES_NAMES.tokens,
-      convertObjectToCookieString(tokens, false),
-      {
-        maxAge: 60 * 60,
-      }
-    );
+      ctx.authCookieStore.set(
+        AUTH_COOKIES_NAMES.tokens,
+        convertObjectToCookieString(tokens, false),
+        {
+          maxAge: 60 * 60,
+        }
+      );
+    } catch {
+      throw new TRPCError({ code: "UNAUTHORIZED" });
+    }
   }),
 });
