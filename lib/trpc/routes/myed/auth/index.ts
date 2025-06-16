@@ -2,6 +2,7 @@ import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieStri
 import { fetchMyEd } from "@/instances/fetchMyEd";
 import * as cheerio from "cheerio";
 import { z } from "zod";
+
 import { publicProcedure, router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import {
@@ -360,6 +361,7 @@ export const authRouter = router({
         }
       );
     } catch {
+await deleteSession()
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
   }),
