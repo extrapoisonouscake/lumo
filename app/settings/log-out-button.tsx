@@ -1,3 +1,4 @@
+"use client"
 import { useAuthStatus } from "@/components/providers/auth-status-provider";
 import { Button } from "@/components/ui/button";
 import { useLogOut } from "@/hooks/trpc/use-log-out";
