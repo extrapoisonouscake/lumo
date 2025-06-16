@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-function LogOutButton() {
+export function LogOutButton() {
   const router = useRouter();
   const { refreshAuthStatus } = useAuthStatus();
   const logOutMutation = useLogOut(router.push, refreshAuthStatus);
