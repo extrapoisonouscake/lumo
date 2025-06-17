@@ -10,7 +10,7 @@ import { HalfDonutProgressChart } from "@/components/ui/charts/half-donut-progre
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { UserSettings } from "@/types/core";
-import { SubjectTerm, type SubjectSummary } from "@/types/school";
+import { type SubjectSummary, SubjectTerm } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { getGradeInfo } from "./helpers";
@@ -20,10 +20,18 @@ const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FirstSemester]: "Semester I",
   [SubjectTerm.SecondSemester]: "Semester II",
   [SubjectTerm.FullYear]: "Full Year",
-[SubjectTerm.FirstQuarter]:"Quarter I",
-[SubjectTerm.SecondQuarter]:"Quarter II",
-[SubjectTerm.ThirdQuarter]:"Quarter III",
-[SubjectTerm.FourthQuarter]:"Quarter IV"
+  [SubjectTerm.FirstQuarter]: "Quarter I",
+  [SubjectTerm.SecondQuarter]: "Quarter II",
+  [SubjectTerm.ThirdQuarter]: "Quarter III",
+  [SubjectTerm.FourthQuarter]: "Quarter IV",
+};
+const calculateOverallAverageGradeBasedOnTermAverages = (
+  averages: Omit<SubjectSummary["academics"]["averages"], "overall">
+) => {
+  const values = Object.values(averages);
+  const mark =
+    values.reduce((prev, cur) => prev + (cur?.mark ?? 0), 0) / values.length;
+  return { mark, letter: getGradeInfo({ mark }).letter };
 };
 export function SubjectSummary({
   term,
@@ -32,7 +40,10 @@ export function SubjectSummary({
   shouldShowLetterGrade,
 }: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">) {
   const wasGradePosted = typeof academics.posted === "number";
-  const gradePercentage = wasGradePosted ? academics.posted : academics.average;
+  const gradePercentage = wasGradePosted
+    ? academics.posted
+    : academics.averages.overall ??
+      calculateOverallAverageGradeBasedOnTermAverages(academics.averages);
   const gradeInfo = gradePercentage ? getGradeInfo(gradePercentage) : null;
   const fillColor = gradeInfo ? gradeInfo.color : "zinc-200";
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(

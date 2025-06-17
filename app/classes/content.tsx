@@ -33,7 +33,9 @@ export function SubjectsPageContent() {
                 ...response.subjects,
                 main: response.subjects.main.map((subject) => ({
                   ...subject,
-                  average: subjectSummaries.data[subject.id]?.academics.average,
+                  average:
+                    subjectSummaries.data[subject.id]?.academics.averages
+                      .overall,
                 })),
               },
             }}

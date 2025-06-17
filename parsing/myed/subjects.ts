@@ -11,12 +11,11 @@ import {
 import { DeepWithRequired } from "@/types/utils";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
-const gpaRegex = /^\d+(\.\d+)?(?=\s[A-Za-z]|$)/;
 const normalizeMarkWithLetter = (string?: string | null) => {
   if (!string) return null;
-  const [mark, letter] = string.split(" ");
-  if (!mark) return null;
-  return { mark: +mark, letter };
+  const [mark, ...letter] = string.split(" ");
+  if (!mark || isNaN(+mark)) return null; //TODO handle edge cases
+  return { mark: +mark, letter: letter.join("") };
 };
 
 // const parseSubjectTeachersString = (string: string) => {
@@ -50,10 +49,10 @@ const termRawValueToNormalized: Record<string, SubjectTerm> = {
   FY: SubjectTerm.FullYear,
   S1: SubjectTerm.FirstSemester,
   S2: SubjectTerm.SecondSemester,
-Q1:SubjectTerm.FirstQuarter,
-Q2:SubjectTerm.SecondQuarter,
-Q3:SubjectTerm.ThirdQuarter,
-Q4:SubjectTerm.FourthQuarter
+  Q1: SubjectTerm.FirstQuarter,
+  Q2: SubjectTerm.SecondQuarter,
+  Q3: SubjectTerm.ThirdQuarter,
+  Q4: SubjectTerm.FourthQuarter,
 };
 
 const convertSubject = ({
@@ -125,6 +124,10 @@ const convertAttendanceSummary = (
   return result;
 };
 const NOT_APPLICABLE_MARK = "N/A";
+type RawSubjectSummary = ParserFunctionArguments<
+  "subjectSummary",
+  [SubjectSummaryResponse]
+>;
 const convertAcademicCategory = (
   item: SubjectSummaryResponse["averageSummary"][number]
 ): SubjectSummary["academics"]["categories"][number] => {
@@ -150,19 +153,48 @@ const convertAcademicCategory = (
     }),
   };
 };
+const GRADES_SUMMARY_ITEM_STATIC_KEYS = [
+  "category",
+  "categoryOid",
+  "overall",
+  "running",
+];
+const GRADES_SUMMARY_ITEM_STATIC_PREFIXES = ["avg", "percentage"];
+const getGradesSummaryItemFluidKeys = (keys: string[]) => {
+  //e.g. {overall,Q1,Q2,percentageQ2}=>{Q1,Q2}
+  return keys.filter(
+    (key) =>
+      !GRADES_SUMMARY_ITEM_STATIC_KEYS.includes(key) &&
+      !GRADES_SUMMARY_ITEM_STATIC_PREFIXES.some((prefix) =>
+        key.startsWith(prefix)
+      )
+  );
+};
+function getSubjectAverages(
+  data: RawSubjectSummary["responses"][number]["averageSummary"][number]
+) {
+  return Object.fromEntries(
+    Object.entries({
+      overall: data.overall ?? data.running ?? null,
+      ...Object.fromEntries(
+        getGradesSummaryItemFluidKeys(Object.keys(data)).map((key) => [
+          key,
+          data[key as keyof typeof data],
+        ])
+      ),
+    }).map(([key, value]) => [key, normalizeMarkWithLetter(value)])
+  ) as SubjectSummary["academics"]["averages"];
+}
 export function parseSubjectSummary({
   responses: [data],
-}: ParserFunctionArguments<
-  "subjectSummary",
-  [SubjectSummaryResponse]
->): SubjectSummary {
+}: RawSubjectSummary): SubjectSummary {
   const { section, averageSummary, attendanceSummary, postedSummary } = data;
   const result: SubjectSummary = {
     id: section.oid,
     name: prettifyEducationalName(section.relSscMstOid_mstDescription),
     term: termRawValueToNormalized[section.sscTermView]!,
     academics: {
-      average: null,
+      averages: { overall: null },
       posted: null,
       categories: [],
     },
@@ -176,13 +208,13 @@ export function parseSubjectSummary({
     const gradebookAverageIndex = averageSummary.findIndex(
       (item) => item.category === "Gradebook average"
     );
-    const gradebookAverage = averageSummary[gradebookAverageIndex];
+    const gradebookAverage = averageSummary[gradebookAverageIndex]!; //? is it always present
     const categories = averageSummary.filter(
       (_, index) => index !== gradebookAverageIndex
     );
     const overallPostedGrade = postedSummary[0]!.overall;
     const academics: SubjectSummary["academics"] = {
-      average: normalizeMarkWithLetter(gradebookAverage!.running),
+      averages: getSubjectAverages(gradebookAverage),
       posted: normalizeMarkWithLetter(overallPostedGrade),
       categories: categories.map(convertAcademicCategory),
     };

@@ -79,7 +79,7 @@ export function PasswordResetSection({
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Password Reset</DialogTitle>
+            <DialogTitle>Reset Password</DialogTitle>
           </DialogHeader>
           <Form {...form} onSubmit={onSubmit}>
             {errorMessageNode}

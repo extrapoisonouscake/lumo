@@ -15,10 +15,10 @@ export enum SubjectTerm {
   FirstSemester = "FIRST_SEMESTER",
   SecondSemester = "SECOND_SEMESTER",
   FullYear = "FULL_YEAR",
-FirstQuarter="FIRST_QUARTER",
-SecondQuarter="SECOND_QUARTER",
-ThirdQuarter="THIRD_QUARTER",
-FourthQuarter="FOURTH_QUARTER"
+  FirstQuarter = "FIRST_QUARTER",
+  SecondQuarter = "SECOND_QUARTER",
+  ThirdQuarter = "THIRD_QUARTER",
+  FourthQuarter = "FOURTH_QUARTER",
 }
 export type SubjectGrade = {
   mark: number;
@@ -29,7 +29,10 @@ export interface SubjectSummary {
   name: string;
   term: SubjectTerm;
   academics: {
-    average: SubjectGrade | null;
+    averages: {
+      [key: string]: SubjectGrade | null;
+      overall: SubjectGrade | null;
+    };
     posted: SubjectGrade | null;
     categories: {
       id: string;
