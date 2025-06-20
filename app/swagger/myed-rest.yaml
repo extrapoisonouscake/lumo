@@ -425,70 +425,7 @@ paths:
                     type: array
                     description: "The average summary for the subjects, each includes percentages for all terms as string-number and percentage{TERM} properties with a percent symbol included"
                     items:
-                      type: object
-                      required:
-                        - categoryOid
-                        - overall
-                        - category
-                      properties:
-                        categoryOid:
-                          type: string
-                        overall:
-                          $ref: "#/components/schemas/GradeAsString"
-                        running:
-                          $ref: "#/components/schemas/GradeAsString"
-                        category:
-                          type: string
-                        Q1:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        percentageQ1:
-                          oneOf:
-                            - $ref: "#/components/schemas/PercentageAsString"
-                            - $ref: "#/components/schemas/NAString"
-                        avgViewQ1:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        Q2:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        percentageQ2:
-                          oneOf:
-                            - $ref: "#/components/schemas/PercentageAsString"
-                            - $ref: "#/components/schemas/NAString"
-                        avgViewQ2:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        Q3:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        percentageQ3:
-                          oneOf:
-                            - $ref: "#/components/schemas/PercentageAsString"
-                            - $ref: "#/components/schemas/NAString"
-                        avgViewQ3:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        Q4:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        percentageQ4:
-                          oneOf:
-                            - $ref: "#/components/schemas/PercentageAsString"
-                            - $ref: "#/components/schemas/NAString"
-                        avgViewQ4:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        S1:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        S2:
-                          $ref: "#/components/schemas/GradeAsString"
-                          nullable: true
-                        percentage:
-                          oneOf:
-                            - $ref: "#/components/schemas/PercentageAsString"
-                            - $ref: "#/components/schemas/NAString"
+                      $ref: "#/components/schemas/GradesObject"
 
                   attendanceSummary:
                     type: array
@@ -515,17 +452,7 @@ paths:
                     type: array
                     description: "The posted summary for the subjects, each item includes properties for each term with the term id as key"
                     items:
-                      type: object
-                      required:
-                        - overall
-                        - category
-                      properties:
-                        overall:
-                          oneOf:
-                            - $ref: "#/components/schemas/NumberAsString"
-                            - type: "null"
-                        category:
-                          type: string
+                      $ref: "#/components/schemas/GradesObject"
                   standardSummary:
                     type: array
                     description: "The standard summary for the subjects, each item includes properties for each term with the term id as key"
@@ -1022,6 +949,71 @@ components:
           type: boolean
         hasStudentEditableGoogleDriveFile:
           type: boolean
+    GradesObject:
+      type: object
+      required:
+        - categoryOid
+        - overall
+        - category
+      properties:
+        categoryOid:
+          type: string
+        overall:
+          $ref: "#/components/schemas/GradeAsString"
+        running:
+          $ref: "#/components/schemas/GradeAsString"
+        category:
+          type: string
+        Q1:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        percentageQ1:
+          oneOf:
+            - $ref: "#/components/schemas/PercentageAsString"
+            - $ref: "#/components/schemas/NAString"
+        avgViewQ1:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        Q2:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        percentageQ2:
+          oneOf:
+            - $ref: "#/components/schemas/PercentageAsString"
+            - $ref: "#/components/schemas/NAString"
+        avgViewQ2:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        Q3:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        percentageQ3:
+          oneOf:
+            - $ref: "#/components/schemas/PercentageAsString"
+            - $ref: "#/components/schemas/NAString"
+        avgViewQ3:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        Q4:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        percentageQ4:
+          oneOf:
+            - $ref: "#/components/schemas/PercentageAsString"
+            - $ref: "#/components/schemas/NAString"
+        avgViewQ4:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        S1:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        S2:
+          $ref: "#/components/schemas/GradeAsString"
+          nullable: true
+        percentage:
+          oneOf:
+            - $ref: "#/components/schemas/PercentageAsString"
+            - $ref: "#/components/schemas/NAString"
     GradeTerm:
       type: object
       required:

@@ -25,25 +25,17 @@ const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.ThirdQuarter]: "Quarter III",
   [SubjectTerm.FourthQuarter]: "Quarter IV",
 };
-const calculateOverallAverageGradeBasedOnTermAverages = (
-  averages: Omit<SubjectSummary["academics"]["averages"], "overall">
-) => {
-  const values = Object.values(averages);
-  const mark =
-    values.reduce((prev, cur) => prev + (cur?.mark ?? 0), 0) / values.length;
-  return { mark, letter: getGradeInfo({ mark }).letter };
-};
+
 export function SubjectSummary({
   term,
   name,
   academics,
   shouldShowLetterGrade,
 }: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">) {
-  const wasGradePosted = typeof academics.posted === "number";
+  const wasGradePosted = typeof academics.posted.overall === "number";
   const gradePercentage = wasGradePosted
-    ? academics.posted
-    : academics.averages.overall ??
-      calculateOverallAverageGradeBasedOnTermAverages(academics.averages);
+    ? academics.posted.overall
+    : academics.averages.overall;
   const gradeInfo = gradePercentage ? getGradeInfo(gradePercentage) : null;
   const fillColor = gradeInfo ? gradeInfo.color : "zinc-200";
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(

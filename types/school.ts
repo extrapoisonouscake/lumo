@@ -24,16 +24,17 @@ export type SubjectGrade = {
   mark: number;
   letter?: string;
 };
+type GradesObject = {
+  [key: string]: SubjectGrade | null;
+  overall: SubjectGrade | null;
+};
 export interface SubjectSummary {
   id: string;
   name: string;
   term: SubjectTerm;
   academics: {
-    averages: {
-      [key: string]: SubjectGrade | null;
-      overall: SubjectGrade | null;
-    };
-    posted: SubjectGrade | null;
+    averages: GradesObject;
+    posted: GradesObject;
     categories: {
       id: string;
       name: string;

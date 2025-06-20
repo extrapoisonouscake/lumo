@@ -173,17 +173,26 @@ const getGradesSummaryItemFluidKeys = (keys: string[]) => {
 function getSubjectAverages(
   data: RawSubjectSummary["responses"][number]["averageSummary"][number]
 ) {
-  return Object.fromEntries(
-    Object.entries({
-      overall: data.overall ?? data.running ?? null,
-      ...Object.fromEntries(
-        getGradesSummaryItemFluidKeys(Object.keys(data)).map((key) => [
-          key,
-          data[key as keyof typeof data],
-        ])
-      ),
-    }).map(([key, value]) => [key, normalizeMarkWithLetter(value)])
-  ) as SubjectSummary["academics"]["averages"];
+  const termsEntries = getGradesSummaryItemFluidKeys(Object.keys(data)).map(
+    (key) => [key, data[key as keyof typeof data]]
+  );
+  const fluidTermsData = termsEntries.map(
+    ([key, value]) =>
+      [key, normalizeMarkWithLetter(value)] as [
+        string,
+        ReturnType<typeof normalizeMarkWithLetter>
+      ]
+  );
+
+  return {
+    ...Object.fromEntries(fluidTermsData),
+    overall:
+      normalizeMarkWithLetter(data.overall ?? data.running) ??
+      fluidTermsData
+        .map(([, value]) => value)
+        .reduce((prev, cur) => prev + (cur?.mark ?? 0), 0) /
+        termsEntries.length,
+  } as SubjectSummary["academics"]["averages"];
 }
 export function parseSubjectSummary({
   responses: [data],
@@ -195,7 +204,7 @@ export function parseSubjectSummary({
     term: termRawValueToNormalized[section.sscTermView]!,
     academics: {
       averages: { overall: null },
-      posted: null,
+      posted: { overall: null },
       categories: [],
     },
     attendance: {
@@ -212,10 +221,9 @@ export function parseSubjectSummary({
     const categories = averageSummary.filter(
       (_, index) => index !== gradebookAverageIndex
     );
-    const overallPostedGrade = postedSummary[0]!.overall;
     const academics: SubjectSummary["academics"] = {
       averages: getSubjectAverages(gradebookAverage),
-      posted: normalizeMarkWithLetter(overallPostedGrade),
+      posted: getSubjectAverages(postedSummary[0]!),
       categories: categories.map(convertAcademicCategory),
     };
     result.academics = academics;
