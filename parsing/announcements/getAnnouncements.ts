@@ -62,11 +62,11 @@ export async function parseAnnouncements(
       },
     ],
   });
-  console.log("PARSING DONE", school, fileUrl)
+  console.log("PARSING DONE", school, fileUrl);
   const elements = chatResponse.choices?.find(
     (choice) => choice.finishReason === FinishReason.Stop
   )?.message.content as string | undefined;
-console.log(elements)
+  console.log(elements);
   if (!elements) {
     console.error("failed to parse pdf", chatResponse);
     return;

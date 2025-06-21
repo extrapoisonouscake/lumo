@@ -31,12 +31,15 @@ export function SubjectsPageContent() {
               ...response,
               subjects: {
                 ...response.subjects,
-                main: response.subjects.main.map((subject) => ({
-                  ...subject,
-                  average:
-                    subjectSummaries.data[subject.id]?.academics.averages
-                      .overall,
-                })),
+                main: response.subjects.main.map((subject) => {
+                  const academics =
+                    subjectSummaries.data[subject.id]?.academics;
+                  return {
+                    ...subject,
+                    average:
+                      academics?.posted.overall ?? academics?.running.overall,
+                  };
+                }),
               },
             }}
             year={year}

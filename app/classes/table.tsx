@@ -32,7 +32,7 @@ import { renderTableCell, sortColumnWithNullablesLast } from "@/helpers/tables";
 import { Subject, SubjectGrade } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
-import { getGradeInfo } from "./[subjectId]/helpers";
+import { getGradeInfo } from "../../helpers/grades";
 
 type SubjectWithAverage = Subject & { average?: SubjectGrade | null };
 const columnHelper = createColumnHelper<SubjectWithAverage>();
@@ -54,8 +54,9 @@ const columns = [
       const average = cell.getValue();
       if (average === undefined) return <CellSkeleton length={5} />;
       if (average === null) return NULL_VALUE_DISPLAY_FALLBACK;
-      return `${fractionFormatter.format(average.mark)} ${
-        average.letter ?? getGradeInfo(average).letter
+      const letter = average.letter ?? getGradeInfo(average)?.letter;
+      return `${fractionFormatter.format(average.mark)}${
+        letter ? ` ${letter}` : ""
       }`;
     },
     sortUndefined: "last",

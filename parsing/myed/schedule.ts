@@ -16,7 +16,6 @@ function getTableBody($: cheerio.CheerioAPI) {
   if ($tableContainer.length === 0) {
     const errorMessage = $contentContainer.prop("innerText");
     if (!errorMessage) return null;
-    console.log("1", errorMessage, $contentContainer.html());
     return { knownError: removeLineBreaks(errorMessage) }; //! ?needed?
   }
   const $tableBody = $tableContainer.find("tbody:has(> .listHeader)");

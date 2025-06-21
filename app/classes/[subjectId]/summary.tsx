@@ -13,7 +13,7 @@ import { UserSettings } from "@/types/core";
 import { type SubjectSummary, SubjectTerm } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { getGradeInfo } from "./helpers";
+import { getGradeInfo } from "../../../helpers/grades";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 
 const termToLabel: Record<SubjectTerm, string> = {
@@ -32,11 +32,12 @@ export function SubjectSummary({
   academics,
   shouldShowLetterGrade,
 }: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">) {
-  const wasGradePosted = typeof academics.posted.overall === "number";
-  const gradePercentage = wasGradePosted
+  const wasGradePosted = typeof academics.posted.overall?.mark === "number";
+
+  const gradeObject = wasGradePosted
     ? academics.posted.overall
-    : academics.averages.overall;
-  const gradeInfo = gradePercentage ? getGradeInfo(gradePercentage) : null;
+    : academics.running.overall;
+  const gradeInfo = gradeObject ? getGradeInfo(gradeObject) : null;
   const fillColor = gradeInfo ? gradeInfo.color : "zinc-200";
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(
     shouldShowLetterGrade
@@ -68,7 +69,7 @@ export function SubjectSummary({
             )}
             <div>
               <HalfDonutProgressChart
-                value={gradePercentage?.mark || 0}
+                value={Math.min(gradeObject?.mark || 0, 100)}
                 filledClassName={`fill-${fillColor}`}
               />
             </div>
@@ -88,10 +89,10 @@ export function SubjectSummary({
                   "leading-none"
                 )}
               >
-                {gradePercentage !== null
+                {gradeObject
                   ? isLetterGradeShown
-                    ? gradePercentage.letter ?? gradeInfo!.letter
-                    : gradePercentage.mark
+                    ? gradeObject.letter
+                    : gradeObject.mark
                   : "-"}
               </span>
               {!isLetterGradeShown && (

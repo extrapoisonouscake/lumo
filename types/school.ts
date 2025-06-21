@@ -20,11 +20,12 @@ export enum SubjectTerm {
   ThirdQuarter = "THIRD_QUARTER",
   FourthQuarter = "FOURTH_QUARTER",
 }
+
 export type SubjectGrade = {
   mark: number;
-  letter?: string;
+  letter: string | null;
 };
-type GradesObject = {
+export type GradeObject = {
   [key: string]: SubjectGrade | null;
   overall: SubjectGrade | null;
 };
@@ -33,8 +34,8 @@ export interface SubjectSummary {
   name: string;
   term: SubjectTerm;
   academics: {
-    averages: GradesObject;
-    posted: GradesObject;
+    running: GradeObject;
+    posted: GradeObject;
     categories: {
       id: string;
       name: string;

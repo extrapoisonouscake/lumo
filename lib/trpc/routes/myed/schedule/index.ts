@@ -15,7 +15,6 @@ export const scheduleRouter = router({
       const response = await getMyEd("schedule", {
         date: !currentDate.isSame(input.date, "day") ? input.date : undefined,
       });
-      console.log({ response });
       return response;
     }),
 });

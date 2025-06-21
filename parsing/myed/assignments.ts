@@ -63,7 +63,6 @@ function convertAssignment({
 }
 export function parseSubjectAssignments({
   responses,
-  metadata,
 }: ParserFunctionArguments<"subjectAssignments">): {
   subjectId?: string;
   assignments: Assignment[];

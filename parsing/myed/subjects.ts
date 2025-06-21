@@ -1,3 +1,4 @@
+import { getGradeLetter } from "@/helpers/grades";
 import {
   prettifyEducationalName,
   TEACHER_ADVISORY_ABBREVIATION,
@@ -11,11 +12,18 @@ import {
 import { DeepWithRequired } from "@/types/utils";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
-const normalizeMarkWithLetter = (string?: string | null) => {
+const convertStringToGradeObject = (string?: string | null) => {
   if (!string) return null;
   const [mark, ...letter] = string.split(" ");
   if (!mark || isNaN(+mark)) return null; //TODO handle edge cases
-  return { mark: +mark, letter: letter.join("") };
+  const markAsNumber = +mark;
+  const existingLetter = letter.join("").trim();
+
+  return {
+    mark: markAsNumber,
+    letter:
+      existingLetter.length > 0 ? existingLetter : getGradeLetter(markAsNumber),
+  };
 };
 
 // const parseSubjectTeachersString = (string: string) => {
@@ -137,7 +145,7 @@ const convertAcademicCategory = (
   return {
     id: item.categoryOid,
     name: prettifyEducationalName(item.category),
-    average: normalizeMarkWithLetter(item.overall),
+    average: convertStringToGradeObject(item.overall),
     terms: termsEntries.map(([key, value]) => {
       const percentage = item[`percentage${key}` as keyof typeof item];
       const avgView = item[`avgView${key}` as keyof typeof item];
@@ -147,8 +155,7 @@ const convertAcademicCategory = (
           percentage && percentage !== NOT_APPLICABLE_MARK
             ? +percentage.slice(0, -1)
             : null,
-        average:
-          normalizeMarkWithLetter(value) || normalizeMarkWithLetter(avgView),
+        average: convertStringToGradeObject(value ?? avgView),
       };
     }),
   };
@@ -178,21 +185,16 @@ function getSubjectAverages(
   );
   const fluidTermsData = termsEntries.map(
     ([key, value]) =>
-      [key, normalizeMarkWithLetter(value)] as [
+      [key, convertStringToGradeObject(value)] as [
         string,
-        ReturnType<typeof normalizeMarkWithLetter>
+        ReturnType<typeof convertStringToGradeObject>
       ]
   );
 
   return {
     ...Object.fromEntries(fluidTermsData),
-    overall:
-      normalizeMarkWithLetter(data.overall ?? data.running) ??
-      fluidTermsData
-        .map(([, value]) => value)
-        .reduce((prev, cur) => prev + (cur?.mark ?? 0), 0) /
-        termsEntries.length,
-  } as SubjectSummary["academics"]["averages"];
+    overall: convertStringToGradeObject(data.overall ?? data.running),
+  } as SubjectSummary["academics"]["running"];
 }
 export function parseSubjectSummary({
   responses: [data],
@@ -203,7 +205,7 @@ export function parseSubjectSummary({
     name: prettifyEducationalName(section.relSscMstOid_mstDescription),
     term: termRawValueToNormalized[section.sscTermView]!,
     academics: {
-      averages: { overall: null },
+      running: { overall: null },
       posted: { overall: null },
       categories: [],
     },
@@ -217,13 +219,32 @@ export function parseSubjectSummary({
     const gradebookAverageIndex = averageSummary.findIndex(
       (item) => item.category === "Gradebook average"
     );
-    const gradebookAverage = averageSummary[gradebookAverageIndex]!; //? is it always present
+    const runningAveragesObject = averageSummary[gradebookAverageIndex]!; //? is it always present
     const categories = averageSummary.filter(
       (_, index) => index !== gradebookAverageIndex
     );
+    //TODO: clarify variable names
+    const postedAverages = getSubjectAverages(postedSummary[0]!);
+    const runningAverages = getSubjectAverages(runningAveragesObject);
+    if (!runningAverages.overall) {
+      const postedAveragesValues = Object.entries(postedAverages)
+        .filter(([key, value]) => key !== "overall" && value?.mark)
+        .map(([, value]) => value?.mark);
+
+      if (postedAveragesValues.length > 0) {
+        runningAverages.overall = {
+          mark:
+            postedAveragesValues.reduce(
+              (prev: number, cur) => prev + (cur ?? 0),
+              0
+            ) / postedAveragesValues.length,
+          letter: null,
+        };
+      }
+    }
     const academics: SubjectSummary["academics"] = {
-      averages: getSubjectAverages(gradebookAverage),
-      posted: getSubjectAverages(postedSummary[0]!),
+      running: runningAverages,
+      posted: postedAverages,
       categories: categories.map(convertAcademicCategory),
     };
     result.academics = academics;

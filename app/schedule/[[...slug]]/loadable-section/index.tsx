@@ -1,7 +1,6 @@
 import { trpc } from "@/app/trpc";
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
@@ -103,10 +102,7 @@ function Loader({ date }: { date: Date }) {
   );
   const subjectsDataQuery = useSubjectsData();
   return (
-    <QueryWrapper
-      query={scheduleQuery}
-      skeleton={<ScheduleContentSkeleton date={date} />}
-    >
+    <QueryWrapper query={scheduleQuery} skeleton={<ScheduleContentSkeleton />}>
       {(schedule) => (
         <Content
           schedule={schedule}
@@ -151,24 +147,8 @@ function Content({
     </GridLayout>
   );
 }
-export function ScheduleContentSkeleton({ date }: { date: Date }) {
-  const shouldShowTimer = timezonedDayJS().isSame(timezonedDayJS(date), "date");
-  return (
-    <GridLayout>
-      {getActualWeekdayIndex(date) === 5 && (
-        <div className="row-start-1 col-start-2 w-full flex justify-end [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:justify-start">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm">Same as</h3>
-            <Skeleton>
-              <span className="font-semibold">Friday</span>
-            </Skeleton>
-          </div>
-        </div>
-      )}
-
-      <ScheduleTable isLoading shouldShowTimer={shouldShowTimer} />
-    </GridLayout>
-  );
+export function ScheduleContentSkeleton() {
+  return <ScheduleTable isLoading />;
 }
 function GridLayout({ children }: { children: ReactNode }) {
   return <div className="grid grid-cols-2 gap-4 auto-rows-max">{children}</div>;
