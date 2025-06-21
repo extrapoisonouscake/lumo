@@ -19,22 +19,22 @@ const getWinterBreakDates = (date: Dayjs) => {
   } else {
     year = currentYear;
   }
-  const december31 = timezonedDayJS(`${year}-12-31`);
-  const lastMonday = december31.day(1);
+  const december31st = timezonedDayJS(`${year}-12-31`);
+  const lastMonday = december31st.day(1);
 
   const secondToLastMonday = lastMonday.subtract(1, "week");
-  const january1 = timezonedDayJS(`${year + 1}-01-01`);
-  const firstFriday = january1.day(5);
+  const january1st = timezonedDayJS(`${year + 1}-01-01`);
+  const firstFriday = january1st.day(5);
   return [secondToLastMonday, firstFriday] as const;
 };
 const getSpringBreakDates = (year: number) => {
   const march31st = timezonedDayJS(`${year}-03-31`);
 
-  const lastMonday = march31.day(1);
+  const lastMonday = march31st.day(1);
 
   const thirdToLastMonday = lastMonday.subtract(2, "week");
   const april1st=timezonedDayJS(`${year}-04-01`);
-  const firstFriday = april1.day(5);
+  const firstFriday = april1st.day(5);
   const secondFriday = firstFriday.add(1, "week");
   return [thirdToLastMonday, secondFriday] as const;
 };
