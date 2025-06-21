@@ -17,6 +17,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 import { refreshSessionExpiresAt, trpc } from "../../trpc";
+import { initClientLogin } from "../helpers";
 function getFullErrorMessage(error: string | null | undefined) {
   return (
     loginErrorIDToMessageMap[error as LoginErrors] ||
@@ -45,9 +46,8 @@ export function LoginForm({
     }
     const response = await loginMutation.mutateAsync(data);
     if (response.success) {
-      refreshSessionExpiresAt();
-      router.push("/");
-      refreshAuthStatus();
+     
+      initClientLogin({push:router.push,refreshAuthStatus})
     } else {
       const message = response.message;
       if (

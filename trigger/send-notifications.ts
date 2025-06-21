@@ -11,7 +11,7 @@ import { hashString } from "@/helpers/hashString";
 import { INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import { encryption } from "@/lib/encryption";
 import { broadcastNotification } from "@/lib/trpc/routes/core/settings/web-push";
-import { fetchAuthCookiesAndStudentID } from "@/lib/trpc/routes/myed/auth/helpers";
+import { fetchAuthCookiesAndStudentId } from "@/lib/trpc/routes/myed/auth/helpers";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
 import { logger, schedules } from "@trigger.dev/sdk/v3";
@@ -65,13 +65,13 @@ const sendNotificationsToUser = async (
   subscriptions: NotificationsSubscriptionSelectModel[],
   trackedSchoolData: TrackedSchoolDataSelectModel | null
 ) => {
-  const { tokens, studentID } = await fetchAuthCookiesAndStudentID(
+  const { tokens, studentId } = await fetchAuthCookiesAndStudentId(
     encryption.decrypt(credentials.username),
     encryption.decrypt(credentials.password)
   );
   const getMyEdWithParameters = getMyEd({
     authCookies: tokens,
-    studentId: studentID,
+    studentId,
   });
   logger.info("logs 1", {
     trackedSchoolData,
@@ -160,7 +160,7 @@ const sendNotificationsToUser = async (
       db
         .insert(tracked_school_data)
         .values({
-          userId: hashString(studentID),
+          userId: hashString(studentId),
           subjects: Object.fromEntries(
             subjectsWithAssignments.map((subject) => [
               subject.id,

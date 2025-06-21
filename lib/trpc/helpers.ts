@@ -1,5 +1,6 @@
-import { TRPCError } from "@trpc/server";
+import { TRPCClientError } from "@trpc/client";
+import { AppRouter } from ".";
 
-export function isTRPCError(error: unknown): error is TRPCError {
-  return error instanceof TRPCError;
+export function isTRPCError(error: unknown): error is TRPCClientError<AppRouter> {
+  return error instanceof TRPCClientError;
 }

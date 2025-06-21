@@ -7,7 +7,7 @@ import { publicProcedure, router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import {
   deleteSession,
-  fetchStudentID,
+  fetchStudentId,
   getFreshAuthCookiesAndHTMLToken,
   LoginError,
   parseAuthGenericErrorMessage,
@@ -35,7 +35,7 @@ import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { TRPCError } from "@trpc/server";
 import { isAuthenticatedContext } from "../../../context";
-import { fetchAuthCookiesAndStudentID } from "./helpers";
+import { fetchAuthCookiesAndStudentId } from "./helpers";
 
 const convertObjectToWeirdStringRepresentation = (
   obj: Record<string, string>
@@ -157,7 +157,7 @@ const resetPassword = publicProcedure
         normalizedMessage += ".";
       }
       throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
+        code: "BAD_REQUEST",
         message: normalizedMessage,
       });
     }
@@ -324,11 +324,11 @@ export const authRouter = router({
       z.object({ authCookies: authCookiesSchema, credentials: loginSchema })
     )
     .mutation(async ({ input: { authCookies, credentials } }) => {
-      const studentID = await fetchStudentID(authCookies);
+      const studentId = await fetchStudentId(authCookies);
       await setUpLogin({
         tokens: authCookies,
         credentials,
-        studentID,
+        studentId,
       });
     }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
@@ -348,7 +348,7 @@ export const authRouter = router({
     }
 
     try {
-      const { tokens } = await fetchAuthCookiesAndStudentID(
+      const { tokens } = await fetchAuthCookiesAndStudentId(
         ctx.credentials.username,
         ctx.credentials.password
       );

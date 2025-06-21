@@ -35,6 +35,8 @@ import { after } from "next/server";
 import "server-only";
 import { runNotificationUnsubscriptionDBCalls } from "../../core/settings/helpers";
 import { genericErrorMessageVariableRegex } from "./public";
+import { getMyEd } from "@/parsing/myed/getMyEd";
+import { KNOWN_SCHOOL_MYED_NAME_TO_ID, } from "@/constants/schools";
 export class LoginError extends Error {
   authCookies?: AuthCookies;
   constructor(message: string, authCookies?: AuthCookies) {
@@ -43,12 +45,16 @@ export class LoginError extends Error {
     this.authCookies = authCookies;
   }
 }
-const upsertUserRecords = async (studentId: string) => {
+
+const initStudentFirstLogin = async ({tokens,studentId}:{tokens:AuthCookies,studentId: string}) => {
+  
   const hashedStudentId = hashString(studentId);
   const existingUser = await db.query.users.findFirst({
     where: eq(users.id, hashedStudentId),
   });
   if (existingUser) return;
+  const personalInfo=await getMyEd({authCookies:tokens,studentId})('personalDetails')
+  const knownSchool=KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName]
   await db.insert(users).values({ id: hashedStudentId });
 
   // const encryptedCredentials = credentials
@@ -58,8 +64,9 @@ const upsertUserRecords = async (studentId: string) => {
   //   }
   // : undefined;
   await db.insert(user_settings).values({
-    userId: hashedStudentId,
     ...USER_SETTINGS_DEFAULT_VALUES,
+    userId: hashedStudentId,
+    schoolId:knownSchool
   });
 };
 export async function performLogin(
@@ -72,14 +79,14 @@ export async function performLogin(
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
-  const { studentID, tokens } = await fetchAuthCookiesAndStudentID(
+  const { studentId, tokens } = await fetchAuthCookiesAndStudentId(
     username,
     password
   );
 
   await setUpLogin({
     tokens,
-    studentID,
+    studentId,
     credentials: formData,
     store,
   });
@@ -87,12 +94,12 @@ export async function performLogin(
 
 export async function setUpLogin({
   tokens,
-  studentID,
+  studentId,
   credentials,
   store: externalStore,
 }: {
-  tokens: Record<string, string>;
-  studentID: string;
+  tokens: AuthCookies;
+  studentId: string;
   credentials?: LoginSchema;
   store?: PlainCookieStore;
 }) {
@@ -103,7 +110,7 @@ export async function setUpLogin({
     maxAge: SESSION_TTL_IN_SECONDS,
   });
 
-  cookieStore.set(AUTH_COOKIES_NAMES.studentId, studentID);
+  cookieStore.set(AUTH_COOKIES_NAMES.studentId, studentId);
   if (credentials) {
     const credentialsString =
       encodeURIComponent(credentials.username) +
@@ -115,7 +122,7 @@ export async function setUpLogin({
     ...cookieDefaultOptions,
     httpOnly: false,
   });
-  await upsertUserRecords(studentID);
+  await initStudentFirstLogin({tokens,studentId});
 }
 const loginDefaultParams = {
   userEvent: "930",
@@ -150,7 +157,7 @@ export async function getFreshAuthCookiesAndHTMLToken() {
     token: loginToken,
   };
 }
-export async function fetchAuthCookiesAndStudentID(
+export async function fetchAuthCookiesAndStudentId(
   username: string,
   password: string
 ) {
@@ -186,22 +193,22 @@ export async function fetchAuthCookiesAndStudentID(
   if (needsPasswordChange($)) {
     throw new LoginError(LoginErrors.passwordChangeRequired, cookies);
   }
-  const studentID = await fetchStudentID(cookies);
+  const studentId = await fetchStudentId(cookies);
   return {
     tokens: cookies,
-    studentID,
+    studentId,
   };
 }
-export async function fetchStudentID(cookies: AuthCookies) {
+export async function fetchStudentId(cookies: AuthCookies) {
   const studentsData = await fetchMyEd<
     OpenAPI200JSONResponse<"/users/students">
   >("rest/users/students", {
     headers: { Cookie: convertObjectToCookieString(cookies) },
   }).then((response) => response.json());
 
-  const studentID = studentsData[0]?.studentOid;
-  if (!studentID) throw new LoginError(LoginErrors.invalidAuth);
-  return studentID;
+  const studentId = studentsData[0]?.studentOid;
+  if (!studentId) throw new LoginError(LoginErrors.invalidAuth);
+  return studentId;
 }
 export const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
   "This account has been disabled.": LoginErrors.accountDisabled,

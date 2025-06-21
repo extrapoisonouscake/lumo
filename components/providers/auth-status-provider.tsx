@@ -7,15 +7,16 @@ import {
   useEffect,
   useState,
 } from "react";
-
-const AuthStatusContext = createContext<{
+export type AuthStatusContext={
   isLoggedIn: boolean;
 
   refreshAuthStatus: () => void;
-}>({
+}
+const AuthStatusContext = createContext<AuthStatusContext>({
   isLoggedIn: false,
   refreshAuthStatus: () => {},
 });
+
 const getAuthStatuses = () => {
   const isLoggedIn = clientAuthChecks.isLoggedIn();
   return { isLoggedIn };

@@ -14,6 +14,8 @@ import { ChangePasswordModal } from "./change-password-modal";
 import { LoginForm } from "./form";
 import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
+import { initClientLogin } from "./helpers";
+import { useAuthStatus } from "@/components/providers/auth-status-provider";
 export function LoginPageContent() {
   const form = useFormValidation(loginSchema);
   const searchParams = useSearchParams();
@@ -35,6 +37,7 @@ export function LoginPageContent() {
   useEffect(() => {
     queryClient.removeQueries();
   }, []);
+  const {refreshAuthStatus}=useAuthStatus()
   return (
     <>
       {!!registrationResult && (
@@ -107,12 +110,10 @@ export function LoginPageContent() {
                 password: data.password,
               },
             });
-            router.push("/");
-            refreshSessionExpiresAt();
+           initClientLogin({push:router.push,refreshAuthStatus})
           })();
         }}
         onClose={() => {
-          router.push("/login");
           setTemporaryAuthCookies(undefined);
         }}
         authCookies={temporaryAuthCookies}

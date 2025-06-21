@@ -49,7 +49,7 @@ type RouteResolverParams<Params extends RouteParams> = {
   responses: RouteResponse[];
   params: Params;
   metadata: Record<string, any>;
-  studentID: string;
+  studentId: string;
 };
 type MetadataResolverFunction<Params extends RouteParams> = (
   props: RouteResolverParams<Params>
@@ -99,7 +99,7 @@ const processStep = <Params extends RouteParams>(
 };
 
 class ResolvedRoute<Params extends RouteParams> {
-  studentID?: string;
+  studentId?: string;
   params: Params;
   steps: Array<RouteStep<Params> | MetadataResolver<Params>> = [];
   resolvedSteps: Array<FlatRouteStep | FlatRouteStep[]> = [];
@@ -110,18 +110,18 @@ class ResolvedRoute<Params extends RouteParams> {
   constructor({
     steps,
     predicates,
-    studentID,
+    studentId,
     params,
     requiresAuth,
   }: {
-    studentID?: string;
+    studentId?: string;
     params: Params;
     steps: Array<RouteStep<Params> | MetadataResolver<Params>>;
     predicates: Record<number, RouteStepPredicate<Params>>;
     requiresAuth: boolean;
   }) {
-    if (requiresAuth && !studentID) throw new Error("route requires auth");
-    this.studentID = studentID;
+    if (requiresAuth && !studentId) throw new Error("route requires auth");
+    this.studentId = studentId;
     this.requiresAuth = requiresAuth;
     this.params = params;
     this.steps = steps;
@@ -151,7 +151,7 @@ class ResolvedRoute<Params extends RouteParams> {
           responses: this.responses,
           params: this.params,
           metadata: this.metadata,
-          studentID: this.studentID as string,
+          studentId: this.studentId as string,
         });
         continue;
       } else if (typeof nextStep === "function") {
@@ -159,7 +159,7 @@ class ResolvedRoute<Params extends RouteParams> {
           responses: this.responses,
           params: this.params,
           metadata: this.metadata,
-          studentID: this.studentID as string,
+          studentId: this.studentId as string,
         });
       }
       if (Array.isArray(nextStep)) {
@@ -219,9 +219,9 @@ export class Route<
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
-  call(...[studentID, params]: [string, Params]) {
+  call(...[studentId, params]: [string, Params]) {
     return new ResolvedRoute({
-      studentID,
+      studentId,
       params,
       steps: this.steps,
       predicates: this.predicates,
@@ -298,7 +298,7 @@ const subjectTermToGradeLabelsMap: Record<
 };
 
 const generateSubjectsListStepParams = (
-  studentID: string,
+  studentId: string,
   params?: {
     isPreviousYear?: boolean;
     termId?: string;
@@ -312,7 +312,7 @@ const generateSubjectsListStepParams = (
     method: "GET" as const,
     path: `rest/lists/academics.classes.list`,
     body: {
-      selectedStudent: studentID,
+      selectedStudent: studentId,
       fieldSetOid: "fsnX2Cls",
       customParams: customParams.join(";"),
     },
@@ -404,8 +404,8 @@ export const myEdRestEndpoints = {
       },
       expect: "json",
     }))
-    .step(({ studentID, params: { isPreviousYear, termId } }) => {
-      return generateSubjectsListStepParams(studentID, {
+    .step(({ studentId, params: { isPreviousYear, termId } }) => {
+      return generateSubjectsListStepParams(studentId, {
         isPreviousYear,
         termId,
       });
@@ -422,8 +422,8 @@ export const myEdRestEndpoints = {
   subjectIdByName: new Route<{
     name: string;
   }>()
-    .step(({ studentID }) =>
-      generateSubjectsListStepParams(studentID, { termId: "all" })
+    .step(({ studentId }) =>
+      generateSubjectsListStepParams(studentId, { termId: "all" })
     )
     .metadata(({ params: { name }, responses, metadata }) => {
       const targetResponse = responses[0]!;
@@ -433,8 +433,8 @@ export const myEdRestEndpoints = {
       }
     })
     .step(
-      ({ studentID }) =>
-        generateSubjectsListStepParams(studentID, {
+      ({ studentId }) =>
+        generateSubjectsListStepParams(studentId, {
           isPreviousYear: true,
           termId: "all",
         }),
@@ -460,9 +460,9 @@ export const myEdRestEndpoints = {
   subjectAssignments: subjectAssignmentsRoute,
   subjectAssignment: new Route<{
     assignmentId: string;
-  }>().step(({ studentID, params: { assignmentId } }) => ({
+  }>().step(({ studentId, params: { assignmentId } }) => ({
     method: "GET",
-    path: `rest/students/${studentID}/assignments/${assignmentId}`,
+    path: `rest/students/${studentId}/assignments/${assignmentId}`,
     expect: "json",
   })),
 };
