@@ -69,7 +69,7 @@ const visualizableErrors: Record<
     const dateObject = timezonedDayJS(date);
     let message=getNotInSessionGenericMessage(dateObject),
       emoji = "😴";
-if(isWeekend) return
+if(!isWeekend){
     const winterBreakDates = getWinterBreakDates(dateObject);
 const currentYear=dateObject.year()
     const springBreakDates = getSpringBreakDates(currentYear);
@@ -84,7 +84,7 @@ const summerBreakDates = getSummerBreakDates(currentYear);
 message = "Happy Summer!";
       emoji = "☀️";
 }
-
+}
     return { children: message, emoji };
   },
 };
