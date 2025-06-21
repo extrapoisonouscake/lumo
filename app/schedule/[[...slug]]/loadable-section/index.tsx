@@ -51,14 +51,23 @@ const isDayJSObjectBetweenDates = (
   date1: Dayjs,
   date2: Dayjs
 ) => dateObject.isBetween(date1, date2, "date", "[]");
+const getNotInSessionGenericMessage=(dateObject:Dayjs)=>{
+let messagePortion;
+      if (timezonedDayJS().isSame(dateObject, "date")) {
+        messagePortion = "today";
+      } else {
+        messagePortion = "on this day";
+      }
+return `No school ${messagePortion}.`;
+}
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
 const visualizableErrors: Record<
   string,
-  ({ date }: { date: Date }) => ErrorCardProps
+  ({ date,isWeekend }: { date: Date,isWeekend:true }) => ErrorCardProps
 > = {
   [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date }) => {
     const dateObject = timezonedDayJS(date);
-    let message,
+    let message=getNotInSessionGenericMessage(dateObject),
       emoji = "😴";
     const winterBreakDates = getWinterBreakDates(dateObject);
 const currentYear=dateObject.year()
@@ -74,16 +83,7 @@ const summerBreakDates = getSummerBreakDates(currentYear);
 message = "Happy Summer!";
       emoji = "☀️";
 }
-else {
-      let messagePortion;
-      if (timezonedDayJS().isSame(dateObject, "date")) {
-        messagePortion = "today";
-      } else {
-        messagePortion = "on this day";
-      }
 
-      message = `No school ${messagePortion}.`;
-    }
     return { children: message, emoji };
   },
 };
@@ -98,7 +98,7 @@ export function ScheduleLoadableSection({ date }: Props) {
   if ([0, 6].includes(currentDayObject.day())) {
     return (
       <ErrorCard
-        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({ date })}
+        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({ date,isWeekend:true})}
       />
     );
   }
