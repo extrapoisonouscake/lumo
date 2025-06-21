@@ -28,15 +28,22 @@ const getWinterBreakDates = (date: Dayjs) => {
   return [secondToLastMonday, firstFriday] as const;
 };
 const getSpringBreakDates = (year: number) => {
-  const march31 = timezonedDayJS(`${year}-03-31`);
+  const march31st = timezonedDayJS(`${year}-03-31`);
 
   const lastMonday = march31.day(1);
 
   const thirdToLastMonday = lastMonday.subtract(2, "week");
-  const april1 = timezonedDayJS(`${year}-04-01`);
+  const april1st=timezonedDayJS(`${year}-04-01`);
   const firstFriday = april1.day(5);
   const secondFriday = firstFriday.add(1, "week");
   return [thirdToLastMonday, secondFriday] as const;
+};
+const getSummerBreakDates = (year: number) => {
+  const june15th=timezonedDayJS(`${year}-06-15`);
+
+  const labourDay=timezonedDayJS(`${year}-09-01`).day(2)
+
+  return [june15th, labourDay] as const;
 };
 
 const isDayJSObjectBetweenDates = (
@@ -54,14 +61,20 @@ const visualizableErrors: Record<
     let message,
       emoji = "😴";
     const winterBreakDates = getWinterBreakDates(dateObject);
-    const springBreakDates = getSpringBreakDates(dateObject.year());
+const currentYear=dateObject.year()
+    const springBreakDates = getSpringBreakDates(currentYear);
+const summerBreakDates = getSummerBreakDates(currentYear);
     if (isDayJSObjectBetweenDates(dateObject, ...winterBreakDates)) {
       message = "Happy Holidays!";
       emoji = "❄️";
     } else if (isDayJSObjectBetweenDates(dateObject, ...springBreakDates)) {
       message = "It's Spring Break.";
       emoji = "🌷";
-    } else {
+    } else if(isDayJSObjectBetweenDates(dateObject, ...summerBreakDates)){
+message = "Happy Summer!";
+      emoji = "☀️";
+}
+else {
       let messagePortion;
       if (timezonedDayJS().isSame(dateObject, "date")) {
         messagePortion = "today";
