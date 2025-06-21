@@ -63,12 +63,13 @@ return `No school ${messagePortion}.`;
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
 const visualizableErrors: Record<
   string,
-  ({ date,isWeekend }: { date: Date,isWeekend:true }) => ErrorCardProps
+  ({ date,isWeekend }: { date: Date,isWeekend?:boolean }) => ErrorCardProps
 > = {
   [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date }) => {
     const dateObject = timezonedDayJS(date);
     let message=getNotInSessionGenericMessage(dateObject),
       emoji = "😴";
+if(isWeekend) return
     const winterBreakDates = getWinterBreakDates(dateObject);
 const currentYear=dateObject.year()
     const springBreakDates = getSpringBreakDates(currentYear);
