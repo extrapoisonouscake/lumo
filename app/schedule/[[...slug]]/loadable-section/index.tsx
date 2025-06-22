@@ -65,7 +65,7 @@ const visualizableErrors: Record<
   string,
   ({ date,isWeekend }: { date: Date,isWeekend?:boolean }) => ErrorCardProps
 > = {
-  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date }) => {
+  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date,isWeekend }) => {
     const dateObject = timezonedDayJS(date);
     let message=getNotInSessionGenericMessage(dateObject),
       emoji = "😴";
