@@ -1,5 +1,6 @@
 "use client";
 import { ErrorCard } from "@/components/misc/error-card";
+import { Spinner } from "@/components/ui/button";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { useQuery } from "@tanstack/react-query";
 import ip3country from "ip3country";
@@ -10,7 +11,15 @@ ip3country.init();
 export function SettingsPageContent() {
   const query = useQuery(trpc.myed.auth.getRegistrationFields.queryOptions());
   return (
-    <QueryWrapper query={query} onError={<RegistrationInitError />}>
+    <QueryWrapper
+      query={query}
+      onError={<RegistrationInitError />}
+      skeleton={
+        <div className="flex justify-center items-center w-full">
+          <Spinner />
+        </div>
+      }
+    >
       {(data) => (
         <RegistrationForm
           schoolDistricts={data.schoolDistrictOptions}

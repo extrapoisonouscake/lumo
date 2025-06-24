@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuthStatus } from "@/components/providers/auth-status-provider";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
@@ -9,13 +10,12 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
-import { queryClient, refreshSessionExpiresAt, trpc } from "../trpc";
+import { queryClient, trpc } from "../trpc";
 import { ChangePasswordModal } from "./change-password-modal";
 import { LoginForm } from "./form";
+import { initClientLogin } from "./helpers";
 import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
-import { initClientLogin } from "./helpers";
-import { useAuthStatus } from "@/components/providers/auth-status-provider";
 export function LoginPageContent() {
   const form = useFormValidation(loginSchema);
   const searchParams = useSearchParams();
@@ -37,7 +37,7 @@ export function LoginPageContent() {
   useEffect(() => {
     queryClient.removeQueries();
   }, []);
-  const {refreshAuthStatus}=useAuthStatus()
+  const { refreshAuthStatus } = useAuthStatus();
   return (
     <>
       {!!registrationResult && (
@@ -75,6 +75,7 @@ export function LoginPageContent() {
                   form.setValue("username", newUsername);
                   form.setValue("password", "");
                 }}
+                getInitialUsername={() => form.getValues("username")}
               />
               <Link
                 href="/register"
@@ -110,7 +111,7 @@ export function LoginPageContent() {
                 password: data.password,
               },
             });
-           initClientLogin({push:router.push,refreshAuthStatus})
+            initClientLogin({ push: router.push, refreshAuthStatus });
           })();
         }}
         onClose={() => {

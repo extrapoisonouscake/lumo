@@ -28,7 +28,7 @@ export function RegistrationStepsBar({
                 className={cn(
                   "rounded-full size-8 flex items-center justify-center bg-muted text-sm box-content border-[3px] border-background",
                   {
-                    "bg-primary text-primary-foreground": currentStep === index,
+                    "bg-primary text-primary-foreground": currentStep >= index,
                   }
                 )}
               >

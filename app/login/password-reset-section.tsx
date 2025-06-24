@@ -17,16 +17,19 @@ import {
   passwordResetSchema,
 } from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "../trpc";
 
 export function PasswordResetSection({
   setLoginFormValues,
+  getInitialUsername,
 }: {
   setLoginFormValues: (newUsername: string) => void;
+  getInitialUsername: () => string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+
   const form = useFormValidation(passwordResetSchema);
   const { errorMessage, setErrorMessage, errorMessageNode } =
     useFormErrorMessage();
@@ -68,6 +71,20 @@ export function PasswordResetSection({
       form.setValue("securityAnswer", "");
     }
   };
+
+  // Update form values when initial username changes
+  useEffect(() => {
+    if (isOpen) {
+      const currentUsername = getInitialUsername();
+      form.setValue("username", currentUsername);
+
+      // Use setTimeout to ensure the dialog is fully rendered before setting focus
+      setTimeout(() => {
+        form.setFocus("email");
+      }, 0);
+    }
+  }, [isOpen, getInitialUsername, form]);
+
   return (
     <>
       <p

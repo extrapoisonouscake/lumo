@@ -1,5 +1,4 @@
-import { FormItem, FormLabel } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { FormInput } from "@/components/ui/form-input";
 import { AllowedRegistrationCountries } from "@/lib/trpc/routes/myed/auth/public";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useRef, useState } from "react";
@@ -18,7 +17,8 @@ export function AddressAutocompleteInput({
   const form = useFormContext();
   const [placeAutocomplete, setPlaceAutocomplete] =
     useState<google.maps.places.Autocomplete | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
   const places = useMapsLibrary("places");
   useEffect(() => {
     if (!places || !inputRef.current) return;
@@ -65,19 +65,18 @@ export function AddressAutocompleteInput({
     <Controller
       control={form.control}
       name={FORM_FIELD_NAME}
-      render={({ field: { onChange, value, ...field } }) => (
-        <FormItem>
-          <FormLabel required>Address</FormLabel>
-          <Input
-            required
-            value={value}
-            autoComplete="address-line1"
-            placeholder={countrySpecificPlaceholder[country]}
-            onChange={onChange}
-            {...field}
-            ref={inputRef}
-          />
-        </FormItem>
+      render={({ field }) => (
+        <FormInput
+          required
+          label="Address"
+          autoComplete="address-line1"
+          placeholder={countrySpecificPlaceholder[country]}
+          {...field}
+          ref={(el: HTMLInputElement) => {
+            field.ref(el);
+            inputRef.current = el;
+          }}
+        />
       )}
     />
   );
