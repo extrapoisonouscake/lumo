@@ -1,7 +1,14 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import useEmblaCarousel from "embla-carousel-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+const TOTAL_WEEKS = 21;
+const LOADING_SLIDES = 2; // One at each end
+const TOTAL_SLIDES = TOTAL_WEEKS + LOADING_SLIDES;
+const CENTER_INDEX = Math.floor(TOTAL_SLIDES / 2);
+const PRELOAD_THRESHOLD = 3;
 
 export function WeekdaySlider({
   startDate,
@@ -12,34 +19,32 @@ export function WeekdaySlider({
   currentDate: Date;
   setDate: (date: Date) => void;
 }) {
-  // Use a large buffer to minimize rebuilds - 21 weeks total
-  const TOTAL_WEEKS = 21;
-  const CENTER_INDEX = 10; // Middle of 21 weeks
-  const PRELOAD_THRESHOLD = 3; // Start preloading when within 3 weeks of edge
-
-  const [baseWeekOffset, setBaseWeekOffset] = useState(-CENTER_INDEX); // Start at center
-  const lastRebuildRef = useRef(0); // Prevent rapid rebuilds
+  const [weekOffset, setWeekOffset] = useState(-Math.floor(TOTAL_WEEKS / 2));
+  const lastRebuildRef = useRef(0);
+  const baseStartDateRef = useRef(startDate);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     startIndex: CENTER_INDEX,
     skipSnaps: false,
   });
 
-  // Create buffer of weeks
-  const weeks = useMemo(
-    () =>
-      Array.from({ length: TOTAL_WEEKS }, (_, weekIndex) =>
+  const slides = useMemo(
+    () => {
+      const weekSlides = Array.from({ length: TOTAL_WEEKS }, (_, weekIndex) =>
         [...Array(7)].map((_, dayIndex) => {
-          const date = timezonedDayJS(startDate)
-            .add(baseWeekOffset + weekIndex, "week")
+          const date = timezonedDayJS(baseStartDateRef.current)
+            .add(weekOffset + weekIndex, "week")
             .add(dayIndex, "day");
           return { name: date.format("dd"), day: date.date(), date };
         })
-      ),
-    [startDate, baseWeekOffset]
+      );
+
+      // null indicates loading slide
+      return [null, ...weekSlides, null];
+    },
+    [weekOffset] // Only depend on weekOffset
   );
 
-  // Rebuild carousel with new date range when user gets close to edges
   const handlePreload = useCallback(
     (selectedIndex: number) => {
       const now = Date.now();
@@ -48,37 +53,41 @@ export function WeekdaySlider({
       if (now - lastRebuildRef.current < 300) return;
 
       let shouldRebuild = false;
-      let newBaseOffset = baseWeekOffset;
+      let newWeekOffset = weekOffset;
       let newStartIndex = selectedIndex;
 
-      if (selectedIndex <= PRELOAD_THRESHOLD) {
-        // User is close to beginning, shift backward
-        const shiftAmount = CENTER_INDEX - PRELOAD_THRESHOLD;
-        newBaseOffset = baseWeekOffset - shiftAmount;
+      // Check if user is on loading slides or close to them
+      if (selectedIndex === 0 || selectedIndex <= PRELOAD_THRESHOLD + 1) {
+        // User is on first loading slide or close to beginning, extend backward
+        const shiftAmount = Math.floor(TOTAL_WEEKS / 2);
+        newWeekOffset = weekOffset - shiftAmount;
         newStartIndex = selectedIndex + shiftAmount;
         shouldRebuild = true;
-      } else if (selectedIndex >= TOTAL_WEEKS - PRELOAD_THRESHOLD - 1) {
-        // User is close to end, shift forward
-        const shiftAmount = CENTER_INDEX - PRELOAD_THRESHOLD;
-        newBaseOffset = baseWeekOffset + shiftAmount;
+      } else if (
+        selectedIndex === TOTAL_SLIDES - 1 ||
+        selectedIndex >= TOTAL_SLIDES - PRELOAD_THRESHOLD - 2
+      ) {
+        // User is on last loading slide or close to end, extend forward
+        const shiftAmount = Math.floor(TOTAL_WEEKS / 2);
+        newWeekOffset = weekOffset + shiftAmount;
         newStartIndex = selectedIndex - shiftAmount;
         shouldRebuild = true;
       }
 
       if (shouldRebuild && emblaApi) {
         lastRebuildRef.current = now;
-        setBaseWeekOffset(newBaseOffset);
+        setWeekOffset(newWeekOffset);
 
         // Rebuild after state update
         setTimeout(() => {
           if (emblaApi) {
             emblaApi.reInit();
-            emblaApi.scrollTo(newStartIndex, false); // Jump without animation after rebuild
+            emblaApi.scrollTo(newStartIndex, false);
           }
         }, 0);
       }
     },
-    [emblaApi, baseWeekOffset]
+    [emblaApi, weekOffset]
   );
 
   // Handle slide changes - only trigger preload after user settles
@@ -101,48 +110,58 @@ export function WeekdaySlider({
     };
   }, [emblaApi, onSlideSettle]);
 
+  // Loading slide component
+
   return (
     <div className="overflow-hidden" ref={emblaRef}>
       <div className="flex">
-        {weeks.map((days, weekIndex) => (
+        {slides.map((days, slideIndex) => (
           <div
-            key={`week-${baseWeekOffset + weekIndex}`}
+            key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
             className="flex-[0_0_100%] flex justify-center"
           >
             <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
-              {days.map((day) => {
-                const isCurrent = day.date.isSame(currentDate, "day");
-                return (
-                  <div
-                    key={day.date.format("YYYY-MM-DD")}
-                    className={cn(
-                      "flex flex-col items-center gap-1 cursor-pointer"
-                    )}
-                    onClick={() => setDate(day.date.toDate())}
-                  >
-                    <p
-                      className={cn(
-                        "text-sm transition-colors duration-200",
-                        isCurrent
-                          ? "text-primary font-medium"
-                          : "text-muted-foreground"
-                      )}
-                    >
-                      {day.name}
-                    </p>
+              {days ? (
+                days.map((day) => {
+                  const isCurrent = day.date.isSame(currentDate, "day");
+                  return (
                     <div
+                      key={day.date.format("YYYY-MM-DD")}
                       className={cn(
-                        "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200",
-                        isCurrent
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-foreground hover:border-muted-foreground/50 hover:bg-muted/20"
+                        "flex flex-col items-center gap-1 cursor-pointer"
                       )}
+                      onClick={() => {
+                        // Ensure consistent timezone handling by using startOf('day')
+                        const clickedDate = day.date.startOf("day").toDate();
+                        setDate(clickedDate);
+                      }}
                     >
-                      {day.day}
+                      <p
+                        className={cn(
+                          "text-sm transition-colors duration-200",
+                          isCurrent
+                            ? "text-primary font-medium"
+                            : "text-muted-foreground"
+                        )}
+                      >
+                        {day.name}
+                      </p>
+                      <div
+                        className={cn(
+                          "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200",
+                          isCurrent
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "text-foreground hover:border-muted-foreground/50 hover:bg-muted/20"
+                        )}
+                      >
+                        {day.day}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <WeekdaysSkeleton />
+              )}
             </div>
           </div>
         ))}
@@ -150,3 +169,10 @@ export function WeekdaySlider({
     </div>
   );
 }
+const WeekdaysSkeleton = () =>
+  Array.from({ length: 7 }).map((_, dayIndex) => (
+    <div key={dayIndex} className="flex flex-col items-center gap-1 my-1.5">
+      <Skeleton className="h-2 w-4" />
+      <Skeleton className="p-1.5 leading-tight size-9 flex items-center justify-center rounded-full text-muted-foreground/50"></Skeleton>
+    </div>
+  ));
