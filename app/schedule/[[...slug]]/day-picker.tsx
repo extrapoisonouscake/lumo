@@ -3,8 +3,8 @@
 import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { RotateCcw } from "lucide-react";
+import { useState } from "react";
 function ChevronButton(props: ButtonProps) {
   return (
     <Button
@@ -15,7 +15,6 @@ function ChevronButton(props: ButtonProps) {
     />
   );
 }
-type NavigationButtonsNames = "left" | "calendar" | "right";
 export function ScheduleDayPicker({
   date,
   setDate,
@@ -26,72 +25,34 @@ export function ScheduleDayPicker({
   isNavigating: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [loadingButtonName, setLoadingButtonName] =
-    useState<NavigationButtonsNames | null>(null);
-  const onDateChange = async (
-    newDate = new Date(),
-    originButton: NavigationButtonsNames
-  ) => {
-    setDate(newDate);
-    setLoadingButtonName(originButton);
-  };
-  useEffect(() => {
-    if (!isNavigating) {
-      setLoadingButtonName(null);
-    }
-  }, [isNavigating]);
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <ChevronButton
-        onClick={() => {
-          onDateChange(
-            timezonedDayJS(date).subtract(1, "day").startOf("date").toDate(),
-            "left"
-          );
-        }}
-        isLoading={loadingButtonName === "left"}
-      >
-        <ChevronLeft className="!size-5" />
-      </ChevronButton>
 
-      <DatePicker
-        open={isOpen}
-        onOpenChange={setIsOpen}
-        disabledModifier={{ dayOfWeek: [0, 6] }}
-        isLoading={loadingButtonName === "calendar"}
-        date={date}
-        keepTimezone={!!date}
-        showWeekday
-        setDate={(newDate) => onDateChange(newDate, "calendar")}
-        bottomContent={
-          !timezonedDayJS(date).isSame(timezonedDayJS(), "date") && (
-            <div className="p-2 pt-0">
-              <Button
-                onClick={() => {
-                  setIsOpen(false);
-                  onDateChange(undefined, "calendar");
-                }}
-                variant="outline"
-                className="w-full"
-                leftIcon={<RotateCcw />}
-              >
-                Back to today
-              </Button>
-            </div>
-          )
-        }
-      />
-      <ChevronButton
-        onClick={() => {
-          onDateChange(
-            timezonedDayJS(date).add(1, "day").startOf("date").toDate(),
-            "right"
-          );
-        }}
-        isLoading={loadingButtonName === "right"}
-      >
-        <ChevronRight className="!size-5" />
-      </ChevronButton>
-    </div>
+  return (
+    <DatePicker
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      disabledModifier={{ dayOfWeek: [0, 6] }}
+      isLoading={isNavigating}
+      date={date}
+      keepTimezone={!!date}
+      className="w-fit h-9"
+      setDate={(date) => setDate(date ?? new Date())}
+      bottomContent={
+        !timezonedDayJS(date).isSame(timezonedDayJS(), "date") && (
+          <div className="p-2 pt-0">
+            <Button
+              onClick={() => {
+                setIsOpen(false);
+                setDate(new Date());
+              }}
+              variant="outline"
+              className="w-full"
+              leftIcon={<RotateCcw />}
+            >
+              Back to today
+            </Button>
+          </div>
+        )
+      }
+    />
   );
 }

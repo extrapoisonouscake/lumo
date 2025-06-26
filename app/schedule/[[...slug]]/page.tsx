@@ -1,7 +1,4 @@
-import {
-  PageDataProvider,
-  PageHeading,
-} from "@/components/layout/page-heading";
+import { PageDataProvider } from "@/components/layout/page-heading";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
 import { SchedulePageContent } from "./content";
@@ -24,10 +21,7 @@ export default async function Page({ params }: Props) {
   const day = slug?.[0];
   return (
     <PageDataProvider>
-      <div className="flex flex-col gap-4">
-        <PageHeading />
-        <SchedulePageContent initialDay={day} />
-      </div>
+      <SchedulePageContent initialDay={day} />
     </PageDataProvider>
   );
 }

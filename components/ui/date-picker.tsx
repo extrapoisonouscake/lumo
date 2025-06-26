@@ -35,6 +35,7 @@ export function DatePicker({
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
   keepTimezone = false,
+  className,
 }: {
   date?: Date;
   defaultDate?: Date;
@@ -43,6 +44,7 @@ export function DatePicker({
   setDate: (newDate: typeof date) => void;
   bottomContent?: ReactNode;
   keepTimezone?: boolean;
+  className?: string;
 } & Pick<ComponentProps<typeof Button>, "disabled" | "isLoading"> &
   Pick<ComponentProps<typeof Popover>, "open" | "onOpenChange">) {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,7 +62,8 @@ export function DatePicker({
           variant={"outline"}
           className={cn(
             "justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
+            className
           )}
           leftIcon={<CalendarIcon className="h-4 w-4" />}
         >

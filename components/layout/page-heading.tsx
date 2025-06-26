@@ -76,54 +76,64 @@ export const usePageData = () => {
   return { ...context, setBreadcrumbItem, addBreadcrumbItem };
 };
 
-export function PageHeading() {
-  const { pageData } = usePageData();
+export function PageHeading({
+  leftContent,
+}: {
+  leftContent?: React.ReactNode;
+}) {
   const { isLoggedIn } = useAuthStatus();
   return (
     <div className="flex justify-between gap-4 items-center">
-      <div className="flex items-center gap-2">
-        {isLoggedIn && (
-          <div className="hidden sm:flex items-center gap-2">
-            <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-1 h-4" />
-          </div>
-        )}
-
-        {pageData ? (
-          <Breadcrumb>
-            <BreadcrumbList>
-              {pageData.breadcrumb.map(({ href, name }, i) => {
-                const isLast = i === pageData.breadcrumb.length - 1;
-                return (
-                  <Fragment key={name}>
-                    <BreadcrumbItem>
-                      {isLast ? (
-                        <BreadcrumbPage
-                          className={cn({ "font-semibold": i === 0 })}
-                        >
-                          {name}
-                        </BreadcrumbPage>
-                      ) : (
-                        <BreadcrumbLink asChild>
-                          <Link href={href ?? ""}>{name}</Link>
-                        </BreadcrumbLink>
-                      )}
-                    </BreadcrumbItem>
-                    {!isLast && <BreadcrumbSeparator />}
-                  </Fragment>
-                );
-              })}
-            </BreadcrumbList>
-          </Breadcrumb>
-        ) : (
-          <Skeleton className="leading-none">Some Page</Skeleton>
-        )}
-      </div>
+      {leftContent ?? <DefaultLeftContent />}
 
       <div className="w-fit flex sm:hidden gap-1 items-center">
         <ThemeToggle isInSidebar={false} shouldShowText={false} />
         {isLoggedIn && <UserHeader className="w-fit" />}
       </div>
+    </div>
+  );
+}
+function DefaultLeftContent() {
+  const { pageData } = usePageData();
+  const { isLoggedIn } = useAuthStatus();
+  return (
+    <div className="flex items-center gap-2">
+      {isLoggedIn && (
+        <div className="hidden sm:flex items-center gap-2">
+          <SidebarTrigger />
+          <Separator orientation="vertical" className="mr-1 h-4" />
+        </div>
+      )}
+
+      {pageData ? (
+        <Breadcrumb>
+          <BreadcrumbList>
+            {pageData.breadcrumb.map(({ href, name }, i) => {
+              const isLast = i === pageData.breadcrumb.length - 1;
+              return (
+                <Fragment key={name}>
+                  <BreadcrumbItem>
+                    {isLast ? (
+                      <BreadcrumbPage
+                        className={cn({ "font-semibold": i === 0 })}
+                      >
+                        {name}
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link href={href ?? ""}>{name}</Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                  {!isLast && <BreadcrumbSeparator />}
+                </Fragment>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
+      ) : (
+        <Skeleton className="leading-none">Some Page</Skeleton>
+      )}
     </div>
   );
 }

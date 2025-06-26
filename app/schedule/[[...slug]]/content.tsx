@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "@/components/layout/page-heading";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
@@ -32,12 +33,16 @@ export function SchedulePageContent({
     });
   };
   return (
-    <>
+    <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
-        <ScheduleDayPicker
-          date={date}
-          setDate={dateSetHandler}
-          isNavigating={isPending}
+        <PageHeading
+          leftContent={
+            <ScheduleDayPicker
+              date={date}
+              setDate={dateSetHandler}
+              isNavigating={isPending}
+            />
+          }
         />
         <WeekdaySlider
           setDate={dateSetHandler}
@@ -46,6 +51,6 @@ export function SchedulePageContent({
         />
       </div>
       <ScheduleLoadableSection date={date} />
-    </>
+    </div>
   );
 }
