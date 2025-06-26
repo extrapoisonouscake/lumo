@@ -10,6 +10,7 @@ import { SubjectsTable } from "./table";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
 import { useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 
 export function SubjectsPageContent() {
   const searchParams = useSearchParams();
@@ -22,6 +23,12 @@ export function SubjectsPageContent() {
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
   });
+  const currentTermIndex = useMemo(
+    () =>
+      Object.values(subjectSummaries.data)[0]?.currentTermIndex ?? undefined,
+    [subjectSummaries.data]
+  );
+
   return (
     <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
       {(response) => {
@@ -42,6 +49,8 @@ export function SubjectsPageContent() {
                 }),
               },
             }}
+            //*timewise
+            currentTermIndex={currentTermIndex}
             year={year}
             term={term}
           />
@@ -58,10 +67,12 @@ function LoadedContent({
   response,
   year,
   term,
+  currentTermIndex,
 }: {
   response?: MyEdEndpointResponse<"subjects">;
   year?: string;
   term?: string;
+  currentTermIndex?: number;
 }) {
   return (
     <>
@@ -70,7 +81,12 @@ function LoadedContent({
           <TermSelects
             terms={response.terms}
             initialYear={year}
-            initialTerm={term}
+            initialTerm={
+              term ??
+              (typeof currentTermIndex === "number"
+                ? response.terms[currentTermIndex]!.id
+                : undefined)
+            }
           />
         ) : (
           <TermSelectsSkeleton />

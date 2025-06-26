@@ -1,10 +1,10 @@
 import { Column } from "@tanstack/react-table";
-import { motion } from "framer-motion";
 import {
   ArrowDownNarrowWide,
   ArrowUpDown,
   ArrowUpWideNarrow,
 } from "lucide-react";
+import { motion } from "motion/react";
 
 export function SortableColumn<TableObject, CellValue>({
   children,

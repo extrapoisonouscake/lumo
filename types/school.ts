@@ -11,6 +11,7 @@ export type ScheduleSubject = Omit<Subject, "average" | "id" | "term"> & {
   startsAt: Date;
   endsAt: Date;
 };
+// TODO: distinguish between quarterly and semester terms
 export enum SubjectTerm {
   FirstSemester = "FIRST_SEMESTER",
   SecondSemester = "SECOND_SEMESTER",
@@ -33,6 +34,8 @@ export interface SubjectSummary {
   id: string;
   name: string;
   term: SubjectTerm;
+  //this is the only way to get the current term
+  currentTermIndex: number | null;
   academics: {
     running: GradeObject;
     posted: GradeObject;

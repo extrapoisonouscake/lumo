@@ -1,6 +1,7 @@
 import { trpc } from "@/app/trpc";
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
@@ -33,15 +34,15 @@ const getSpringBreakDates = (year: number) => {
   const lastMonday = march31st.day(1);
 
   const thirdToLastMonday = lastMonday.subtract(2, "week");
-  const april1st=timezonedDayJS(`${year}-04-01`);
+  const april1st = timezonedDayJS(`${year}-04-01`);
   const firstFriday = april1st.day(5);
   const secondFriday = firstFriday.add(1, "week");
   return [thirdToLastMonday, secondFriday] as const;
 };
 const getSummerBreakDates = (year: number) => {
-  const june15th=timezonedDayJS(`${year}-06-15`);
+  const june15th = timezonedDayJS(`${year}-06-15`);
 
-  const labourDay=timezonedDayJS(`${year}-09-01`).day(2)
+  const labourDay = timezonedDayJS(`${year}-09-01`).day(2);
 
   return [june15th, labourDay] as const;
 };
@@ -51,40 +52,40 @@ const isDayJSObjectBetweenDates = (
   date1: Dayjs,
   date2: Dayjs
 ) => dateObject.isBetween(date1, date2, "date", "[]");
-const getNotInSessionGenericMessage=(dateObject:Dayjs)=>{
-let messagePortion;
-      if (timezonedDayJS().isSame(dateObject, "date")) {
-        messagePortion = "today";
-      } else {
-        messagePortion = "on this day";
-      }
-return `No school ${messagePortion}.`;
-}
+const getNotInSessionGenericMessage = (dateObject: Dayjs) => {
+  let messagePortion;
+  if (timezonedDayJS().isSame(dateObject, "date")) {
+    messagePortion = "today";
+  } else {
+    messagePortion = "on this day";
+  }
+  return `No school ${messagePortion}.`;
+};
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
 const visualizableErrors: Record<
   string,
-  ({ date,isWeekend }: { date: Date,isWeekend?:boolean }) => ErrorCardProps
+  ({ date, isWeekend }: { date: Date; isWeekend?: boolean }) => ErrorCardProps
 > = {
-  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date,isWeekend }) => {
+  [SCHOOL_NOT_IN_SESSION_MESSAGE]: ({ date, isWeekend }) => {
     const dateObject = timezonedDayJS(date);
-    let message=getNotInSessionGenericMessage(dateObject),
+    let message = getNotInSessionGenericMessage(dateObject),
       emoji = "😴";
-if(!isWeekend){
-    const winterBreakDates = getWinterBreakDates(dateObject);
-const currentYear=dateObject.year()
-    const springBreakDates = getSpringBreakDates(currentYear);
-const summerBreakDates = getSummerBreakDates(currentYear);
-    if (isDayJSObjectBetweenDates(dateObject, ...winterBreakDates)) {
-      message = "Happy Holidays!";
-      emoji = "❄️";
-    } else if (isDayJSObjectBetweenDates(dateObject, ...springBreakDates)) {
-      message = "It's Spring Break.";
-      emoji = "🌷";
-    } else if(isDayJSObjectBetweenDates(dateObject, ...summerBreakDates)){
-message = "Happy Summer!";
-      emoji = "☀️";
-}
-}
+    if (!isWeekend) {
+      const winterBreakDates = getWinterBreakDates(dateObject);
+      const currentYear = dateObject.year();
+      const springBreakDates = getSpringBreakDates(currentYear);
+      const summerBreakDates = getSummerBreakDates(currentYear);
+      if (isDayJSObjectBetweenDates(dateObject, ...winterBreakDates)) {
+        message = "Happy Holidays!";
+        emoji = "❄️";
+      } else if (isDayJSObjectBetweenDates(dateObject, ...springBreakDates)) {
+        message = "It's Spring Break.";
+        emoji = "🌷";
+      } else if (isDayJSObjectBetweenDates(dateObject, ...summerBreakDates)) {
+        message = "Happy Summer!";
+        emoji = "☀️";
+      }
+    }
     return { children: message, emoji };
   },
 };
@@ -99,7 +100,10 @@ export function ScheduleLoadableSection({ date }: Props) {
   if ([0, 6].includes(currentDayObject.day())) {
     return (
       <ErrorCard
-        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({ date,isWeekend:true})}
+        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({
+          date,
+          isWeekend: true,
+        })}
       />
     );
   }
@@ -114,7 +118,10 @@ function Loader({ date }: { date: Date }) {
       { trpc: { abortOnUnmount: true } }
     )
   );
-  const subjectsDataQuery = useSubjectsData();
+  const subjectsDataQuery = useSubjectsData({
+    isPreviousYear: false,
+    termId: MYED_ALL_GRADE_TERMS_SELECTOR,
+  });
   return (
     <QueryWrapper query={scheduleQuery} skeleton={<ScheduleContentSkeleton />}>
       {(schedule) => (

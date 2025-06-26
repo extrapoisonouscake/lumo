@@ -16,7 +16,7 @@ import {
 } from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { refreshSessionExpiresAt, trpc } from "../../trpc";
+import { trpc } from "../../trpc";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(error: string | null | undefined) {
   return (
@@ -46,8 +46,7 @@ export function LoginForm({
     }
     const response = await loginMutation.mutateAsync(data);
     if (response.success) {
-     
-      initClientLogin({push:router.push,refreshAuthStatus})
+      initClientLogin({ push: router.push, refreshAuthStatus });
     } else {
       const message = response.message;
       if (
@@ -60,14 +59,21 @@ export function LoginForm({
       }
     }
   }
+
   return (
-    <Form onSubmit={onSubmit} {...form} className="flex flex-col gap-3 w-full">
+    <div>
       {errorMessageNode}
-      <FormInput placeholder="1234567" name="username" label="Username" />
-      <FormPasswordInput name="password" />
-      <SubmitButton isLoading={form.formState.isSubmitting}>
-        Sign In
-      </SubmitButton>
-    </Form>
+      <Form
+        onSubmit={onSubmit}
+        {...form}
+        className="flex flex-col gap-3 w-full"
+      >
+        <FormInput placeholder="1234567" name="username" label="Username" />
+        <FormPasswordInput name="password" />
+        <SubmitButton isLoading={form.formState.isSubmitting}>
+          Sign In
+        </SubmitButton>
+      </Form>
+    </div>
   );
 }

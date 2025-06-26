@@ -389,7 +389,7 @@ const subjectAssignmentsRoute = new Route<
       },
     ]);
   });
-
+export const MYED_ALL_GRADE_TERMS_SELECTOR = "all";
 export const myEdRestEndpoints = {
   subjects: new Route<{
     isPreviousYear?: boolean;
@@ -400,7 +400,7 @@ export const myEdRestEndpoints = {
       path: `rest/lists/academics.classes.list/studentGradeTerms`,
       body: {
         year: isPreviousYear ? "previous" : "current",
-        term: termId || "all",
+        term: termId || MYED_ALL_GRADE_TERMS_SELECTOR,
       },
       expect: "json",
     }))
@@ -423,7 +423,9 @@ export const myEdRestEndpoints = {
     name: string;
   }>()
     .step(({ studentId }) =>
-      generateSubjectsListStepParams(studentId, { termId: "all" })
+      generateSubjectsListStepParams(studentId, {
+        termId: MYED_ALL_GRADE_TERMS_SELECTOR,
+      })
     )
     .metadata(({ params: { name }, responses, metadata }) => {
       const targetResponse = responses[0]!;
@@ -436,7 +438,7 @@ export const myEdRestEndpoints = {
       ({ studentId }) =>
         generateSubjectsListStepParams(studentId, {
           isPreviousYear: true,
-          termId: "all",
+          termId: MYED_ALL_GRADE_TERMS_SELECTOR,
         }),
       ({ metadata: { shouldSearchInPreviousYear } }) =>
         shouldSearchInPreviousYear

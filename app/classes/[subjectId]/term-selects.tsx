@@ -1,4 +1,5 @@
 "use client";
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -37,12 +38,9 @@ export function TermSelects({
   const secondYear = isSecondYear ? currentYear : currentYear - 1;
   const shouldShowTermSelect = terms.length > 0;
   useEffect(() => {
-    if (initialTerm !== term) {
-      setTerm(initialTerm);
-    }
-    if (initialYear !== year) {
-      setYear(initialYear);
-    }
+    setTerm(initialTerm);
+
+    setYear(initialYear);
   }, [initialTerm, initialYear]);
   if (!shouldShowTermSelect && !shouldShowYearSelect) return null;
   return (
@@ -91,7 +89,9 @@ export function TermSelects({
             }}
           >
             <SelectTrigger>
-              {term && (terms.some((t) => t.id === term) || term === "all") ? (
+              {term &&
+              (terms.some((t) => t.id === term) ||
+                term === MYED_ALL_GRADE_TERMS_SELECTOR) ? (
                 <SelectValue placeholder="Select a term..." />
               ) : (
                 "Current"

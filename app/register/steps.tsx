@@ -18,6 +18,7 @@ export function RegistrationStepsBar({
         const allowClick = maxVisitedStep >= index && currentStep !== index;
         return (
           <div
+            key={index}
             className={cn("flex items-center gap-1 flex-col relative", {
               "cursor-pointer": allowClick,
             })}

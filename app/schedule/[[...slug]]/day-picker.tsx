@@ -4,18 +4,7 @@ import { Button, ButtonProps } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-  useTransition,
-} from "react";
-import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
-const formatDateToStandard = (date: Date | undefined) =>
-  timezonedDayJS(date).format(SCHEDULE_QUERY_DATE_FORMAT);
+import { useEffect, useState } from "react";
 function ChevronButton(props: ButtonProps) {
   return (
     <Button
@@ -30,14 +19,13 @@ type NavigationButtonsNames = "left" | "calendar" | "right";
 export function ScheduleDayPicker({
   date,
   setDate,
+  isNavigating,
 }: {
   date: Date;
-  setDate: Dispatch<SetStateAction<Date>>;
+  setDate: (date: Date) => void;
+  isNavigating: boolean;
 }) {
-  const router = useRouter();
-  const currentSearchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const [loadingButtonName, setLoadingButtonName] =
     useState<NavigationButtonsNames | null>(null);
   const onDateChange = async (
@@ -46,18 +34,12 @@ export function ScheduleDayPicker({
   ) => {
     setDate(newDate);
     setLoadingButtonName(originButton);
-    startTransition(() => {
-      router.push(
-        `/schedule${
-          newDate ? `/${formatDateToStandard(newDate)}` : ""
-        }?${currentSearchParams.toString()}`
-      );
-    });
   };
   useEffect(() => {
-    if (isPending) return;
-    setLoadingButtonName(null);
-  }, [isPending]);
+    if (!isNavigating) {
+      setLoadingButtonName(null);
+    }
+  }, [isNavigating]);
   return (
     <div className="flex items-center justify-between gap-2">
       <ChevronButton

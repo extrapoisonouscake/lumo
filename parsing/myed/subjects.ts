@@ -199,7 +199,13 @@ function getSubjectAverages(
 export function parseSubjectSummary({
   responses: [data],
 }: RawSubjectSummary): SubjectSummary {
-  const { section, averageSummary, attendanceSummary, postedSummary } = data;
+  const {
+    section,
+    averageSummary,
+    attendanceSummary,
+    postedSummary,
+    currentGradeTermIndex,
+  } = data;
   const result: SubjectSummary = {
     id: section.oid,
     name: prettifyEducationalName(section.relSscMstOid_mstDescription),
@@ -209,6 +215,8 @@ export function parseSubjectSummary({
       posted: { overall: null },
       categories: [],
     },
+    currentTermIndex:
+      currentGradeTermIndex !== "" ? +currentGradeTermIndex : null,
     attendance: {
       absent: 0,
       dismissed: 0,
@@ -217,6 +225,7 @@ export function parseSubjectSummary({
   };
   if (averageSummary.length > 0) {
     const gradebookAverageIndex = averageSummary.findIndex(
+      //* STATIC NAME
       (item) => item.category === "Gradebook average"
     );
     const runningAveragesObject = averageSummary[gradebookAverageIndex]!; //? is it always present
