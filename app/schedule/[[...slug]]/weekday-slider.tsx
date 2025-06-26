@@ -1,7 +1,7 @@
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import useEmblaCarousel from "embla-carousel-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function WeekdaySlider({
   startDate,
@@ -12,64 +12,101 @@ export function WeekdaySlider({
   currentDate: Date;
   setDate: (date: Date) => void;
 }) {
-  // Track the center week offset for sliding window
-  const [centerWeekOffset, setCenterWeekOffset] = useState(0);
+  // Use a large buffer to minimize rebuilds - 21 weeks total
+  const TOTAL_WEEKS = 21;
+  const CENTER_INDEX = 10; // Middle of 21 weeks
+  const PRELOAD_THRESHOLD = 3; // Start preloading when within 3 weeks of edge
 
-  // Use embla with infinite loop
+  const [baseWeekOffset, setBaseWeekOffset] = useState(-CENTER_INDEX); // Start at center
+  const lastRebuildRef = useRef(0); // Prevent rapid rebuilds
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    startIndex: 2, // Start at the center week (index 2 of 5 weeks)
+    startIndex: CENTER_INDEX,
+    skipSnaps: false,
   });
 
-  // Create a sliding window of 5 weeks around the current center
+  // Create buffer of weeks
   const weeks = useMemo(
     () =>
-      [-2, -1, 0, 1, 2].map((weekOffset) =>
-        [...Array(7)].map((_, i) => {
+      Array.from({ length: TOTAL_WEEKS }, (_, weekIndex) =>
+        [...Array(7)].map((_, dayIndex) => {
           const date = timezonedDayJS(startDate)
-            .add(centerWeekOffset + weekOffset, "week")
-            .add(i, "day");
+            .add(baseWeekOffset + weekIndex, "week")
+            .add(dayIndex, "day");
           return { name: date.format("dd"), day: date.date(), date };
         })
       ),
-    [startDate, centerWeekOffset]
+    [startDate, baseWeekOffset]
   );
 
-  // Handle slide changes to update the sliding window
-  const onSlideChange = useCallback(() => {
+  // Rebuild carousel with new date range when user gets close to edges
+  const handlePreload = useCallback(
+    (selectedIndex: number) => {
+      const now = Date.now();
+
+      // Prevent rapid rebuilds (debounce by 300ms)
+      if (now - lastRebuildRef.current < 300) return;
+
+      let shouldRebuild = false;
+      let newBaseOffset = baseWeekOffset;
+      let newStartIndex = selectedIndex;
+
+      if (selectedIndex <= PRELOAD_THRESHOLD) {
+        // User is close to beginning, shift backward
+        const shiftAmount = CENTER_INDEX - PRELOAD_THRESHOLD;
+        newBaseOffset = baseWeekOffset - shiftAmount;
+        newStartIndex = selectedIndex + shiftAmount;
+        shouldRebuild = true;
+      } else if (selectedIndex >= TOTAL_WEEKS - PRELOAD_THRESHOLD - 1) {
+        // User is close to end, shift forward
+        const shiftAmount = CENTER_INDEX - PRELOAD_THRESHOLD;
+        newBaseOffset = baseWeekOffset + shiftAmount;
+        newStartIndex = selectedIndex - shiftAmount;
+        shouldRebuild = true;
+      }
+
+      if (shouldRebuild && emblaApi) {
+        lastRebuildRef.current = now;
+        setBaseWeekOffset(newBaseOffset);
+
+        // Rebuild after state update
+        setTimeout(() => {
+          if (emblaApi) {
+            emblaApi.reInit();
+            emblaApi.scrollTo(newStartIndex, false); // Jump without animation after rebuild
+          }
+        }, 0);
+      }
+    },
+    [emblaApi, baseWeekOffset]
+  );
+
+  // Handle slide changes - only trigger preload after user settles
+  const onSlideSettle = useCallback(() => {
     if (!emblaApi) return;
 
     const selectedIndex = emblaApi.selectedScrollSnap();
-
-    // When we're at the edges, shift the sliding window
-    if (selectedIndex === 0) {
-      // Scrolled to first week, shift window backward
-      setCenterWeekOffset((prev) => prev - 1);
-      emblaApi.scrollTo(2, false); // Jump to center without animation
-    } else if (selectedIndex === 4) {
-      // Scrolled to last week, shift window forward
-      setCenterWeekOffset((prev) => prev + 1);
-      emblaApi.scrollTo(2, false); // Jump to center without animation
-    }
-  }, [emblaApi]);
+    handlePreload(selectedIndex);
+  }, [emblaApi, handlePreload]);
 
   // Set up event listeners
   useEffect(() => {
     if (!emblaApi) return;
 
-    emblaApi.on("select", onSlideChange);
+    // Only listen to 'settle' to avoid interrupting animations
+    emblaApi.on("settle", onSlideSettle);
 
     return () => {
-      emblaApi.off("select", onSlideChange);
+      emblaApi.off("settle", onSlideSettle);
     };
-  }, [emblaApi, onSlideChange]);
+  }, [emblaApi, onSlideSettle]);
 
   return (
     <div className="overflow-hidden" ref={emblaRef}>
       <div className="flex">
         {weeks.map((days, weekIndex) => (
           <div
-            key={`${centerWeekOffset + weekIndex - 2}`}
+            key={`week-${baseWeekOffset + weekIndex}`}
             className="flex-[0_0_100%] flex justify-center"
           >
             <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
