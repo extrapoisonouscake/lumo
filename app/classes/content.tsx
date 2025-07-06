@@ -9,19 +9,22 @@ import { SubjectsTable } from "./table";
 
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
+import { SubjectYear } from "@/types/school";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 export function SubjectsPageContent() {
   const searchParams = useSearchParams();
-  const year = searchParams.get("year") ?? undefined;
+  const year = (searchParams.get("year") ?? "current") as SubjectYear;
   const term = searchParams.get("term") ?? undefined;
+  const isPreviousYear = year === "previous";
   const query = useSubjectsData({
-    isPreviousYear: year === "previous",
+    isPreviousYear,
     termId: term,
   });
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
+    year: isPreviousYear ? "previous" : "current",
   });
   const currentTermIndex = useMemo(
     () =>
@@ -60,7 +63,7 @@ export function SubjectsPageContent() {
   );
 }
 function SubjectsPageSkeleton() {
-  return <LoadedContent />;
+  return <LoadedContent year="current" />;
 }
 
 function LoadedContent({
@@ -70,7 +73,7 @@ function LoadedContent({
   currentTermIndex,
 }: {
   response?: MyEdEndpointResponse<"subjects">;
-  year?: string;
+  year: SubjectYear;
   term?: string;
   currentTermIndex?: number;
 }) {
@@ -92,12 +95,18 @@ function LoadedContent({
           <TermSelectsSkeleton />
         )}
       </div>
-      <SubjectsTable data={response?.subjects.main} isLoading={!response} />
+      <SubjectsTable
+        data={response?.subjects.main}
+        isLoading={!response}
+        year={year}
+      />
 
       {response?.subjects.teacherAdvisory && (
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-medium">Teacher Advisory</h3>
           <SubjectsTable
+            year={year}
+            isLoading={false}
             shownColumns={["room", "teachers"]}
             data={[response.subjects.teacherAdvisory]}
           />

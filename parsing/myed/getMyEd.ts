@@ -16,6 +16,7 @@ import { parseRegistrationFields } from "./registration";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import {
+  parseSubjectAttendance,
   parseSubjectIdByName,
   parseSubjects,
   parseSubjectSummary,
@@ -32,6 +33,7 @@ const endpointToParsingFunction = {
   subjectAssignment: parseSubjectAssignment,
   subjectSummary: parseSubjectSummary,
   subjectIdByName: parseSubjectIdByName,
+  subjectAttendance: parseSubjectAttendance,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>

@@ -33,7 +33,7 @@ export function SubjectAssignments({
 }) {
   const [categoryId, setCategoryId] = useState(initialCategoryId);
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2">
         {terms && (
           <TermSelects
@@ -54,17 +54,17 @@ export function SubjectAssignments({
       </div>
 
       <ResponsiveAssignments categoryId={categoryId} data={assignments} />
-    </>
+    </div>
   );
 }
 
 export function SubjectAssignmentsSkeleton() {
   return (
-    <>
+    <div className="flex flex-col gap-3">
       <div className="flex flex-wrap gap-2">
         <CategorySelectSkeleton />
       </div>
       <ResponsiveAssignmentsSkeleton />
-    </>
+    </div>
   );
 }

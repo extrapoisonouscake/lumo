@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/sidebar";
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
-import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { useThemeColor } from "@/hooks/trpc/use-theme-color";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
@@ -88,16 +87,10 @@ function PagesMenu({ initialThemeColor }: { initialThemeColor?: string }) {
             <SidebarMenuButton
               asChild
               isActive={isActive}
-              className={cn(
-                isMobile &&
-                  "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:bg-transparent transition-colors"
-              )}
-              style={{
-                color:
-                  isMobile && isActive && themeColor
-                    ? prepareThemeColor(themeColor)
-                    : undefined,
-              }}
+              className={cn({
+                "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 transition-colors":
+                  isMobile,
+              })}
             >
               <Link href={url}>
                 <page.icon className="size-5" />

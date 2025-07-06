@@ -45,7 +45,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
   };
   return (
     <div className="flex flex-col gap-2">
-      <Label className="text-sm font-normal">Theme color</Label>
+      <Label className="text-sm font-normal">Theme colour</Label>
       <div className="flex gap-2 flex-wrap">
         {AVAILABLE_THEMES.map((theme) => (
           <div

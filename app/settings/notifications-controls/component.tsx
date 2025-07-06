@@ -61,7 +61,7 @@ export function NotificationsControlsComponent({
     });
   };
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const shouldShowHelpDrawer = isIOS && !isPWA;
+  const shouldShowHelpDrawer = true;
   return (
     <>
       <div className="flex flex-col gap-2">

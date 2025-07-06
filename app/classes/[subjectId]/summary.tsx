@@ -1,4 +1,5 @@
 "use client";
+import { HalfDonutTextChart } from "@/components/misc/half-donut-text-chart";
 import {
   Card,
   CardContent,
@@ -14,6 +15,7 @@ import { type SubjectSummary, SubjectTerm } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { getGradeInfo } from "../../../helpers/grades";
+import { SubjectAttendance } from "./attendance";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 
 const termToLabel: Record<SubjectTerm, string> = {
@@ -27,9 +29,11 @@ const termToLabel: Record<SubjectTerm, string> = {
 };
 
 export function SubjectSummary({
+  id,
   term,
   name,
   academics,
+  year,
   shouldShowLetterGrade,
 }: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">) {
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
@@ -43,81 +47,64 @@ export function SubjectSummary({
     shouldShowLetterGrade
   );
   return (
-    <Card className="flex flex-col gap-3 relative items-center">
-      <div className="absolute top-2 right-2">
-        <LetterGradeSwitch
-          value={isLetterGradeShown}
-          onValueChange={setIsLetterGradeShown}
-        />
+    <Card className="flex flex-col relative items-center">
+      <div className="block p-2 md:absolute top-0 left-0 w-full">
+        <div className="flex justify-between items-center gap-4">
+          <SubjectAttendance id={id} year={year} />
+
+          <LetterGradeSwitch
+            value={isLetterGradeShown}
+            onValueChange={setIsLetterGradeShown}
+          />
+        </div>
       </div>
-      <CardHeader className="items-center pb-0 px-[80px]">
+      <CardHeader className="items-center pt-0 md:pt-6 pb-0 md:px-[120px]">
         <CardTitle className="text-center">{name}</CardTitle>
         {term && <CardDescription>{termToLabel[term]}</CardDescription>}
       </CardHeader>
-      <CardContent className="flex flex-1 items-center gap-1">
+      <CardContent className="mt-3 flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
-          <div
-            className={cn(
-              "relative",
-              isLetterGradeShown ? "h-[45px]" : "h-[50px]"
-            )}
-          >
-            {wasGradePosted && (
-              <Check
-                className={`absolute -top-1.5 -right-1.5 size-4 text-${fillColor}`}
-              />
-            )}
-            <div>
-              <HalfDonutProgressChart
-                value={Math.min(gradeObject?.mark || 0, 100)}
-                filledClassName={`fill-${fillColor}`}
-              />
-            </div>
-            <div
-              className={cn(
-                "absolute",
-                isLetterGradeShown ? "top-[1.05rem]" : "top-[1.25rem]",
-                "left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
-              )}
-            >
-              <span
-                className={cn(
-                  "font-bold",
-                  {
-                    "text-2xl": isLetterGradeShown,
-                  },
-                  "leading-none"
-                )}
-              >
-                {gradeObject
-                  ? isLetterGradeShown
-                    ? gradeObject.letter
-                    : gradeObject.mark
-                  : "-"}
-              </span>
-              {!isLetterGradeShown && (
-                <span className="text-muted-foreground leading-none text-[10px]">
-                  /&nbsp;100
-                </span>
-              )}
-            </div>
-          </div>
+          <HalfDonutTextChart
+            height={isLetterGradeShown ? 45 : 50}
+            value={gradeObject?.mark || 0}
+            fillColor={fillColor}
+            topRightContent={
+              wasGradePosted && <Check className={`size-4 text-${fillColor}`} />
+            }
+            mainText={
+              gradeObject
+                ? isLetterGradeShown
+                  ? gradeObject.letter || ""
+                  : gradeObject.mark.toString()
+                : "-"
+            }
+            mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
+            secondaryText={!isLetterGradeShown ? `/ 100` : ""}
+            textContainerClassName={
+              isLetterGradeShown ? "top-[1.05rem]" : "top-[1.25rem]"
+            }
+          />
           <span className="text-zinc-500 text-[10px] uppercase">
             {isLetterGradeShown ? "Grade" : "Average"}
           </span>
         </div>
       </CardContent>
-      {/* <CardFooter className="flex-col gap-2 text-sm"></CardFooter> */}
     </Card>
   );
 }
 export function SubjectSummarySkeleton() {
   return (
-    <Card className="flex flex-col gap-3 relative items-center">
-      <Skeleton className="pointer-events-none absolute top-2 right-2">
-        <LetterGradeSwitch value={true} />
-      </Skeleton>
-      <CardHeader className="items-center pb-0">
+    <Card className="flex flex-col relative items-center">
+      <div className="block p-2 md:absolute top-0 left-0 w-full">
+        <div className="flex justify-between items-center gap-4">
+          <Skeleton className="h-8 w-[120px]" />
+
+          <Skeleton>
+            <LetterGradeSwitch value={true} />
+          </Skeleton>
+        </div>
+      </div>
+      <CardHeader className="items-center pt-0 md:pt-6 pb-0 md:px-[120px]">
         <Skeleton shouldShrink={false}>
           <CardTitle className="text-center">Subject Name</CardTitle>
         </Skeleton>
@@ -125,7 +112,7 @@ export function SubjectSummarySkeleton() {
           <CardDescription>Full Year</CardDescription>
         </Skeleton>
       </CardHeader>
-      <CardContent className="flex flex-1 items-center gap-1">
+      <CardContent className="mt-3 flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
           <div className={cn("relative", "h-[45px]")}>
             <div>

@@ -1,11 +1,14 @@
 import { prepareAssignmentForDBStorage } from "@/trigger/send-notifications";
-import { SubjectTerm } from "@/types/school";
+import { SubjectTerm, SubjectYear } from "@/types/school";
 import { after } from "next/server";
 import { z } from "zod";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import { updateSubjectLastAssignments } from "../../core/settings/helpers";
-
+const subjectYearEnum = z.enum([
+  "current",
+  "previous",
+] as const satisfies SubjectYear[]);
 export const subjectsRouter = router({
   getSubjects: authenticatedProcedure
     .input(
@@ -24,6 +27,7 @@ export const subjectsRouter = router({
     .input(
       z.object({
         id: z.string(),
+        year: subjectYearEnum,
       })
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
@@ -78,5 +82,15 @@ export const subjectsRouter = router({
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
       return getMyEd("subjectAssignment", input);
+    }),
+  getSubjectAttendance: authenticatedProcedure
+    .input(
+      z.object({
+        subjectId: z.string(),
+        year: subjectYearEnum,
+      })
+    )
+    .query(async ({ input, ctx: { getMyEd } }) => {
+      return getMyEd("subjectAttendance", input);
     }),
 });

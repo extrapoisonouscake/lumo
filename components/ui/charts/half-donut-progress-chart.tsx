@@ -26,13 +26,17 @@ export function HalfDonutProgressChart({
   value,
   width = 60,
   filledClassName,
+  filledStyle,
   emptyClassName,
+  emptyStyle,
   isLoading = false,
 }: {
   value: number;
   width?: number;
   filledClassName?: string;
+  filledStyle?: React.CSSProperties;
   emptyClassName?: string;
+  emptyStyle?: React.CSSProperties;
   isLoading?: boolean;
 }) {
   // Create the background arc (empty portion)
@@ -65,6 +69,7 @@ export function HalfDonutProgressChart({
         {/* Background arc */}
         <g clipPath="url(#fillable-half-donut-clip-empty)">
           <path
+            style={emptyStyle}
             className={cn("fill-zinc-200 dark:fill-zinc-800", emptyClassName, {
               "animate-pulse": isLoading,
             })}
@@ -77,6 +82,7 @@ export function HalfDonutProgressChart({
           <g clipPath="url(#fillable-half-donut-clip-filled)">
             <path
               className={cn("fill-brand", filledClassName)}
+              style={filledStyle}
               strokeWidth={lightStrokeEffect}
               d={arcGenerator(progressArc) || undefined}
             />

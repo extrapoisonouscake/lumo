@@ -1,23 +1,14 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  ResponsiveDialog,
+  ResponsiveDialogClose,
+  ResponsiveDialogContent,
+  ResponsiveDialogDescription,
+  ResponsiveDialogFooter,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+} from "@/components/ui/responsive-dialog";
 import { cn } from "@/helpers/cn";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Check, Share2, Smartphone } from "lucide-react";
 const steps = [
   {
@@ -46,46 +37,24 @@ export function HelpDrawer({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const isMobile = useIsMobile();
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Add to Home Screen</DrawerTitle>
-            <DrawerDescription>
-              Your phone requires you to add this website to your home screen to
-              receive notifications.
-            </DrawerDescription>
-          </DrawerHeader>
-          <Steps className="px-4" />
-          <DrawerFooter>
-            <DrawerClose>
-              <Button className="w-full">Got it!</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
-    );
-  }
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Add to Home Screen</DialogTitle>
-          <DialogDescription>
+    <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>Add to Home Screen</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
             Your phone requires you to add this website to your home screen to
             receive notifications.
-          </DialogDescription>
-        </DialogHeader>
-        <Steps />
-        <DialogFooter>
-          <Button className="w-full" onClick={() => onOpenChange(false)}>
-            Got it!
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </ResponsiveDialogDescription>
+        </ResponsiveDialogHeader>
+        <Steps className="px-4 sm:px-0" />
+        <ResponsiveDialogFooter>
+          <ResponsiveDialogClose asChild>
+            <Button className="w-full">Got it!</Button>
+          </ResponsiveDialogClose>
+        </ResponsiveDialogFooter>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
 function Steps({ className }: { className?: string }) {

@@ -3,13 +3,17 @@ import {
   prettifyEducationalName,
   TEACHER_ADVISORY_ABBREVIATION,
 } from "@/helpers/prettifyEducationalName";
+import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import {
+  RichSubjectAttendance,
   Subject,
   SubjectSummary,
   SubjectTerm,
   TermEntry,
 } from "@/types/school";
 import { DeepWithRequired } from "@/types/utils";
+
+import { $getTableBody, MYED_TABLE_HEADER_SELECTOR } from "./helpers";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const convertStringToGradeObject = (string?: string | null) => {
@@ -198,6 +202,7 @@ function getSubjectAverages(
 }
 export function parseSubjectSummary({
   responses: [data],
+  params: { year },
 }: RawSubjectSummary): SubjectSummary {
   const {
     section,
@@ -222,6 +227,7 @@ export function parseSubjectSummary({
       dismissed: 0,
       tardy: 0,
     },
+    year,
   };
   if (averageSummary.length > 0) {
     const gradebookAverageIndex = averageSummary.findIndex(
@@ -270,4 +276,36 @@ export function parseSubjectIdByName({
   [OpenAPI200JSONResponse<"/lists/academics.classes.list">]
 >): string {
   return subjectId;
+}
+export function parseSubjectAttendance({
+  responses,
+}: ParserFunctionArguments<"subjectAttendance">): RichSubjectAttendance {
+  const $ = responses.at(-1)!;
+  const $tableBody = $getTableBody($);
+  if (!$tableBody) throw new Error("No table body");
+  if ("knownError" in $tableBody) {
+    const knownError = $tableBody.knownError;
+    if (knownError === "No matching records") return [];
+    throw new Error(knownError);
+  }
+  const data: RichSubjectAttendance = [];
+  $tableBody
+    .children("tr")
+    .not(MYED_TABLE_HEADER_SELECTOR)
+    .each((_, tr) => {
+      const $tr = $(tr);
+      const $date = $tr.find("td:nth-of-type(2)");
+      const date = locallyTimezonedDayJS(
+        $date.text().trim(),
+        "M/D/YYYY"
+      ).toDate();
+      const code = $tr.find("td:nth-of-type(3)").text().trim();
+      const reason = $tr.find("td:nth-of-type(4)").text().trim();
+      data.push({
+        date,
+        code,
+        reason,
+      });
+    });
+  return data;
 }

@@ -30,6 +30,7 @@ export type GradeObject = {
   [key: string]: SubjectGrade | null;
   overall: SubjectGrade | null;
 };
+export type SubjectYear = "current" | "previous";
 export interface SubjectSummary {
   id: string;
   name: string;
@@ -55,7 +56,13 @@ export interface SubjectSummary {
     absent: number;
     dismissed: number;
   };
+  year: SubjectYear;
 }
+export type RichSubjectAttendance = {
+  date: Date;
+  code: string;
+  reason?: string;
+}[];
 export type AnnouncementSectionData =
   | { type: "list"; content: string[] }
   | { type: "table"; content: string[][] };

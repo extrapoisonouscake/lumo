@@ -17,7 +17,11 @@ export function stringToColor(input: string): string {
   return adjustedHsl;
 }
 
-function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+export function rgbToHsl(
+  r: number,
+  g: number,
+  b: number
+): [number, number, number] {
   r /= 255;
   g /= 255;
   b /= 255;
@@ -60,7 +64,11 @@ export function getTextColorForBackground(hsl: string): string {
   // Use white if luminance is low (dark background), black otherwise
   return luminance < 0.5 ? "white" : "black";
 }
-function hslToRgb(h: number, s: number, l: number): [number, number, number] {
+export function hslToRgb(
+  h: number,
+  s: number,
+  l: number
+): [number, number, number] {
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;

@@ -1,6 +1,5 @@
 import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/helpers/cn";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 import { GeistSans } from "geist/font/sans";
@@ -79,23 +78,26 @@ export default async function RootLayout({
             content="black"
           />
         </head>
-        <body
-          className={cn("flex justify-center min-h-full", GeistSans.className)}
-        >
-          <Providers initialCookieValues={{ isLoggedIn }}>
-            <Toaster />
-            <AppSidebarWrapper
-              initialIsExpanded={isSidebarExpanded}
-              initialThemeColor={themeColor}
-            >
-              {children}
-            </AppSidebarWrapper>
-          </Providers>
-          {process.env.NODE_ENV === "production" && (
-            <GoogleAnalytics
-              gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}
-            />
-          )}
+        <body className={GeistSans.className}>
+          <div
+            className="flex justify-center min-h-full"
+            vaul-drawer-wrapper="true"
+          >
+            <Providers initialCookieValues={{ isLoggedIn }}>
+              <Toaster />
+              <AppSidebarWrapper
+                initialIsExpanded={isSidebarExpanded}
+                initialThemeColor={themeColor}
+              >
+                {children}
+              </AppSidebarWrapper>
+            </Providers>
+            {process.env.NODE_ENV === "production" && (
+              <GoogleAnalytics
+                gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}
+              />
+            )}
+          </div>
         </body>
       </html>
     </>

@@ -1,5 +1,6 @@
 "use client";
 import { PageHeading } from "@/components/layout/page-heading";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
@@ -32,6 +33,7 @@ export function SchedulePageContent({
       );
     });
   };
+  const isMobile = useIsMobile();
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-3">
@@ -44,11 +46,13 @@ export function SchedulePageContent({
             />
           }
         />
-        <WeekdaySlider
-          setDate={dateSetHandler}
-          startDate={timezonedDayJS(date).startOf("week").toDate()}
-          currentDate={date}
-        />
+        {isMobile && (
+          <WeekdaySlider
+            setDate={dateSetHandler}
+            startDate={timezonedDayJS(date).startOf("week").toDate()}
+            currentDate={date}
+          />
+        )}
       </div>
       <ScheduleLoadableSection date={date} />
     </div>

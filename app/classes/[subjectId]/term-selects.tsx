@@ -1,7 +1,7 @@
 "use client";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { TermEntry } from "@/types/school";
+import { SubjectYear, TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ export function TermSelects({
   shouldShowYearSelect = true,
 }: {
   terms: TermEntry[];
-  initialYear?: string;
+  initialYear?: SubjectYear;
   initialTerm?: string;
   shouldShowYearSelect?: boolean;
   shouldShowAllOption?: boolean;
@@ -51,7 +51,7 @@ export function TermSelects({
           <Select
             value={year}
             onValueChange={(value) => {
-              setYear(value);
+              setYear(value as SubjectYear);
               const params = new URLSearchParams(searchParams);
 
               params.set("year", value);

@@ -5,27 +5,12 @@ import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { Dayjs } from "dayjs";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
+import { $getTableBody, MYED_TABLE_HEADER_SELECTOR } from "./helpers";
 import { ParserFunctionArguments } from "./types";
-function getTableBody($: cheerio.CheerioAPI) {
-  const $contentContainer = $(
-    ".contentContainer > table:last-of-type > tbody > tr:last-of-type > td"
-  );
-  if ($contentContainer.length === 0) return null;
-  const $tableContainer = $contentContainer.find(".listGridFixed");
 
-  if ($tableContainer.length === 0) {
-    const errorMessage = $contentContainer.prop("innerText");
-    if (!errorMessage) return null;
-    return { knownError: removeLineBreaks(errorMessage) }; //! ?needed?
-  }
-  const $tableBody = $tableContainer.find("tbody:has(> .listHeader)");
-
-  if ($tableBody.length === 0) return null;
-  return $tableBody;
-}
 function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   const rawWeekdayName = $tableBody
-    .find(".listHeader th:last-of-type")
+    .find(`${MYED_TABLE_HEADER_SELECTOR} th:last-of-type`)
     .first()
     .prop("textContent");
   const weekday = removeLineBreaks(rawWeekdayName?.split("-")[0])?.trim();
@@ -36,7 +21,7 @@ export function parseCurrentWeekday({
 }: ParserFunctionArguments<"currentWeekday">) {
   const $ = ($dateAdjusted || $initial)!;
 
-  const $tableBody = getTableBody($);
+  const $tableBody = $getTableBody($);
   if (!$tableBody) return null;
   if ("knownError" in $tableBody) return $tableBody;
   return getWeekday($tableBody);
@@ -52,7 +37,7 @@ export function parseSchedule({
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string } {
   const $ = ($dateAdjusted || $initial)!;
-  const $tableBody = getTableBody($);
+  const $tableBody = $getTableBody($);
   if (!$tableBody) throw new Error("No table body");
   if ("knownError" in $tableBody) return $tableBody;
 
@@ -61,7 +46,7 @@ export function parseSchedule({
 
   const subjects = $tableBody
     .children("tr")
-    .not(".listHeader")
+    .not(MYED_TABLE_HEADER_SELECTOR)
     .toArray()
     .map((row) => {
       const [timeTd, contentTd] = $(row).children("td").toArray();

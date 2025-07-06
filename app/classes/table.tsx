@@ -29,7 +29,7 @@ import {
 
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { renderTableCell, sortColumnWithNullablesLast } from "@/helpers/tables";
-import { Subject, SubjectGrade } from "@/types/school";
+import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 import { getGradeInfo } from "../../helpers/grades";
@@ -112,10 +112,12 @@ export function SubjectsTable({
   data: externalData,
   shownColumns,
   isLoading = false,
+  year,
 }: {
+  isLoading: boolean;
   shownColumns?: string[];
   data?: SubjectWithAverage[];
-  isLoading?: boolean;
+  year: SubjectYear;
 }) {
   const data = useMemo(
     () =>
@@ -144,7 +146,13 @@ export function SubjectsTable({
           key={row.id}
           onClick={
             !isTeacherAdvisory
-              ? () => router.push(getSubjectPageURL(row.original))
+              ? () =>
+                  router.push(
+                    getSubjectPageURL({
+                      ...row.original,
+                      year,
+                    })
+                  )
               : undefined
           }
           data-state={row.getIsSelected() && "selected"}

@@ -1,9 +1,11 @@
 import { timezonedDayJS } from "@/instances/dayjs";
+import { $getTableBody } from "@/parsing/myed/helpers";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
 import { paths } from "@/types/myed-rest";
-import { SubjectTerm } from "@/types/school";
+import { SubjectTerm, SubjectYear } from "@/types/school";
 import CallableInstance from "callable-instance";
 import * as cheerio from "cheerio";
+import { Subject } from "../types/school";
 
 export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen/";
 export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
@@ -276,6 +278,75 @@ export const myEdParsingRoutes = {
     path: "accountCreation.do",
     expect: "html",
   }),
+  //not to be used in standalone, does not preserve state
+  subjectAttendance: new Route<{
+    subjectId: Subject["id"];
+    year: SubjectYear;
+  }>()
+    .step({
+      method: "GET",
+      path: "portalClassList.do?navkey=academics.classes.list",
+      expect: "html",
+    })
+    .step(({ params: { year } }) => ({
+      method: "POST",
+      path: "portalClassList.do",
+      body: {
+        userEvent: "950",
+        yearFilter: year,
+        termFilter: "all",
+      },
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    }))
+    .step(({ params: { subjectId } }) => ({
+      method: "POST",
+      path: "portalClassList.do",
+      body: {
+        userEvent: "2100",
+        userParam: subjectId,
+      },
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    }))
+    .step({
+      method: "GET",
+      path: "https://myeducation.gov.bc.ca/aspen/contextList.do?navkey=academics.classes.list.pat",
+      expect: "html",
+    })
+    .metadata(({ responses, metadata }) => {
+      const $ = responses.at(-1)! as cheerio.CheerioAPI;
+      const $tableBody = $getTableBody($);
+      if (!$tableBody) throw new Error("No table body");
+      if ("knownError" in $tableBody) {
+        metadata.shouldSetupFilters = true;
+      }
+    })
+    .step(
+      {
+        method: "POST",
+        path: "filterAdvanced.do",
+        body: {
+          userEvent: "930",
+          selectedBaseFilter: "###all",
+        },
+        contentType: "application/x-www-form-urlencoded",
+        expect: "html",
+      },
+      ({ metadata: { shouldSetupFilters } }) => shouldSetupFilters
+    )
+    .step(
+      {
+        method: "POST",
+        body: {
+          userEvent: "910",
+        },
+        path: "contextList.do",
+        contentType: "application/x-www-form-urlencoded",
+        expect: "html",
+      },
+      ({ metadata: { shouldSetupFilters } }) => shouldSetupFilters
+    ),
 };
 export type MyEdParsingRoutes = typeof myEdParsingRoutes;
 export type MyEdParsingRoute = keyof MyEdParsingRoutes;
@@ -410,7 +481,11 @@ export const myEdRestEndpoints = {
         termId,
       });
     }),
-  subjectSummary: new Route<{ id: string }>().step(({ params: { id } }) => ({
+  subjectSummary: new Route<{
+    id: string;
+    //* required for absences to work
+    year: SubjectYear;
+  }>().step(({ params: { id } }) => ({
     method: "GET",
     path: `rest/studentSchedule/${id}/academics`,
     body: {

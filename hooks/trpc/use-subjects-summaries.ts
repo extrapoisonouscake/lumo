@@ -1,13 +1,21 @@
 import { trpc } from "@/app/trpc";
 import { Subject, SubjectSummary } from "@/types/school";
 import { useQueries } from "@tanstack/react-query";
+import { SubjectYear } from "../../types/school";
 
-export function useSubjectSummaries({ ids }: { ids?: Subject["id"][] }) {
+export function useSubjectSummaries({
+  ids,
+  year,
+}: {
+  ids?: Subject["id"][];
+  year: SubjectYear;
+}) {
   const query = useQueries({
     queries: ids
       ? ids.map((id) =>
           trpc.myed.subjects.getSubjectInfo.queryOptions({
             id,
+            year,
           })
         )
       : [],
