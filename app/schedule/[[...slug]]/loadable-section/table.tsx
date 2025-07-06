@@ -245,6 +245,8 @@ export function ScheduleTable({
                   getSubjectPageURL({
                     id: rowOriginal.id!,
                     name: rowOriginal.name,
+                    //* MyEd doesn't show previous year schedule
+                    year: "current",
                   })
                 )
             : undefined
