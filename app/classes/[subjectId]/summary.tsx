@@ -47,7 +47,7 @@ export function SubjectSummary({
     shouldShowLetterGrade
   );
   return (
-    <Card className="flex flex-col relative items-center">
+    <Card className="flex flex-col gap-3 relative items-center">
       <div className="block p-2 md:absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
           <SubjectAttendance id={id} year={year} />
@@ -62,7 +62,7 @@ export function SubjectSummary({
         <CardTitle className="text-center">{name}</CardTitle>
         {term && <CardDescription>{termToLabel[term]}</CardDescription>}
       </CardHeader>
-      <CardContent className="mt-3 flex flex-1 items-center gap-1">
+      <CardContent className="flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
           <HalfDonutTextChart
             height={isLetterGradeShown ? 45 : 50}
@@ -94,7 +94,7 @@ export function SubjectSummary({
 }
 export function SubjectSummarySkeleton() {
   return (
-    <Card className="flex flex-col relative items-center">
+    <Card className="flex flex-col gap-3 relative items-center">
       <div className="block p-2 md:absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
           <Skeleton className="h-8 w-[120px]" />
@@ -112,7 +112,7 @@ export function SubjectSummarySkeleton() {
           <CardDescription>Full Year</CardDescription>
         </Skeleton>
       </CardHeader>
-      <CardContent className="mt-3 flex flex-1 items-center gap-1">
+      <CardContent className="flex flex-1 items-center gap-1">
         <div className="flex flex-col gap-1 items-center">
           <div className={cn("relative", "h-[45px]")}>
             <div>
