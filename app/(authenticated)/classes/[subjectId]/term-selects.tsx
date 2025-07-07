@@ -67,10 +67,10 @@ export function TermSelects({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="previous">
-                {secondYear - 2} - {secondYear - 1}
+                {secondYear - 2} – {secondYear - 1}
               </SelectItem>
               <SelectItem value="current">
-                {secondYear - 1} - {secondYear}
+                {secondYear - 1} – {secondYear}
               </SelectItem>
             </SelectContent>
           </Select>

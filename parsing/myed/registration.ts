@@ -10,7 +10,7 @@ export function parseRegistrationFields({
       .toArray();
   const schoolDistrictOptions = getSelectOptions(
     RegistrationInternalFields.schoolDistrict
-  );
+  ).filter((s) => s !== "--- Select ---");
   const securityQuestionOptions = getSelectOptions(
     RegistrationInternalFields.securityQuestionType
   );

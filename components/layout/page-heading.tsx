@@ -112,7 +112,7 @@ function DefaultLeftContent() {
                   <BreadcrumbItem>
                     {isLast ? (
                       <BreadcrumbPage
-                        className={cn({ "font-semibold": i === 0 })}
+                        className={cn({ "font-semibold": i === 0 && !isLast })}
                       >
                         {name}
                       </BreadcrumbPage>

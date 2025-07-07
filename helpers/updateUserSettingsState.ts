@@ -1,4 +1,4 @@
-import { UserSettingsWithDerivedFields } from "@/app/settings/types";
+import { UserSettingsWithDerivedFields } from "@/app/(authenticated)/settings/types";
 import { queryClient, trpc } from "@/app/trpc";
 import set from "lodash/set";
 export function updateUserSettingState(key: string, value: any) {

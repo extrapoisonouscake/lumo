@@ -42,7 +42,7 @@ export function UserHeader({ className }: { className?: string }) {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+                <span className="truncate font-semibold text-foreground">
                   {firstName} {middleName && `${middleName[0]}. `}
                   {lastName}
                 </span>

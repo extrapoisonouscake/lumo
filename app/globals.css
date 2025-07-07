@@ -117,6 +117,6 @@ ul {
 }
 @layer components {
   .root-container {
-    @apply p-4 flex flex-col gap-4;
+    @apply flex-1 p-4 flex flex-col gap-4;
   }
 }
