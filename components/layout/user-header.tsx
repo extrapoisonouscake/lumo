@@ -43,7 +43,7 @@ export function UserHeader({ className }: { className?: string }) {
               </Avatar>
               <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {firstName} {middleName ? `${middleName[0]}. ` : ""}
+                  {firstName} {middleName && `${middleName[0]}. `}
                   {lastName}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">

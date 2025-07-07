@@ -30,7 +30,7 @@ const steps = [
     color: "purple",
   },
 ];
-export function HelpDrawer({
+export function IOSNotificationsHelpDrawer({
   open,
   onOpenChange,
 }: {
@@ -43,7 +43,7 @@ export function HelpDrawer({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Add to Home Screen</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Your phone requires you to add this website to your home screen to
+            Your iPhone requires you to add this website to your home screen to
             receive notifications.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>

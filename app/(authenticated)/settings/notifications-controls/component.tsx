@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AsyncSwitchField } from "../async-switch-field";
-import { HelpDrawer } from "./help-drawer";
+import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
 const { userAgent } = navigator;
 const isIOS =
   /iphone|ipad|ipod/i.test(userAgent) ||
@@ -61,7 +61,7 @@ export function NotificationsControlsComponent({
     });
   };
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const shouldShowHelpDrawer = true;
+  const shouldShowHelpDrawer = isIOS && !isPWA;
   return (
     <>
       <div className="flex flex-col gap-2">
@@ -103,7 +103,10 @@ export function NotificationsControlsComponent({
           </p>
         )}
       </div>
-      <HelpDrawer open={drawerOpen} onOpenChange={setDrawerOpen} />
+      <IOSNotificationsHelpDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </>
   );
 }
