@@ -65,7 +65,13 @@ const DrawerHeader = ({
   />
 );
 DrawerHeader.displayName = "DrawerHeader";
-
+const DrawerBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={cn("px-4 py-2", className)} {...props} />
+);
+DrawerBody.displayName = "DrawerBody";
 const DrawerFooter = ({
   className,
   ...props
@@ -106,6 +112,7 @@ DrawerDescription.displayName = DrawerPrimitive.Description.displayName;
 
 export {
   Drawer,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
   DrawerDescription,

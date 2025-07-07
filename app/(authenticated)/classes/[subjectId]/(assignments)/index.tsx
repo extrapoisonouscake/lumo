@@ -1,6 +1,6 @@
 "use client";
 
-import { TermSelects } from "@/app/classes/[subjectId]/term-selects";
+import { TermSelects } from "@/app/(authenticated)/classes/[subjectId]/term-selects";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 
 import { SubjectSummary } from "@/types/school";

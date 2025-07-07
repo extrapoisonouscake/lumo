@@ -2,7 +2,7 @@
 import {
   TermSelects,
   TermSelectsSkeleton,
-} from "@/app/classes/[subjectId]/term-selects";
+} from "@/app/(authenticated)/classes/[subjectId]/term-selects";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";

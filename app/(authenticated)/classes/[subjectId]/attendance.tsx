@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogContent,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
@@ -34,20 +35,20 @@ export function SubjectAttendance({
           {/* does it need rounded-tl-md? */}
           <Button
             variant="outline"
-            className="h-8 hover:bg-transparent hover:opacity-70 rounded-tl-md"
+            className="h-8 rounded-tl-md"
             size="sm"
             leftIcon={<ListX />}
           >
             Absences
           </Button>
         </ResponsiveDialogTrigger>
-        <ResponsiveDialogContent>
+        <ResponsiveDialogContent className="pb-0">
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Absences</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>
-          <div className="px-4 pt-2">
+          <ResponsiveDialogBody className="pb-0">
             <Content id={id} year={year} />
-          </div>
+          </ResponsiveDialogBody>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </>
@@ -77,7 +78,7 @@ function Content({
           </div>
         ) : (
           <ErrorCard className="mb-6" shouldShowBorder={false} emoji="✨">
-            You haven't missed any classes yet.
+            You haven't missed any classes.
           </ErrorCard>
         )
       }

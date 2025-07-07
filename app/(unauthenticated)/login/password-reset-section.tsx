@@ -11,6 +11,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
 
+import { trpc } from "@/app/trpc";
 import { isTRPCError } from "@/lib/trpc/helpers";
 import {
   PasswordResetSchema,
@@ -19,7 +20,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { trpc } from "../trpc";
 
 export function PasswordResetSection({
   setLoginFormValues,

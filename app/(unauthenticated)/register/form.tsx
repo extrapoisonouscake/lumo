@@ -9,6 +9,7 @@ import { cn } from "@/helpers/cn";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useFormValidation } from "@/hooks/use-form-validation";
 
+import { trpc } from "@/app/trpc";
 import { isTRPCError } from "@/lib/trpc/helpers";
 import {
   allowedRegistrationCountries,
@@ -22,10 +23,9 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
-import { trpc } from "../trpc";
+import { ExtendedFormPasswordInput } from "../../../components/layout/extended-password-input";
 import { AddressAutocompleteInput } from "./address-autocomplete-input";
 import { LoginSuggestionText } from "./login-suggestion-text";
-import { ExtendedFormPasswordInput } from "./password-input";
 import { PhoneInput } from "./phone-input";
 import { RegistrationStepsBar } from "./steps";
 const COUNTRIES_OPTIONS = [

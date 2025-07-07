@@ -14,11 +14,9 @@ import {
 } from "@/components/ui/sidebar";
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
-import { useThemeColor } from "@/hooks/trpc/use-theme-color";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuthStatus } from "../providers/auth-status-provider";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { LogOutIcon } from "lucide-react";
@@ -26,16 +24,13 @@ import { Spinner } from "../ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
-export function AppSidebar({
-  initialThemeColor,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & { initialThemeColor: string }) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
     return (
       <Sidebar {...props}>
-        <PagesMenu initialThemeColor={initialThemeColor} />
+        <PagesMenu />
       </Sidebar>
     );
   }
@@ -70,13 +65,12 @@ export function AppSidebar({
   );
 }
 
-function PagesMenu({ initialThemeColor }: { initialThemeColor?: string }) {
+function PagesMenu() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const pages = Object.entries(websitePagesWithStaticPaths).filter(
-    ([url, page]) => !page.isHiddenInSidebar
+    ([_, page]) => !page.isHiddenInSidebar
   );
-  const themeColor = useThemeColor(initialThemeColor);
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
       {pages.map(([url, page]) => {
@@ -105,8 +99,7 @@ function PagesMenu({ initialThemeColor }: { initialThemeColor?: string }) {
 }
 function LogOutButton() {
   const router = useRouter();
-  const { refreshAuthStatus } = useAuthStatus();
-  const logOutMutation = useLogOut(router.push, refreshAuthStatus);
+  const logOutMutation = useLogOut(router.push);
   return (
     <SidebarMenuButton
       shouldCloseSidebarOnMobile={false}

@@ -8,7 +8,6 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 
-import { useAuthStatus } from "@/components/providers/auth-status-provider";
 import {
   loginErrorIDToMessageMap,
   LoginErrors,
@@ -16,7 +15,8 @@ import {
 } from "@/lib/trpc/routes/myed/auth/public";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
-import { trpc } from "../../trpc";
+
+import { trpc } from "@/app/trpc";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(error: string | null | undefined) {
   return (
@@ -39,14 +39,14 @@ export function LoginForm({
     );
   const loginMutation = useMutation(trpc.myed.auth.login.mutationOptions());
   const router = useRouter();
-  const { refreshAuthStatus } = useAuthStatus();
+
   async function onSubmit(data: LoginSchema) {
     if (errorMessage) {
       setErrorMessage(null);
     }
     const response = await loginMutation.mutateAsync(data);
     if (response.success) {
-      initClientLogin({ push: router.push, refreshAuthStatus });
+      initClientLogin(router.push);
     } else {
       const message = response.message;
       if (

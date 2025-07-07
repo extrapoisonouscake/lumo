@@ -1,5 +1,4 @@
 "use client";
-import { useAuthStatus } from "@/components/providers/auth-status-provider";
 import { Button } from "@/components/ui/button";
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -8,8 +7,8 @@ import { useRouter } from "next/navigation";
 
 export function LogOutButton() {
   const router = useRouter();
-  const { refreshAuthStatus } = useAuthStatus();
-  const logOutMutation = useLogOut(router.push, refreshAuthStatus);
+
+  const logOutMutation = useLogOut(router.push);
   const isMobile = useIsMobile();
   if (!isMobile) return null;
   return (

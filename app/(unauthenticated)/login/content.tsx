@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStatus } from "@/components/providers/auth-status-provider";
+import { queryClient, trpc } from "@/app/trpc";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
@@ -10,7 +10,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
-import { queryClient, trpc } from "../trpc";
 import { ChangePasswordModal } from "./change-password-modal";
 import { LoginForm } from "./form";
 import { initClientLogin } from "./helpers";
@@ -37,7 +36,7 @@ export function LoginPageContent() {
   useEffect(() => {
     queryClient.removeQueries();
   }, []);
-  const { refreshAuthStatus } = useAuthStatus();
+
   return (
     <>
       {!!registrationResult && (
@@ -111,7 +110,7 @@ export function LoginPageContent() {
                 password: data.password,
               },
             });
-            initClientLogin({ push: router.push, refreshAuthStatus });
+            initClientLogin(router.push);
           })();
         }}
         onClose={() => {

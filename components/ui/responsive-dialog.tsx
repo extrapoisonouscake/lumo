@@ -1,6 +1,7 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
@@ -11,6 +12,7 @@ import {
 } from "./dialog";
 import {
   Drawer,
+  DrawerBody,
   DrawerClose,
   DrawerContent,
   DrawerDescription,
@@ -48,6 +50,10 @@ export const ResponsiveDialogContent = createComponent({
 export const ResponsiveDialogHeader = createComponent({
   mobile: DrawerHeader,
   desktop: DialogHeader,
+});
+export const ResponsiveDialogBody = createComponent({
+  mobile: DrawerBody,
+  desktop: DialogBody,
 });
 export const ResponsiveDialogClose = createComponent({
   mobile: DrawerClose,

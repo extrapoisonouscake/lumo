@@ -1,7 +1,6 @@
 "use client";
 import { cn } from "@/helpers/cn";
 import { ReactNode } from "react";
-import { useAuthStatus } from "../providers/auth-status-provider";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { TopLoader } from "./top-loader";
@@ -17,30 +16,20 @@ const Inset = ({
 }) => (
   <SidebarInset className={cn("min-w-0", className)}>
     {topLoader}
-    <div className="p-4 flex flex-col gap-4">{children}</div>
+    <div className="root-container">{children}</div>
   </SidebarInset>
 );
 
 export function AppSidebarWrapper({
   children,
   initialIsExpanded,
-  initialThemeColor,
 }: {
   children: ReactNode;
   initialIsExpanded: boolean;
-  initialThemeColor: string;
 }) {
-  const { isLoggedIn } = useAuthStatus();
-  if (!isLoggedIn)
-    return (
-      <>
-        <Inset topLoader={<TopLoader />}>{children}</Inset>
-      </>
-    );
-
   return (
     <SidebarProvider defaultOpen={initialIsExpanded}>
-      <AppSidebar initialThemeColor={initialThemeColor} />
+      <AppSidebar />
 
       <Inset
         topLoader={<TopLoader />}

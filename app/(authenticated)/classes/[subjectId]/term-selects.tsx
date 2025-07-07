@@ -5,7 +5,7 @@ import { SubjectYear, TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
-import { Label } from "../../../components/ui/label";
+import { Label } from "../../../../components/ui/label";
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectSkeleton,
   SelectTrigger,
   SelectValue,
-} from "../../../components/ui/select";
+} from "../../../../components/ui/select";
 export function TermSelects({
   terms,
   initialYear = "current",

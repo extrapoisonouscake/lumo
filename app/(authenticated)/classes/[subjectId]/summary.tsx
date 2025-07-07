@@ -14,7 +14,7 @@ import { UserSettings } from "@/types/core";
 import { type SubjectSummary, SubjectTerm } from "@/types/school";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { getGradeInfo } from "../../../helpers/grades";
+import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 

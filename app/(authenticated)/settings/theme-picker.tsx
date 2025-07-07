@@ -1,13 +1,13 @@
 "use client";
 import { Label } from "@/components/ui/label";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import { THEME_COLOR_TAG_ID } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 import { Check } from "lucide-react";
 import { useState } from "react";
-import { THEME_COLOR_TAG_ID } from "../constants";
 
 const AVAILABLE_THEMES = [
   USER_SETTINGS_DEFAULT_VALUES.themeColor,

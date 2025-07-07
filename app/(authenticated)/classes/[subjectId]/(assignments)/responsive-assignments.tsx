@@ -3,7 +3,7 @@ import { AssignmentCard, AssignmentCardSkeleton } from "./assignment-card";
 
 import { cn } from "@/helpers/cn";
 import { ReactNode, useMemo } from "react";
-import { useIsMobile } from "../../../../hooks/use-mobile";
+import { useIsMobile } from "../../../../../hooks/use-mobile";
 
 import { ErrorCard } from "@/components/misc/error-card";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";

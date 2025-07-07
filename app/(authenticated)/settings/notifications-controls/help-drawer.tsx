@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
@@ -8,7 +9,6 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { cn } from "@/helpers/cn";
 import { Check, Share2, Smartphone } from "lucide-react";
 const steps = [
   {
@@ -47,7 +47,7 @@ export function HelpDrawer({
             receive notifications.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <Steps className="px-4 sm:px-0" />
+        <Steps />
         <ResponsiveDialogFooter>
           <ResponsiveDialogClose asChild>
             <Button className="w-full">Got it!</Button>
@@ -57,9 +57,9 @@ export function HelpDrawer({
     </ResponsiveDialog>
   );
 }
-function Steps({ className }: { className?: string }) {
+function Steps() {
   return (
-    <div className={cn("flex flex-col gap-4 pb-2", className)}>
+    <ResponsiveDialogBody className="flex flex-col gap-4">
       {steps.map((step) => (
         <div key={step.title} className="flex items-center gap-3">
           <div
@@ -73,6 +73,6 @@ function Steps({ className }: { className?: string }) {
           </div>
         </div>
       ))}
-    </div>
+    </ResponsiveDialogBody>
   );
 }

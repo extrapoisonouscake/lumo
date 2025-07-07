@@ -1,4 +1,3 @@
-import { ExtendedFormPasswordInput } from "@/app/register/password-input";
 import { trpc } from "@/app/trpc";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
@@ -14,6 +13,7 @@ import { Form } from "../ui/form";
 import { FormInput } from "../ui/form-input";
 import { FormPasswordInput } from "../ui/form-password-input";
 import { SubmitButton } from "../ui/submit-button";
+import { ExtendedFormPasswordInput } from "./extended-password-input";
 export function ChangePasswordForm({
   onSuccess,
   authCookies,

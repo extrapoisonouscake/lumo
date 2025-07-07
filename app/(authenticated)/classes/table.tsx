@@ -32,7 +32,7 @@ import { renderTableCell, sortColumnWithNullablesLast } from "@/helpers/tables";
 import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
-import { getGradeInfo } from "../../helpers/grades";
+import { getGradeInfo } from "../../../helpers/grades";
 
 type SubjectWithAverage = Subject & { average?: SubjectGrade | null };
 const columnHelper = createColumnHelper<SubjectWithAverage>();

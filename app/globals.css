@@ -115,3 +115,8 @@ ul {
     @apply bg-background text-foreground;
   }
 }
+@layer components {
+  .root-container {
+    @apply p-4 flex flex-col gap-4;
+  }
+}

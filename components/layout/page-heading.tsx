@@ -14,7 +14,7 @@ import {
   useState,
 } from "react";
 import { cn } from "../../helpers/cn";
-import { useAuthStatus } from "../providers/auth-status-provider";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -81,29 +81,26 @@ export function PageHeading({
 }: {
   leftContent?: React.ReactNode;
 }) {
-  const { isLoggedIn } = useAuthStatus();
   return (
     <div className="flex justify-between gap-4 items-center">
       {leftContent ?? <DefaultLeftContent />}
 
       <div className="w-fit flex sm:hidden gap-1 items-center">
         <ThemeToggle isInSidebar={false} shouldShowText={false} />
-        {isLoggedIn && <UserHeader className="w-fit" />}
+        <UserHeader className="w-fit" />
       </div>
     </div>
   );
 }
 function DefaultLeftContent() {
   const { pageData } = usePageData();
-  const { isLoggedIn } = useAuthStatus();
+  console.log("hsh");
   return (
     <div className="flex items-center gap-2">
-      {isLoggedIn && (
-        <div className="hidden sm:flex items-center gap-2">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="mr-1 h-4" />
-        </div>
-      )}
+      <div className="hidden sm:flex items-center gap-2">
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="mr-1 h-4" />
+      </div>
 
       {pageData ? (
         <Breadcrumb>

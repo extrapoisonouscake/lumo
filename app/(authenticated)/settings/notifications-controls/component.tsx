@@ -1,8 +1,8 @@
+import { trpc } from "@/app/trpc";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { trpc } from "../../trpc";
 import { AsyncSwitchField } from "../async-switch-field";
 import { HelpDrawer } from "./help-drawer";
 const { userAgent } = navigator;

@@ -1,4 +1,3 @@
-import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
@@ -11,17 +10,23 @@ import "./globals.css";
 import { createCaller } from "@/lib/trpc";
 
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { WEBSITE_TITLE } from "@/constants/website";
+import { THEME_COLOR_TAG_ID, WEBSITE_TITLE } from "@/constants/website";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
-import { THEME_COLOR_TAG_ID } from "./constants";
+
 export const viewport: Viewport = {
   maximumScale: 1,
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: [
+    {
+      color: "black",
+      media: "(prefers-color-scheme: dark)",
+    },
+  ],
 };
 export const metadata: Metadata = {
   manifest: "/manifest.json",
@@ -50,8 +55,7 @@ export default async function RootLayout({
     }
     themeColor = userSettings.themeColor;
   }
-  const sidebarState = store.get("sidebar:state")?.value;
-  const isSidebarExpanded = sidebarState ? sidebarState === "true" : true;
+
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -72,25 +76,16 @@ export default async function RootLayout({
             content={prepareThemeColor(themeColor)}
             media="(prefers-color-scheme: light)"
           />
-          <meta
-            name="theme-color"
-            media="(prefers-color-scheme: dark)"
-            content="black"
-          />
         </head>
         <body className={GeistSans.className}>
           <div
             className="flex justify-center min-h-full"
             vaul-drawer-wrapper="true"
           >
-            <Providers initialCookieValues={{ isLoggedIn }}>
+            <Providers>
               <Toaster />
-              <AppSidebarWrapper
-                initialIsExpanded={isSidebarExpanded}
-                initialThemeColor={themeColor}
-              >
-                {children}
-              </AppSidebarWrapper>
+
+              {children}
             </Providers>
             {process.env.NODE_ENV === "production" && (
               <GoogleAnalytics

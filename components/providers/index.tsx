@@ -4,16 +4,9 @@ import { APIProvider } from "@vis.gl/react-google-maps";
 import { ReactNode } from "react";
 import { ThemeProvider } from "../../app/theme-provider";
 import { queryClient } from "../../app/trpc";
-import { AuthStatusProvider } from "./auth-status-provider";
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 if (!GOOGLE_MAPS_API_KEY) throw new Error("No Google Maps API key provided");
-export function Providers({
-  children,
-  initialCookieValues,
-}: {
-  children: ReactNode;
-  initialCookieValues: { isLoggedIn: boolean };
-}) {
+export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider
@@ -22,11 +15,7 @@ export function Providers({
         defaultTheme="system"
         enableSystem
       >
-        <APIProvider apiKey={GOOGLE_MAPS_API_KEY!}>
-          <AuthStatusProvider initialCookieValues={initialCookieValues}>
-            {children}
-          </AuthStatusProvider>
-        </APIProvider>
+        <APIProvider apiKey={GOOGLE_MAPS_API_KEY!}>{children}</APIProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

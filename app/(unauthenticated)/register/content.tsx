@@ -1,10 +1,10 @@
 "use client";
+import { trpc } from "@/app/trpc";
 import { ErrorCard } from "@/components/misc/error-card";
 import { Spinner } from "@/components/ui/button";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { useQuery } from "@tanstack/react-query";
 import ip3country from "ip3country";
-import { trpc } from "../trpc";
 import { RegistrationForm } from "./form";
 import { LoginSuggestionText } from "./login-suggestion-text";
 ip3country.init();

@@ -46,7 +46,9 @@ export function UserHeader({ className }: { className?: string }) {
                   {firstName} {middleName ? `${middleName[0]}. ` : ""}
                   {lastName}
                 </span>
-                <span className="truncate text-xs">Grade {grade}</span>
+                <span className="truncate text-xs text-muted-foreground">
+                  Grade {grade}
+                </span>
               </div>
             </UserButton>
           </Link>
