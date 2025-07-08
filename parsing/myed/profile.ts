@@ -42,7 +42,7 @@ function parseMainDetails($: CheerioAPI) {
   );
   const result: any = {}; //!
   for (const [label, key] of Object.entries(detailLabelsMap)) {
-    const value = rawDetails[label];
+    let value = rawDetails[label];
     if (!value) {
       if (value === undefined) {
         throw new Error("No value");
@@ -50,8 +50,14 @@ function parseMainDetails($: CheerioAPI) {
         continue;
       }
     }
+    if (key === "taRoom") {
+      value = value.replace("TA ", "");
+    }
     const valueAsNumber = Number(value);
-    result[key] = isNaN(valueAsNumber) ? value : valueAsNumber;
+    const isNumber = !isNaN(valueAsNumber);
+    const hasMeaningfulZeros =
+      isNumber && value.length > 1 && value.startsWith("0");
+    result[key] = isNumber && !hasMeaningfulZeros ? valueAsNumber : value;
   }
   return result as Omit<PersonalDetails, "photoURL">;
 }

@@ -1,7 +1,6 @@
 "use client";
 import { formatUserFullName, UserAvatar } from "@/components/misc/user";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +14,6 @@ import {
   HashIcon,
   LockKeyholeIcon,
   LucideIcon,
-  PencilIcon,
   SchoolIcon,
   SquareParkingIcon,
   UserIcon,
@@ -56,7 +54,7 @@ export default function ProfileContent() {
                   iconBackground="bg-blue-600/20"
                 />
                 <UserProperty
-                  label="Personal Education Number"
+                  label="PEN (Personal Education Number)"
                   value={personalEducationNumber}
                   icon={HashIcon}
                   iconColor="text-green-500"
@@ -83,7 +81,7 @@ export default function ProfileContent() {
                 className="[grid-area:b]"
               >
                 <UserProperty
-                  label="School Name"
+                  label="Name"
                   value={schoolName}
                   icon={SchoolIcon}
                   iconColor="text-yellow-400"
@@ -143,8 +141,11 @@ export default function ProfileContent() {
 }
 function ProfileCard(data: PersonalDetails) {
   return (
-    <Card className="gap-3 md:gap-4 p-5 items-center relative md:flex-row">
-      <UserAvatar {...data} className="size-24 text-4xl sm:rounded-full" />
+    <Card className="gap-3 md:gap-4 p-5 items-center md:flex-row mt-5 md:mt-0">
+      <UserAvatar
+        {...data}
+        className="size-24 text-4xl sm:rounded-full -mt-14 md:mt-0"
+      />
       <div className="flex flex-col gap-1.5 items-center md:items-start">
         <h1 className="text-2xl font-semibold">{formatUserFullName(data)}</h1>
         <div className="flex gap-1.5 flex-wrap">
@@ -156,9 +157,6 @@ function ProfileCard(data: PersonalDetails) {
           </Badge>
         </div>
       </div>
-      <Button variant="ghost" className="absolute top-2 right-2 p-2 size-auto">
-        <PencilIcon className="size-4" />
-      </Button>
     </Card>
   );
 }
@@ -231,7 +229,7 @@ function SectionCard({
 }) {
   return (
     <Card className={className}>
-      <CardHeader className="py-4 px-5 pb-0 flex-row justify-between items-center">
+      <CardHeader className="py-4 px-5 pb-0 flex-row justify-between items-center space-y-0">
         <CardTitle className="text-xl font-medium">{title}</CardTitle>
         <Icon className="size-5 text-muted-foreground" />
       </CardHeader>
