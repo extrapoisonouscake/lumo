@@ -346,7 +346,6 @@ export const authRouter = router({
     if (ctx.tokens) {
       return; // Session is valid, no need to refresh
     }
-    console.log("ensureValidSession", ctx.credentials);
     try {
       const { tokens } = await fetchAuthCookiesAndStudentId(
         ctx.credentials.username,

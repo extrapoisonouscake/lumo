@@ -8,12 +8,17 @@ import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { PersonalDetails } from "@/types/school";
 import {
+  AsteriskIcon,
   CarIcon,
   DoorClosedIcon,
+  EarthIcon,
   GraduationCapIcon,
   HashIcon,
   LockKeyholeIcon,
   LucideIcon,
+  MailIcon,
+  MapPinIcon,
+  MapPinPlusIcon,
   SchoolIcon,
   SquareParkingIcon,
   UserIcon,
@@ -35,6 +40,7 @@ export default function ProfileContent() {
           graduationYear,
           parkingSpaceNumber,
           licensePlateNumber,
+          addresses,
         } = data;
         const shouldShowParking = !!(parkingSpaceNumber || licensePlateNumber);
         return (
@@ -56,16 +62,8 @@ export default function ProfileContent() {
                   value={personalEducationNumber}
                   icon={HashIcon}
                 />
-                <UserProperty
-                  label="Graduation Year"
-                  value={graduationYear}
-                  icon={GraduationCapIcon}
-                />
-                <UserProperty
-                  label="Locker"
-                  value={locker}
-                  icon={LockKeyholeIcon}
-                />
+
+                <AddressList {...addresses} />
               </SectionCard>
               <SectionCard
                 title="School"
@@ -84,6 +82,11 @@ export default function ProfileContent() {
                     icon={SchoolIcon}
                   />
                 )}
+                <UserProperty
+                  label="Graduation Year"
+                  value={graduationYear}
+                  icon={GraduationCapIcon}
+                />
                 {taRoom && (
                   <UserProperty
                     label="TA Room"
@@ -91,6 +94,11 @@ export default function ProfileContent() {
                     icon={DoorClosedIcon}
                   />
                 )}
+                <UserProperty
+                  label="Locker"
+                  value={locker}
+                  icon={LockKeyholeIcon}
+                />
               </SectionCard>
               {shouldShowParking && (
                 <SectionCard
@@ -180,6 +188,7 @@ function ProfileContentSkeleton() {
     </>
   );
 }
+
 function Sections({
   children,
   shouldShowParking,
@@ -257,5 +266,35 @@ function UserPropertySkeleton() {
         </Skeleton>
       </div>
     </div>
+  );
+}
+const addressLabelsVisualData: Record<
+  keyof PersonalDetails["addresses"],
+  { label: string; icon: LucideIcon }
+> = {
+  physical: { label: "Physical Address", icon: MapPinIcon },
+  mailing: { label: "Mailing Address", icon: MailIcon },
+  secondaryPhysical: {
+    label: "Secondary Physical Address",
+    icon: MapPinPlusIcon,
+  },
+  other: { label: "Other Address", icon: EarthIcon },
+  custom: { label: "Custom Address", icon: AsteriskIcon },
+};
+function AddressList({
+  custom,
+  ...otherAddresses
+}: PersonalDetails["addresses"]) {
+  return (
+    <>
+      {Object.entries(otherAddresses).map(([key, value]) => {
+        const data =
+          addressLabelsVisualData[key as keyof PersonalDetails["addresses"]];
+        return <UserProperty key={key} value={value} {...data} />;
+      })}
+      {Object.entries(custom).map(([key, value]) => (
+        <UserProperty key={key} label={key} value={value} icon={MapPinIcon} />
+      ))}
+    </>
   );
 }

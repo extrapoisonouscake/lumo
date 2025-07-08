@@ -74,17 +74,25 @@ export interface PersonalDetails {
   firstName: string;
   middleName?: string;
   lastName: string;
-  studentNumber: number;
-  personalEducationNumber: number;
+  studentNumber: string;
+  personalEducationNumber: string;
   taRoom?: string;
   locker?: string;
   schoolName: string;
   nextSchoolName?: string;
-  graduationYear: number;
-  grade: number;
-  parkingSpaceNumber?: number;
-  licensePlateNumber?: number;
+  graduationYear: string;
+  grade: string;
+  parkingSpaceNumber?: string;
+  licensePlateNumber?: string;
   photoURL?: string;
+  addresses: {
+    physical?: string;
+    secondaryPhysical?: string;
+    mailing?: string;
+    other?: string;
+    // label -> value
+    custom: Record<string, string>;
+  };
 }
 export enum AssignmentStatus {
   Unknown,

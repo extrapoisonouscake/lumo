@@ -268,6 +268,16 @@ export const myEdParsingRoutes = {
       path: "portalStudentDetail.do?navkey=myInfo.details.detail",
       body: {
         userEvent: "2030",
+        userParam: "1",
+      },
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    })
+    .step({
+      method: "POST",
+      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      body: {
+        userEvent: "2030",
         userParam: "2",
       },
       contentType: "application/x-www-form-urlencoded",
