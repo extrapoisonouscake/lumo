@@ -34,8 +34,8 @@ export function TermSelects({
   const [term, setTerm] = useState(initialTerm);
   const date = timezonedDayJS();
   const currentYear = date.year();
-  const isSecondYear = date.month() < 6;
-  const secondYear = isSecondYear ? currentYear : currentYear - 1;
+  const isSecondYear = date.month() < 9;
+  const secondYear = isSecondYear ? currentYear : currentYear + 1;
   const shouldShowTermSelect = terms.length > 0;
   useEffect(() => {
     setTerm(initialTerm);

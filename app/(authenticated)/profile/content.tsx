@@ -50,29 +50,21 @@ export default function ProfileContent() {
                   label="Student Number"
                   value={studentNumber}
                   icon={HashIcon}
-                  iconColor="text-blue-600"
-                  iconBackground="bg-blue-600/20"
                 />
                 <UserProperty
                   label="PEN (Personal Education Number)"
                   value={personalEducationNumber}
                   icon={HashIcon}
-                  iconColor="text-green-500"
-                  iconBackground="bg-green-500/20"
                 />
                 <UserProperty
                   label="Graduation Year"
                   value={graduationYear}
                   icon={GraduationCapIcon}
-                  iconColor="text-pink-600"
-                  iconBackground="bg-pink-600/20"
                 />
                 <UserProperty
                   label="Locker"
                   value={locker}
                   icon={LockKeyholeIcon}
-                  iconColor="text-purple-600"
-                  iconBackground="bg-purple-600/20"
                 />
               </SectionCard>
               <SectionCard
@@ -84,16 +76,12 @@ export default function ProfileContent() {
                   label="Name"
                   value={schoolName}
                   icon={SchoolIcon}
-                  iconColor="text-yellow-400"
-                  iconBackground="bg-yellow-400/20"
                 />
                 {nextSchoolName && nextSchoolName !== schoolName && (
                   <UserProperty
                     label="Next School Name"
                     value={nextSchoolName}
                     icon={SchoolIcon}
-                    iconColor="text-cyan-600"
-                    iconBackground="bg-cyan-600/20"
                   />
                 )}
                 {taRoom && (
@@ -101,8 +89,6 @@ export default function ProfileContent() {
                     label="TA Room"
                     value={taRoom}
                     icon={DoorClosedIcon}
-                    iconColor="text-orange-500"
-                    iconBackground="bg-orange-500/20"
                   />
                 )}
               </SectionCard>
@@ -117,8 +103,6 @@ export default function ProfileContent() {
                       label="Parking Space Number"
                       value={parkingSpaceNumber}
                       icon={SquareParkingIcon}
-                      iconColor="text-emerald-600"
-                      iconBackground="bg-emerald-600/20"
                     />
                   )}
                   {licensePlateNumber && (
@@ -126,8 +110,6 @@ export default function ProfileContent() {
                       label="License Plate Number"
                       value={licensePlateNumber}
                       icon={CarIcon}
-                      iconColor="text-cyan-600"
-                      iconBackground="bg-cyan-600/20"
                     />
                   )}
                 </SectionCard>
@@ -241,23 +223,23 @@ function UserProperty({
   label,
   value,
   icon: Icon,
-  iconColor,
-  iconBackground,
 }: {
   label: string;
   value: string | number | undefined;
   icon: LucideIcon;
-  iconColor: string;
-  iconBackground: string;
 }) {
   return (
-    <div className="flex gap-4 py-4 px-5 border-b last:border-b-0 items-center">
-      <div className={cn("rounded-full p-2", iconBackground, iconColor)}>
+    <div className="flex gap-3 py-4 px-5 border-b last:border-b-0 items-center">
+      <div className="rounded-full p-2 bg-brand/20 text-brand">
         <Icon className="size-5" />
       </div>
       <div className="flex flex-col gap-0.5">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p>{value ?? "—"}</p>
+        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {label}
+        </span>
+        <p className="text-base">
+          {value ?? <span className="italic text-muted-foreground">N/A</span>}
+        </p>
       </div>
     </div>
   );
