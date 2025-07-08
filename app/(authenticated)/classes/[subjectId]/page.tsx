@@ -32,7 +32,7 @@ export default function SubjectPage() {
   });
   return (
     <div className="flex flex-col gap-3">
-      <BackButton href="/classes" />
+      <BackButton />
       <QueryWrapper query={summary} skeleton={<SubjectPageSkeleton />}>
         {(summary) => (
           <>

@@ -1,7 +1,5 @@
 import type { Config } from "tailwindcss";
-import colors from "tailwindcss/colors";
 import plugin from "tailwindcss/plugin";
-const accordionTimingFunction = "cubic-bezier(0.68, -0.55, 0.265, 1.55)";
 const config = {
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -76,7 +74,6 @@ const config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        blue: colors.blue,
       },
       keyframes: {
         "accordion-down": {
@@ -149,6 +146,18 @@ const config = {
     "bg-blue-100",
     "bg-green-100",
     "bg-purple-100",
+    "bg-blue-600/20",
+    "bg-green-500/20",
+    "bg-purple-600/20",
+    "bg-orange-500/20",
+    "bg-yellow-400/20",
+    "bg-cyan-600/20",
+    "bg-pink-600/20",
+    "text-green-500",
+    "text-orange-500",
+    "text-yellow-400",
+    "text-cyan-600",
+    "text-pink-600",
   ],
 } satisfies Config;
 export default config;

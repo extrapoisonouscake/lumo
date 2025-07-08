@@ -94,7 +94,7 @@ export function PageHeading({
 }
 function DefaultLeftContent() {
   const { pageData } = usePageData();
-  console.log("hsh");
+
   return (
     <div className="flex items-center gap-2">
       <div className="hidden sm:flex items-center gap-2">

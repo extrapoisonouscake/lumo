@@ -1,12 +1,8 @@
-import {
-  getTextColorForBackground,
-  stringToColor,
-} from "@/helpers/stringToColor";
-
 import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { usePathname } from "next/navigation";
+import { formatUserFullName, UserAvatar } from "../misc/user";
 import { QueryWrapper } from "../ui/query-wrapper";
 import { SidebarMenuButton } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
@@ -20,31 +16,19 @@ export function UserHeader({ className }: { className?: string }) {
       skeleton={<UserHeaderSkeleton className={className} />}
     >
       {(data) => {
-        const { firstName, middleName, lastName, grade } = data;
-        const backgroundColor = stringToColor(data.firstName + data.lastName);
+        const { firstName, middleName, lastName, grade, photoURL } = data;
+
         return (
           <Link href="/profile" className={className}>
             <UserButton>
-              <Avatar className="size-8 rounded-full sm:rounded-lg">
-                <AvatarImage
-                  className="object-cover object-center"
-                  src={data.photoURL}
-                />
-                <AvatarFallback
-                  className="text-sm rounded-full sm:rounded-lg"
-                  style={{
-                    background: backgroundColor,
-                    color: getTextColorForBackground(backgroundColor),
-                  }}
-                >
-                  {firstName[0]}
-                  {lastName[0]}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                firstName={firstName}
+                lastName={lastName}
+                photoURL={photoURL}
+              />
               <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold text-foreground">
-                  {firstName} {middleName && `${middleName[0]}. `}
-                  {lastName}
+                  {formatUserFullName({ firstName, middleName, lastName })}
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
                   Grade {grade}
@@ -60,7 +44,7 @@ export function UserHeader({ className }: { className?: string }) {
 
 export function UserHeaderSkeleton({ className }: { className?: string }) {
   return (
-    <UserButton className={cn(className, "hover:bg-transparent")}>
+    <UserButton isLoading className={cn(className, "hover:bg-transparent")}>
       <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-lg" />
 
       <div className="hidden sm:grid flex-1 gap-1 text-left text-sm leading-tight">
@@ -76,11 +60,14 @@ export function UserHeaderSkeleton({ className }: { className?: string }) {
 }
 function UserButton({
   className,
+  isLoading = false,
   ...props
-}: React.ComponentProps<typeof SidebarMenuButton>) {
+}: React.ComponentProps<typeof SidebarMenuButton> & { isLoading?: boolean }) {
+  const pathname = usePathname();
   return (
     <SidebarMenuButton
       size="lg"
+      isActive={!isLoading && pathname === "/profile"}
       className={cn(
         "p-0 h-fit sm:h-12 rounded-full sm:rounded-lg sm:p-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
         className

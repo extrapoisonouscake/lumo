@@ -6,7 +6,6 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  console.log("hshsss");
   const store = await cookies();
   const sidebarState = store.get("sidebar:state")?.value;
   const isSidebarExpanded = sidebarState ? sidebarState === "true" : true;
