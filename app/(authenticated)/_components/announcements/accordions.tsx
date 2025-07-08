@@ -56,7 +56,7 @@ export function AnnouncementsAccordions({
   studentGrade: PersonalDetails["grade"] | undefined;
 }) {
   const hasRelevantGrade = studentGrade
-    ? getHasRelevantGrade(studentGrade)
+    ? getHasRelevantGrade(+studentGrade)
     : undefined;
   const [personalAnnouncementsItems, accordionItems] = useMemo(() => {
     const personalAnnouncementsItems = [];
