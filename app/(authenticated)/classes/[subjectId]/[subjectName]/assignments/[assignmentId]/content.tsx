@@ -174,7 +174,7 @@ export function AssignmentPageContent({
                   <SectionCard
                     title="Feedback"
                     icon={MessageSquare}
-                    contentClassName="gap-0.5"
+                    contentClassName="gap-0.5 text-sm"
                   >
                     {feedback.split("\n").map((line, i) => (
                       <p className="leading-relaxed" key={i}>
