@@ -6,8 +6,23 @@ import * as React from "react";
 import { cn } from "@/helpers/cn";
 
 const TooltipProvider = TooltipPrimitive.Provider;
+const Tooltip = ({
+  children,
+  ...props
+}: React.ComponentProps<typeof TooltipPrimitive.Root>) => {
+  const [open, setOpen] = React.useState(false);
 
-const Tooltip = TooltipPrimitive.Root;
+  return (
+    <TooltipPrimitive.Root
+      open={open}
+      delayDuration={0}
+      onOpenChange={setOpen}
+      {...props}
+    >
+      <div onClick={() => setOpen(true)}>{children}</div>
+    </TooltipPrimitive.Root>
+  );
+};
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
