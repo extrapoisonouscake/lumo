@@ -94,7 +94,7 @@ export function PageHeading({
 }
 function DefaultLeftContent() {
   const { pageData } = usePageData();
-
+  const filteredBreadcrumb = pageData?.breadcrumb.filter(Boolean);
   return (
     <div className="flex items-center gap-2">
       <div className="hidden sm:flex items-center gap-2">
@@ -105,8 +105,10 @@ function DefaultLeftContent() {
       {pageData ? (
         <Breadcrumb>
           <BreadcrumbList>
-            {pageData.breadcrumb.map(({ href, name }, i) => {
+            {filteredBreadcrumb!.map((item, i) => {
+              const { href, name } = item!;
               const isLast = i === pageData.breadcrumb.length - 1;
+              const shouldShowSeparator = i < filteredBreadcrumb!.length - 1;
               return (
                 <Fragment key={name}>
                   <BreadcrumbItem>
@@ -122,7 +124,7 @@ function DefaultLeftContent() {
                       </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
-                  {!isLast && <BreadcrumbSeparator />}
+                  {shouldShowSeparator && <BreadcrumbSeparator />}
                 </Fragment>
               );
             })}

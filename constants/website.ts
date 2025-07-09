@@ -8,7 +8,7 @@ export interface BreadcrumbDataItem {
   href?: string;
 }
 export interface WebsitePage {
-  breadcrumb: BreadcrumbDataItem[];
+  breadcrumb: (BreadcrumbDataItem | null)[];
   icon?: any /*//!*/;
 }
 interface StaticWebsitePage extends WebsitePage {
@@ -26,7 +26,7 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
   const exactMatch = websitePagesWithStaticPaths[pathname]!;
   if (exactMatch) return exactMatch;
   const segments = pathname.split("/").slice(1);
-  let data = null;
+  let data: WebsitePage | null = null;
   if (segments[0] === "classes") {
     let lastPathname = "/classes";
     data = {
@@ -46,11 +46,8 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
       });
     }
     if (assignmentId) {
-      lastPathname += `/assignments/${assignmentId}`;
-      data.breadcrumb.push({
-        name: "Assignment",
-        href: lastPathname,
-      });
+      //not showing the assignment page but allowing the user to navigate to the subject page
+      data.breadcrumb.push(null);
     }
     return data;
   }

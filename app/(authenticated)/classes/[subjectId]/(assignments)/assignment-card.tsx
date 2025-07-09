@@ -108,8 +108,6 @@ export function AssignmentCardSkeleton() {
         <SkeletonColumn heading="Due Date" value="00/00/0000 00/00/0000" />
 
         <SkeletonColumn heading="ScoreScore" value="00 / 100 00 / 100" />
-
-        <SkeletonColumn heading="Weight" value="1000000" />
       </div>
     </Card>
   );

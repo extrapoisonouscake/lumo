@@ -1,9 +1,11 @@
 "use client";
 import { TitleManager } from "@/components/misc/title-manager";
+import { BackButton } from "@/components/ui/back-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -62,175 +64,175 @@ export function AssignmentPageContent({
   //* this response is not used to get absences, year doesn't matter
   const summary = useSubjectSummary(subjectId, "current");
   return (
-    <QueryWrapper query={assignment}>
-      {(data) => {
-        const {
-          name,
-          submission,
-          score,
+    <>
+      <BackButton />
+      <QueryWrapper query={assignment} skeleton={<ContentSkeleton />}>
+        {(data) => {
+          const {
+            name,
+            submission,
+            score,
 
-          dueAt,
-          feedback,
-          assignedAt,
-          status,
-          classAverage,
-          weight,
-          categoryId,
-        } = data;
+            dueAt,
+            feedback,
+            assignedAt,
+            status,
+            classAverage,
+            weight,
+            categoryId,
+          } = data;
 
-        const getScoreComparisonIcon = () => {
-          if (
-            status !== AssignmentStatus.Graded ||
-            !classAverage ||
-            typeof score !== "number"
-          ) {
+          const getScoreComparisonIcon = () => {
+            if (
+              status !== AssignmentStatus.Graded ||
+              !classAverage ||
+              typeof score !== "number"
+            ) {
+              return null;
+            }
+            if (score > classAverage) {
+              return <TrendingUp className="h-4 w-4 text-green-500" />;
+            } else if (score < classAverage) {
+              return <TrendingDown className="h-4 w-4 text-red-500" />;
+            }
             return null;
-          }
-          if (score > classAverage) {
-            return <TrendingUp className="h-4 w-4 text-green-500" />;
-          } else if (score < classAverage) {
-            return <TrendingDown className="h-4 w-4 text-red-500" />;
-          }
-          return null;
-        };
+          };
 
-        return (
-          <>
-            <TitleManager title={`${name} - Assignment`} />
+          return (
+            <>
+              <TitleManager title={`${name} - Assignment`} />
+              <div className="flex flex-col gap-4">
+                {/* Header Card */}
+                <AssignmentHeader name={name} status={status} />
 
-            <div className="flex flex-col gap-4">
-              {/* Header Card */}
-              <AssignmentHeader name={name} status={status} />
-
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
-                {/* Score Information */}
-                <SectionCard title="Score" icon={Award}>
-                  <PropertyRow
-                    label="Score"
-                    value={
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {formatScore(settings?.shouldShowPercentages)(
-                            data,
-                            "score"
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+                  {/* Score Information */}
+                  <SectionCard title="Score" icon={Award}>
+                    <PropertyRow
+                      label="Score"
+                      value={
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">
+                            {formatScore(settings?.shouldShowPercentages)(
+                              data,
+                              "score"
+                            )}
+                          </span>
+                          {classAverage && getScoreComparisonIcon() ? (
+                            <TooltipProvider>
+                              <Tooltip delayDuration={0}>
+                                <TooltipTrigger asChild>
+                                  <div className="cursor-help hover:opacity-80 transition-opacity">
+                                    {getScoreComparisonIcon()}
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    Class Average:{" "}
+                                    {formatScore(
+                                      settings?.shouldShowPercentages
+                                    )(data, "classAverage")}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          ) : (
+                            getScoreComparisonIcon()
                           )}
-                        </span>
-                        {classAverage && getScoreComparisonIcon() ? (
-                          <TooltipProvider>
-                            <Tooltip delayDuration={0}>
-                              <TooltipTrigger asChild>
-                                <div className="cursor-help hover:opacity-80 transition-opacity">
-                                  {getScoreComparisonIcon()}
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  Class Average:{" "}
-                                  {formatScore(settings?.shouldShowPercentages)(
-                                    data,
-                                    "classAverage"
-                                  )}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        ) : (
-                          getScoreComparisonIcon()
-                        )}
-                      </div>
-                    }
-                  />
+                        </div>
+                      }
+                    />
 
-                  {weight && (
-                    <PropertyRow label="Weight" value={`${weight}%`} />
-                  )}
-                  <CategoryRow
-                    categories={summary.data?.academics?.categories}
-                    categoryId={categoryId}
-                  />
-                </SectionCard>
+                    {weight && (
+                      <PropertyRow label="Weight" value={`${weight}%`} />
+                    )}
+                    <CategoryRow
+                      categories={summary.data?.academics?.categories}
+                      categoryId={categoryId}
+                    />
+                  </SectionCard>
 
-                {/* Dates Information */}
-                <SectionCard title="Dates" icon={Calendar}>
-                  <DueDateRow
-                    value={dueAt}
-                    isMissing={status === AssignmentStatus.Missing}
-                  />
-                  <PropertyRow
-                    label="Date Assigned"
-                    value={
-                      assignedAt
-                        ? timezonedDayJS(assignedAt).format(VISIBLE_DATE_FORMAT)
-                        : NULL_VALUE_DISPLAY_FALLBACK
-                    }
-                  />
-                </SectionCard>
-              </div>
-              <SectionCard
-                title="Feedback"
-                className="text-sm"
-                icon={MessageSquare}
-              >
-                {feedback ? (
-                  <div className="flex flex-col gap-0.5">
+                  {/* Dates Information */}
+                  <SectionCard title="Dates" icon={Calendar}>
+                    <DueDateRow
+                      value={dueAt}
+                      isMissing={status === AssignmentStatus.Missing}
+                    />
+                    <PropertyRow
+                      label="Date Assigned"
+                      value={
+                        assignedAt
+                          ? timezonedDayJS(assignedAt).format(
+                              VISIBLE_DATE_FORMAT
+                            )
+                          : NULL_VALUE_DISPLAY_FALLBACK
+                      }
+                    />
+                  </SectionCard>
+                </div>
+                {feedback && (
+                  <SectionCard
+                    title="Feedback"
+                    className="text-sm"
+                    icon={MessageSquare}
+                    contentClassName="gap-0.5"
+                  >
                     {feedback.split("\n").map((line, i) => (
                       <p className="leading-relaxed" key={i}>
                         {line}
                       </p>
                     ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground italic">N/A</p>
+                  </SectionCard>
                 )}
-              </SectionCard>
-              {/* Submission Information */}
-              {submission && (
-                <SectionCard
-                  title="Submission"
-                  icon={FileText}
-                  rightContent={
-                    <Badge
-                      variant={!submission ? "secondary" : "default"}
-                      className={cn("capitalize", {
-                        "bg-brand/20 text-brand": submission,
-                      })}
-                    >
-                      {submission ? "Submitted" : "Not Submitted"}
-                    </Badge>
-                  }
-                  contentClassName="gap-2 md:justify-between md:items-end md:flex-row md:pt-1"
-                >
-                  <PropertyRow
-                    label="Date Submitted"
-                    className="justify-start"
-                    value={timezonedDayJS(submission.submittedAt).format(
-                      VISIBLE_DATE_FORMAT
-                    )}
-                  />
-
-                  <Link
-                    href={getSubmissionDownloadLink({
-                      ...submission,
-                      assignmentId: data.id,
-                    })}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {/* Submission Information */}
+                {submission && (
+                  <SectionCard
+                    title="Submission"
+                    icon={FileText}
+                    rightContent={
+                      <Badge
+                        variant={!submission ? "secondary" : "default"}
+                        className={cn("capitalize", {
+                          "bg-brand/20 text-brand": submission,
+                        })}
+                      >
+                        {submission ? "Submitted" : "Not Submitted"}
+                      </Badge>
+                    }
+                    contentClassName="gap-2 md:justify-between md:items-end md:flex-row md:pt-1"
                   >
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      leftIcon={<DownloadIcon />}
+                    <PropertyRow
+                      label="Date Submitted"
+                      className="justify-start"
+                      value={timezonedDayJS(submission.submittedAt).format(
+                        VISIBLE_DATE_FORMAT
+                      )}
+                    />
+
+                    <Link
+                      href={getSubmissionDownloadLink({
+                        ...submission,
+                        assignmentId: data.id,
+                      })}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      Download
-                    </Button>
-                  </Link>
-                </SectionCard>
-              )}
-            </div>
-          </>
-        );
-      }}
-    </QueryWrapper>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        leftIcon={<DownloadIcon />}
+                      >
+                        Download
+                      </Button>
+                    </Link>
+                  </SectionCard>
+                )}
+              </div>
+            </>
+          );
+        }}
+      </QueryWrapper>
+    </>
   );
 }
 const CLASSNAMES_BY_STATUS = {
@@ -245,7 +247,29 @@ const CLASSNAMES_BY_STATUS = {
   [AssignmentStatus.Unknown]:
     "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
 };
+function ContentSkeleton() {
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Header Card */}
+      <AssignmentHeaderSkeleton />
 
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+        {/* Score Information */}
+        <SectionCard title="Score" icon={Award}>
+          <PropertyRowSkeleton />
+
+          <PropertyRowSkeleton labelLength={12} valueLength={12} />
+        </SectionCard>
+
+        {/* Dates Information */}
+        <SectionCard title="Dates" icon={Calendar}>
+          <PropertyRowSkeleton labelLength={12} valueLength={12} />
+          <PropertyRowSkeleton />
+        </SectionCard>
+      </div>
+    </div>
+  );
+}
 function AssignmentHeader({
   name,
   status,
@@ -255,7 +279,7 @@ function AssignmentHeader({
 }) {
   const Icon = assignmentStatusToIcon[status];
   return (
-    <Card className="p-5 flex-row gap-3">
+    <Card className="p-5 flex-row gap-3 flex-wrap">
       <CardTitle className="text-2xl">{name}</CardTitle>
       <div className="flex items-center gap-2">
         <Badge
@@ -267,6 +291,18 @@ function AssignmentHeader({
           <Icon className="size-4" />
           {ASSIGNMENT_STATUS_LABELS[status]}
         </Badge>
+      </div>
+    </Card>
+  );
+}
+function AssignmentHeaderSkeleton() {
+  return (
+    <Card className="p-5 flex-row gap-3 flex-wrap">
+      <Skeleton shouldShrink={false}>
+        <CardTitle className="text-2xl">NameNameName</CardTitle>
+      </Skeleton>
+      <div className="flex items-center gap-2">
+        <Skeleton className="rounded-full h-[26px] w-20"></Skeleton>
       </div>
     </Card>
   );
@@ -328,6 +364,24 @@ function PropertyRow({
     </div>
   );
 }
+function PropertyRowSkeleton({
+  labelLength = 8,
+  valueLength = 8,
+}: {
+  labelLength?: number;
+  valueLength?: number;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <Skeleton shouldShrink={false}>
+        <span>{Array.from({ length: labelLength }).join("1")}</span>
+      </Skeleton>
+      <Skeleton shouldShrink={false}>
+        <span>{Array.from({ length: valueLength }).join("1")}</span>
+      </Skeleton>
+    </div>
+  );
+}
 const relativeTimeFormat = new Intl.RelativeTimeFormat("en", {
   style: "short",
 });
@@ -359,6 +413,7 @@ function CategoryRow({
   categoryId: string;
 }) {
   const category = categories?.find((c) => c.id === categoryId);
-  if (!category) return null;
+  if (!category)
+    return <PropertyRowSkeleton labelLength={12} valueLength={12} />;
   return <PropertyRow label="Category" value={category.name} />;
 }
