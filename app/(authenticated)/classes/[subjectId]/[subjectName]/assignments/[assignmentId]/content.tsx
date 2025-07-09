@@ -173,7 +173,6 @@ export function AssignmentPageContent({
                 {feedback && (
                   <SectionCard
                     title="Feedback"
-                    className="text-sm"
                     icon={MessageSquare}
                     contentClassName="gap-0.5"
                   >
@@ -297,9 +296,9 @@ function AssignmentHeader({
 }
 function AssignmentHeaderSkeleton() {
   return (
-    <Card className="p-5 flex-row gap-3 flex-wrap">
+    <Card className="p-4 flex-row gap-3 flex-wrap">
       <Skeleton shouldShrink={false}>
-        <CardTitle className="text-2xl">NameNameName</CardTitle>
+        <CardTitle className="text-xl">NameNameName</CardTitle>
       </Skeleton>
       <div className="flex items-center gap-2">
         <Skeleton className="rounded-full h-[26px] w-20"></Skeleton>
@@ -377,7 +376,7 @@ function PropertyRowSkeleton({
   valueLength?: number;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center text-sm justify-between gap-3">
       <Skeleton shouldShrink={false}>
         <span>{Array.from({ length: labelLength }).join("1")}</span>
       </Skeleton>
