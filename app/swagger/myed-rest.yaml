@@ -949,6 +949,34 @@ components:
           type: boolean
         hasStudentEditableGoogleDriveFile:
           type: boolean
+        submission:
+          type: object
+          required:
+            - formattedTimeSubmitted
+            - gssOid
+            - iconLink
+            - studentOid
+            - timeSubmitted
+            - type
+          properties:
+            formattedTimeSubmitted:
+              type: string
+            gssOid:
+              type: string
+            iconLink:
+              type: string
+            studentOid:
+              type: string
+            timeSubmitted:
+              type: number
+              format: int64
+            type:
+              type: string
+              enum:
+                - FILE
+                - NOTE
+                - GOOGLE_DOC
+                - QUIZ
     GradesObject:
       type: object
       required:

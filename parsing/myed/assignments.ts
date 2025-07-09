@@ -18,6 +18,7 @@ function convertAssignment({
   scoreElements,
   remark,
   categoryOid,
+  submission,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const scoreElement = scoreElements[0];
 
@@ -30,6 +31,13 @@ function convertAssignment({
     feedback: remark ?? null,
     categoryId: categoryOid,
     maxScore: totalPoints,
+    submission: submission
+      ? {
+          id: submission.gssOid,
+          type: submission.type,
+          submittedAt: new Date(submission.timeSubmitted),
+        }
+      : null,
   };
   if (scoreElement) {
     const { scoreLabel, score, pointMax } = scoreElement;

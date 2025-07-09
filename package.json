@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "openapi:generate-myed": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
+    "generate-myed-types": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
     "postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run openapi:generate-myed && npm run db:update; fi",
     "trigger:dev": "npx trigger.dev@latest dev",
     "trigger:deploy": "npx trigger.dev@latest deploy",

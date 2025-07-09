@@ -29,14 +29,11 @@ import {
 import { fractionFormatter } from "@/constants/intl";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
-import {
-  displayTableCellWithFallback,
-  renderTableCell,
-} from "@/helpers/tables";
+import { renderTableCell } from "@/helpers/tables";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { UserSettings } from "@/types/core";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
-import { formatAssignmentScore, formatClassAverage } from "./helpers";
+import { formatAssignmentScore } from "./helpers";
 import { useAssignmentNavigation } from "./use-assignment-navigation";
 
 const columnHelper = createColumnHelper<Assignment>();
@@ -67,13 +64,7 @@ const getColumns = (
     header: "Score",
 
     cell: ({ row }) => {
-      return formatAssignmentScore(row.original, shouldShowPercentages);
-    },
-  }),
-  columnHelper.display({
-    header: "Class Average",
-    cell: ({ row }) => {
-      return formatClassAverage(row.original, shouldShowPercentages);
+      return formatAssignmentScore(shouldShowPercentages)(row.original);
     },
   }),
   ...(shouldShowWeightColumn
@@ -88,10 +79,6 @@ const getColumns = (
         }),
       ]
     : []),
-  columnHelper.accessor("feedback", {
-    header: "Feedback",
-    cell: displayTableCellWithFallback,
-  }),
 ];
 const columnsSkeletons = makeTableColumnsSkeletons(getColumns(false, true), {
   name: 12,
@@ -113,6 +100,7 @@ const mockAssignments = (length: number) =>
         status: AssignmentStatus.Unknown,
         classAverage: 0,
         categoryId: "",
+        submission: null,
       } satisfies Assignment)
   );
 export function SubjectAssignmentsTable({

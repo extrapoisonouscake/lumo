@@ -101,6 +101,11 @@ export enum AssignmentStatus {
   Missing,
   Exempt,
 }
+export interface AssignmentSubmission {
+  id: string;
+  type: "FILE" | "NOTE" | "GOOGLE_DOC" | "QUIZ";
+  submittedAt: Date;
+}
 export type Assignment = {
   id: string;
   name: string;
@@ -111,6 +116,7 @@ export type Assignment = {
   classAverage: number | null;
   categoryId: string;
   maxScore: number;
+  submission: AssignmentSubmission | null;
 } & (
   | {
       status: AssignmentStatus.Graded;

@@ -20,6 +20,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, ListX } from "lucide-react";
+const UPPERCASE_REGEX = /(?=[A-Z])/;
 
 export function SubjectAttendance({
   id,
@@ -179,7 +180,7 @@ function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
           </div>
         </div>
 
-        {reason && color ? (
+        {reason ? (
           <Badge
             className="flex-shrink-0 border-0"
             style={{
@@ -187,14 +188,11 @@ function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
               color: `hsl(${color})`,
             }}
           >
-            {reason}
+            {reason.split(UPPERCASE_REGEX).join(" ")}
           </Badge>
         ) : (
-          <Badge
-            variant="secondary"
-            className="flex-shrink-0 bg-destructive/15 text-destructive"
-          >
-            {reason || "Unexcused"}
+          <Badge className="flex-shrink-0 bg-red-500/15 text-red-500">
+            Unexcused
           </Badge>
         )}
       </div>

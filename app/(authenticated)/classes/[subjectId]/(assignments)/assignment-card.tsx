@@ -6,7 +6,7 @@ import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { Assignment, AssignmentStatus } from "@/types/school";
 import { ClockAlert, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
-import { formatAssignmentScore, formatClassAverage } from "./helpers";
+import { formatAssignmentScore } from "./helpers";
 
 interface AssignmentCardProps {
   assignment: Assignment;
@@ -55,7 +55,7 @@ export function AssignmentCard({
                 { "text-blue-500/70": status === AssignmentStatus.Exempt }
               )}
             >
-              {formatAssignmentScore(assignment, shouldShowPercentages)}
+              {formatAssignmentScore(shouldShowPercentages)(assignment)}
             </p>
             <ScoreIcon
               classAverage={assignment.classAverage}
@@ -65,24 +65,10 @@ export function AssignmentCard({
           </div>
         </div>
 
-        {assignment.classAverage && (
-          <div>
-            <p className="text-muted-foreground">Class Average</p>
-            <p>{formatClassAverage(assignment, shouldShowPercentages)}</p>
-          </div>
-        )}
-
         {weight && (
           <div>
             <p className="text-muted-foreground">Weight</p>
             <p>{weight ? weight : NULL_VALUE_DISPLAY_FALLBACK}</p>
-          </div>
-        )}
-
-        {feedback && (
-          <div className="col-span-2">
-            <p className="text-muted-foreground">Feedback</p>
-            <p>{feedback || NULL_VALUE_DISPLAY_FALLBACK}</p>
           </div>
         )}
       </div>
@@ -123,7 +109,6 @@ export function AssignmentCardSkeleton() {
 
         <SkeletonColumn heading="ScoreScore" value="00 / 100 00 / 100" />
 
-        <SkeletonColumn heading="Class Average" value="00 / 100 00 / 100" />
         <SkeletonColumn heading="Weight" value="1000000" />
       </div>
     </Card>

@@ -1,12 +1,17 @@
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export function BackButton() {
   const router = useRouter();
+  const [referrer, setReferrer] = useState<string>();
+  useEffect(() => {
+    setReferrer(document.referrer);
+  }, []);
   return (
     <Link
-      href={document.referrer}
+      href={referrer ?? "/"}
       onClick={() => {
         router.back();
         return false;
