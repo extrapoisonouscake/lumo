@@ -105,7 +105,7 @@ export function AssignmentPageContent({
                 {/* Header Card */}
                 <AssignmentHeader name={name} status={status} />
 
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
                   {/* Score Information */}
                   <SectionCard title="Score" icon={Award}>
                     <PropertyRow
@@ -199,7 +199,7 @@ export function AssignmentPageContent({
                         {submission ? "Submitted" : "Not Submitted"}
                       </Badge>
                     }
-                    contentClassName="gap-2 md:justify-between md:items-end md:flex-row md:pt-1"
+                    contentClassName="gap-2 md:justify-between items-start md:flex-row md:pt-1"
                   >
                     <PropertyRow
                       label="Date Submitted"
@@ -253,7 +253,7 @@ function ContentSkeleton() {
       {/* Header Card */}
       <AssignmentHeaderSkeleton />
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
         {/* Score Information */}
         <SectionCard title="Score" icon={Award}>
           <PropertyRowSkeleton />
@@ -279,8 +279,8 @@ function AssignmentHeader({
 }) {
   const Icon = assignmentStatusToIcon[status];
   return (
-    <Card className="p-5 flex-row gap-3 flex-wrap">
-      <CardTitle className="text-2xl">{name}</CardTitle>
+    <Card className="p-4 flex-row gap-3 flex-wrap">
+      <CardTitle className="text-xl">{name}</CardTitle>
       <div className="flex items-center gap-2">
         <Badge
           className={cn(
@@ -324,15 +324,15 @@ function SectionCard({
 }) {
   return (
     <Card className={cn(className)}>
-      <CardHeader className="p-5 pb-2 justify-between items-center flex-row">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Icon className="h-5 w-5 text-brand" />
+      <CardHeader className="p-4 pb-2 justify-between items-center flex-row">
+        <CardTitle className="text-base font-medium flex items-center gap-2">
+          <Icon className="size-4 text-brand" />
           {title}
         </CardTitle>
         {rightContent}
       </CardHeader>
       <CardContent
-        className={cn("flex flex-col gap-2 p-5 pt-0", contentClassName)}
+        className={cn("flex flex-col gap-2 p-4 pt-0", contentClassName)}
       >
         {children}
       </CardContent>
@@ -356,7 +356,12 @@ function PropertyRow({
   labelClassName?: string;
 }) {
   return (
-    <div className={cn("flex items-center justify-between gap-3", className)}>
+    <div
+      className={cn(
+        "flex items-center text-sm justify-between gap-3",
+        className
+      )}
+    >
       <span className={cn("text-muted-foreground", labelClassName)}>
         {label}
       </span>

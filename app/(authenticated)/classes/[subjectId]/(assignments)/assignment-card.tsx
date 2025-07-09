@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
@@ -34,7 +35,14 @@ export function AssignmentCard({
         }
       )}
     >
-      <h3 className="font-medium text-base">{name}</h3>
+      <div className="gap-1.5 flex flex-col items-start">
+        {assignment.feedback && (
+          <Badge className="font-medium bg-blue-500/10 text-blue-500">
+            Teacher Comment
+          </Badge>
+        )}
+        <h3 className="font-medium text-base">{name}</h3>
+      </div>
 
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div>
