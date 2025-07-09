@@ -191,7 +191,7 @@ export function AssignmentPageContent({
                     rightContent={
                       <Badge
                         variant={!submission ? "secondary" : "default"}
-                        className={cn("capitalize", {
+                        className={cn("font-medium", {
                           "bg-brand/20 text-brand": submission,
                         })}
                       >
@@ -341,7 +341,7 @@ function SectionCard({
 function getSubmissionDownloadLink(
   submission: AssignmentSubmission & { assignmentId: Assignment["id"] }
 ) {
-  return `https://myeducation.gov.bc.ca/aspen/rest/assignments/${submission.assignmentId}/submissions/${submission.id}/download`;
+  return `/api/aspen/rest/assignments/${submission.assignmentId}/submissions/${submission.id}/download`;
 }
 function PropertyRow({
   label,
