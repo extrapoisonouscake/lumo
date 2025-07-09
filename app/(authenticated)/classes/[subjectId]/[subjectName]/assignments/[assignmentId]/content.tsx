@@ -62,7 +62,7 @@ export function AssignmentPageContent({
   const assignment = useSubjectAssignment(subjectId, assignmentId);
   const settings = useUserSettings();
   //* this response is not used to get absences, year doesn't matter
-  const summary = useSubjectSummary(subjectId, "current");
+  const { data: subject } = useSubjectSummary(subjectId, "current");
   return (
     <>
       <BackButton />
@@ -100,7 +100,9 @@ export function AssignmentPageContent({
 
           return (
             <>
-              <TitleManager title={`${name} - Assignment`} />
+              <TitleManager
+                title={`${name} - ${subject ? subject.name : "Loading..."}`}
+              />
               <div className="flex flex-col gap-4">
                 {/* Header Card */}
                 <AssignmentHeader name={name} status={status} />
@@ -147,7 +149,7 @@ export function AssignmentPageContent({
                       <PropertyRow label="Weight" value={`${weight}%`} />
                     )}
                     <CategoryRow
-                      categories={summary.data?.academics?.categories}
+                      categories={subject?.academics?.categories}
                       categoryId={categoryId}
                     />
                   </SectionCard>
