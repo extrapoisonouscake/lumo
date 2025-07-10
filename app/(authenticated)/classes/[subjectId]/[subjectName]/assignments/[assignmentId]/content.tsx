@@ -395,7 +395,7 @@ function DueDateRow({ value, isMissing }: { value: Date; isMissing: boolean }) {
   return (
     <PropertyRow
       label="Due Date"
-      labelClassName={cn({ "text-destructive": isMissing })}
+      labelClassName={cn({ "text-red-500": isMissing })}
       value={
         value
           ? `${timezonedDayJS(value).format(VISIBLE_DATE_FORMAT)}${

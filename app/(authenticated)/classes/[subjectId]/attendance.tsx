@@ -69,7 +69,11 @@ function Content({
     })
   );
   return (
-    <QueryWrapper query={query} skeleton={<ContentSkeleton />}>
+    <QueryWrapper
+      query={query}
+      onError={<ErrorCard className="mb-6" />}
+      skeleton={<ContentSkeleton />}
+    >
       {(data) =>
         data.length > 0 ? (
           <div className="flex flex-col gap-3 max-h-[calc(100vh-15rem)] overflow-y-auto rounded-t-lg pb-6">
