@@ -1,8 +1,7 @@
-import * as cheerio from "cheerio";
-
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
+import * as cheerio from "cheerio";
 import { Dayjs } from "dayjs";
 import { removeLineBreaks } from "../../helpers/removeLineBreaks";
 import { $getTableBody, MYED_TABLE_HEADER_SELECTOR } from "./helpers";
@@ -17,9 +16,9 @@ function getWeekday($tableBody: ReturnType<cheerio.CheerioAPI>) {
   return weekday ?? null;
 }
 export function parseCurrentWeekday({
-  responses: [$initial, $dateAdjusted],
+  responses,
 }: ParserFunctionArguments<"currentWeekday">) {
-  const $ = ($dateAdjusted || $initial)!;
+  const $ = responses.at(-1)!;
 
   const $tableBody = $getTableBody($);
   if (!$tableBody) return null;
@@ -32,11 +31,11 @@ const getDateFromSubjectTimeString = (initialDate: Dayjs) => (time: string) => {
 };
 export function parseSchedule({
   params: initialParams,
-  responses: [$initial, $dateAdjusted],
+  responses,
 }: ParserFunctionArguments<"schedule">):
   | { weekday: ReturnType<typeof getWeekday>; subjects: ScheduleSubject[] }
   | { knownError: string } {
-  const $ = ($dateAdjusted || $initial)!;
+  const $ = responses.at(-1)!;
   const $tableBody = $getTableBody($);
   if (!$tableBody) throw new Error("No table body");
   if ("knownError" in $tableBody) return $tableBody;

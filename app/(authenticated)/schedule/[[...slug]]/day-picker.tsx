@@ -18,11 +18,9 @@ function ChevronButton(props: ButtonProps) {
 export function ScheduleDayPicker({
   date,
   setDate,
-  isNavigating,
 }: {
   date: Date;
   setDate: (date: Date) => void;
-  isNavigating: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -31,7 +29,6 @@ export function ScheduleDayPicker({
       open={isOpen}
       onOpenChange={setIsOpen}
       disabledModifier={{ dayOfWeek: [0, 6] }}
-      isLoading={isNavigating}
       date={date}
       keepTimezone={!!date}
       className="w-fit h-9"

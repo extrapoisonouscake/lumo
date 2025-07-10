@@ -240,12 +240,27 @@ export const myEdParsingRoutes = {
       path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
       expect: "html",
     })
+    .metadata(({ responses, metadata }) => {
+      const $ = responses[0]! as cheerio.CheerioAPI;
+      const $termSelect = $("#selectedTermOid");
+      if ($termSelect.children("[selected]").val() !== "date") {
+        metadata.shouldSelectDateMode = true;
+      }
+    })
+    .step(
+      {
+        method: "GET",
+        path: "https://myeducation.gov.bc.ca/aspen/studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=date",
+        expect: "html",
+      },
+      ({ metadata: { shouldSelectDateMode } }) => shouldSelectDateMode
+    )
     .step(
       ({ params: { date } }) => {
         const day = timezonedDayJS(date).format(MYED_DATE_FORMAT);
         return {
           method: "GET",
-          path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
+          path: `studentScheduleMatrix.do?navkey=myInfo.sch.matrix&termOid=date&schoolOid=&k8Mode=&viewDate=${day}&userEvent=0`,
           expect: "html",
         };
       },

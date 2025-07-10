@@ -1,16 +1,25 @@
 import { MYED_ROOT_URL } from "@/constants/myed";
+import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
+import { getAuthCookies } from "@/helpers/getAuthCookies";
+import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { NextRequest } from "next/server";
 
 export async function GET(
-  _: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
   const url = `${MYED_ROOT_URL}${path.join("/")}`;
 
   try {
+    const store = await MyEdCookieStore.create();
+    const authCookies = getAuthCookies(store);
     // Fetch the content from the original source
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      headers: {
+        Cookie: convertObjectToCookieString(authCookies),
+      },
+    });
     if (!response.ok) {
       return new Response(`Failed to fetch content: ${response.statusText}`, {
         status: response.status,
@@ -20,20 +29,16 @@ export async function GET(
     // Get the content data
     const contentData = await response.arrayBuffer();
 
-    // Get headers from original response
-    const contentType = response.headers.get("content-type");
-    const contentLength = response.headers.get("content-length");
-    const contentDisposition = response.headers.get("content-disposition");
-    const cacheControl = response.headers.get("cache-control");
-
     // Create a new headers object with all relevant headers except cookies
     const headers = new Headers();
-    if (contentType) headers.set("Content-Type", contentType);
-    if (contentLength) headers.set("Content-Length", contentLength);
-    if (contentDisposition)
-      headers.set("Content-Disposition", contentDisposition);
-    if (cacheControl) {
-      headers.set("Cache-Control", cacheControl);
+    for (const key of [
+      "content-type",
+      "content-length",
+      "content-disposition",
+      "cache-control",
+    ]) {
+      const value = response.headers.get(key);
+      if (value) headers.set(key, value);
     }
 
     // Create a new response with the content data but without cookies

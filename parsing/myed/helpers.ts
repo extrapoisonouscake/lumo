@@ -7,7 +7,9 @@ export function $getTableBody($: cheerio.CheerioAPI) {
   //there is probably no tables with only one column, so we can check for known errors like this
   const lastRow = $tableBody.children("tr:last-of-type");
   if ($tableBody.length === 0 || lastRow.find("td").length === 1) {
-    const errorMessage = lastRow.prop("innerText");
+    const errorMessage =
+      $('td:has(> img[src="images/exclamation-circle-small.gif"])').text() ??
+      lastRow.text();
     if (!errorMessage) return null;
     return { knownError: removeLineBreaks(errorMessage) }; //! ?needed?
   }

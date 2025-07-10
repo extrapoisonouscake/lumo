@@ -4,7 +4,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
 import { ScheduleDayPicker } from "./day-picker";
 import { convertQueryDayToDate } from "./helpers";
@@ -22,16 +22,15 @@ export function SchedulePageContent({
 
   const router = useRouter();
   const currentSearchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
+
   const dateSetHandler = (newDate: Date) => {
     setDate(newDate);
-    startTransition(() => {
-      router.push(
-        `/schedule${
-          newDate ? `/${formatDateToStandard(newDate)}` : ""
-        }?${currentSearchParams.toString()}`
-      );
-    });
+
+    router.push(
+      `/schedule${
+        newDate ? `/${formatDateToStandard(newDate)}` : ""
+      }?${currentSearchParams.toString()}`
+    );
   };
   const isMobile = useIsMobile();
   return (
@@ -39,11 +38,7 @@ export function SchedulePageContent({
       <div className="flex flex-col gap-3">
         <PageHeading
           leftContent={
-            <ScheduleDayPicker
-              date={date}
-              setDate={dateSetHandler}
-              isNavigating={isPending}
-            />
+            <ScheduleDayPicker date={date} setDate={dateSetHandler} />
           }
         />
         {isMobile && (
