@@ -45,13 +45,7 @@ import {
   ASSIGNMENT_STATUS_LABELS,
   formatScore,
 } from "../../../(assignments)/helpers";
-const assignmentStatusToIcon = {
-  [AssignmentStatus.Graded]: CheckCircle,
-  [AssignmentStatus.Missing]: CircleSlash,
-  [AssignmentStatus.Exempt]: MinusCircle,
-  [AssignmentStatus.Ungraded]: Clock,
-  [AssignmentStatus.Unknown]: HelpCircle,
-};
+
 export function AssignmentPageContent({
   subjectId,
   assignmentId,
@@ -236,6 +230,13 @@ export function AssignmentPageContent({
     </>
   );
 }
+const ASSIGNMENT_STATUS_TO_ICON = {
+  [AssignmentStatus.Graded]: CheckCircle,
+  [AssignmentStatus.Missing]: CircleSlash,
+  [AssignmentStatus.Exempt]: MinusCircle,
+  [AssignmentStatus.Ungraded]: Clock,
+  [AssignmentStatus.Unknown]: HelpCircle,
+};
 const CLASSNAMES_BY_STATUS = {
   [AssignmentStatus.Graded]:
     "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
@@ -278,19 +279,21 @@ function AssignmentHeader({
   name: string;
   status: AssignmentStatus;
 }) {
-  const Icon = assignmentStatusToIcon[status];
+  const transformedStatus =
+    status === AssignmentStatus.Unknown ? AssignmentStatus.Ungraded : status;
+  const Icon = ASSIGNMENT_STATUS_TO_ICON[transformedStatus];
   return (
     <Card className="p-4 flex-row gap-3 flex-wrap">
       <CardTitle className="text-xl">{name}</CardTitle>
       <div className="flex items-center gap-2">
         <Badge
           className={cn(
-            CLASSNAMES_BY_STATUS[status],
+            CLASSNAMES_BY_STATUS[transformedStatus],
             "flex items-center gap-1 pl-1 pr-2 py-1 font-medium"
           )}
         >
           <Icon className="size-4" />
-          {ASSIGNMENT_STATUS_LABELS[status]}
+          {ASSIGNMENT_STATUS_LABELS[transformedStatus]}
         </Badge>
       </div>
     </Card>
