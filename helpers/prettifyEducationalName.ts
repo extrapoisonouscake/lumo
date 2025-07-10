@@ -38,7 +38,8 @@ export const prettifyEducationalName = (name: string) => {
   const lowerCaseName = name.toLowerCase();
   const replacement = directReplacements[lowerCaseName];
   if (replacement) return replacement;
-  return lowerCaseName
+
+  const processedName = lowerCaseName
     .split(/(\s+|[-–—])/g)
     .map((word, i) => {
       if (
@@ -57,4 +58,7 @@ export const prettifyEducationalName = (name: string) => {
       }
     })
     .join("");
+
+  // Remove spaces after opening brackets and before closing brackets
+  return processedName.replace(/([\(\[\{])\s+|\s+([\)\]\}])/g, "$1$2");
 };
