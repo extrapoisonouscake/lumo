@@ -1,15 +1,15 @@
 "use client";
-import {
-  PageDataProvider,
-  PageHeading,
-} from "@/components/layout/page-heading";
-import { Announcements } from "./_components/announcements";
+import { PageDataProvider } from "@/components/layout/page-heading";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { WidgetEditor } from "./_components/widgets/widget-editor";
+
 export default function Home() {
+  const settings = useUserSettings(false);
   return (
     <PageDataProvider>
-      <PageHeading />
-
-      <Announcements />
+      {settings ? (
+        <WidgetEditor configuration={settings.widgetsConfiguration} />
+      ) : null}
     </PageDataProvider>
   );
 }

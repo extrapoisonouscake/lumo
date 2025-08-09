@@ -28,7 +28,11 @@ import {
 } from "@/helpers/makeTableColumnsSkeletons";
 
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
-import { renderTableCell, sortColumnWithNullablesLast } from "@/helpers/tables";
+import {
+  displayTableCellWithFallback,
+  renderTableCell,
+  sortColumnWithNullablesLast,
+} from "@/helpers/tables";
 import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
@@ -64,9 +68,7 @@ const columns = [
   columnHelper.accessor("room", {
     header: "Room",
 
-    cell: ({ cell }) => {
-      return cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK;
-    },
+    cell: displayTableCellWithFallback,
   }),
   columnHelper.accessor("teachers", {
     header: ({ table }) => {

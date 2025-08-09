@@ -48,7 +48,13 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
   if (!lastPart.startsWith("myed")) {
     return fetch(input, init);
   }
-  return queue.enqueue(() => fetch(input, init));
+  return queue.enqueue(async () => {
+    const response = await fetch(input, init);
+    if (response.status === 503) {
+      window.location.href = "/maintenance";
+    }
+    return response;
+  });
 };
 
 export const trpcClient = createTRPCClient<AppRouter>({

@@ -13,7 +13,7 @@ import {
 } from "@/types/school";
 import { DeepWithRequired } from "@/types/utils";
 
-import { $getTableBody, MYED_TABLE_HEADER_SELECTOR } from "./helpers";
+import { $getGenericContentTableBody, $getTableValues } from "./helpers";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const convertStringToGradeObject = (string?: string | null) => {
@@ -281,7 +281,7 @@ export function parseSubjectAttendance({
   responses,
 }: ParserFunctionArguments<"subjectAttendance">): RichSubjectAttendance {
   const $ = responses.at(-1)!;
-  const $tableBody = $getTableBody($);
+  const $tableBody = $getGenericContentTableBody($);
   if (!$tableBody) throw new Error("No table body");
   if ("knownError" in $tableBody) {
     const knownError = $tableBody.knownError;
@@ -289,23 +289,16 @@ export function parseSubjectAttendance({
     throw new Error(knownError);
   }
   const data: RichSubjectAttendance = [];
-  $tableBody
-    .children("tr")
-    .not(MYED_TABLE_HEADER_SELECTOR)
-    .each((_, tr) => {
-      const $tr = $(tr);
-      const $date = $tr.find("td:nth-of-type(2)");
-      const date = locallyTimezonedDayJS(
-        $date.text().trim(),
-        "M/D/YYYY"
-      ).toDate();
-      const code = $tr.find("td:nth-of-type(3)").text().trim();
-      const reason = $tr.find("td:nth-of-type(4)").text().trim();
-      data.push({
-        date,
-        code,
-        reason,
-      });
+  const values = $getTableValues($tableBody);
+  values.forEach((rowValues) => {
+    const date = locallyTimezonedDayJS(rowValues[0]!, "M/D/YYYY").toDate();
+    const code = rowValues[1]!;
+    const reason = rowValues[2]!;
+    data.push({
+      date,
+      code,
+      reason,
     });
+  });
   return data;
 }

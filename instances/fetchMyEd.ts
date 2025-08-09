@@ -5,10 +5,10 @@ type ResponseWithJSON<T> = Omit<Awaited<ReturnType<Fetch>>, "json"> & {
 };
 export const fetchMyEd = async <T>(
   url: string,
-  options?: Parameters<Fetch>[1]
+  options?: Parameters<Fetch>[1],
+  baseUrl = MYED_ROOT_URL
 ) => {
-  if (url.startsWith("/")) throw new Error("Url must not start with /");
-  const response = await fetch(new URL(url, MYED_ROOT_URL), options);
+  const response = await fetch(new URL(url, baseUrl).href, options);
   if (!response.ok) throw response;
   return response as ResponseWithJSON<T>;
 };

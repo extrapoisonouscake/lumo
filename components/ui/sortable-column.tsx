@@ -1,8 +1,8 @@
 import { Column } from "@tanstack/react-table";
 import {
   ArrowDownNarrowWide,
+  ArrowDownWideNarrow,
   ArrowUpDown,
-  ArrowUpWideNarrow,
 } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -14,10 +14,10 @@ export function SortableColumn<TableObject, CellValue>({
   let Icon;
   switch (sortingDirection) {
     case "asc":
-      Icon = ArrowUpWideNarrow;
+      Icon = ArrowDownNarrowWide;
       break;
     case "desc":
-      Icon = ArrowDownNarrowWide;
+      Icon = ArrowDownWideNarrow;
       break;
     default:
       Icon = ArrowUpDown;

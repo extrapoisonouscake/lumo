@@ -71,8 +71,9 @@ function convertAssignment({
 }
 export function parseSubjectAssignments({
   responses,
+  params: { id },
 }: ParserFunctionArguments<"subjectAssignments">): {
-  subjectId?: string;
+  subjectId: string;
   assignments: Assignment[];
   terms: TermEntry[] | null;
   currentTermIndex: number | null;
@@ -97,6 +98,7 @@ export function parseSubjectAssignments({
       name: item.gradeTermId,
     }));
   return {
+    subjectId: id,
     assignments: preparedAssignments,
     terms: assignmentsSegments.length === 1 ? preparedTerms : null,
     currentTermIndex:

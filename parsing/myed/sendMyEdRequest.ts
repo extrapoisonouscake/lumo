@@ -1,14 +1,13 @@
-import {
-  FlatRouteStep,
-  MYED_AUTHENTICATION_COOKIES_NAMES,
-  MYED_HTML_TOKEN_INPUT_NAME,
-} from "@/constants/myed";
-
 import { headers } from "next/headers";
 import "server-only";
 
+import {
+  MYED_AUTHENTICATION_COOKIES_NAMES,
+  MYED_HTML_TOKEN_INPUT_NAME,
+} from "@/constants/myed";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { fetchMyEd } from "@/instances/fetchMyEd";
+import { FlatRouteStep } from "./routes";
 
 const USER_AGENT_FALLBACK =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
@@ -48,6 +47,7 @@ export async function sendMyEdRequest<
     Cookie: cookiesString,
     "User-Agent": userAgent,
   };
+
   const argumentsArray: [string, RequestInit][] = [];
   const isMultipleSteps = Array.isArray(stepOrSteps);
   const stepsArray: FlatRouteStep[] = isMultipleSteps

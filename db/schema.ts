@@ -49,6 +49,10 @@ export const user_settings = table("user_settings", {
     .notNull()
     .default(USER_SETTINGS_DEFAULT_VALUES.shouldShowLetterGrade),
   themeColor: t.text("theme_color"),
+  widgetsConfiguration: t
+    .jsonb("widgets_configuration")
+    .notNull()
+    .default(USER_SETTINGS_DEFAULT_VALUES.widgetsConfiguration),
 });
 
 export type UserSettingsSelectModel = InferSelectModel<typeof user_settings>;

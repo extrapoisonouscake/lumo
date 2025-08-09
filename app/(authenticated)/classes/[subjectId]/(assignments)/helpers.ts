@@ -1,8 +1,8 @@
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { UserSettings } from "@/types/core";
-import { Assignment, AssignmentStatus } from "@/types/school";
+import { Assignment, AssignmentStatus, Subject } from "@/types/school";
 
-function getPercentageString(score: number, maxScore: number): string {
+export function getPercentageString(score: number, maxScore: number): string {
   const percentage = +(score / (maxScore / 100)).toFixed(1);
   return ` (${percentage}%)`;
 }
@@ -60,8 +60,8 @@ export function formatScore(
  * Constructs the URL for an assignment
  */
 export function getAssignmentURL(
-  pathname: string,
-  assignment: Assignment
+  assignment: Assignment,
+  subject: Pick<Subject, "id" | "name">
 ): string {
-  return `${pathname}/assignments/${assignment.id}`;
+  return `/classes/${subject.id}/${subject.name}/assignments/${assignment.id}`;
 }

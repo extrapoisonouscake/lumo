@@ -9,7 +9,10 @@ import {
 } from "@/db/schema";
 
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
-import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import {
+  USER_SETTINGS_DEFAULT_VALUES,
+  WidgetsConfiguration,
+} from "@/constants/core";
 import { db } from "@/db";
 import { user_settings } from "@/db/schema";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
@@ -20,6 +23,7 @@ import { authenticatedProcedure } from "@/lib/trpc/procedures";
 import { PartialUserSettings } from "@/types/core";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { z } from "zod";
 import { runNotificationUnsubscriptionDBCalls } from "./helpers";
 import { updateUserSettingSchema } from "./public";
 const settingsCookieOptions = {
@@ -31,6 +35,7 @@ export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
     return getUserSettings(ctx);
   }),
+
   updateGenericUserSetting: authenticatedProcedure
     .input(updateUserSettingSchema)
     .mutation(
@@ -43,6 +48,27 @@ export const settingsRouter = router({
           .where(eq(user_settings.userId, ctx.studentHashedId));
       }
     ),
+  saveWidgetsConfiguration: authenticatedProcedure
+    .input(
+      z.object({
+        widgetsConfiguration: z.array(
+          z.object({
+            id: z.string(),
+            type: z.string(),
+            width: z.number(),
+            height: z.number(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ ctx, input: { widgetsConfiguration } }) => {
+      await db
+        .update(user_settings)
+        .set({
+          widgetsConfiguration: widgetsConfiguration as WidgetsConfiguration,
+        })
+        .where(eq(user_settings.userId, ctx.studentHashedId));
+    }),
   subscribeToNotifications: authenticatedProcedure
     .input(
       notificationSubscriptionSchema.pick({

@@ -6,9 +6,12 @@ import { authenticatedProcedure } from "../../../procedures";
 export const scheduleRouter = router({
   getSchedule: authenticatedProcedure
     .input(
-      z.object({
-        date: z.date().optional(),
-      })
+      z
+        .object({
+          date: z.date().optional(),
+        })
+        .optional()
+        .default({})
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
       const currentDate = timezonedDayJS().startOf("day");

@@ -32,7 +32,7 @@ export function AppleEmojiComponent({
   }
   return (
     <img
-      src={emojiSrcs[value]}
+      src={`https://em-content.zobj.net/source/apple/${emojiSrcs[value]}`}
       alt={value}
       aria-label={value}
       {...props}

@@ -8,7 +8,7 @@ import { authenticatedProcedure } from "../../../procedures";
 import {
   deleteSession,
   fetchStudentId,
-  getFreshAuthCookiesAndHTMLToken,
+  getFreshAuthCookies,
   LoginError,
   parseAuthGenericErrorMessage,
   parseHTMLTokenFromResponse,
@@ -97,7 +97,7 @@ const register = publicProcedure
       general: convertObjectToWeirdStringRepresentation(generalInfo),
       userInfo: convertObjectToWeirdStringRepresentation(userInfo),
     });
-    const { cookies } = await getFreshAuthCookiesAndHTMLToken();
+    const cookies = await getFreshAuthCookies();
     const responseXML = await fetchMyEd(
       `accountCreation.do?${query.toString()}`,
       {
@@ -126,13 +126,13 @@ const resetPasswordModifiedErrorMessages: Record<string, string> = {
 const resetPassword = publicProcedure
   .input(passwordResetSchema)
   .mutation(async ({ input }) => {
-    const { cookies, token } = await getFreshAuthCookiesAndHTMLToken();
+    const cookies = await getFreshAuthCookies();
     const params = new URLSearchParams({
       userEvent: input.securityQuestion ? "930" : "10010",
       deploymentId: "aspen",
       username: input.username,
       email: input.email,
-      [MYED_HTML_TOKEN_INPUT_NAME]: token,
+
       ...(input.securityQuestion
         ? {
             question: input.securityQuestion,
@@ -309,6 +309,7 @@ export const authRouter = router({
           success: true,
         };
       } catch (e: any) {
+        console.log(e);
         const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
           ? e.message
           : LoginErrors.unexpectedError;

@@ -8,8 +8,10 @@ import {
 } from "@tanstack/react-table";
 
 import { cn } from "@/helpers/cn";
-import { memo, ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { ReactNode } from "react";
 import { AppleEmoji } from "../misc/apple-emoji";
+import { ErrorCard } from "../misc/error-card";
 import {
   Table,
   TableBody,
@@ -36,24 +38,50 @@ export type EmptyStateProps = {
   text?: string;
 };
 const NO_CONTENT_MESSAGE = "No content.";
-function TableRendererComponent<T>({
+export function TableRenderer<T>({
   table,
   columns,
+  mobileHeader,
   rowRendererFactory,
   containerClassName,
   tableContainerClassName,
   emptyState,
+  renderMobileRow,
   ...props
 }: {
   table: TableType<T>;
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
+  mobileHeader?: ReactNode;
   rowRendererFactory?: RowRendererFactory<T>;
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
   emptyState?: EmptyStateProps | string;
+  renderMobileRow?: (row: Row<T>) => ReactNode;
 }) {
+  const { rows } = table.getRowModel();
+  const isMobile = useIsMobile();
+  if (isMobile && renderMobileRow) {
+    return (
+      <div className="flex flex-col gap-4">
+        {mobileHeader}
+        {rows.length ? (
+          rows.map(renderMobileRow)
+        ) : (
+          <ErrorCard
+            emoji={
+              typeof emptyState !== "string" ? emptyState?.emoji : undefined
+            }
+          >
+            {typeof emptyState !== "string"
+              ? emptyState?.text
+              : emptyState ?? NO_CONTENT_MESSAGE}
+          </ErrorCard>
+        )}
+      </div>
+    );
+  }
   return (
     <div className={cn("rounded-lg r border", containerClassName)}>
       <Table {...props} containerClassName={tableContainerClassName}>
@@ -76,8 +104,8 @@ function TableRendererComponent<T>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map(
+          {rows.length ? (
+            rows.map(
               rowRendererFactory?.(table) ||
                 function (row) {
                   return (
@@ -126,7 +154,3 @@ function TableRendererComponent<T>({
     </div>
   );
 }
-
-export const TableRenderer = memo(
-  TableRendererComponent
-) as typeof TableRendererComponent;

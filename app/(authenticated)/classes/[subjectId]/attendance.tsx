@@ -82,7 +82,7 @@ function Content({
             ))}
           </div>
         ) : (
-          <ErrorCard className="mb-6" shouldShowBorder={false} emoji="✨">
+          <ErrorCard className="mb-6" variant="ghost" emoji="✨">
             You haven't missed any classes.
           </ErrorCard>
         )

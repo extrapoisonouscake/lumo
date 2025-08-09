@@ -38,7 +38,7 @@ export function ResponsiveAssignments({
   const settings = useUserSettings();
   const isMobile = useIsMobile();
   const { navigateToAssignment } = useAssignmentNavigation();
-
+  //TODO: refactor to use the new content card component
   const preparedData = useMemo(() => {
     const filteredData =
       categoryId === "all"

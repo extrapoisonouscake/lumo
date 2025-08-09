@@ -10,17 +10,26 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
-import Link from "next/link";
+
 import { usePathname, useRouter } from "next/navigation";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
-import { LogOutIcon } from "lucide-react";
+import { ChevronRight, LogOutIcon } from "lucide-react";
 import { Spinner } from "../ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
+import { Link } from "../ui/link";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
@@ -69,29 +78,73 @@ function PagesMenu() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const pages = Object.entries(websitePagesWithStaticPaths).filter(
-    ([_, page]) => !page.isHiddenInSidebar
+    ([_, page]) => !page.isHiddenInSidebar && (!isMobile || page.showOnMobile)
   );
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
       {pages.map(([url, page]) => {
         const isActive =
           url === "/" ? url === pathname : pathname.startsWith(url);
+        const mainItemContent = (
+          <>
+            {page.icon && <page.icon className="size-5" />}
+            {page.breadcrumb[0]!.name}
+          </>
+        );
         return (
-          <SidebarMenuItem key={url} className={cn(isMobile && "flex-1")}>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive}
-              className={cn({
-                "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 transition-colors":
-                  isMobile,
-              })}
-            >
-              <Link href={url}>
-                <page.icon className="size-5" />
-                {page.breadcrumb[0]!.name}
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Collapsible
+            defaultOpen={isActive}
+            key={url}
+            className={cn("group/collapsible", {
+              "flex-1": isMobile,
+            })}
+          >
+            <SidebarMenuItem key={url}>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isActive && !page.items?.length}
+                  className={cn({
+                    "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 transition-colors":
+                      isMobile,
+                  })}
+                >
+                  {page.items ? (
+                    <div className="flex items-center gap-2 cursor-pointer">
+                      {mainItemContent}
+                      <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                    </div>
+                  ) : (
+                    <Link href={url}>{mainItemContent}</Link>
+                  )}
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              {page.items?.length && (
+                <CollapsibleContent>
+                  <SidebarMenuSub>
+                    {page.items.map((item) => {
+                      const fullUrl = url + item.href;
+                      return (
+                        <SidebarMenuSubItem key={fullUrl}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={pathname.startsWith(fullUrl)}
+                          >
+                            <Link
+                              href={fullUrl}
+                              className="whitespace-nowrap flex items-center gap-2"
+                            >
+                              {item.title}
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      );
+                    })}
+                  </SidebarMenuSub>
+                </CollapsibleContent>
+              )}
+            </SidebarMenuItem>
+          </Collapsible>
         );
       })}
     </SidebarMenu>

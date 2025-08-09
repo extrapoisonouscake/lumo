@@ -7,7 +7,13 @@ export const renderTableCell = <T, H>(cell: Cell<T, H>) =>
 export const displayTableCellWithFallback: ColumnDef<any>["cell"] = ({
   cell,
 }) => {
-  return cell.getValue() || NULL_VALUE_DISPLAY_FALLBACK;
+  return (
+    cell.getValue() || (
+      <span className="text-muted-foreground">
+        {NULL_VALUE_DISPLAY_FALLBACK}
+      </span>
+    )
+  );
 };
 const NULLABLE_VALUES = [null, undefined];
 export const sortColumnWithNullablesLast =
@@ -17,6 +23,7 @@ export const sortColumnWithNullablesLast =
   (rowA: Row<T>, rowB: Row<T>, columnId: string) => {
     const desc =
       rowA._getAllCellsByColumnId()[columnId]!.column.getIsSorted() === "desc";
+    console.log({ desc });
     const a = rowA.getValue(columnId) as any;
     const b = rowB.getValue(columnId) as any;
     const isANullable = NULLABLE_VALUES.includes(a);
@@ -31,5 +38,9 @@ export const sortColumnWithNullablesLast =
       }
     }
 
-    return callback ? callback(a, b) : b.localeCompare(a);
+    return callback
+      ? callback(a, b)
+      : typeof a === "string"
+      ? a.localeCompare(b)
+      : a - b;
   };

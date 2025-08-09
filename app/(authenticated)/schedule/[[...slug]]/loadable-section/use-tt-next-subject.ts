@@ -4,19 +4,15 @@ import {} from "@/types/school";
 import { useEffect, useState } from "react";
 import { isRowScheduleSubject, ScheduleRow } from "./table";
 
-export function useTTNextSubject({
-  isLoading,
-  data,
-}: {
-  isLoading: boolean;
-  data: ScheduleRow[];
-}) {
+export function useTTNextSubject(data?: ScheduleRow[]) {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | undefined>();
-  const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>();
-  const [currentRowIndex, setCurrentRowIndex] = useState<number | null>();
+  const [timeToNextSubject, setTimeToNextSubject] = useState<number | null>(
+    null
+  );
+  const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null);
   useEffect(() => {
     const intervalId = setInterval(() => {
-      if (!isLoading && timeToNextSubject !== null) {
+      if (data && timeToNextSubject !== null) {
         setTimeToNextSubject((prev) =>
           typeof prev === "number" ? prev - 1000 : null
         );
@@ -24,7 +20,7 @@ export function useTTNextSubject({
     }, 1000);
     let newTimeoutId: NodeJS.Timeout;
     const refresh = () => {
-      if (isLoading) return;
+      if (!data) return;
       const setNullValues = () => {
         setTimeToNextSubject(null);
         setCurrentRowIndex(null);
@@ -100,7 +96,7 @@ export function useTTNextSubject({
       clearInterval(intervalId);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [isLoading, data, !!timeToNextSubject]);
+  }, [data, !!timeToNextSubject]);
 
   return { timeToNextSubject, currentRowIndex };
 }

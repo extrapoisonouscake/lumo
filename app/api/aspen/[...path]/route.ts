@@ -9,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
-  const url = `${MYED_ROOT_URL}${path.join("/")}`;
+  const url = `${MYED_ROOT_URL}/${path.join("/")}`;
 
   try {
     const store = await MyEdCookieStore.create();

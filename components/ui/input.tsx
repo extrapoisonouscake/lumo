@@ -7,15 +7,29 @@ export interface InputProps
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   rightIconContainerProps?: React.HTMLAttributes<HTMLDivElement>;
+  containerClassName?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
-    { className, type, leftIcon, rightIcon, rightIconContainerProps, ...props },
+    {
+      className,
+      type,
+      leftIcon,
+      containerClassName,
+      rightIcon,
+      rightIconContainerProps,
+      ...props
+    },
     ref
   ) => {
     return (
-      <div className="relative">
+      <div
+        className={cn(
+          "relative [&_svg]:size-4 [&_svg]:text-muted-foreground",
+          containerClassName
+        )}
+      >
         {leftIcon && (
           <div className="absolute left-3 top-1/2 -translate-y-1/2">
             {leftIcon}
@@ -24,7 +38,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            "flex h-10 w-full rounded-lg r border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            "flex h-10 w-full rounded-lg r border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground",
+            { "pl-9": leftIcon, "pr-9": rightIcon },
             className
           )}
           ref={ref}

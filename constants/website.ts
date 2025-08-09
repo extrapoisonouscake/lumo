@@ -1,4 +1,11 @@
-import { Calendar, Home, Library, Settings } from "lucide-react";
+import {
+  Calendar,
+  Home,
+  Library,
+  LucideIcon,
+  ScrollText,
+  Settings,
+} from "lucide-react";
 import { Params } from "next/dist/server/request/params";
 
 export const WEBSITE_TITLE = "MyEd+";
@@ -9,17 +16,57 @@ export interface BreadcrumbDataItem {
 }
 export interface WebsitePage {
   breadcrumb: (BreadcrumbDataItem | null)[];
-  icon?: any /*//!*/;
+  icon?: LucideIcon;
 }
 interface StaticWebsitePage extends WebsitePage {
   isHiddenInSidebar?: boolean;
+  showOnMobile?: boolean;
+  items?: { title: string; href: string }[];
 }
-export const unauthenticatedPathnames = ["/login", "/register"];
+export const unauthenticatedPathnames = ["/login", "/register", "/maintenance"];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
-  "/": { breadcrumb: [{ name: "Home" }], icon: Home },
-  "/schedule": { breadcrumb: [{ name: "Schedule" }], icon: Calendar },
-  "/classes": { breadcrumb: [{ name: "Classes" }], icon: Library },
-  "/settings": { breadcrumb: [{ name: "Settings" }], icon: Settings },
+  "/": { breadcrumb: [{ name: "Home" }], icon: Home, showOnMobile: true },
+  "/classes": {
+    breadcrumb: [{ name: "Classes" }],
+    icon: Library,
+    showOnMobile: true,
+  },
+  "/schedule": {
+    breadcrumb: [{ name: "Schedule" }],
+    icon: Calendar,
+    showOnMobile: true,
+  },
+  "/transcript": {
+    breadcrumb: [{ name: "Transcript" }],
+    icon: ScrollText,
+    items: [
+      {
+        title: "Entries",
+        href: "",
+      },
+      {
+        title: "Credit Summary",
+        href: "/credit-summary",
+      },
+      {
+        title: "GPA",
+        href: "/gpa",
+      },
+      {
+        title: "Programs of Study",
+        href: "/programs-of-study",
+      },
+      {
+        title: "Graduation Summary",
+        href: "/graduation-summary",
+      },
+    ],
+  },
+  "/settings": {
+    breadcrumb: [{ name: "Settings" }],
+    icon: Settings,
+    showOnMobile: true,
+  },
   "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
 };
 export const getWebsitePageData = (pathname: string, params: Params) => {

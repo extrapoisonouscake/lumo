@@ -62,7 +62,7 @@ const getNotInSessionGenericMessage = (dateObject: Dayjs) => {
   return `No school ${messagePortion}.`;
 };
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
-const visualizableErrors: Record<
+export const scheduleVisualizableErrors: Record<
   string,
   ({ date, isWeekend }: { date: Date; isWeekend?: boolean }) => ErrorCardProps
 > = {
@@ -100,7 +100,7 @@ export function ScheduleLoadableSection({ date }: Props) {
   if ([0, 6].includes(currentDayObject.day())) {
     return (
       <ErrorCard
-        {...visualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({
+        {...scheduleVisualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({
           date,
           isWeekend: true,
         })}
@@ -145,7 +145,9 @@ function Content({
 }) {
   if ("knownError" in schedule) {
     return (
-      <ErrorCard {...visualizableErrors[schedule.knownError]?.({ date })} />
+      <ErrorCard
+        {...scheduleVisualizableErrors[schedule.knownError]?.({ date })}
+      />
     );
   }
   const userSettings = useUserSettings();

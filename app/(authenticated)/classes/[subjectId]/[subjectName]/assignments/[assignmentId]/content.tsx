@@ -328,7 +328,7 @@ function SectionCard({
 }) {
   return (
     <Card className={cn(className)}>
-      <CardHeader className="p-4 pb-2 justify-between items-center flex-row">
+      <CardHeader className="pb-2 justify-between items-center flex-row">
         <CardTitle className="text-base font-medium flex items-center gap-2">
           <Icon className="size-4 text-brand" />
           {title}

@@ -131,3 +131,10 @@ export interface TermEntry {
   id: string;
   name: string;
 }
+export interface TranscriptEntry {
+  year: number;
+  grade: string;
+  subjectName: string;
+  finalGrade: number | null;
+  creditAmount: number;
+}

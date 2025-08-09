@@ -1,5 +1,6 @@
 const educationAbbreviations = new Set([
   "EFP",
+  "ADST",
   "PhD",
   "MBA",
   "BA",

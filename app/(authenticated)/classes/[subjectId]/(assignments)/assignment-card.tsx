@@ -1,3 +1,4 @@
+import { ContentCard } from "@/components/misc/content-card";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,62 +26,56 @@ export function AssignmentCard({
   const { name, dueAt, status, weight, feedback } = assignment;
   const isMissing = status === AssignmentStatus.Missing;
   return (
-    <Card
+    <ContentCard
       onClick={onClick}
       className={cn(
-        "p-4 cursor-pointer transition-colors gap-2 hover:bg-muted/50",
+        "cursor-pointer transition-colors gap-2 hover:bg-muted/50",
         {
           "border-red-500/50 dark:border-red-500/40":
             shouldHighlightIfMissing && isMissing,
         }
       )}
-    >
-      <div className="gap-1.5 flex flex-col items-start">
-        {assignment.feedback && (
-          <Badge className="font-medium bg-blue-500/10 text-blue-500">
-            Teacher Comment
-          </Badge>
-        )}
-        <h3 className="font-medium text-base">{name}</h3>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <p className="text-muted-foreground">Due Date</p>
-          <p>
-            {dueAt
-              ? timezonedDayJS(dueAt).format(VISIBLE_DATE_FORMAT)
-              : NULL_VALUE_DISPLAY_FALLBACK}
-          </p>
+      items={[
+        {
+          label: "Due Date",
+          value: dueAt
+            ? timezonedDayJS(dueAt).format(VISIBLE_DATE_FORMAT)
+            : NULL_VALUE_DISPLAY_FALLBACK,
+        },
+        {
+          label: "Score",
+          valueClassName: "flex items-center gap-1",
+          value: (
+            <>
+              <p
+                className={cn(
+                  { "text-red-500": isMissing },
+                  { "text-blue-500/70": status === AssignmentStatus.Exempt }
+                )}
+              >
+                {formatAssignmentScore(shouldShowPercentages)(assignment)}
+              </p>
+              <ScoreIcon
+                classAverage={assignment.classAverage}
+                score={assignment.score}
+                status={assignment.status}
+              />
+            </>
+          ),
+        },
+        ...(weight ? [{ label: "Weight", value: weight }] : []),
+      ]}
+      header={
+        <div className="gap-1.5 flex flex-col items-start">
+          {assignment.feedback && (
+            <Badge className="font-medium bg-blue-500/10 text-blue-500">
+              Teacher Comment
+            </Badge>
+          )}
+          <h3 className="font-medium text-base">{name}</h3>
         </div>
-
-        <div>
-          <p className="text-muted-foreground">Score</p>
-          <div className="flex gap-1 items-center">
-            <p
-              className={cn(
-                { "text-red-500": isMissing },
-                { "text-blue-500/70": status === AssignmentStatus.Exempt }
-              )}
-            >
-              {formatAssignmentScore(shouldShowPercentages)(assignment)}
-            </p>
-            <ScoreIcon
-              classAverage={assignment.classAverage}
-              score={assignment.score}
-              status={assignment.status}
-            />
-          </div>
-        </div>
-
-        {weight && (
-          <div>
-            <p className="text-muted-foreground">Weight</p>
-            <p>{weight ? weight : NULL_VALUE_DISPLAY_FALLBACK}</p>
-          </div>
-        )}
-      </div>
-    </Card>
+      }
+    />
   );
 }
 function ScoreIcon({

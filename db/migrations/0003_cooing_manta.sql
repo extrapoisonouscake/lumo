@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ALTER COLUMN "widgets_configuration" SET DEFAULT '[{"id":"announcements-1","type":"announcements","width":3,"height":2},{"id":"recent-grades-1","type":"recent_grades","width":2,"height":1},{"id":"overdue-assignments-1","type":"overdue_assignments","width":1,"height":1},{"id":"schedule-today-1","type":"schedule_today","width":2,"height":1}]'::jsonb;

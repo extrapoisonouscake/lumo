@@ -58,11 +58,11 @@ export function SubjectSummary({
           />
         </div>
       </div>
-      <CardHeader className="items-center pt-0 md:pt-6 pb-0 md:px-[120px]">
+      <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px]">
         <CardTitle className="text-center">{name}</CardTitle>
         {term && <CardDescription>{termToLabel[term]}</CardDescription>}
       </CardHeader>
-      <CardContent className="flex flex-1 items-center gap-1">
+      <CardContent className="flex flex-1 items-center gap-1 p-6 pt-0">
         <div className="flex flex-col gap-1 items-center">
           <HalfDonutTextChart
             height={isLetterGradeShown ? 45 : 50}
@@ -131,7 +131,6 @@ export function SubjectSummarySkeleton() {
           <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
         </div>
       </CardContent>
-      {/* <CardFooter className="flex-col gap-2 text-sm"></CardFooter> */}
     </Card>
   );
 }

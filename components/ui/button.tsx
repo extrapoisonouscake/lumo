@@ -73,7 +73,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant,
       size,
       asChild = false,
-      isLoading: externalIsLoading = false,
+      isLoading: externalIsLoading,
       shouldShowChildrenOnLoading = false,
       leftIcon,
       rightIcon,
@@ -88,6 +88,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const derivedIsLoading = hasExternalIsLoading
       ? externalIsLoading
       : isLoading;
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -100,6 +101,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ? onClick
             : onClick
             ? async (e) => {
+                console.log("clicked");
                 setIsLoading(true);
                 try {
                   await onClick(e);

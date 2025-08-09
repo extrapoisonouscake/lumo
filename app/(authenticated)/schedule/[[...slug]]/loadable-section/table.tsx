@@ -41,7 +41,7 @@ type ScheduleRowSubject = {
 export type ScheduleRow =
   | ScheduleRowSubject
   | ({ type: BreakRowType } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
-const breakRowVisualData: Record<
+export const ScheduleLoadableSectionreakRowVisualData: Record<
   BreakRowType,
   { emoji: string; label: string }
 > = {
@@ -65,17 +65,7 @@ const columns = [
     header: "Name",
     cell: ({ row, cell }) => {
       if (row.original.type !== "subject") {
-        const visualData = breakRowVisualData[row.original.type];
-        return (
-          <div className="flex items-center gap-[6px]">
-            {visualData.label}{" "}
-            <AppleEmoji
-              imageClassName="size-4"
-              value={visualData.emoji}
-              width={16}
-            />
-          </div>
-        );
+        return <ScheduleBreak type={row.original.type} />;
       }
       const value = cell.getValue();
       return value ? (
@@ -151,7 +141,7 @@ const mockScheduleSubjects = (length: number) => {
   }
   return rows;
 };
-const prepareTableData = (data: ScheduleSubject[]) => {
+export const addBreaksToSchedule = (data: ScheduleSubject[]): ScheduleRow[] => {
   const preparedData = prepareTableDataForSorting(data);
   const filledIntervals: ScheduleRow[] = [];
   let wasLunchFound = false;
@@ -214,13 +204,12 @@ export function ScheduleTable({
     () =>
       isLoading
         ? mockScheduleSubjects(5)
-        : prepareTableData(externalData as NonNullable<typeof externalData>),
+        : addBreaksToSchedule(externalData as NonNullable<typeof externalData>),
     [isLoading, externalData]
   );
-  const { currentRowIndex, timeToNextSubject } = useTTNextSubject({
-    isLoading,
-    data,
-  });
+  const { currentRowIndex, timeToNextSubject } = useTTNextSubject(
+    !isLoading ? data : undefined
+  );
 
   const router = useRouter();
   const getRowRenderer: RowRendererFactory<ScheduleRow> = (table) => (row) => {
@@ -341,5 +330,14 @@ export function ScheduleTable({
         rowRendererFactory={getRowRenderer}
       />
     </>
+  );
+}
+export function ScheduleBreak({ type }: { type: BreakRowType }) {
+  const visualData = ScheduleLoadableSectionreakRowVisualData[type];
+  return (
+    <div className="flex items-center gap-[6px]">
+      {visualData.label}{" "}
+      <AppleEmoji imageClassName="size-4" value={visualData.emoji} width={16} />
+    </div>
   );
 }
