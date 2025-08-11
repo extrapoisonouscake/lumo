@@ -68,8 +68,8 @@ export function MaintenancePageContent() {
       {/* Action Section */}
       <div className="flex flex-col items-center gap-4 w-full">
         <Button
-          onClick={() => {
-            healthCheck.refetch();
+          onClick={async () => {
+            await healthCheck.refetch();
           }}
           variant="outline"
           shouldShowChildrenOnLoading

@@ -162,7 +162,6 @@ export function WidgetEditor({
     const newWidget = getNewWidgetConfiguration(type);
     setConfiguration([...configuration, newWidget]);
   };
-
   const handleRemoveWidget = (widgetId: string) => {
     const newConfiguration = configuration.filter(
       (widget) => widget.id !== widgetId

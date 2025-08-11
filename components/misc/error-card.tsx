@@ -10,17 +10,20 @@ export interface ErrorCardProps {
   className?: string;
   size?: "sm" | "md";
 }
-const errorCardVariants = cva("p-3 flex flex-col gap-1.5 items-center", {
-  variants: {
-    variant: {
-      default: "p-3",
-      ghost: "border-none p-0",
+const errorCardVariants = cva(
+  "p-3 flex flex-col gap-1.5 items-center justify-center",
+  {
+    variants: {
+      variant: {
+        default: "p-3",
+        ghost: "border-none p-0",
+      },
     },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
 export function ErrorCard({
   size = "md",
   children = "Something went wrong.",

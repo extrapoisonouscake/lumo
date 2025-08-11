@@ -18,6 +18,7 @@ import { WidgetComponentProps } from "./index";
 
 export default function OverdueAssignmentsWidget({
   size,
+  isEditing,
 }: WidgetComponentProps) {
   const settings = useUserSettings();
   const subjects = useSubjectsData({
@@ -64,7 +65,7 @@ export default function OverdueAssignmentsWidget({
     }
   }, [size]);
 
-  if (overdueAssignments.length === 0) {
+  if (overdueAssignments.length === 0 && !isEditing) {
     return null;
   }
 

@@ -13,11 +13,15 @@ import { WidgetContext } from "./widget-editor";
 
 export function Widget({
   isEditing,
+  className,
+  contentClassName,
   index,
   children,
   ...data
 }: WidgetComponentProps & {
   children: React.ReactNode;
+  className?: string;
+  contentClassName?: string;
 }) {
   const {
     dragOverIndex,
@@ -39,7 +43,6 @@ export function Widget({
     dragState.isDragging &&
     dragState.widgetId === data.id &&
     dragState.dragType === "resize";
-  console.log({ gridColumns });
   return (
     <Card
       draggable={isEditing}
@@ -51,12 +54,14 @@ export function Widget({
         "relative group h-full transition-transform ",
         { "!shadow-sm": isBeingResized },
         { "cursor-move": isEditing },
-        { "-translate-y-1": dragOverIndex === index }
+        { "-translate-y-1": dragOverIndex === index },
+        className
       )}
       style={{
         gridColumn: `span ${Math.min(data.width, gridColumns)}`,
         gridRow: `span ${data.height}`,
         minHeight: gridColumns === 1 ? "auto" : `${data.height * 200}px`,
+        minWidth: 0, // Prevents grid item from growing beyond its column
         transition: isBeingResized ? "none" : "all 0.2s ease",
       }}
     >
@@ -101,7 +106,7 @@ export function Widget({
       {/* Resize Handle */}
       {isEditing && (
         <div
-          className="absolute -bottom-1.5 -right-1.5 z-10 pl-2 pt-2 flex justify-end items-end cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute -bottom-1.5 -right-1.5 z-10 pl-2 pt-2 flex justify-end items-end cursor-se-resize"
           style={{
             borderTopLeftRadius: "100%",
           }}
@@ -114,9 +119,13 @@ export function Widget({
 
       {/* Widget Content */}
       <CardContent
-        className={cn("pt-0 relative flex-1", {
-          "pointer-events-none": isEditing,
-        })}
+        className={cn(
+          "pt-0 relative flex-1",
+          {
+            "pointer-events-none": isEditing,
+          },
+          contentClassName
+        )}
       >
         {children}
       </CardContent>

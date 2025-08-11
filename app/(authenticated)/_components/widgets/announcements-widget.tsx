@@ -30,19 +30,16 @@ import { ArrowUpRightIcon } from "lucide-react";
 import { useState } from "react";
 import { AnnouncementsAccordions } from "../announcements/accordions";
 import { WidgetComponentProps, WidgetWithCustomization } from "./index";
+import { Widget } from "./widget";
 
-function AnnouncementsWidgetComponent({
-  size,
-  isEditing,
-  custom,
-}: WidgetComponentProps) {
+function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
   const settings = useUserSettings(false);
   const customSettings = {
     ...WIDGET_CUSTOM_DEFAULTS[Widgets.ANNOUNCEMENTS],
-    ...custom,
+    ...widget.custom,
   } as WidgetCustomProps[Widgets.ANNOUNCEMENTS];
 
-  let shouldFetch = !!settings && !isEditing;
+  let shouldFetch = !!settings && !widget.isEditing;
   let error: AnnouncementsNotAvailableReason | undefined;
 
   if (settings) {
@@ -69,17 +66,17 @@ function AnnouncementsWidgetComponent({
     enabled: shouldFetch,
   });
 
-  // Determine content layout based on size
-  if (!settings || isEditing) {
-    return <AnnouncementsSkeleton size={size} />;
+  let content: React.ReactNode;
+  if (!settings) {
+    content = <AnnouncementsSkeleton size={widget.size} />;
   } else if (error !== undefined) {
-    return <AnnouncementsNotAvailableCard reason={error} />;
+    content = <AnnouncementsNotAvailableCard reason={error} />;
   } else {
-    return (
+    content = (
       <QueryWrapper
         query={query}
         onError={<ErrorCard />}
-        skeleton={<AnnouncementsSkeleton size={size} />}
+        skeleton={<AnnouncementsSkeleton size={widget.size} />}
       >
         {(response) => (
           <>
@@ -90,7 +87,7 @@ function AnnouncementsWidgetComponent({
             ) : response.data.length > 0 ? (
               <AnnouncementsContent
                 data={response.data}
-                size={size}
+                size={widget.size}
                 studentGrade={personalDetailsQuery.data?.grade}
                 customSettings={customSettings}
                 showPdfButton={
@@ -108,6 +105,8 @@ function AnnouncementsWidgetComponent({
       </QueryWrapper>
     );
   }
+
+  return <Widget {...widget}>{content}</Widget>;
 }
 
 function AnnouncementsContent({
@@ -241,7 +240,11 @@ function AnnouncementsNotAvailableCard({
   reason: AnnouncementsNotAvailableReason;
 }) {
   const { emoji, message } = reasonToVisualData[reason];
-  return <ErrorCard emoji={emoji}>{message}</ErrorCard>;
+  return (
+    <ErrorCard className="h-full" variant="ghost" emoji={emoji}>
+      {message}
+    </ErrorCard>
+  );
 }
 
 function AnnouncementsCustomization({

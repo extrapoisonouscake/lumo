@@ -332,10 +332,16 @@ export function ScheduleTable({
     </>
   );
 }
-export function ScheduleBreak({ type }: { type: BreakRowType }) {
+export function ScheduleBreak({
+  type,
+  className,
+}: {
+  type: BreakRowType;
+  className?: string;
+}) {
   const visualData = ScheduleLoadableSectionreakRowVisualData[type];
   return (
-    <div className="flex items-center gap-[6px]">
+    <div className={cn("flex items-center gap-[6px]", className)}>
       {visualData.label}{" "}
       <AppleEmoji imageClassName="size-4" value={visualData.emoji} width={16} />
     </div>
