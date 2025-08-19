@@ -1,6 +1,6 @@
 "use client";
 
-import { queryClient, trpc, trpcClient } from "@/app/trpc";
+import { queryClient, trpc } from "@/app/trpc";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
@@ -35,11 +35,11 @@ export function LoginPageContent() {
   );
   useEffect(() => {
     queryClient.removeQueries();
-    trpcClient.myed.health.query().then((res) => {
-      if (!res.isHealthy) {
-        router.push("/maintenance");
-      }
-    });
+    // trpcClient.myed.health.query().then((res) => {
+    //   if (!res.isHealthy) {
+    //     router.push("/maintenance");
+    //   }
+    // });
   }, []);
 
   return (

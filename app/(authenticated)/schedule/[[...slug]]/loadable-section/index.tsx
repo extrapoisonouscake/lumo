@@ -57,11 +57,12 @@ const getNotInSessionGenericMessage = (dateObject: Dayjs) => {
   if (timezonedDayJS().isSame(dateObject, "date")) {
     messagePortion = "today";
   } else {
-    messagePortion = "on this day";
+    messagePortion = "on that day";
   }
   return `No school ${messagePortion}.`;
 };
 const SCHOOL_NOT_IN_SESSION_MESSAGE = "School is not in session on that date.";
+const NO_SCHEDULE_MESSAGE = "The active schedule contains no schedule days.";
 export const scheduleVisualizableErrors: Record<
   string,
   ({ date, isWeekend }: { date: Date; isWeekend?: boolean }) => ErrorCardProps
@@ -87,6 +88,18 @@ export const scheduleVisualizableErrors: Record<
       }
     }
     return { children: message, emoji };
+  },
+  [NO_SCHEDULE_MESSAGE]: ({ date }) => {
+    let relativeDateMessage;
+    if (timezonedDayJS(date).isSame(timezonedDayJS(), "date")) {
+      relativeDateMessage = "today";
+    } else {
+      relativeDateMessage = "that day";
+    }
+    return {
+      children: `No schedule available for ${relativeDateMessage}`,
+      emoji: "🤷",
+    };
   },
 };
 interface Props {

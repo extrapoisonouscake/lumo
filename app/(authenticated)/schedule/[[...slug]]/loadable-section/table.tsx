@@ -31,18 +31,16 @@ import { ScheduleSubject } from "@/types/school";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
+import {
+  ExtendedScheduleSubject,
+  ScheduleBreakRowType,
+  ScheduleRow,
+  ScheduleRowSubject,
+} from "./types";
 import { useTTNextSubject } from "./use-tt-next-subject";
-type RowType = "subject" | "short-break" | "long-break" | "lunch";
-type BreakRowType = Exclude<RowType, "subject">;
-type ExtendedScheduleSubject = ScheduleSubject & { id?: string };
-type ScheduleRowSubject = {
-  type: Extract<RowType, "subject">;
-} & ExtendedScheduleSubject;
-export type ScheduleRow =
-  | ScheduleRowSubject
-  | ({ type: BreakRowType } & Pick<ScheduleSubject, "startsAt" | "endsAt">);
+
 export const ScheduleLoadableSectionreakRowVisualData: Record<
-  BreakRowType,
+  ScheduleBreakRowType,
   { emoji: string; label: string }
 > = {
   "short-break": { emoji: "➡️", label: "Go to next class" },
@@ -119,7 +117,7 @@ const columnsSkeletons = makeTableColumnsSkeletons(
   },
   true
 );
-const mockScheduleSubjects = (length: number) => {
+export const mockScheduleSubjects = (length: number) => {
   const rows = [];
   for (let i = 0; i < length; i++) {
     rows.push({
@@ -127,7 +125,7 @@ const mockScheduleSubjects = (length: number) => {
       endsAt: new Date(),
       teachers: [],
       actualName: "",
-      name: "",
+      name: "1",
       room: "",
       type: "subject" as const,
     } satisfies ScheduleRowSubject);
@@ -154,7 +152,7 @@ export const addBreaksToSchedule = (data: ScheduleSubject[]): ScheduleRow[] => {
       const nextStart = preparedData[i + 1]!.startsAt;
 
       if (currentEnd < nextStart) {
-        let type: BreakRowType;
+        let type: ScheduleBreakRowType;
         const minutesDiff = timezonedDayJS(nextStart).diff(
           currentEnd,
           "minutes"
@@ -336,7 +334,7 @@ export function ScheduleBreak({
   type,
   className,
 }: {
-  type: BreakRowType;
+  type: ScheduleBreakRowType;
   className?: string;
 }) {
   const visualData = ScheduleLoadableSectionreakRowVisualData[type];

@@ -101,7 +101,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             ? onClick
             : onClick
             ? async (e) => {
-                console.log("clicked");
                 setIsLoading(true);
                 try {
                   await onClick(e);

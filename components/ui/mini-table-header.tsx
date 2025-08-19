@@ -10,7 +10,7 @@ export function MiniTableHeader({
   return (
     <div
       className={cn(
-        "px-4 py-3 border flex items-center gap-4 rounded-lg justify-between text-sm font-medium text-muted-foreground",
+        "px-4 py-3 border flex items-center gap-4 rounded-lg justify-between text-sm font-medium text-muted-foreground min-h-[42px]",
         className
       )}
     >

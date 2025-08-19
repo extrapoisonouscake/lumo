@@ -1,3 +1,4 @@
+import { ErrorCardProps } from "@/components/misc/error-card";
 import { WidgetCustomProps, Widgets } from "@/constants/core";
 import { ReactNode } from "react";
 import { ResponsiveWidget } from "./widget-editor";
@@ -6,7 +7,8 @@ export const WIDGET_NAMES: Record<Widgets, string> = {
   [Widgets.ANNOUNCEMENTS]: "School Announcements",
   [Widgets.RECENT_GRADES]: "Recent Grades",
   [Widgets.OVERDUE_ASSIGNMENTS]: "Overdue Assignments",
-  [Widgets.UPCOMING_ASSIGNMENTS]: "Upcoming Assignments",
+  [Widgets.NEW_ASSIGNMENTS]: "New Assignments",
+  [Widgets.DYNAMIC_ASSIGNMENTS]: "Dynamic Assignments",
   [Widgets.SCHEDULE_TODAY]: "Today's Schedule",
   [Widgets.ATTENDANCE_SUMMARY]: "Attendance Summary",
 };
@@ -14,6 +16,7 @@ export const WIDGET_NAMES: Record<Widgets, string> = {
 export type WidgetComponentProps = ResponsiveWidget & {
   isEditing?: boolean;
   index: number;
+  richError?: ErrorCardProps;
 };
 
 // For customizable widgets
@@ -61,7 +64,8 @@ export const WIDGET_COMPONENTS: Record<Widgets, WidgetExport> = {
   [Widgets.RECENT_GRADES]: require("./recent-grades-widget").default,
   [Widgets.OVERDUE_ASSIGNMENTS]: require("./overdue-assignments-widget")
     .default,
-  [Widgets.UPCOMING_ASSIGNMENTS]: require("./upcoming-assignments-widget")
+  [Widgets.NEW_ASSIGNMENTS]: require("./new-assignments-widget").default,
+  [Widgets.DYNAMIC_ASSIGNMENTS]: require("./dynamic-assignments-widget")
     .default,
   [Widgets.SCHEDULE_TODAY]: require("./schedule-today-widget").default,
   [Widgets.ATTENDANCE_SUMMARY]: require("./attendance-summary-widget").default,

@@ -63,8 +63,12 @@ export type RichSubjectAttendance = {
   code: string;
   reason?: string;
 }[];
+export type AnnouncementEntry = {
+  text: string;
+  isNew?: boolean;
+};
 export type AnnouncementSectionData =
-  | { type: "list"; content: string[] }
+  | { type: "list"; content: AnnouncementEntry[] }
   | { type: "table"; content: string[][] };
 export type AnnouncementSection = {
   title: string;
@@ -137,4 +141,26 @@ export interface TranscriptEntry {
   subjectName: string;
   finalGrade: number | null;
   creditAmount: number;
+}
+export interface CreditSummaryEntry {
+  years: [number, number];
+  grade: number;
+  transcriptCredits: number;
+  adjustedCredits: number;
+  totalCredits: number;
+}
+export interface CourseRequirement {
+  name: string;
+  code: string;
+  entries: CourseRequirementEntry[];
+}
+export interface CourseRequirementEntry {
+  name: string;
+  code: string;
+  grade: number;
+  years: [number, number];
+  equivalentContentCode?: string;
+  isIncluded: boolean;
+  creditAmount: number;
+  isCreditAmountPending?: boolean;
 }

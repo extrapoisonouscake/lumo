@@ -51,7 +51,7 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
   return queue.enqueue(async () => {
     const response = await fetch(input, init);
     if (response.status === 503) {
-      window.location.href = "/maintenance";
+      // window.location.href = "/maintenance";
     }
     return response;
   });

@@ -1,6 +1,7 @@
 "use client";
 
-import { ErrorCard } from "@/components/misc/error-card";
+import { CircularProgress } from "@/components/misc/circular-progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { WidgetSize } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
@@ -20,7 +21,7 @@ import { Widget } from "./widget";
 export default function RecentGradesWidget(widget: WidgetComponentProps) {
   const settings = useUserSettings();
   const subjects = useSubjectsData({
-    isPreviousYear: false,
+    isPreviousYear: true,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
   const assignments = useRecentAssignments(subjects.data?.subjects.main);
@@ -34,10 +35,12 @@ export default function RecentGradesWidget(widget: WidgetComponentProps) {
         return 4;
       case WidgetSize.TALL:
         return 5;
+      default:
+        return 2;
     }
   }, [widget.size]);
 
-  const recentAssignments = useMemo(() => {
+  const recentGradedAssignments = useMemo(() => {
     return assignments.data
       .filter((assignment) => typeof assignment.score === "number")
       .toSorted((a, b) => b.dueAt.getTime() - a.dueAt.getTime())
@@ -48,7 +51,7 @@ export default function RecentGradesWidget(widget: WidgetComponentProps) {
   const isSmallWidget = widget.size === WidgetSize.SMALL;
 
   // Determine grid columns based on widget size
-  const gridCols = useMemo(() => {
+  const gridColsClassName = useMemo(() => {
     switch (widget.size) {
       case WidgetSize.WIDE:
         return "grid-cols-2";
@@ -56,128 +59,156 @@ export default function RecentGradesWidget(widget: WidgetComponentProps) {
         return "grid-cols-1";
       case WidgetSize.SMALL:
         return "grid-cols-1";
+      default:
+        return "grid-cols-1";
     }
   }, [widget.size]);
-  let content;
-  if (recentAssignments.length === 0) {
+  let content, richError;
+  if (!assignments.isFetched) {
     content = (
-      <ErrorCard
-        size="sm"
-        className="p-0 border-none h-full justify-center text-muted-foreground"
-        emoji="📊"
-      >
-        No recent grades found
-      </ErrorCard>
+      <ContentSkeleton
+        gridColsClassName={gridColsClassName}
+        isSmallWidget={isSmallWidget}
+        maxItems={maxItems}
+      />
     );
+  } else {
+    if (recentGradedAssignments.length === 0) {
+      richError = {
+        emoji: "📊",
+        message: "No recent grades",
+      };
+    } else {
+      content = (
+        <div className={cn(`grid gap-2`, gridColsClassName)}>
+          {recentGradedAssignments.map((assignment) => {
+            return (
+              <RecentGradedAssignmentCard
+                assignment={assignment}
+                isSmallWidget={isSmallWidget}
+                shouldShowPercentages={settings.shouldShowPercentages}
+              />
+            );
+          })}
+        </div>
+      );
+    }
   }
+  return (
+    <Widget {...widget} richError={richError}>
+      {content}
+    </Widget>
+  );
+}
+function RecentGradedAssignmentCard({
+  assignment,
+  isSmallWidget,
+  shouldShowPercentages,
+}: {
+  assignment: ReturnType<typeof useRecentAssignments>["data"][number];
+  isSmallWidget: boolean;
+  shouldShowPercentages: boolean;
+}) {
+  const percentage = (assignment.score! / assignment.maxScore) * 100;
+  const gradeInfo = getGradeInfo({
+    mark: percentage,
+    letter: "",
+  })!;
 
-  content = (
-    <div className={cn(`grid gap-2 ${gridCols}`, "h-full")}>
-      {recentAssignments.map((assignment) => {
-        const percentage = (assignment.score! / assignment.maxScore) * 100;
-        const gradeInfo = getGradeInfo({
-          mark: percentage,
-          letter: "",
-        })!;
+  return (
+    <Link
+      href={getAssignmentURL(assignment, assignment.subject)}
+      className={cn(
+        "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-lg border",
+        isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <p className="font-semibold text-lg leading-none">
+          {assignment.score} / {assignment.maxScore}
+          {shouldShowPercentages && (
+            <span className="text-xs font-medium">
+              &nbsp;
+              {getPercentageString(assignment.score!, assignment.maxScore)}
+            </span>
+          )}
+        </p>
 
+        <CircularProgress
+          value={percentage}
+          letter={gradeInfo?.letter}
+          fillColor={gradeInfo?.color}
+          size="normal"
+        />
+      </div>
+      {isSmallWidget ? (
+        <p className="text-xs text-muted-foreground font-medium truncate">
+          {assignment.name}
+        </p>
+      ) : (
+        <>
+          <div className="flex flex-col gap-1">
+            <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
+              {assignment.name}
+            </p>
+            <p className="flex items-center justify-between text-xs text-muted-foreground">
+              {assignment.subject.name}
+            </p>
+          </div>
+        </>
+      )}
+    </Link>
+  );
+}
+function ContentSkeleton({
+  gridColsClassName,
+  isSmallWidget,
+  maxItems,
+}: {
+  gridColsClassName: string;
+  isSmallWidget: boolean;
+  maxItems: number;
+}) {
+  return (
+    <div className={cn(`grid gap-2`, gridColsClassName)}>
+      {[...Array(maxItems)].map((_, index) => {
         return (
-          <Link
-            href={getAssignmentURL(assignment, assignment.subject)}
+          <div
             className={cn(
               "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-lg border",
               isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
             )}
           >
             <div className="flex items-center justify-between">
-              <p className="font-semibold text-lg leading-none">
-                {assignment.score} / {assignment.maxScore}
-                {settings.shouldShowPercentages && (
-                  <span className="text-xs font-medium">
-                    &nbsp;
-                    {getPercentageString(
-                      assignment.score!,
-                      assignment.maxScore
-                    )}
-                  </span>
-                )}
-              </p>
+              <div className="flex gap-1 items-end">
+                <Skeleton className="font-semibold text-lg leading-none">
+                  10 / 10
+                </Skeleton>
 
-              <CircularProgress
-                value={percentage}
-                letter={gradeInfo?.letter}
-                fillColor={gradeInfo?.color}
-                size="small"
-              />
+                <Skeleton className="text-xs font-medium">100%</Skeleton>
+              </div>
+
+              <CircularProgress value={0} fillColor="brand" size="normal" />
             </div>
             {isSmallWidget ? (
-              <p className="text-xs text-muted-foreground font-medium truncate">
-                {assignment.name}
-              </p>
+              <Skeleton className="w-fit text-xs text-muted-foreground font-medium truncate">
+                Assignment name name
+              </Skeleton>
             ) : (
               <>
                 <div className="flex flex-col gap-1">
-                  <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
-                    {assignment.name}
-                  </p>
-                  <p className="flex items-center justify-between text-xs text-muted-foreground">
-                    {assignment.subject.name}
-                  </p>
+                  <Skeleton className="w-fit font-medium text-sm leading-tight line-clamp-2 truncate">
+                    Assignment name name
+                  </Skeleton>
+                  <Skeleton className="w-fit flex items-center justify-between text-xs text-muted-foreground">
+                    Subject name
+                  </Skeleton>
                 </div>
               </>
             )}
-          </Link>
+          </div>
         );
       })}
-    </div>
-  );
-  return <Widget {...widget}>{content}</Widget>;
-}
-
-function CircularProgress({
-  value,
-  letter,
-  fillColor,
-  size,
-}: {
-  value: number;
-  letter: string;
-  fillColor: string;
-  size: "small" | "normal";
-}) {
-  const circumference = Math.PI * 20;
-  const strokeDashoffset = circumference - (value / 100) * circumference;
-
-  return (
-    <div className="relative">
-      <svg className={cn("size-6 rotate-90")} viewBox={`0 0 24 24`}>
-        {/* Background circle */}
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          className="text-muted-foreground/20"
-        />
-        {/* Progress circle */}
-        <circle
-          cx="12"
-          cy="12"
-          r="10"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          className={cn("transition-all duration-500", `text-${fillColor}`)}
-        />
-      </svg>
-
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-bold">{letter}</span>
-      </div>
     </div>
   );
 }

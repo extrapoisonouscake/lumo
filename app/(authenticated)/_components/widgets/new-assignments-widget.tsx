@@ -15,10 +15,11 @@ import {
   getPercentageString,
 } from "../../classes/[subjectId]/(assignments)/helpers";
 import { WidgetComponentProps } from "./index";
-import { Widget } from "./widget";
 
-export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
-  const { size, isEditing } = widget;
+export default function NewAssignmentsWidget({
+  size,
+  isEditing,
+}: WidgetComponentProps) {
   const settings = useUserSettings();
   const subjects = useSubjectsData({
     isPreviousYear: false,
@@ -69,10 +70,7 @@ export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
   }
 
   return (
-    <Widget
-      {...widget}
-      contentClassName={cn(`grid gap-2 ${gridCols}`, "h-full")}
-    >
+    <div className={cn(`grid gap-2 ${gridCols}`, "h-full")}>
       {overdueAssignments.map((assignment) => {
         return (
           <Link
@@ -111,6 +109,6 @@ export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
           </Link>
         );
       })}
-    </Widget>
+    </div>
   );
 }

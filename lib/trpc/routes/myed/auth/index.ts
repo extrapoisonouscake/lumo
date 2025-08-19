@@ -99,7 +99,7 @@ const register = publicProcedure
     });
     const cookies = await getFreshAuthCookies();
     const responseXML = await fetchMyEd(
-      `accountCreation.do?${query.toString()}`,
+      `/accountCreation.do?${query.toString()}`,
       {
         headers: {
           Cookie: convertObjectToCookieString(cookies),
@@ -140,7 +140,7 @@ const resetPassword = publicProcedure
           }
         : {}),
     });
-    const response = await fetchMyEd("passwordRecovery.do", {
+    const response = await fetchMyEd("/passwordRecovery.do", {
       method: "POST",
       headers: {
         Cookie: convertObjectToCookieString(cookies),
@@ -195,7 +195,7 @@ const changePassword = publicProcedure
       authCookies = externalCookies;
     }
     const cookiesString = convertObjectToCookieString(authCookies);
-    const loginPageResponse = await fetchMyEd("changePassword.do", {
+    const loginPageResponse = await fetchMyEd("/changePassword.do", {
       headers: { Cookie: cookiesString },
     });
 
@@ -209,7 +209,7 @@ const changePassword = publicProcedure
       [MYED_HTML_TOKEN_INPUT_NAME]: htmlToken,
     });
     try {
-      const response = await fetchMyEd("changePassword.do", {
+      const response = await fetchMyEd("/changePassword.do", {
         method: "POST",
         headers: {
           Cookie: cookiesString,
@@ -278,7 +278,7 @@ async function finalizePasswordChange({
     password: "",
     [MYED_HTML_TOKEN_INPUT_NAME]: htmlToken,
   });
-  const response = await fetchMyEd("logon.do", {
+  const response = await fetchMyEd("/logon.do", {
     method: "POST",
     headers: {
       Cookie: convertObjectToCookieString(authCookies),
@@ -309,7 +309,6 @@ export const authRouter = router({
           success: true,
         };
       } catch (e: any) {
-        console.log(e);
         const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
           ? e.message
           : LoginErrors.unexpectedError;

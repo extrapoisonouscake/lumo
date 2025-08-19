@@ -8,7 +8,7 @@ export const fetchMyEd = async <T>(
   options?: Parameters<Fetch>[1],
   baseUrl = MYED_ROOT_URL
 ) => {
-  const response = await fetch(new URL(url, baseUrl).href, options);
+  const response = await fetch(`${baseUrl}${url}`, options);
   if (!response.ok) throw response;
   return response as ResponseWithJSON<T>;
 };

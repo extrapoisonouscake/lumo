@@ -7,7 +7,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   ResponsiveDialog,
   ResponsiveDialogContent,
-  ResponsiveDialogDescription,
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
@@ -28,6 +27,7 @@ import {
   LayoutDashboardIcon,
   PlusIcon,
   Settings2Icon,
+  XIcon,
 } from "lucide-react";
 import React, {
   createContext,
@@ -404,30 +404,38 @@ export function WidgetEditor({
   return (
     <div className="space-y-4">
       {/* Editor Controls */}
-      <div className="flex items-center justify-between">
-        <PageHeading />
-        <div className="flex items-center gap-2">
-          {isEditing ? (
-            <>
-              <Button variant="outline" size="sm" onClick={handleCancel}>
-                Cancel
+
+      <PageHeading
+        rightContent={
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                  leftIcon={<XIcon className="size-4 sm:hidden" />}
+                >
+                  <p className="hidden sm:block">Cancel</p>
+                </Button>
+                <Button size="sm" onClick={handleSave} leftIcon={<CheckIcon />}>
+                  <p className="hidden sm:block">Save</p>
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleStartEditing}
+                size="sm"
+                className="border-none px-0 h-fit sm:h-9 sm:px-3 sm:border-solid"
+                leftIcon={<LayoutDashboardIcon />}
+              >
+                <p className="hidden sm:block">Customize</p>
               </Button>
-              <Button size="sm" onClick={handleSave} leftIcon={<CheckIcon />}>
-                Save
-              </Button>
-            </>
-          ) : (
-            <Button
-              variant="outline"
-              onClick={handleStartEditing}
-              size="sm"
-              leftIcon={<LayoutDashboardIcon />}
-            >
-              Customize
-            </Button>
-          )}
-        </div>
-      </div>
+            )}
+          </div>
+        }
+      />
 
       {/* Widget Palette */}
       {isEditing && (
@@ -494,6 +502,7 @@ export function WidgetEditor({
 
               return (
                 <WidgetComponent
+                  key={widget.id}
                   {...widget}
                   isEditing={isEditing}
                   index={index}
@@ -504,20 +513,30 @@ export function WidgetEditor({
             {/* Drop zone for adding at the end */}
             {isEditing && (
               <div
+                className="flex flex-col items-center gap-2"
                 onDragOver={(e) => handleDragOver(e, configuration.length)}
                 onDrop={(e) => handleDrop(e, configuration.length)}
-                className={cn(
-                  "sm:min-h-[200px] border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all",
-
-                  dragOverIndex === configuration.length &&
-                    isDraggingFromPalette &&
-                    "border-brand bg-brand/15 text-brand"
-                )}
               >
-                <PlusIcon className="size-6" />
-                {isDraggingFromPalette && dragOverIndex === configuration.length
-                  ? "Release to add widget here"
-                  : "Drop widget here"}
+                <div
+                  className={cn(
+                    "min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all",
+
+                    {
+                      "border-brand bg-brand/15 text-brand":
+                        dragOverIndex === configuration.length &&
+                        isDraggingFromPalette,
+                    }
+                  )}
+                >
+                  <PlusIcon className="size-6" />
+                  {isDraggingFromPalette &&
+                  dragOverIndex === configuration.length
+                    ? "Release to add widget here"
+                    : "Drop widget here"}
+                </div>
+                <p className="text-xs invisible">
+                  Dummy title for the drop zone
+                </p>
               </div>
             )}
 
@@ -529,7 +548,7 @@ export function WidgetEditor({
           </div>
         </WidgetContext.Provider>
       ) : (
-        <ErrorCard emoji="📊">No widgets added yet.</ErrorCard>
+        <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
       )}
     </div>
   );
@@ -572,9 +591,6 @@ function CustomizationModal({
             Customize
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogDescription>
-          Customize the widget to your liking.
-        </ResponsiveDialogDescription>
 
         {isCustomizable &&
           widgetExport.getCustomizationContent(

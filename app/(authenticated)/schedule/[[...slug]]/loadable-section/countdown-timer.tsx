@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatCountdown } from "@/helpers/format-countdown";
 
-const pad = (num: number) => `${num}`.padStart(2, "0");
 const MAX_MINUTES = 90;
 export function CountdownTimer({
   timeToNextSubject,
@@ -11,29 +11,22 @@ export function CountdownTimer({
 }) {
   if (!timeToNextSubject || timeToNextSubject > 1000 * 60 * MAX_MINUTES)
     return null;
-  let countdown;
-  if (timeToNextSubject > 0) {
-    const hours = Math.floor(timeToNextSubject / (1000 * 60 * 60));
-    const minutes = Math.floor(
-      (timeToNextSubject % (1000 * 60 * 60)) / (1000 * 60)
-    );
-    const seconds = Math.floor((timeToNextSubject % (1000 * 60)) / 1000);
-    countdown = `${pad(minutes)}:${pad(seconds)}`;
-    if (hours > 0) {
-      countdown = `${pad(hours)}:${countdown}`;
-    }
-  } else {
-    countdown = "00:00";
-  }
+  const countdown = formatCountdown(timeToNextSubject);
   return (
-    <p id="schedule-countdown" className="row-start-1 col-start-1 flex items-center text-sm">
+    <p
+      id="schedule-countdown"
+      className="row-start-1 col-start-1 flex items-center text-sm"
+    >
       {isBreak ? `Next class in ${countdown}` : `${countdown} left`}
     </p>
   );
 }
 export function CountdownTimerSkeleton() {
   return (
-    <Skeleton id="schedule-countdown" className="row-start-1 col-start-1 h-5 w-fit">
+    <Skeleton
+      id="schedule-countdown"
+      className="row-start-1 col-start-1 h-5 w-fit"
+    >
       <p className="text-sm">00:00</p>
     </Skeleton>
   );

@@ -2,18 +2,18 @@ import { INTERNAL_DATE_FORMAT } from "@/constants/core";
 import { KnownSchools } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
 
-import { getMidnight } from "@/helpers/getMidnight";
 import { mistral } from "@/instances/mistral";
-import { getRedisExpiryArgs, redis } from "@/instances/redis";
+import { redis } from "@/instances/redis";
 import { AnnouncementSectionData } from "@/types/school";
 import { FinishReason } from "@mistralai/mistralai/models/components/chatcompletionchoice";
 export const withAnnouncementsPrefix = (key: string) => `announcements:${key}`;
-export const getAnnouncementsRedisIdentificator = (
-  school: KnownSchools,
-  date?: Date
-) => `${school}:${timezonedDayJS(date).format(INTERNAL_DATE_FORMAT)}`;
+export const getAnnouncementsRedisSchoolPrefix = (school: KnownSchools) =>
+  withAnnouncementsPrefix(school);
+
 export const getAnnouncementsRedisKey = (school: KnownSchools, date?: Date) =>
-  withAnnouncementsPrefix(getAnnouncementsRedisIdentificator(school, date));
+  `${getAnnouncementsRedisSchoolPrefix(school)}:${timezonedDayJS(date).format(
+    INTERNAL_DATE_FORMAT
+  )}`;
 
 export const getAnnouncementsPDFIDRedisHashKey = (date: Date) =>
   withAnnouncementsPrefix(
@@ -75,11 +75,46 @@ export async function parseAnnouncements(
     extractBrackets(elements)
   ) as AnnouncementSectionData[];
   if (data.length === 0) throw new Error("Something went wrong");
-  const now = timezonedDayJS();
-  const midnight = getMidnight(now);
+  const schoolPrefix = getAnnouncementsRedisSchoolPrefix(school);
 
-  const expiryArgs = getRedisExpiryArgs(midnight);
-  await redis.set(redisKey, elements, ...expiryArgs);
+  const previousDayDataKey = (
+    await redis.scan(0, { match: schoolPrefix })
+  )[1][0];
+  let previousDayData: AnnouncementSectionData[] | undefined;
+  if (previousDayDataKey) {
+    previousDayData = (await redis.get(
+      previousDayDataKey
+    )) as AnnouncementSectionData[];
+  }
+  let preparedData;
+  if (previousDayData) {
+    preparedData = data.map((section, i) => {
+      const previousDaySection = previousDayData[i];
+      if (
+        !previousDaySection ||
+        previousDaySection.type !== "list" ||
+        section.type !== "list"
+      ) {
+        return section;
+      }
+      return {
+        ...section,
+        content: section.content.map((entry) => ({
+          ...entry,
+          isNew: !previousDaySection.content.some(
+            (previousDayEntry) => previousDayEntry.text === entry.text
+          ),
+        })),
+      };
+    });
+  } else {
+    preparedData = data;
+  }
+
+  await Promise.all([
+    redis.set(redisKey, JSON.stringify(preparedData)),
+    previousDayDataKey && redis.del(previousDayDataKey),
+  ]);
   return data;
 }
 function extractBrackets(string: string) {

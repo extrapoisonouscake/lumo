@@ -47,12 +47,13 @@ export const schoolSpecificRouter = router({
       }));
     }
     if (data.length === 0) {
-      return {
-        notAvailableReason: AnnouncementsNotAvailableReason.NoAnnouncements,
-      };
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: AnnouncementsNotAvailableReason.NoAnnouncements,
+      });
     }
     return {
-      data,
+      sections: data,
       pdfLink,
     };
   }),

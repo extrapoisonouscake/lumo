@@ -1,315 +1,149 @@
 "use client";
 
-import { trpc } from "@/app/trpc";
-import { ErrorCard } from "@/components/misc/error-card";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { ErrorCardProps } from "@/components/misc/error-card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Link } from "@/components/ui/link";
-import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import {
-  WIDGET_CUSTOM_DEFAULTS,
-  WidgetCustomProps,
-  WidgetSize,
-  Widgets,
-} from "@/constants/core";
-import { isKnownSchool } from "@/constants/schools";
-import { useStudentDetails } from "@/hooks/trpc/use-student-details";
-import { useUserSettings } from "@/hooks/trpc/use-user-settings";
-import { timezonedDayJS } from "@/instances/dayjs";
-import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-specific/public";
-import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/helpers/cn";
+import { useAnnouncements } from "@/hooks/trpc/use-announcements";
+import { pluralize } from "@/instances/intl";
 import { ArrowUpRightIcon } from "lucide-react";
-import { useState } from "react";
-import { AnnouncementsAccordions } from "../announcements/accordions";
-import { WidgetComponentProps, WidgetWithCustomization } from "./index";
+import { announcementsNotAvailableReasonToVisualData } from "../../announcements";
+import { WidgetComponentProps } from "./index";
 import { Widget } from "./widget";
 
-function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
-  const settings = useUserSettings(false);
-  const customSettings = {
-    ...WIDGET_CUSTOM_DEFAULTS[Widgets.ANNOUNCEMENTS],
-    ...widget.custom,
-  } as WidgetCustomProps[Widgets.ANNOUNCEMENTS];
+const announcementsPluralForms = {
+  one: "announcement",
+  other: "announcements",
+};
+const pluralizeAnnouncements = pluralize(announcementsPluralForms);
 
-  let shouldFetch = !!settings && !widget.isEditing;
-  let error: AnnouncementsNotAvailableReason | undefined;
-
-  if (settings) {
-    const { schoolId } = settings;
-    const date = timezonedDayJS();
-    if (!schoolId) {
-      error = AnnouncementsNotAvailableReason.SchoolNotSelected;
-    } else if (!isKnownSchool(schoolId)) {
-      error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
-    } else if ([0, 6].includes(date.day())) {
-      error = AnnouncementsNotAvailableReason.NotAWeekday;
-    }
-    if (error !== undefined) {
-      shouldFetch = false;
-    }
-  }
-
-  const query = useQuery({
-    ...trpc.core.schoolSpecific.getAnnouncements.queryOptions(),
-    enabled: shouldFetch,
-  });
-
-  const personalDetailsQuery = useStudentDetails({
-    enabled: shouldFetch,
-  });
+export default function AnnouncementsWidgetComponent(
+  widget: WidgetComponentProps
+) {
+  const announcements = useAnnouncements();
 
   let content: React.ReactNode;
-  if (!settings) {
-    content = <AnnouncementsSkeleton size={widget.size} />;
-  } else if (error !== undefined) {
-    content = <AnnouncementsNotAvailableCard reason={error} />;
+  let richError: ErrorCardProps | undefined;
+  let contentClassName;
+  if (!announcements.data) {
+    if (announcements.error) {
+      richError =
+        announcementsNotAvailableReasonToVisualData[announcements.error];
+    } else {
+      content = <ContentSkeleton />;
+    }
   } else {
+    const { newAnnouncementsCount, sections, personalSection } =
+      announcements.data;
+    const hasPersonalAnnouncements = personalSection.length > 0;
+    const totalAnnouncementsCount = sections.reduce(
+      (acc, section) => acc + section.content.length,
+      0
+    );
+    contentClassName = "pb-1";
     content = (
-      <QueryWrapper
-        query={query}
-        onError={<ErrorCard />}
-        skeleton={<AnnouncementsSkeleton size={widget.size} />}
-      >
-        {(response) => (
-          <>
-            {"notAvailableReason" in response ? (
-              <AnnouncementsNotAvailableCard
-                reason={response.notAvailableReason!}
+      <div className="flex-1 flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-medium text-muted-foreground">
+            {totalAnnouncementsCount}{" "}
+            {pluralize(announcementsPluralForms)(totalAnnouncementsCount)} total
+          </p>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 rounded-lg">
+              <div
+                className={cn(
+                  "w-2 h-2 rounded-full",
+                  newAnnouncementsCount > 0
+                    ? "bg-red-500"
+                    : "bg-muted-foreground"
+                )}
               />
-            ) : response.data.length > 0 ? (
-              <AnnouncementsContent
-                data={response.data}
-                size={widget.size}
-                studentGrade={personalDetailsQuery.data?.grade}
-                customSettings={customSettings}
-                showPdfButton={
-                  !!query.data?.pdfLink && !!customSettings.showPdfButton
-                }
-                pdfLink={query.data?.pdfLink || undefined}
-              />
-            ) : (
-              <AnnouncementsNotAvailableCard
-                reason={AnnouncementsNotAvailableReason.NoAnnouncements}
-              />
+              <span className="text-sm font-medium text-foreground">
+                {newAnnouncementsCount > 0 ? (
+                  <>
+                    {newAnnouncementsCount} new{" "}
+                    {pluralizeAnnouncements(newAnnouncementsCount)}
+                  </>
+                ) : (
+                  "No new announcements"
+                )}
+              </span>
+            </div>
+            {hasPersonalAnnouncements && (
+              <div className="flex items-center gap-2 ">
+                <div className="w-2 h-2 rounded-full bg-brand" />
+                <span className="text-sm font-medium text-foreground">
+                  {announcements.data.personalSection.length} personal{" "}
+                  {pluralizeAnnouncements(
+                    announcements.data.personalSection.length
+                  )}
+                </span>
+              </div>
             )}
-          </>
-        )}
-      </QueryWrapper>
-    );
-  }
-
-  return <Widget {...widget}>{content}</Widget>;
-}
-
-function AnnouncementsContent({
-  data,
-  size,
-  studentGrade,
-  customSettings,
-  showPdfButton,
-  pdfLink,
-}: {
-  data: any[];
-  size: WidgetSize;
-  studentGrade?: string;
-  customSettings: WidgetCustomProps[Widgets.ANNOUNCEMENTS];
-  showPdfButton: boolean;
-  pdfLink?: string;
-}) {
-  const maxItems = customSettings.maxItems || 5;
-
-  // For large sizes, show full accordion
-  if (size === WidgetSize.LARGE || size === WidgetSize.EXTRA_LARGE) {
-    return (
-      <>
-        {showPdfButton && pdfLink && (
-          <div className="flex justify-end mb-3">
-            <Link href={pdfLink} target="_blank">
-              <Button size="sm" variant="ghost" className="h-7">
-                <ArrowUpRightIcon className="size-4" />
-              </Button>
-            </Link>
           </div>
-        )}
-        <AnnouncementsAccordions
-          pdfURL={null}
-          data={data.slice(0, maxItems)}
-          studentGrade={studentGrade}
-        />
-      </>
+        </div>
+
+        <Link href="/announcements" className="mt-auto">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-full hover:bg-transparent text-muted-foreground"
+            rightIcon={<ArrowUpRightIcon className="size-4" />}
+          >
+            View all
+          </Button>
+        </Link>
+      </div>
     );
   }
 
-  // For medium sizes, show limited accordion
-  if (size === WidgetSize.TALL) {
-    const limitedData = data.slice(0, Math.min(3, maxItems));
-    return (
-      <div className="space-y-2">
-        <AnnouncementsAccordions
-          pdfURL={null}
-          data={limitedData}
-          studentGrade={studentGrade}
-        />
-        {data.length > limitedData.length && (
-          <div className="text-xs text-muted-foreground text-center">
-            +{data.length - limitedData.length} more
+  return (
+    <Widget
+      {...widget}
+      contentClassName={contentClassName}
+      richError={richError}
+    >
+      {content}
+    </Widget>
+  );
+}
+
+function ContentSkeleton() {
+  return (
+    <div className="flex-1 flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
+        <Skeleton className="text-xs w-fit font-medium text-muted-foreground">
+          1 total announcements
+        </Skeleton>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 rounded-lg">
+            <Skeleton className="w-2 h-2 rounded-full" />
+            <Skeleton className="text-sm font-medium text-foreground">
+              1 new announcement
+            </Skeleton>
           </div>
-        )}
-      </div>
-    );
-  }
-
-  // For small sizes, show summary only
-  const itemsToShow = Math.min(2, maxItems);
-  return (
-    <div className="space-y-2">
-      <div className="text-xs text-muted-foreground">
-        {data.length} announcement{data.length !== 1 ? "s" : ""} available
-      </div>
-      {data.slice(0, itemsToShow).map((announcement, index) => (
-        <div key={index} className="text-xs line-clamp-2">
-          {announcement.title || announcement.content?.substring(0, 50) + "..."}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AnnouncementsSkeleton({ size }: { size: WidgetSize }) {
-  const itemCount =
-    size === WidgetSize.SMALL ? 2 : size === WidgetSize.TALL ? 3 : 4;
-
-  return (
-    <div className="space-y-2">
-      {[...Array(itemCount)].map((_, i) => (
-        <div key={i}>
-          {size === WidgetSize.SMALL ? (
-            <Skeleton className="h-3 w-full" />
-          ) : (
-            <Accordion type="multiple">
-              <AccordionItem value={`${i}`} className="pointer-events-none">
-                <AccordionTrigger>
-                  <Skeleton>Loading announcements...</Skeleton>
-                </AccordionTrigger>
-              </AccordionItem>
-            </Accordion>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-const reasonToVisualData = {
-  [AnnouncementsNotAvailableReason.SchoolNotSelected]: {
-    emoji: "🏫",
-    message: (
-      <>
-        <Link variant="underline" href="/settings">
-          Select your school
-        </Link>{" "}
-        to view daily announcements.
-      </>
-    ),
-  },
-  [AnnouncementsNotAvailableReason.SchoolNotAvailable]: {
-    emoji: "😔",
-    message: "Your school is not supported yet.",
-  },
-  [AnnouncementsNotAvailableReason.NoAnnouncements]: {
-    emoji: "⏳",
-    message: "No announcements for today yet.",
-  },
-  [AnnouncementsNotAvailableReason.NotAWeekday]: {
-    emoji: "📭",
-    message: "No announcements for today.",
-  },
-};
-
-function AnnouncementsNotAvailableCard({
-  reason,
-}: {
-  reason: AnnouncementsNotAvailableReason;
-}) {
-  const { emoji, message } = reasonToVisualData[reason];
-  return (
-    <ErrorCard className="h-full" variant="ghost" emoji={emoji}>
-      {message}
-    </ErrorCard>
-  );
-}
-
-function AnnouncementsCustomization({
-  initialValues,
-  onSave,
-}: {
-  initialValues: WidgetCustomProps[Widgets.ANNOUNCEMENTS];
-  onSave: (values: WidgetCustomProps[Widgets.ANNOUNCEMENTS]) => void;
-}) {
-  const [showPdfButton, setShowPdfButton] = useState(
-    initialValues.showPdfButton ?? true
-  );
-  const [maxItems, setMaxItems] = useState(initialValues.maxItems ?? 5);
-
-  const handleSave = () => {
-    onSave({
-      showPdfButton,
-      maxItems,
-    });
-  };
-
-  return (
-    <div className="p-4 space-y-4">
-      <h3 className="font-medium text-sm">Customize Announcements</h3>
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="pdf-button" className="text-xs">
-            Show PDF button
-          </Label>
-          <Switch
-            id="pdf-button"
-            checked={showPdfButton}
-            onCheckedChange={setShowPdfButton}
-          />
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="max-items" className="text-xs">
-            Maximum items to show
-          </Label>
-          <Input
-            id="max-items"
-            type="number"
-            min="1"
-            max="20"
-            value={maxItems}
-            onChange={(e) => setMaxItems(parseInt(e.target.value) || 5)}
-            className="h-8"
-          />
+          <div className="flex items-center gap-2 rounded-lg">
+            <Skeleton className="w-2 h-2 rounded-full" />
+            <Skeleton className="text-sm font-medium text-foreground">
+              1 personal announcement
+            </Skeleton>
+          </div>
         </div>
       </div>
 
-      <div className="flex gap-2 pt-2">
-        <Button size="sm" onClick={handleSave} className="flex-1">
-          Save
+      <Skeleton className="mt-auto w-full self-center">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full hover:bg-transparent text-muted-foreground"
+          rightIcon={<ArrowUpRightIcon className="size-4" />}
+        >
+          View all
         </Button>
-      </div>
+      </Skeleton>
     </div>
   );
 }
-
-export default {
-  component: AnnouncementsWidgetComponent,
-  getCustomizationContent: (initialValues, onSave) => (
-    <AnnouncementsCustomization initialValues={initialValues} onSave={onSave} />
-  ),
-} satisfies WidgetWithCustomization<Widgets.ANNOUNCEMENTS>;

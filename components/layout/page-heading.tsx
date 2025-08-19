@@ -4,28 +4,10 @@ import {
   getWebsitePageData,
   WebsitePage,
 } from "@/constants/website";
-import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import {
-  createContext,
-  Fragment,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { cn } from "../../helpers/cn";
+import { createContext, useContext, useEffect, useState } from "react";
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "../ui/breadcrumb";
-import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Skeleton } from "../ui/skeleton";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 const PageDataContext = createContext<{
@@ -78,61 +60,29 @@ export const usePageData = () => {
 
 export function PageHeading({
   leftContent,
+  rightContent,
 }: {
   leftContent?: React.ReactNode;
+  rightContent?: React.ReactNode;
 }) {
   return (
     <div className="flex justify-between gap-4 items-center">
       {leftContent ?? <DefaultLeftContent />}
 
-      <div className="w-fit flex sm:hidden gap-1 items-center">
-        <ThemeToggle isInSidebar={false} shouldShowText={false} />
-        <UserHeader className="w-fit" />
+      <div className="w-fit flex gap-1 items-center">
+        {rightContent}
+        <div className="w-fit flex sm:hidden gap-1 items-center">
+          <ThemeToggle isInSidebar={false} shouldShowText={false} />
+          <UserHeader className="w-fit" />
+        </div>
       </div>
     </div>
   );
 }
 function DefaultLeftContent() {
-  const { pageData } = usePageData();
-  const filteredBreadcrumb = pageData?.breadcrumb.filter(Boolean);
   return (
-    <div className="flex items-center gap-2">
-      <div className="hidden sm:flex items-center gap-2">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="mr-1 h-4" />
-      </div>
-
-      {pageData ? (
-        <Breadcrumb>
-          <BreadcrumbList>
-            {filteredBreadcrumb!.map((item, i) => {
-              const { href, name } = item!;
-              const isLast = i === pageData.breadcrumb.length - 1;
-              const shouldShowSeparator = i < filteredBreadcrumb!.length - 1;
-              return (
-                <Fragment key={name}>
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage
-                        className={cn({ "font-semibold": i === 0 && !isLast })}
-                      >
-                        {name}
-                      </BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink asChild>
-                        <Link href={href ?? ""}>{name}</Link>
-                      </BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                  {shouldShowSeparator && <BreadcrumbSeparator />}
-                </Fragment>
-              );
-            })}
-          </BreadcrumbList>
-        </Breadcrumb>
-      ) : (
-        <Skeleton className="leading-none">Some Page</Skeleton>
-      )}
+    <div>
+      <SidebarTrigger className="hidden sm:flex" />
     </div>
   );
 }

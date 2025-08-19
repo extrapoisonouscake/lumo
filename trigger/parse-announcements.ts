@@ -1,7 +1,7 @@
 import { KnownSchools, knownSchoolsIDs } from "@/constants/schools";
 import { getMidnight } from "@/helpers/getMidnight";
 import { INSTANTIATED_TIMEZONE, timezonedDayJS } from "@/instances/dayjs";
-import { redis } from "@/instances/redis";
+import { getRedisExpiryTimestamp, redis } from "@/instances/redis";
 import { getUploadthingFileUrl } from "@/instances/uploadthing";
 import {
   getAnnouncementsPDFIDRedisHashKey,
@@ -146,7 +146,10 @@ export const savePDFLink = async (
     [school]: directUrl,
   });
 
-  await redis.expireat(pdfLinkHashKey, getMidnight(date).unix());
+  await redis.expireat(
+    pdfLinkHashKey,
+    getRedisExpiryTimestamp(getMidnight(date))
+  );
 };
 export const checkAllAnnouncementsTask = schedules.task({
   id: "check-for-all-announcements",

@@ -7,7 +7,8 @@ export enum Widgets {
   ANNOUNCEMENTS = "announcements",
   RECENT_GRADES = "recent_grades",
   OVERDUE_ASSIGNMENTS = "overdue_assignments",
-  UPCOMING_ASSIGNMENTS = "upcoming_assignments",
+  NEW_ASSIGNMENTS = "new_assignments",
+  DYNAMIC_ASSIGNMENTS = "dynamic_assignments",
   SCHEDULE_TODAY = "schedule_today",
   ATTENDANCE_SUMMARY = "attendance_summary",
 }
@@ -23,31 +24,23 @@ export enum WidgetSize {
 
 // Custom properties for each widget type
 export type WidgetCustomProps = {
-  [Widgets.ANNOUNCEMENTS]: {
-    showPdfButton?: boolean;
-    maxItems?: number;
-  };
   [Widgets.RECENT_GRADES]: {
     subjectId?: string;
-    showLetterGrades?: boolean;
-    daysBack?: number;
   };
   [Widgets.OVERDUE_ASSIGNMENTS]: {
     subjectId?: string;
-    urgencyThreshold?: number; // days
   };
-  [Widgets.UPCOMING_ASSIGNMENTS]: {
+  [Widgets.NEW_ASSIGNMENTS]: {
     subjectId?: string;
-    daysAhead?: number;
   };
-  [Widgets.SCHEDULE_TODAY]: {
-    showRoomNumbers?: boolean;
-    showTeacherNames?: boolean;
+  [Widgets.DYNAMIC_ASSIGNMENTS]: {
+    subjectId?: string;
   };
   [Widgets.ATTENDANCE_SUMMARY]: {
-    termId?: string;
-    showPercentages?: boolean;
+    subjectId?: string;
   };
+  [Widgets.SCHEDULE_TODAY]: {};
+  [Widgets.ANNOUNCEMENTS]: {};
 };
 
 export type WidgetGridItem = {
@@ -65,49 +58,25 @@ export const WIDGET_CUSTOMIZATION_OPTIONS: Record<Widgets, boolean> = {
   [Widgets.ANNOUNCEMENTS]: true,
   [Widgets.RECENT_GRADES]: true,
   [Widgets.OVERDUE_ASSIGNMENTS]: true,
-  [Widgets.UPCOMING_ASSIGNMENTS]: true,
-  [Widgets.SCHEDULE_TODAY]: true,
+  [Widgets.NEW_ASSIGNMENTS]: true,
+  [Widgets.DYNAMIC_ASSIGNMENTS]: true,
+  [Widgets.SCHEDULE_TODAY]: false,
   [Widgets.ATTENDANCE_SUMMARY]: false, // Simple widget, no customization needed
 };
 // Default custom values for each widget type
-export const WIDGET_CUSTOM_DEFAULTS: WidgetCustomProps = {
-  [Widgets.ANNOUNCEMENTS]: {
-    showPdfButton: true,
-    maxItems: 5,
-  },
-  [Widgets.RECENT_GRADES]: {
-    subjectId: undefined, // All subjects/
-    showLetterGrades: false,
-    daysBack: 30,
-  },
-  [Widgets.OVERDUE_ASSIGNMENTS]: {
-    subjectId: undefined, // All subjects
-    urgencyThreshold: 7,
-  },
-  [Widgets.UPCOMING_ASSIGNMENTS]: {
-    subjectId: undefined, // All subjects
-    daysAhead: 14,
-  },
-  [Widgets.SCHEDULE_TODAY]: {
-    showRoomNumbers: true,
-    showTeacherNames: false,
-  },
-  [Widgets.ATTENDANCE_SUMMARY]: {
-    termId: undefined, // Current term
-    showPercentages: true,
-  },
-};
+export const WIDGET_CUSTOM_DEFAULTS: Partial<WidgetCustomProps> = {};
 
 // Define max dimensions for each widget type
 export const WIDGET_MAX_DIMENSIONS: Record<
   Widgets,
   { width: number; height: number }
 > = {
-  [Widgets.ANNOUNCEMENTS]: { width: 3, height: 3 },
+  [Widgets.ANNOUNCEMENTS]: { width: 1, height: 1 },
   [Widgets.RECENT_GRADES]: { width: 2, height: 2 },
   [Widgets.OVERDUE_ASSIGNMENTS]: { width: 2, height: 2 },
-  [Widgets.UPCOMING_ASSIGNMENTS]: { width: 2, height: 2 },
-  [Widgets.SCHEDULE_TODAY]: { width: 3, height: 3 },
+  [Widgets.NEW_ASSIGNMENTS]: { width: 2, height: 2 },
+  [Widgets.DYNAMIC_ASSIGNMENTS]: { width: 2, height: 2 },
+  [Widgets.SCHEDULE_TODAY]: { width: 2, height: 1 },
   [Widgets.ATTENDANCE_SUMMARY]: { width: 2, height: 1 },
 };
 
@@ -155,14 +124,14 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
     {
       id: "announcements-1",
       type: Widgets.ANNOUNCEMENTS,
-      width: 3,
-      height: 2,
+      width: 1,
+      height: 1,
       custom: WIDGET_CUSTOM_DEFAULTS[Widgets.ANNOUNCEMENTS],
     },
     {
       id: "recent-grades-1",
       type: Widgets.RECENT_GRADES,
-      width: 2,
+      width: 1,
       height: 1,
       custom: WIDGET_CUSTOM_DEFAULTS[Widgets.RECENT_GRADES],
     },
@@ -176,7 +145,7 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
     {
       id: "schedule-today-1",
       type: Widgets.SCHEDULE_TODAY,
-      width: 2,
+      width: 1,
       height: 1,
       custom: WIDGET_CUSTOM_DEFAULTS[Widgets.SCHEDULE_TODAY],
     },

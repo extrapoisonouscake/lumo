@@ -23,7 +23,7 @@ export const sortColumnWithNullablesLast =
   (rowA: Row<T>, rowB: Row<T>, columnId: string) => {
     const desc =
       rowA._getAllCellsByColumnId()[columnId]!.column.getIsSorted() === "desc";
-    console.log({ desc });
+
     const a = rowA.getValue(columnId) as any;
     const b = rowB.getValue(columnId) as any;
     const isANullable = NULLABLE_VALUES.includes(a);

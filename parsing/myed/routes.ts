@@ -228,21 +228,20 @@ export const myEdParsingRoutes = {
   schedule: new Route<{ date?: Date }>()
     .step({
       method: "GET",
-      path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
+      path: "/studentScheduleContextList.do?navkey=myInfo.sch.list",
       expect: "html",
     })
     .metadata(({ responses, metadata }) => {
       const $ = responses[0]! as cheerio.CheerioAPI;
       const $termSelect = $("#selectedTermOid");
       if ($termSelect.children("[selected]").val() !== "date") {
-        console.log("SHOULD SELECT DATE MODE");
         metadata.shouldSelectDateMode = true;
       }
     })
     .step(
       {
         method: "POST",
-        path: "studentScheduleContextList.do",
+        path: "/studentScheduleContextList.do",
         body: {
           userEvent: "2210",
           selectedTermOid: "date",
@@ -257,7 +256,7 @@ export const myEdParsingRoutes = {
         const day = timezonedDayJS(date).format(MYED_DATE_FORMAT);
         return {
           method: "POST",
-          path: "studentScheduleContextList.do",
+          path: "/studentScheduleContextList.do",
           body: {
             userEvent: "2000",
             matrixDate: day,
@@ -271,19 +270,19 @@ export const myEdParsingRoutes = {
     ),
   currentWeekday: new Route().step({
     method: "GET",
-    path: "studentScheduleContextList.do?navkey=myInfo.sch.list",
+    path: "/studentScheduleContextList.do?navkey=myInfo.sch.list",
     expect: "html",
   }),
 
   personalDetails: new Route()
     .step({
       method: "GET",
-      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
       expect: "html",
     })
     .step({
       method: "POST",
-      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
       body: {
         userEvent: "2030",
         userParam: "1",
@@ -293,7 +292,7 @@ export const myEdParsingRoutes = {
     })
     .step({
       method: "POST",
-      path: "portalStudentDetail.do?navkey=myInfo.details.detail",
+      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
       body: {
         userEvent: "2030",
         userParam: "2",
@@ -303,7 +302,7 @@ export const myEdParsingRoutes = {
     }),
   registrationFields: new Route(false).step({
     method: "GET",
-    path: "accountCreation.do",
+    path: "/accountCreation.do",
     expect: "html",
   }),
   //not to be used in standalone, does not preserve state
@@ -313,13 +312,13 @@ export const myEdParsingRoutes = {
   }>()
     .step({
       method: "GET",
-      path: "portalClassList.do?navkey=academics.classes.list",
+      path: "/portalClassList.do?navkey=academics.classes.list",
       expect: "html",
     })
     //force to show all terms
     .step(({ params: { year } }) => ({
       method: "POST",
-      path: "portalClassList.do",
+      path: "/portalClassList.do",
       body: {
         userEvent: "950",
         yearFilter: year,
@@ -331,7 +330,7 @@ export const myEdParsingRoutes = {
     //switch to desired subject
     .step(({ params: { subjectId } }) => ({
       method: "POST",
-      path: "portalClassList.do",
+      path: "/portalClassList.do",
       body: {
         userEvent: "2100",
         userParam: subjectId,
@@ -341,7 +340,7 @@ export const myEdParsingRoutes = {
     }))
     .step({
       method: "GET",
-      path: "contextList.do?navkey=academics.classes.list.pat",
+      path: "/contextList.do?navkey=academics.classes.list.pat",
       expect: "html",
     })
     .metadata(({ responses, metadata }) => {
@@ -355,7 +354,7 @@ export const myEdParsingRoutes = {
     .step(
       {
         method: "POST",
-        path: "filterAdvanced.do",
+        path: "/filterAdvanced.do",
         body: {
           userEvent: "930",
           selectedBaseFilter: "###all",
@@ -371,7 +370,7 @@ export const myEdParsingRoutes = {
         body: {
           userEvent: "910",
         },
-        path: "contextList.do",
+        path: "/contextList.do",
         contentType: "application/x-www-form-urlencoded",
         expect: "html",
       },
@@ -379,7 +378,17 @@ export const myEdParsingRoutes = {
     ),
   transcriptEntries: new Route().step({
     method: "GET",
-    path: "transcriptList.do?navkey=myInfo.trn.list",
+    path: "/transcriptList.do?navkey=myInfo.trn.list",
+    expect: "html",
+  }),
+  creditSummary: new Route().step({
+    method: "GET",
+    path: "/creditSummary.do?navkey=myInfo.credits.summary",
+    expect: "html",
+  }),
+  graduationSummary: new Route().step({
+    method: "GET",
+    path: "/graduationSummary.do?includeProjection=false&navkey=myInfo.gradSummary.graduation",
     expect: "html",
   }),
 };
@@ -416,7 +425,7 @@ const generateSubjectsListStepParams = (
   if (termId) customParams.push(`selectedTerm|${termId}`);
   return {
     method: "GET" as const,
-    path: `rest/lists/academics.classes.list`,
+    path: `/rest/lists/academics.classes.list`,
     body: {
       selectedStudent: studentId,
       fieldSetOid: "fsnX2Cls",
@@ -439,7 +448,7 @@ const subjectAssignmentsRoute = new Route<
   .step(({ params: { id } }) => {
     return {
       method: "GET",
-      path: `rest/studentSchedule/${id}/gradeTerms`,
+      path: `/rest/studentSchedule/${id}/gradeTerms`,
       expect: "json",
     };
   })
@@ -479,7 +488,7 @@ const subjectAssignmentsRoute = new Route<
     return termIdsToSearch.flatMap((termId) => [
       {
         method: "GET",
-        path: `rest/studentSchedule/${id}/categoryDetails/pastDue`,
+        path: `/rest/studentSchedule/${id}/categoryDetails/pastDue`,
         body: {
           gradeTermOid: termId,
         },
@@ -487,7 +496,7 @@ const subjectAssignmentsRoute = new Route<
       },
       {
         method: "GET",
-        path: `rest/studentSchedule/${id}/categoryDetails/upcoming`,
+        path: `/rest/studentSchedule/${id}/categoryDetails/upcoming`,
         body: {
           gradeTermOid: termId,
         },
@@ -503,7 +512,7 @@ export const myEdRestEndpoints = {
   }>()
     .step(({ params: { isPreviousYear, termId } }) => ({
       method: "GET",
-      path: `rest/lists/academics.classes.list/studentGradeTerms`,
+      path: `/rest/lists/academics.classes.list/studentGradeTerms`,
       body: {
         year: isPreviousYear ? "previous" : "current",
         term: termId || MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -522,7 +531,7 @@ export const myEdRestEndpoints = {
     year: SubjectYear;
   }>().step(({ params: { id } }) => ({
     method: "GET",
-    path: `rest/studentSchedule/${id}/academics`,
+    path: `/rest/studentSchedule/${id}/academics`,
     body: {
       properties:
         "relSscMstOid.mstDescription,relSscMstOid.mstCourseView,sscTermView",
@@ -574,7 +583,7 @@ export const myEdRestEndpoints = {
     assignmentId: string;
   }>().step(({ studentId, params: { assignmentId } }) => ({
     method: "GET",
-    path: `rest/students/${studentId}/assignments/${assignmentId}`,
+    path: `/rest/students/${studentId}/assignments/${assignmentId}`,
     expect: "json",
   })),
 };

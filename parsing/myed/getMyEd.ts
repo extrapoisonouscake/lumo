@@ -21,7 +21,11 @@ import {
   parseSubjects,
   parseSubjectSummary,
 } from "./subjects";
-import { parseTranscriptEntries } from "./transcript";
+import {
+  parseCreditSummary,
+  parseGraduationSummary,
+  parseTranscriptEntries,
+} from "./transcript";
 import { ParserFunctionArguments } from "./types";
 
 const endpointToParsingFunction = {
@@ -36,6 +40,8 @@ const endpointToParsingFunction = {
   subjectIdByName: parseSubjectIdByName,
   subjectAttendance: parseSubjectAttendance,
   transcriptEntries: parseTranscriptEntries,
+  creditSummary: parseCreditSummary,
+  graduationSummary: parseGraduationSummary,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>
@@ -100,7 +106,6 @@ export const getMyEd = (props?: {
         }
         steps.addResponse(isArray ? responses : responses[0]);
       } catch (e) {
-        console.log("HERERE");
         if (e instanceof Response) {
           const $ = cheerio.load(await e.text());
           const isMaintenance = checkForMaintenance($);

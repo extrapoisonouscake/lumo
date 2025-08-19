@@ -108,10 +108,32 @@ const config = {
             paddingBottom: "0",
           },
         },
+        jiggle: {
+          "0%": {
+            transform: "rotate(-0.5deg)",
+            animationTimingFunction: "ease-in",
+          },
+          "50%": {
+            transform: "rotate(0.75deg)",
+            animationTimingFunction: "ease-out",
+          },
+        },
+        "jiggle-alt": {
+          "0%": {
+            transform: "rotate(0.5deg)",
+            animationTimingFunction: "ease-in",
+          },
+          "50%": {
+            transform: "rotate(-0.75deg)",
+            animationTimingFunction: "ease-out",
+          },
+        },
       },
       animation: {
         "accordion-down": `accordion-down 300ms ease-in-out, accordion-down-padding 300ms ease-in-out`,
         "accordion-up": `accordion-up 300ms ease-in-out, accordion-up-padding 300ms ease-in-out`,
+        jiggle: "jiggle 0.3s ease-in-out infinite",
+        "jiggle-alt": "jiggle-alt 0.3s ease-in-out infinite alternate",
       },
     },
   },

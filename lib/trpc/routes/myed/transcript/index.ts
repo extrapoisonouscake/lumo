@@ -7,4 +7,14 @@ export const transcriptRouter = router({
       return await getMyEd("transcriptEntries");
     }
   ),
+  getCreditSummary: authenticatedProcedure.query(
+    async ({ ctx: { getMyEd } }) => {
+      return await getMyEd("creditSummary");
+    }
+  ),
+  getGraduationSummary: authenticatedProcedure.query(
+    async ({ ctx: { getMyEd } }) => {
+      return await getMyEd("graduationSummary");
+    }
+  ),
 });

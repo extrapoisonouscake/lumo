@@ -31,7 +31,7 @@ export function useRecentAssignments(subjects?: Subject[]) {
           )
           .flat(),
 
-        isLoading: results.some((result) => result.isLoading),
+        isFetched: results.every((result) => result.isFetched),
       };
     },
   });

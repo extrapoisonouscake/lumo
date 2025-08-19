@@ -128,7 +128,11 @@ function PagesMenu() {
                         <SidebarMenuSubItem key={fullUrl}>
                           <SidebarMenuSubButton
                             asChild
-                            isActive={pathname.startsWith(fullUrl)}
+                            isActive={
+                              fullUrl === url
+                                ? pathname === fullUrl
+                                : pathname.startsWith(fullUrl)
+                            }
                           >
                             <Link
                               href={fullUrl}

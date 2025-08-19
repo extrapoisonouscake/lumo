@@ -54,9 +54,43 @@ export function $getTableValues(
 
     // Extract text from each cell
     $cells.each((i, cellElement) => {
-      if (i === 0) return; // skip the checkbox column
+      if ($tableBody.find(cellElement).find("input").length > 0) return; // skip the checkbox column
       const value = $tableBody.find(cellElement).text().trim();
       rowValues.push(value);
+    });
+
+    result.push(rowValues);
+  });
+
+  return result;
+}
+
+export function $getTableValuesMap(
+  $tableBody: cheerio.Cheerio<Element>
+): Record<string, string>[] {
+  const result: Record<string, string>[] = [];
+
+  // Get all non-header rows
+  const $rows = $tableBody.children("tr").not(MYED_TABLE_HEADER_SELECTOR);
+  const thValues = $tableBody
+    .find("th")
+    .map((_, thElement) => {
+      return $tableBody.find(thElement).text().trim();
+    })
+    .get();
+
+  // Process each row
+  $rows.each((_, rowElement) => {
+    const rowValues: Record<string, string> = {};
+
+    // Get all cells in the current row
+    const $cells = $tableBody.find(rowElement).children("td");
+
+    // Extract text from each cell
+    $cells.each((i, cellElement) => {
+      if (i === 0) return; // skip the checkbox column
+      const value = $tableBody.find(cellElement).text().trim();
+      rowValues[thValues[i]!] = value;
     });
 
     result.push(rowValues);

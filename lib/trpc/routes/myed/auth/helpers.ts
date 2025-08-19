@@ -149,7 +149,7 @@ export function parseCookiesFromSetCookieHeader(
 }
 export async function getFreshAuthCookies() {
   const loginTokenResponse = await fetchMyEd(
-    "aspen-login/",
+    "/aspen-login/",
     {
       credentials: "include",
     },
@@ -188,7 +188,7 @@ export async function fetchAuthCookiesAndStudentId(
       securityAnswerExist: boolean;
       passwordExpired: boolean;
     }>(
-      "auth",
+      "/auth",
       {
         method: "POST",
         body: loginParams.toString(),
@@ -217,7 +217,7 @@ export async function fetchAuthCookiesAndStudentId(
       code: number;
       message: string;
     }; //TODO: CLEAN THIS UP
-    console.log({ response });
+
     const errorMessage =
       rawLoginErrorMessageToIDMap[response.message] ?? response.message;
     throw new LoginError(errorMessage);
@@ -226,7 +226,7 @@ export async function fetchAuthCookiesAndStudentId(
   // if (needsPasswordChange($)) {
   //   throw new LoginError(LoginErrors.passwordChangeRequired, cookies);
   // }
-  console.log({ cookies });
+
   const studentId = await fetchStudentId(cookies);
   return {
     tokens: cookies,
@@ -236,7 +236,7 @@ export async function fetchAuthCookiesAndStudentId(
 export async function fetchStudentId(cookies: AuthCookies) {
   const studentsData = await fetchMyEd<
     OpenAPI200JSONResponse<"/users/students">
-  >("rest/users/students", {
+  >("/rest/users/students", {
     headers: { Cookie: convertObjectToCookieString(cookies) },
   }).then((response) => response.json());
 

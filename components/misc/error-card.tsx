@@ -5,6 +5,7 @@ import { cva } from "class-variance-authority";
 import { ReactNode } from "react";
 export interface ErrorCardProps {
   children?: string | ReactNode;
+  message?: string | ReactNode;
   emoji?: string;
   variant?: "default" | "ghost";
   className?: string;
@@ -25,6 +26,7 @@ const errorCardVariants = cva(
   }
 );
 export function ErrorCard({
+  message,
   size = "md",
   children = "Something went wrong.",
   emoji = "‼️",
@@ -43,7 +45,7 @@ export function ErrorCard({
         imageClassName={cn("size-[30px]", size === "sm" && "size-[20px]")}
       />
 
-      <p className="text-sm text-center">{children}</p>
+      <p className="text-sm text-center">{message ?? children}</p>
     </Card>
   );
 }
