@@ -71,8 +71,10 @@ export const WidgetContext = createContext<{
   handleDragOver: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
   handleDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
   handleDragEnd: () => void;
+  startTouchDrag: (e: React.TouchEvent, index: number) => void;
   gridColumns: number;
   dragState: WidgetDragState;
+  draggedIndex: number | null;
 }>({
   isEditing: false,
   handleRemoveWidget: () => {},
@@ -83,8 +85,10 @@ export const WidgetContext = createContext<{
   handleDragOver: () => {},
   handleDrop: () => {},
   handleDragEnd: () => {},
+  startTouchDrag: () => {},
   gridColumns: 4,
   dragState: initialDragState,
+  draggedIndex: null,
 });
 const getNewWidgetConfiguration = (type: Widgets) => {
   // Get the default size for this widget type (start with 2x2 or max allowed)
@@ -114,6 +118,12 @@ export function WidgetEditor({
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
   const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const isTouchDraggingRef = React.useRef(false);
+  const autoScrollDirectionRef = React.useRef<0 | 1 | -1>(0);
+  const autoScrollRafRef = React.useRef<number | null>(null);
+  const gridRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollElRef = React.useRef<HTMLElement | null>(null);
 
   // Update grid columns based on screen size
   useEffect(() => {
@@ -140,6 +150,88 @@ export function WidgetEditor({
     () => calculateResponsiveLayout(configuration, gridColumns),
     [configuration, gridColumns]
   );
+
+  // Auto-scroll helpers
+  const updateAutoScroll = useCallback(
+    (clientY: number) => {
+      const threshold = 80;
+      const speedPerFrame = 16;
+
+      let dir: 0 | 1 | -1 = 0;
+      const scrollEl = scrollElRef.current;
+      if (scrollEl && scrollEl !== document.body) {
+        const rect = scrollEl.getBoundingClientRect();
+        if (clientY < rect.top + threshold) dir = -1;
+        else if (clientY > rect.bottom - threshold) dir = 1;
+      } else {
+        const { innerHeight } = window;
+        if (clientY < threshold) dir = -1;
+        else if (clientY > innerHeight - threshold) dir = 1;
+      }
+
+      if (dir !== 0) {
+        autoScrollDirectionRef.current = dir;
+        if (autoScrollRafRef.current == null) {
+          const step = () => {
+            if (
+              autoScrollDirectionRef.current !== 0 &&
+              (draggedIndex !== null || isTouchDraggingRef.current)
+            ) {
+              const el = scrollElRef.current;
+              const delta = autoScrollDirectionRef.current * speedPerFrame;
+              if (el && el !== document.body) {
+                el.scrollTop += delta;
+              } else {
+                window.scrollBy({ top: delta, behavior: "auto" });
+              }
+              autoScrollRafRef.current = requestAnimationFrame(step);
+            } else {
+              stopAutoScroll();
+            }
+          };
+          autoScrollRafRef.current = requestAnimationFrame(step);
+        }
+      } else {
+        stopAutoScroll();
+      }
+    },
+    [draggedIndex]
+  );
+
+  const stopAutoScroll = useCallback(() => {
+    autoScrollDirectionRef.current = 0;
+    if (autoScrollRafRef.current != null) {
+      cancelAnimationFrame(autoScrollRafRef.current);
+      autoScrollRafRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      stopAutoScroll();
+    };
+  }, [stopAutoScroll]);
+
+  useEffect(() => {
+    const getScrollableParent = (
+      el: HTMLElement | null
+    ): HTMLElement | null => {
+      let node: HTMLElement | null = el;
+      while (node) {
+        const style = window.getComputedStyle(node);
+        const overflowY = style.overflowY;
+        const canScroll = node.scrollHeight > node.clientHeight;
+        if ((overflowY === "auto" || overflowY === "scroll") && canScroll) {
+          return node;
+        }
+        node = node.parentElement;
+      }
+      return (
+        (document.scrollingElement as HTMLElement) ?? document.documentElement
+      );
+    };
+    scrollElRef.current = getScrollableParent(gridRef.current);
+  }, []);
 
   const handleStartEditing = () => {
     setIsEditing(true);
@@ -213,6 +305,7 @@ export function WidgetEditor({
     (e: React.DragEvent, widgetIndex: number) => {
       e.dataTransfer.setData("text/plain", `widget:${widgetIndex.toString()}`);
       e.dataTransfer.effectAllowed = "move";
+      setDraggedIndex(widgetIndex);
     },
     []
   );
@@ -251,6 +344,9 @@ export function WidgetEditor({
       }
 
       setDragOverIndex(targetIndex);
+      if ("clientY" in e) {
+        updateAutoScroll(e.clientY);
+      }
     },
     [isDraggingFromPalette]
   );
@@ -261,11 +357,9 @@ export function WidgetEditor({
 
       try {
         if (dragData.startsWith("widget:")) {
-          // Moving existing widget
-          const fromIndexStr = dragData.replace("widget:", "");
-          const fromIndex = parseInt(fromIndexStr, 10);
-          if (!isNaN(fromIndex) && fromIndex !== targetIndex) {
-            moveWidget(fromIndex, targetIndex);
+          // Moving existing widget using placeholder location
+          if (draggedIndex !== null && dragOverIndex !== null) {
+            moveWidget(draggedIndex, dragOverIndex);
           }
         } else if (dragData.startsWith("palette:")) {
           // Creating new widget from palette
@@ -274,8 +368,9 @@ export function WidgetEditor({
           const newWidget = getNewWidgetConfiguration(widgetType);
 
           // Insert the new widget at the target position
+          const insertionIndex = dragOverIndex ?? targetIndex;
           const newConfiguration = [...configuration];
-          newConfiguration.splice(targetIndex, 0, newWidget);
+          newConfiguration.splice(insertionIndex, 0, newWidget);
           setConfiguration(newConfiguration);
         }
       } catch (error) {
@@ -284,14 +379,17 @@ export function WidgetEditor({
 
       setDragOverIndex(null);
       setIsDraggingFromPalette(false);
+      setDraggedIndex(null);
     },
-    [moveWidget, configuration]
+    [moveWidget, configuration, draggedIndex, dragOverIndex]
   );
 
   // Add drag end handler to reset palette drag state
   const handleDragEnd = useCallback(() => {
     setIsDraggingFromPalette(false);
     setDragOverIndex(null);
+    setDraggedIndex(null);
+    stopAutoScroll();
   }, []);
 
   // Add drag leave handler to clear drop target highlighting when dragging away
@@ -401,6 +499,63 @@ export function WidgetEditor({
     [configuration, updateWidgetInConfiguration]
   );
 
+  // Touch drag support for mobile devices (defined after moveWidget to avoid used-before-assigned)
+  const startTouchDrag = useCallback(
+    (e: React.TouchEvent, index: number) => {
+      if (!isEditing) return;
+      setDraggedIndex(index);
+      isTouchDraggingRef.current = true;
+
+      const handleTouchMove = (ev: TouchEvent) => {
+        if (!isTouchDraggingRef.current) return;
+        if (ev.touches.length === 0) return;
+        const t = ev.touches[0]!;
+        ev.preventDefault();
+
+        const el = document.elementFromPoint(t.clientX, t.clientY);
+        let targetEl: HTMLElement | null = el as HTMLElement | null;
+        let foundIndex: number | null = null;
+        while (targetEl) {
+          if (targetEl.hasAttribute("data-widget-index")) {
+            const idxStr = targetEl.getAttribute("data-widget-index")!;
+            const idx = parseInt(idxStr, 10);
+            if (!Number.isNaN(idx)) {
+              foundIndex = idx;
+            }
+            break;
+          }
+          targetEl = targetEl.parentElement;
+        }
+        if (foundIndex !== null) {
+          setDragOverIndex(foundIndex);
+        }
+        updateAutoScroll(t.clientY);
+      };
+
+      const handleTouchEnd = () => {
+        if (draggedIndex !== null && dragOverIndex !== null) {
+          moveWidget(draggedIndex, dragOverIndex);
+        }
+        isTouchDraggingRef.current = false;
+        setDraggedIndex(null);
+        setDragOverIndex(null);
+        stopAutoScroll();
+        document.removeEventListener("touchmove", handleTouchMove as any);
+        document.removeEventListener("touchend", handleTouchEnd);
+        document.removeEventListener("touchcancel", handleTouchEnd);
+      };
+
+      document.addEventListener("touchmove", handleTouchMove as any, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleTouchEnd, { passive: true });
+      document.addEventListener("touchcancel", handleTouchEnd, {
+        passive: true,
+      });
+    },
+    [isEditing, draggedIndex, dragOverIndex, moveWidget]
+  );
+
   return (
     <div className="space-y-4">
       {/* Editor Controls */}
@@ -481,8 +636,10 @@ export function WidgetEditor({
             handleDragOver,
             handleDrop,
             handleDragEnd,
+            startTouchDrag,
             gridColumns,
             dragState,
+            draggedIndex,
           }}
         >
           <div
@@ -491,9 +648,42 @@ export function WidgetEditor({
               gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
             }}
             onDragLeave={handleDragLeave}
+            ref={gridRef}
           >
-            {responsiveWidgets.map((widget, index) => {
-              const widgetExport = WIDGET_COMPONENTS[widget.type];
+            {buildDisplayList(
+              responsiveWidgets,
+              draggedIndex,
+              dragOverIndex
+            ).map((entry, index) => {
+              if (entry.type === "placeholder") {
+                return (
+                  <div
+                    key="__placeholder__"
+                    className={cn("h-full flex flex-col gap-2 items-center")}
+                    style={{
+                      gridColumn: `span ${Math.min(
+                        entry.size.width,
+                        gridColumns
+                      )}`,
+                      gridRow: `span ${entry.size.height}`,
+                      minHeight:
+                        gridColumns === 1
+                          ? "108px"
+                          : `${entry.size.height * 200}px`,
+                      minWidth: 0,
+                    }}
+                    data-widget-index={index}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    onDragEnter={(e) => handleDragOver(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    aria-hidden
+                  >
+                    <div className="w-full h-full rounded-lg border border-dashed border-muted-foreground/40 bg-muted/20" />
+                    <p className="text-xs font-medium invisible">Placeholder</p>
+                  </div>
+                );
+              }
+              const widgetExport = WIDGET_COMPONENTS[entry.widget.type];
 
               const isCustomizable = isCustomizableWidget(widgetExport);
               const WidgetComponent = isCustomizable
@@ -502,8 +692,8 @@ export function WidgetEditor({
 
               return (
                 <WidgetComponent
-                  key={widget.id}
-                  {...widget}
+                  key={entry.widget.id}
+                  {...entry.widget}
                   isEditing={isEditing}
                   index={index}
                 />
@@ -568,6 +758,37 @@ function calculateResponsiveLayout(
     const newSize = dimensionsToSize(gridColumns, widget.height);
     return { ...widget, size: newSize, isHidden: false };
   });
+}
+
+function buildDisplayList(
+  widgets: ResponsiveWidget[],
+  draggedIndex: number | null,
+  dragOverIndex: number | null
+): Array<
+  | { type: "widget"; widget: ResponsiveWidget }
+  | { type: "placeholder"; size: { width: number; height: number } }
+> {
+  if (draggedIndex == null || dragOverIndex == null) {
+    return widgets.map((w) => ({ type: "widget", widget: w }));
+  }
+  const dragged = widgets[draggedIndex];
+  if (!dragged) return widgets.map((w) => ({ type: "widget", widget: w }));
+  const list = widgets.filter((_, i) => i !== draggedIndex);
+  const insertAt = Math.min(Math.max(dragOverIndex, 0), list.length);
+  const before = list
+    .slice(0, insertAt)
+    .map((w) => ({ type: "widget" as const, widget: w }));
+  const after = list
+    .slice(insertAt)
+    .map((w) => ({ type: "widget" as const, widget: w }));
+  return [
+    ...before,
+    {
+      type: "placeholder",
+      size: { width: dragged.width, height: dragged.height },
+    },
+    ...after,
+  ];
 }
 function CustomizationModal({
   onSaveCustomization,

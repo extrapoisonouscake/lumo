@@ -55,7 +55,7 @@ export function useAnnouncements() {
     } else if (!isKnownSchool(schoolId)) {
       error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
     } else if ([0, 6].includes(date.day())) {
-      // error = AnnouncementsNotAvailableReason.NotAWeekday;
+      error = AnnouncementsNotAvailableReason.NotAWeekday;
     }
     if (error !== undefined) {
       shouldFetch = false;

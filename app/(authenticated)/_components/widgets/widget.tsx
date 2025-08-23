@@ -37,6 +37,7 @@ export function Widget({
     handleDragEnd,
     gridColumns,
     dragState,
+    startTouchDrag,
   } = useContext(WidgetContext);
   const widgetExport = WIDGET_COMPONENTS[data.type];
 
@@ -60,11 +61,13 @@ export function Widget({
       }}
     >
       <Card
+        data-widget-index={index}
         draggable={isEditing}
         onDragStart={isEditing ? (e) => handleDragStart(e, index) : undefined}
         onDragOver={isEditing ? (e) => handleDragOver(e, index) : undefined}
         onDrop={isEditing ? (e) => handleDrop(e, index) : undefined}
         onDragEnd={isEditing ? handleDragEnd : undefined}
+        onTouchStart={isEditing ? (e) => startTouchDrag(e, index) : undefined}
         className={cn(
           "relative transition-transform flex-1 w-full",
           { "!shadow-sm": isBeingResized },
