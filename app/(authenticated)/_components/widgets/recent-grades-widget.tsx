@@ -1,7 +1,16 @@
 "use client";
 
 import { CircularProgress } from "@/components/misc/circular-progress";
-import { WidgetSize } from "@/constants/core";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Widgets, WidgetSize } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
 import { getGradeInfo } from "@/helpers/grades";
@@ -9,21 +18,39 @@ import { useRecentAssignments } from "@/hooks/trpc/use-subjects-assignments";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   getAssignmentURL,
   getPercentageString,
 } from "../../classes/[subjectId]/(assignments)/helpers";
-import { WidgetComponentProps } from "./index";
+import {
+  WidgetComponentProps,
+  WidgetCustomizationContentRenderer,
+} from "./index";
 import { Widget } from "./widget";
 
-export default function RecentGradesWidget(widget: WidgetComponentProps) {
+function RecentGradesWidget(
+  widget: WidgetComponentProps<Widgets.RECENT_GRADES>
+) {
+  let content, richError;
   const settings = useUserSettings();
   const subjects = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
-  const assignments = useRecentAssignments(subjects.data?.subjects.main);
+  let subjectsToUse = subjects.data?.subjects.main;
+  if (widget.custom.subjectId) {
+    const subject = subjectsToUse?.find(
+      (s) => s.id === widget.custom.subjectId
+    );
+    if (subject) {
+      subjectsToUse = [subject];
+    } else {
+      subjectsToUse = [];
+      richError = {};
+    }
+  }
+  const assignments = useRecentAssignments(subjectsToUse);
 
   // Determine number of items based on widget size
   const maxItems = useMemo(() => {
@@ -62,7 +89,7 @@ export default function RecentGradesWidget(widget: WidgetComponentProps) {
         return "grid-cols-1";
     }
   }, [widget.size]);
-  let content, richError;
+
   if (assignments.progress < 1) {
     content = <ContentSkeleton progress={assignments.progress * 100} />;
   } else {
@@ -156,7 +183,7 @@ function RecentGradedAssignmentCard({
 
 function ContentSkeleton({ progress }: { progress: number }) {
   return (
-    <div className="flex flex-1 flex-col gap-1.5 items-center justify-center min-h-[8.75rem]">
+    <div className="flex flex-1 flex-col gap-1.5 items-center justify-center min-h-[50px]">
       <CircularProgress
         value={progress}
         thickness={2}
@@ -219,3 +246,53 @@ function ContentSkeleton({ progress }: { progress: number }) {
 //     </div>
 //   );
 // }
+
+const getCustomizationContent: WidgetCustomizationContentRenderer<
+  Widgets.RECENT_GRADES
+> = (initialValues, onSave) => {
+  const subjects = useSubjectsData({
+    isPreviousYear: false,
+    termId: MYED_ALL_GRADE_TERMS_SELECTOR,
+  });
+  const mainSubjects = subjects.data?.subjects.main;
+  const [value, setValue] = useState(initialValues.subjectId);
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        <Label>Subject</Label>
+        <Select
+          value={value ?? "all"}
+          onValueChange={(value) => {
+            setValue(value);
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a subject..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All</SelectItem>
+            {mainSubjects?.map((subject) => (
+              <SelectItem key={subject.id} value={subject.id}>
+                {subject.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <Button
+        onClick={() => {
+          onSave({
+            ...initialValues,
+            subjectId: value === "all" ? undefined : value,
+          });
+        }}
+      >
+        Save
+      </Button>
+    </>
+  );
+};
+export default {
+  component: RecentGradesWidget,
+  getCustomizationContent,
+};

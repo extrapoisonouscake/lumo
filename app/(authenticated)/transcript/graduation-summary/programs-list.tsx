@@ -82,7 +82,7 @@ export function GraduationSummaryProgramsList({
           value={currentEducationPlanId ?? undefined}
           onValueChange={(value) => setCurrentEducationPlanId(value)}
         >
-          <SelectTrigger className="w-fit h-8">
+          <SelectTrigger className="w-fit">
             <SelectValue placeholder="Select an education plan" />
           </SelectTrigger>
           <SelectContent>

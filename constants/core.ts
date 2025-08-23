@@ -43,12 +43,12 @@ export type WidgetCustomProps = {
   [Widgets.ANNOUNCEMENTS]: {};
 };
 
-export type WidgetGridItem = {
+export type WidgetGridItem<T extends Widgets = Widgets> = {
   id: string;
-  type: Widgets;
+  type: T;
   width: number;
   height: number;
-  custom?: WidgetCustomProps[Widgets];
+  custom: WidgetCustomProps[T];
 };
 
 export type WidgetsConfiguration = WidgetGridItem[];

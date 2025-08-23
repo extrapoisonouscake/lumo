@@ -43,7 +43,7 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto pb-[--mobile-menu-inset-bottom] flex-col rounded-t-[10px] border bg-background max-h-[calc(100vh-4rem)]",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto pb-[--mobile-menu-inset-bottom] flex-col rounded-t-[10px] border bg-background",
         className
       )}
       {...props}
@@ -69,7 +69,13 @@ const DrawerBody = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("px-4 pt-2 pb-4", className)} {...props} />
+  <div
+    className={cn(
+      "px-4 pt-2 pb-4 max-h-[calc(100vh-4rem-50px-4px)] overflow-y-auto min-h-0 flex-1",
+      className
+    )}
+    {...props}
+  />
 );
 DrawerBody.displayName = "DrawerBody";
 const DrawerFooter = ({

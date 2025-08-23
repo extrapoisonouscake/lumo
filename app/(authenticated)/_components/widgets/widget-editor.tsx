@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ResponsiveDialog,
+  ResponsiveDialogBody,
   ResponsiveDialogContent,
-  ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
@@ -24,7 +24,7 @@ import { cn } from "@/helpers/cn";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import {
   CheckIcon,
-  LayoutDashboardIcon,
+  PencilRulerIcon,
   PlusIcon,
   Settings2Icon,
   XIcon,
@@ -39,7 +39,8 @@ import React, {
 import { WIDGET_COMPONENTS, WIDGET_NAMES, isCustomizableWidget } from "./index";
 
 // Clean interface definitions
-export interface ResponsiveWidget extends WidgetGridItem {
+export interface ResponsiveWidget<T extends Widgets = Widgets>
+  extends WidgetGridItem<T> {
   size: WidgetSize;
 }
 
@@ -237,12 +238,12 @@ export function WidgetEditor({
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    updateSetting.mutate({
+  const handleSave = async (providedConfiguration?: WidgetsConfiguration) => {
+    await updateSetting.mutateAsync({
       key: "widgetsConfiguration",
-      value: configuration,
+      value: providedConfiguration ?? configuration,
     });
-    setIsEditing(false);
+    if (!providedConfiguration) setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -276,8 +277,16 @@ export function WidgetEditor({
     setCustomizingWidget(widget);
   };
 
-  const handleSaveCustomization = (widgetId: string, customValues: any) => {
+  const handleSaveCustomization = async (
+    widgetId: string,
+    customValues: any
+  ) => {
     updateWidgetInConfiguration(widgetId, { custom: customValues });
+    await handleSave(
+      initialConfiguration.map((w) =>
+        w.id === widgetId ? { ...w, custom: customValues } : w
+      )
+    );
     setCustomizingWidget(null);
   };
 
@@ -573,7 +582,11 @@ export function WidgetEditor({
                 >
                   <p className="hidden sm:block">Cancel</p>
                 </Button>
-                <Button size="sm" onClick={handleSave} leftIcon={<CheckIcon />}>
+                <Button
+                  size="sm"
+                  onClick={() => handleSave()}
+                  leftIcon={<CheckIcon />}
+                >
                   <p className="hidden sm:block">Save</p>
                 </Button>
               </>
@@ -583,7 +596,7 @@ export function WidgetEditor({
                 onClick={handleStartEditing}
                 size="sm"
                 className="border-none px-0 h-fit sm:h-9 sm:px-3 sm:border-solid"
-                leftIcon={<LayoutDashboardIcon />}
+                leftIcon={<PencilRulerIcon />}
               >
                 <p className="hidden sm:block">Customize</p>
               </Button>
@@ -813,18 +826,16 @@ function CustomizationModal({
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
 
-        {isCustomizable &&
-          widgetExport.getCustomizationContent(
-            {
-              ...WIDGET_CUSTOM_DEFAULTS[widget!.type],
-              ...widget!.custom,
-            },
-            (values) => onSaveCustomization(widget!.id, values)
-          )}
-
-        <ResponsiveDialogFooter>
-          <Button>Save</Button>
-        </ResponsiveDialogFooter>
+        <ResponsiveDialogBody className="flex flex-col gap-4">
+          {isCustomizable &&
+            widgetExport.getCustomizationContent(
+              {
+                ...WIDGET_CUSTOM_DEFAULTS[widget!.type],
+                ...widget!.custom,
+              },
+              (values) => onSaveCustomization(widget!.id, values)
+            )}
+        </ResponsiveDialogBody>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

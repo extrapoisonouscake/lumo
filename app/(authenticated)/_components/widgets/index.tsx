@@ -13,22 +13,23 @@ export const WIDGET_NAMES: Record<Widgets, string> = {
   [Widgets.ATTENDANCE_SUMMARY]: "Attendance Summary",
 };
 
-export type WidgetComponentProps = ResponsiveWidget & {
-  isEditing?: boolean;
-  index: number;
-  richError?: ErrorCardProps;
-};
+export type WidgetComponentProps<T extends Widgets = Widgets> =
+  ResponsiveWidget<T> & {
+    isEditing?: boolean;
+    index: number;
+    richError?: ErrorCardProps;
+  };
 
 // For customizable widgets
 export type WidgetWithCustomization<T extends Widgets> = {
   component: SimpleWidget;
-  getCustomizationContent: (
-    initialValues: WidgetCustomProps[T],
-    onSave: (values: WidgetCustomProps[T]) => void
-  ) => ReactNode;
+  getCustomizationContent: WidgetCustomizationContentRenderer<T>;
   shouldShow?: (props: WidgetComponentProps) => boolean; // Optional function to determine if widget should be shown
 };
-
+export type WidgetCustomizationContentRenderer<T extends Widgets> = (
+  initialValues: WidgetCustomProps[T],
+  onSave: (values: WidgetCustomProps[T]) => void
+) => ReactNode;
 // For simple widgets
 export type SimpleWidget = React.ComponentType<WidgetComponentProps> & {
   shouldShow?: (props: WidgetComponentProps) => boolean; // Optional function to determine if widget should be shown
