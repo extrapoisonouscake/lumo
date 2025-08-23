@@ -41,31 +41,31 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     icon: ScrollText,
     items: [
       {
+        title: "Graduation Summary",
+        href: "/graduation-summary",
+      },
+      {
         title: "Entries",
-        href: "",
+        href: "/entries",
       },
       {
         title: "Credit Summary",
         href: "/credit-summary",
       },
-      {
-        title: "GPA",
-        href: "/gpa",
-      },
-      {
-        title: "Programs of Study",
-        href: "/programs-of-study",
-      },
-      {
-        title: "Graduation Summary",
-        href: "/graduation-summary",
-      },
+      // {
+      //   title: "GPA",
+      //   href: "/gpa",
+      // },
+      // {
+      //   title: "Programs of Study",
+      //   href: "/programs-of-study",
+      // },
     ],
+    showOnMobile: true,
   },
   "/settings": {
     breadcrumb: [{ name: "Settings" }],
     icon: Settings,
-    showOnMobile: true,
   },
   "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
 };

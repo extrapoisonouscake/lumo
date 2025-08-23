@@ -5,6 +5,7 @@ import { Button } from "../ui/button";
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
+  ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
@@ -37,7 +38,13 @@ export function ResponsiveFilters({
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>Filters</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody>{children}</ResponsiveDialogBody>
+        <ResponsiveDialogBody className="flex flex-col gap-4">
+          {children}
+
+          <ResponsiveDialogClose asChild>
+            <Button className="w-full">Apply</Button>
+          </ResponsiveDialogClose>
+        </ResponsiveDialogBody>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

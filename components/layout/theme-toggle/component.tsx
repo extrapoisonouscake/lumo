@@ -37,7 +37,7 @@ export function ThemeToggleComponent({
             {triggerContent}
           </SidebarMenuButton>
         ) : (
-          <Button variant="ghost" size="smallIcon">
+          <Button variant="ghost" size="smallIcon" className="w-fit">
             {triggerContent}
           </Button>
         )}

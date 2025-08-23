@@ -124,6 +124,7 @@ export function WeekdaySlider({
               {days ? (
                 days.map((day) => {
                   const isCurrent = day.date.isSame(currentDate, "day");
+                  const isToday = day.date.isSame(new Date(), "day");
                   return (
                     <div
                       key={day.date.format("YYYY-MM-DD")}
@@ -148,10 +149,15 @@ export function WeekdaySlider({
                       </p>
                       <div
                         className={cn(
-                          "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200",
-                          isCurrent
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-foreground hover:border-muted-foreground/50 hover:bg-muted/20"
+                          "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-muted/20",
+                          {
+                            "bg-primary text-primary-foreground shadow-sm hover:bg-primary/75":
+                              isCurrent,
+                          },
+                          {
+                            "bg-secondary hover:bg-secondary/75":
+                              isToday && !isCurrent,
+                          }
                         )}
                       >
                         {day.day}

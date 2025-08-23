@@ -103,13 +103,13 @@ function PagesMenu() {
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
                   asChild
-                  isActive={isActive && !page.items?.length}
+                  isActive={isActive && (isMobile || !page.items?.length)}
                   className={cn({
                     "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 transition-colors":
                       isMobile,
                   })}
                 >
-                  {page.items ? (
+                  {page.items && !isMobile ? (
                     <div className="flex items-center gap-2 cursor-pointer">
                       {mainItemContent}
                       <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
@@ -119,7 +119,7 @@ function PagesMenu() {
                   )}
                 </SidebarMenuButton>
               </CollapsibleTrigger>
-              {page.items?.length && (
+              {page.items?.length && !isMobile && (
                 <CollapsibleContent>
                   <SidebarMenuSub>
                     {page.items.map((item) => {

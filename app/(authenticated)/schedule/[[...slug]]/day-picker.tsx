@@ -23,33 +23,41 @@ export function ScheduleDayPicker({
   setDate: (date: Date) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-
+  const isToday = timezonedDayJS(date).isSame(timezonedDayJS(), "date");
+  const resetDate = () => {
+    setIsOpen(false);
+    setDate(new Date());
+  };
   return (
-    <DatePicker
-      open={isOpen}
-      onOpenChange={setIsOpen}
-      disabledModifier={{ dayOfWeek: [0, 6] }}
-      date={date}
-      keepTimezone={!!date}
-      className="w-fit h-9"
-      setDate={(date) => setDate(date ?? new Date())}
-      bottomContent={
-        !timezonedDayJS(date).isSame(timezonedDayJS(), "date") && (
-          <div className="p-2 pt-0">
-            <Button
-              onClick={() => {
-                setIsOpen(false);
-                setDate(new Date());
-              }}
-              variant="outline"
-              className="w-full"
-              leftIcon={<RotateCcw />}
-            >
-              Back to today
-            </Button>
-          </div>
-        )
-      }
-    />
+    <div className="flex items-center gap-2">
+      <DatePicker
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        disabledModifier={{ dayOfWeek: [0, 6] }}
+        date={date}
+        keepTimezone={!!date}
+        className="w-fit h-9"
+        setDate={(date) => setDate(date ?? new Date())}
+        bottomContent={
+          !isToday && (
+            <div className="p-2 pt-0">
+              <Button
+                onClick={resetDate}
+                variant="outline"
+                className="w-full"
+                leftIcon={<RotateCcw />}
+              >
+                Back to today
+              </Button>
+            </div>
+          )
+        }
+      />
+      {!isToday && (
+        <Button size="smallIcon" onClick={resetDate}>
+          <RotateCcw />
+        </Button>
+      )}
+    </div>
   );
 }

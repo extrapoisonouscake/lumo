@@ -164,7 +164,9 @@ function Content({
     );
   }
   const userSettings = useUserSettings();
-  const shouldShowWeekday = getActualWeekdayIndex(date) === 5;
+  const shouldShowWeekday =
+    getActualWeekdayIndex(date) === 5 &&
+    schedule.weekday !== timezonedDayJS().format("dddd");
   return (
     <GridLayout>
       {shouldShowWeekday && (

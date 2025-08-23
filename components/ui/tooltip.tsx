@@ -42,4 +42,30 @@ const TooltipContent = React.forwardRef<
 ));
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };
+const ConditionalTooltip = ({
+  content,
+  children,
+  isEnabled,
+  triggerClassName,
+}: {
+  content: React.ReactNode;
+  children: React.ReactNode;
+  isEnabled: boolean;
+  triggerClassName?: string;
+}) => {
+  if (!isEnabled) return children;
+  return (
+    <Tooltip>
+      <TooltipTrigger className={triggerClassName}>{children}</TooltipTrigger>
+      <TooltipContent>{content}</TooltipContent>
+    </Tooltip>
+  );
+};
+
+export {
+  ConditionalTooltip,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+};

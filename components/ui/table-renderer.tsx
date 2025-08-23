@@ -4,6 +4,7 @@ import {
   flexRender,
   IdIdentifier,
   Row,
+  RowData,
   Table as TableType,
 } from "@tanstack/react-table";
 
@@ -27,10 +28,11 @@ declare module "@tanstack/table-core" {
     getRowStyles?: (row: Row<TData>) => React.CSSProperties;
     getRowClassName?: (row: Row<TData>) => string;
   }
+  interface ColumnDefBase<TData extends RowData, TValue = unknown> {}
 }
 export type RowRendererFactory<T> = (
   table: TableType<T>
-) => (row: Row<T>) => ReactNode;
+) => (row: Row<T>, trueIndex: number) => ReactNode;
 
 // Define the type for the empty state
 export type EmptyStateProps = {
@@ -58,7 +60,7 @@ export function TableRenderer<T>({
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
   emptyState?: EmptyStateProps | string;
-  renderMobileRow?: (row: Row<T>) => ReactNode;
+  renderMobileRow?: (row: Row<T>, rowIndex: number) => ReactNode;
 }) {
   const { rows } = table.getRowModel();
   const isMobile = useIsMobile();

@@ -1,7 +1,6 @@
 "use client";
 
 import { CircularProgress } from "@/components/misc/circular-progress";
-import { Skeleton } from "@/components/ui/skeleton";
 import { WidgetSize } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
@@ -21,7 +20,7 @@ import { Widget } from "./widget";
 export default function RecentGradesWidget(widget: WidgetComponentProps) {
   const settings = useUserSettings();
   const subjects = useSubjectsData({
-    isPreviousYear: true,
+    isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
   const assignments = useRecentAssignments(subjects.data?.subjects.main);
@@ -64,14 +63,8 @@ export default function RecentGradesWidget(widget: WidgetComponentProps) {
     }
   }, [widget.size]);
   let content, richError;
-  if (!assignments.isFetched) {
-    content = (
-      <ContentSkeleton
-        gridColsClassName={gridColsClassName}
-        isSmallWidget={isSmallWidget}
-        maxItems={maxItems}
-      />
-    );
+  if (assignments.progress < 1) {
+    content = <ContentSkeleton progress={assignments.progress * 100} />;
   } else {
     if (recentGradedAssignments.length === 0) {
       richError = {
@@ -160,55 +153,69 @@ function RecentGradedAssignmentCard({
     </Link>
   );
 }
-function ContentSkeleton({
-  gridColsClassName,
-  isSmallWidget,
-  maxItems,
-}: {
-  gridColsClassName: string;
-  isSmallWidget: boolean;
-  maxItems: number;
-}) {
+
+function ContentSkeleton({ progress }: { progress: number }) {
   return (
-    <div className={cn(`grid gap-2`, gridColsClassName)}>
-      {[...Array(maxItems)].map((_, index) => {
-        return (
-          <div
-            className={cn(
-              "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-lg border",
-              isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
-            )}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex gap-1 items-end">
-                <Skeleton className="font-semibold text-lg leading-none">
-                  10 / 10
-                </Skeleton>
-
-                <Skeleton className="text-xs font-medium">100%</Skeleton>
-              </div>
-
-              <CircularProgress value={0} fillColor="brand" size="normal" />
-            </div>
-            {isSmallWidget ? (
-              <Skeleton className="w-fit text-xs text-muted-foreground font-medium truncate">
-                Assignment name name
-              </Skeleton>
-            ) : (
-              <>
-                <div className="flex flex-col gap-1">
-                  <Skeleton className="w-fit font-medium text-sm leading-tight line-clamp-2 truncate">
-                    Assignment name name
-                  </Skeleton>
-                  <Skeleton className="w-fit flex items-center justify-between text-xs text-muted-foreground">
-                    Subject name
-                  </Skeleton>
-                </div>
-              </>
-            )}
-          </div>
-        );
-      })}
+    <div className="flex flex-1 flex-col gap-1.5 items-center justify-center min-h-[8.75rem]">
+      <CircularProgress
+        value={progress}
+        thickness={2}
+        size="normal"
+        fillColor="brand"
+      />
+      <p className="text-sm">Loading grades...</p>
     </div>
   );
 }
+// function ContentSkeleton({
+//   gridColsClassName,
+//   isSmallWidget,
+//   maxItems,
+// }: {
+//   gridColsClassName: string;
+//   isSmallWidget: boolean;
+//   maxItems: number;
+// }) {
+//   return (
+//     <div className={cn(`grid gap-2`, gridColsClassName)}>
+//       {[...Array(maxItems)].map((_, index) => {
+//         return (
+//           <div
+//             className={cn(
+//               "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-lg border",
+//               isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
+//             )}
+//           >
+//             <div className="flex items-center justify-between">
+//               <div className="flex gap-1 items-end">
+//                 <Skeleton className="font-semibold text-lg leading-none">
+//                   10 / 10
+//                 </Skeleton>
+
+//                 <Skeleton className="text-xs font-medium">100%</Skeleton>
+//               </div>
+
+//               <CircularProgress value={0} fillColor="brand" size="normal" />
+//             </div>
+//             {isSmallWidget ? (
+//               <Skeleton className="w-fit text-xs text-muted-foreground font-medium truncate">
+//                 Assignment name name
+//               </Skeleton>
+//             ) : (
+//               <>
+//                 <div className="flex flex-col gap-1">
+//                   <Skeleton className="w-fit font-medium text-sm leading-tight line-clamp-2 truncate">
+//                     Assignment name name
+//                   </Skeleton>
+//                   <Skeleton className="w-fit flex items-center justify-between text-xs text-muted-foreground">
+//                     Subject name
+//                   </Skeleton>
+//                 </div>
+//               </>
+//             )}
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// }

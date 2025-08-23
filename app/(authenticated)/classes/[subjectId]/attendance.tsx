@@ -76,7 +76,7 @@ function Content({
     >
       {(data) =>
         data.length > 0 ? (
-          <div className="flex flex-col gap-3 max-h-[calc(100vh-15rem)] overflow-y-auto rounded-t-lg pb-6">
+          <div className="flex flex-col gap-3 overflow-y-auto rounded-t-lg pb-6">
             {data.map((absence, index) => (
               <AbsenceCard key={index} {...absence} />
             ))}

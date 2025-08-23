@@ -20,6 +20,7 @@ export function useRecentAssignments(subjects?: Subject[]) {
         )
       : [],
     combine: (results) => {
+      if (!subjects) return { progress: 0, data: [] };
       return {
         data: results
           .filter((result) => result.data)
@@ -31,7 +32,9 @@ export function useRecentAssignments(subjects?: Subject[]) {
           )
           .flat(),
 
-        isFetched: results.every((result) => result.isFetched),
+        progress:
+          1 -
+          results.filter((result) => result.isFetching).length / results.length,
       };
     },
   });

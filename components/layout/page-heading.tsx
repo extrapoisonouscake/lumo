@@ -3,10 +3,14 @@ import {
   BreadcrumbDataItem,
   getWebsitePageData,
   WebsitePage,
+  websitePagesWithStaticPaths,
 } from "@/constants/website";
 import { useParams, usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { Settings } from "lucide-react";
+import Link from "next/link";
+import { BackButton } from "../ui/back-button";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
@@ -69,10 +73,15 @@ export function PageHeading({
     <div className="flex justify-between gap-4 items-center">
       {leftContent ?? <DefaultLeftContent />}
 
-      <div className="w-fit flex gap-1 items-center">
+      <div className="w-fit flex gap-2.5 items-center">
         {rightContent}
-        <div className="w-fit flex sm:hidden gap-1 items-center">
-          <ThemeToggle isInSidebar={false} shouldShowText={false} />
+        <div className="w-fit flex sm:hidden gap-3 items-center">
+          <div className="flex items-center gap-2.5">
+            <Link href="/settings">
+              <Settings className="size-4" />
+            </Link>
+            <ThemeToggle isInSidebar={false} shouldShowText={false} />
+          </div>
           <UserHeader className="w-fit" />
         </div>
       </div>
@@ -80,9 +89,11 @@ export function PageHeading({
   );
 }
 function DefaultLeftContent() {
+  const pathname = usePathname();
   return (
-    <div>
+    <div className="flex items-center gap-2.5">
       <SidebarTrigger className="hidden sm:flex" />
+      {!websitePagesWithStaticPaths[pathname] && <BackButton />}
     </div>
   );
 }

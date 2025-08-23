@@ -47,7 +47,7 @@ const DialogContent = React.forwardRef<
     >
       <div
         className={cn(
-          "rounded-lg grid gap-4 border bg-background p-6 shadow-lg relative",
+          "rounded-lg flex flex-col gap-6 p-6 border bg-background shadow-lg relative max-h-[calc(100vh-4rem)]",
           className
         )}
       >
@@ -75,8 +75,11 @@ const DialogHeader = ({
   />
 );
 DialogHeader.displayName = "DialogHeader";
-const DialogBody = ({ ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div {...props} />
+const DialogBody = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div {...props} className={cn("overflow-y-auto min-h-0 flex-1", className)} />
 );
 DialogBody.displayName = "DialogBody";
 

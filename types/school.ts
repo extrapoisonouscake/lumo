@@ -149,18 +149,49 @@ export interface CreditSummaryEntry {
   adjustedCredits: number;
   totalCredits: number;
 }
-export interface CourseRequirement {
+export interface ProgramRequirement {
   name: string;
   code: string;
-  entries: CourseRequirementEntry[];
+  entries: ProgramRequirementEntry[];
 }
-export interface CourseRequirementEntry {
+export enum ProgramRequirementEntryStatus {
+  Included = "Included",
+  Pending = "Pending",
+  AlreadyCounted = "AlreadyCounted",
+  Excluded = "Excluded",
+}
+export interface ProgramRequirementEntry {
   name: string;
   code: string;
   grade: number;
   years: [number, number];
   equivalentContentCode?: string;
+
+  status: ProgramRequirementEntryStatus;
+  completedUnits: number;
+  requiredUnits?: number;
+}
+
+export interface ProgramEntry {
+  name: string;
+  code: string;
+  requiredUnits: number;
+  completedUnits: number;
+  creditsWaived?: number;
   isIncluded: boolean;
-  creditAmount: number;
-  isCreditAmountPending?: boolean;
+  requirements?: Array<
+    ProgramMinifiedRequirement & { requirements?: ProgramMinifiedRequirement[] }
+  >;
+}
+export interface ProgramMinifiedRequirement {
+  code: string;
+  name?: string;
+  requiredUnits: number;
+  completedUnits: number;
+  creditsWaived: number;
+}
+export interface TranscriptEducationPlan {
+  id: string;
+  name: string;
+  isInitial: boolean;
 }

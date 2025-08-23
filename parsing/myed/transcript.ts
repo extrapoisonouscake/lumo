@@ -1,10 +1,15 @@
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import {
-  CourseRequirement,
   CreditSummaryEntry,
+  ProgramEntry,
+  ProgramMinifiedRequirement,
+  ProgramRequirement,
+  ProgramRequirementEntryStatus,
+  TranscriptEducationPlan,
   TranscriptEntry,
 } from "@/types/school";
 import * as cheerio from "cheerio";
+import type { Element } from "domhandler";
 import { $getGenericContentTableBody, $getTableValues } from "./helpers";
 import { ParserFunctionArguments } from "./types";
 
@@ -28,7 +33,7 @@ export function parseTranscriptEntries({
   });
   return transcript;
 }
-
+const NUMBER_EXTRACT_REGEX = /^\d+(\.\d+)?$/;
 export function parseCreditSummary({
   responses,
 }: ParserFunctionArguments<"creditSummary">): CreditSummaryEntry[] {
@@ -60,26 +65,155 @@ export function parseCreditSummary({
 }
 export function parseGraduationSummary({
   responses,
-}: ParserFunctionArguments<"graduationSummary">): CourseRequirement[] {
+}: ParserFunctionArguments<"graduationSummary">): {
+  breakdown: ProgramRequirement[];
+  programs: ProgramEntry[];
+  educationPlans: TranscriptEducationPlan[];
+} {
   const $ = responses.at(-1)!;
-  const result = parseCourseBreakdown($);
+  const breakdown = parseCourseBreakdown($);
+  const programs = parsePrograms($);
+  const programsWithNames = programs.map((program) => ({
+    ...program,
+    requirements: program.requirements?.map((requirement) => ({
+      ...requirement,
+      name: breakdown.find((course) => course.code === requirement.code)?.name,
+    })),
+  }));
+  const allMinifiedRequirements = programs
+    .flatMap((program) => program.requirements)
+    .filter(
+      (requirement): requirement is ProgramMinifiedRequirement =>
+        requirement !== undefined
+    );
+  const plans = parseEducationPlans($);
+  const breakdownWithRequiredUnits = breakdown.map((requirement) => ({
+    ...requirement,
+    entries: requirement.entries.map((entry) => ({
+      ...entry,
+      requiredUnits: allMinifiedRequirements.find(
+        (requirement) => requirement.code === entry.code
+      )?.requiredUnits,
+    })),
+  }));
+  return {
+    breakdown: breakdownWithRequiredUnits,
+    programs: programsWithNames,
+    educationPlans: plans,
+  };
+}
+function parseEducationPlans($: cheerio.CheerioAPI): TranscriptEducationPlan[] {
+  const plans = $(`select[name="selectedProgramStudiesOid"] option`)
+    .map((_, el) => {
+      const $el = $(el);
+      return {
+        id: $el.val() as string,
+        name: $el.text().trim(),
+        isInitial: $el.attr("selected") === "selected",
+      };
+    })
+    .toArray();
+  return plans;
+}
+function parsePrograms($: cheerio.CheerioAPI): ProgramEntry[] {
+  const $table = $(".listGridFixed:first table");
+  const headerMap = getHeaderMap($table);
+  const result: ProgramEntry[] = [];
 
+  $table
+    .find("tbody")
+    .first()
+    .children("tr")
+    .not(":first-child, :last-child") //not the header row or the total row
+    .each((i, tr) => {
+      const $tr = $(tr);
+      const $cells = $tr.children("td");
+
+      const cellsValues = [];
+      for (const cell of $cells.toArray()) {
+        const $cell = $(cell);
+
+        const cellText = $cell.text().trim();
+        cellsValues.push(cellText);
+      }
+
+      const $descriptionCell = $cells.eq(headerMap["Description"]!);
+      const $requirementsRow = $descriptionCell.find("tr[id]"); //the only row that has an id
+      let requirements: ProgramEntry["requirements"] | undefined;
+      if ($requirementsRow.children().length > 0) {
+        requirements = [];
+        $requirementsRow
+          .find("tbody")
+          .first()
+          .children("tr")
+          .map((i, tr) => {
+            const $tr = $requirementsRow.find(tr);
+            const $childTbody = $tr.find("tbody tbody");
+            if ($childTbody.length > 0) {
+              //*found child requirements
+              //nested tables everywhere, im crying so hard rn
+              const childRequirements: ProgramMinifiedRequirement[] = [];
+
+              $childTbody.children("tr").each((i, tr) => {
+                const $tr = $(tr);
+                const requirement = getMinifiedRequirements($tr);
+                if (requirement) {
+                  childRequirements.push(requirement);
+                }
+              });
+              requirements!.at(-1)!.requirements = childRequirements;
+            } else {
+              const requirement = getMinifiedRequirements($tr);
+              if (requirement) {
+                requirements!.push(requirement);
+              }
+            }
+          });
+      }
+
+      const creditsWaivedString =
+        cellsValues[headerMap["Credits waived"]!]!.trim();
+      result.push({
+        name: $cells.eq(headerMap["Description"]!).find("a").text().trim(), //rest of the content are the minified requirements
+        code: cellsValues[headerMap["Code"]!]!,
+        requiredUnits: +cellsValues[headerMap["Required unit"]!]!.trim(),
+        completedUnits: +cellsValues[headerMap["Unit completed"]!]!.trim(),
+        creditsWaived:
+          creditsWaivedString.length > 0 ? +creditsWaivedString : undefined,
+        requirements,
+        isIncluded: !($cells.eq(headerMap["Excluded"]!).find("img").length > 0), //looking for the checkmark icon, checkmark means "Excluded"
+      });
+    });
   return result;
 }
+function getMinifiedRequirements($tr: cheerio.Cheerio<Element>) {
+  const text = $tr.text().trim();
+  if (!text || !text.includes("Code")) return; //filtering out unnecessary text and totals
+
+  const [code, requiredUnits, creditsWaived, completedUnits] = text
+    .split("\n")
+    .map((section) => {
+      const [label, value] = section.split(": ");
+      const trimmedValue = value?.trim();
+      if (!trimmedValue) return undefined;
+      return isNaN(+trimmedValue) ? trimmedValue : +trimmedValue;
+    });
+  return {
+    code: code as string,
+
+    requiredUnits: Math.max(requiredUnits as number, completedUnits as number), //sometimes required units is set to zero
+    completedUnits: completedUnits as number,
+    creditsWaived: creditsWaived as number,
+  };
+}
 const CREDITS_IN_PROGRESS_STRING = "credits in progress...";
-function parseCourseBreakdown($: cheerio.CheerioAPI): CourseRequirement[] {
+function parseCourseBreakdown($: cheerio.CheerioAPI): ProgramRequirement[] {
   const $table = $("#gradTemplateTab1-content .listGridFixed table");
 
-  const headerValues = $table
-    .find("th")
-    .map((i, th) => $(th).text().trim())
-    .get();
-  const headerMap = Object.fromEntries(
-    headerValues.map((value, index) => [value, index])
-  );
+  const headerMap = getHeaderMap($table);
   const requirementColumnIndex = headerMap["Requirement"]!;
-  const result: CourseRequirement[] = [];
-  let currentRequirement: CourseRequirement;
+  const result: ProgramRequirement[] = [];
+  let currentRequirement: ProgramRequirement;
   let entriesLeftInRequirement = 0,
     lastRequirementIndex: number;
 
@@ -123,12 +257,34 @@ function parseCourseBreakdown($: cheerio.CheerioAPI): CourseRequirement[] {
 
       let creditAmountString =
         cellsValues[headerMap["Credits Gained (Credits Total)"]!]!;
-      let isCreditAmountPending = false;
-      if (creditAmountString.includes(CREDITS_IN_PROGRESS_STRING)) {
-        isCreditAmountPending = true;
+      let isCreditAmountPending = creditAmountString.includes(
+          CREDITS_IN_PROGRESS_STRING
+        ),
+        isAlreadyCounted = creditAmountString.startsWith("(");
+      if (isCreditAmountPending) {
+        creditAmountString = creditAmountString.replace(
+          CREDITS_IN_PROGRESS_STRING,
+          ""
+        );
+      } else if (isAlreadyCounted) {
+        //this means this entry is counted toward another requirement
         creditAmountString = creditAmountString
-          .replace(CREDITS_IN_PROGRESS_STRING, "")
-          .trim();
+          .replace("(", "")
+          .replace(")", "");
+        isAlreadyCounted = true;
+      }
+      let status = ProgramRequirementEntryStatus.Excluded;
+      if (isCreditAmountPending) {
+        status = ProgramRequirementEntryStatus.Pending;
+      } else if (isAlreadyCounted) {
+        status = ProgramRequirementEntryStatus.AlreadyCounted;
+      } else if (
+        $cells
+          .eq(headerMap["Included"]! - (!isRequirementRow ? 1 : 0))
+          .find("img").length > 0
+      ) {
+        //looking for the checkmark icon)
+        status = ProgramRequirementEntryStatus.Included;
       }
       currentRequirement.entries.push({
         years: cellsValues[headerMap["School year"]!]!.split("-").map(
@@ -139,14 +295,26 @@ function parseCourseBreakdown($: cheerio.CheerioAPI): CourseRequirement[] {
         name: prettifyEducationalName(cellsValues[headerMap["Description"]!]!),
         equivalentContentCode:
           cellsValues[headerMap["Equivalent content code"]!] || undefined,
-        isIncluded:
-          $cells
-            .eq(headerMap["Included"]! + (!isRequirementRow ? 1 : 0))
-            .find("img").length > 0, //looking for the checkmark icon
-        creditAmount: +creditAmountString,
-        isCreditAmountPending,
+        status,
+        completedUnits: +creditAmountString.trim(),
       });
       entriesLeftInRequirement--;
     });
   return result;
+}
+function getHeaderMap(
+  $table: cheerio.Cheerio<Element>
+): Record<string, number> {
+  const headerValues = $table
+    .find("tr")
+    .first()
+    .children()
+    .map((i, th) => $table.find(th).text().trim())
+    .get();
+  const headerMap = Object.fromEntries(
+    headerValues
+      .map((value, index) => [value, index])
+      .filter(([value]) => value)
+  );
+  return headerMap;
 }

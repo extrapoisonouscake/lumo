@@ -1,31 +1,141 @@
 "use client";
 import { trpc } from "@/app/trpc";
 import { ContentCard } from "@/components/misc/content-card";
-import { MiniTableHeader } from "@/components/ui/mini-table-header";
+import { ResponsiveFilters } from "@/components/misc/responsive-filters";
+import { Label } from "@/components/ui/label";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
-import { SortableColumn } from "@/components/ui/sortable-column";
-import { TableRenderer } from "@/components/ui/table-renderer";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { TableFilterSearchBar } from "@/components/ui/table-filter-search-bar";
+import { TableFilterSelect } from "@/components/ui/table-filter-select";
+import {
+  RowRendererFactory,
+  TableRenderer,
+} from "@/components/ui/table-renderer";
+import { cn } from "@/helpers/cn";
+import { enumKeys } from "@/helpers/enumKeys";
+import { renderTableCell } from "@/helpers/tables";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useTable } from "@/hooks/use-table";
-import { CourseRequirement } from "@/types/school";
+import {
+  ProgramRequirement,
+  ProgramRequirementEntry,
+  ProgramRequirementEntryStatus,
+} from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
-import { ColumnFiltersState, createColumnHelper } from "@tanstack/react-table";
-import { useState } from "react";
-const formatCreditValue = (value: number) => {
-  return value.toFixed(4);
-};
+import {
+  ColumnFiltersState,
+  createColumnHelper,
+  Row,
+  Table,
+} from "@tanstack/react-table";
+import {
+  type LucideIcon,
+  BookOpenText,
+  CheckCircle,
+  CircleDashed,
+  Clock,
+  XCircle,
+} from "lucide-react";
 
-const columnHelper = createColumnHelper<CourseRequirement>();
-const columns = [
-  columnHelper.accessor("code", {
-    header: ({ column }) => {
-      return <SortableColumn {...column}>Years</SortableColumn>;
+import { ConditionalTooltip } from "@/components/ui/tooltip";
+import { useEffect, useMemo, useState } from "react";
+import { GraduationSummaryProgramsList } from "./programs-list";
+
+const formatYears = (years: number[]) => {
+  return years.join(" - ");
+};
+const checkIsFirstRowForRequirement = (
+  rowIndex: number,
+  row: Row<PreparedProgramRequirementEntry>,
+  table: Table<PreparedProgramRequirementEntry>
+) => {
+  return (
+    rowIndex === 0 ||
+    table.getFilteredRowModel().rows[rowIndex - 1]?.original.requirement
+      .code !== row.original.requirement.code
+  );
+};
+type PreparedProgramRequirementEntry = Omit<
+  ProgramRequirementEntry,
+  "years"
+> & {
+  years: string;
+  requirement: {
+    name: string;
+    code: string;
+    totalEntries: number;
+  };
+};
+const formatProgress = (entry: PreparedProgramRequirementEntry) => {
+  const completedUnits = entry.completedUnits;
+  const requiredUnits = entry.requiredUnits;
+  return `${completedUnits.toFixed(1)}${
+    requiredUnits ? `/${requiredUnits.toFixed(1)}` : ""
+  }`;
+};
+const columnHelper = createColumnHelper<PreparedProgramRequirementEntry>();
+const baseColumns = [
+  columnHelper.display({
+    header: "Requirement",
+
+    cell: ({ row }) => {
+      return row.original.requirement.name;
     },
-    filterFn: "includesString",
+    id: "requirement.name",
   }),
 
   columnHelper.accessor("name", {
+    header: "Subject",
+    filterFn: "includesString",
+  }),
+  columnHelper.accessor("code", {
+    header: "Code",
+
+    cell: ({ cell }) => {
+      const equivalentContentCode = cell.row.original.equivalentContentCode;
+      return `${cell.getValue()}${
+        equivalentContentCode ? ` (${equivalentContentCode})` : ""
+      }`;
+    },
+  }),
+
+  columnHelper.accessor("years", {
+    header: "Years",
+    filterFn: "equalsString",
+  }),
+
+  columnHelper.accessor("grade", {
     header: "Grade",
-    filterFn: "arrIncludes",
+  }),
+  columnHelper.accessor("completedUnits", {
+    header: "Credits",
+
+    cell: ({ cell }) => formatProgress(cell.row.original),
+  }),
+  columnHelper.accessor("status", {
+    id: "status",
+    header: "Status",
+    filterFn: "equalsString",
+    cell: ({ cell, table }) => {
+      const status = cell.getValue();
+      let alternativeRequirementEntry;
+      if (status === ProgramRequirementEntryStatus.AlreadyCounted) {
+        alternativeRequirementEntry = table
+          .getRowModel()
+          .rows.find(
+            (row) =>
+              row.original.code === cell.row.original.code &&
+              row.original.status !==
+                ProgramRequirementEntryStatus.AlreadyCounted
+          )?.original;
+      }
+      return (
+        <EntryStatusBadge
+          status={status}
+          alternativeRequirementEntry={alternativeRequirementEntry}
+        />
+      );
+    },
   }),
 ];
 
@@ -33,55 +143,260 @@ export function GraduationSummaryContent() {
   const query = useQuery(
     trpc.myed.transcript.getGraduationSummary.queryOptions()
   );
-
+  const [currentEducationPlanId, setCurrentEducationPlanId] = useState<
+    string | null
+  >(null);
+  useEffect(() => {
+    if (query.data?.educationPlans) {
+      const initialPlan = query.data.educationPlans.find(
+        (plan) => plan.isInitial
+      );
+      setCurrentEducationPlanId(initialPlan?.id ?? null);
+    }
+  }, [query.data?.educationPlans]);
   return (
     <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
-      {(data) => <Content data={data} />}
+      {({ breakdown, programs, educationPlans }) => (
+        <div className="flex flex-col gap-6">
+          <GraduationSummaryProgramsList
+            programs={programs}
+            educationPlans={educationPlans}
+            currentEducationPlanId={currentEducationPlanId}
+            setCurrentEducationPlanId={setCurrentEducationPlanId}
+          />
+          <CoursesBreakdown data={breakdown} />
+        </div>
+      )}
     </QueryWrapper>
   );
 }
-
-function Content({ data }: { data: CourseRequirement[] }) {
+function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const table = useTable(data, columns, {
-    state: { columnFilters },
+
+  const preparedData = useMemo(() => {
+    return data
+      .map((subject) =>
+        subject.entries.map((entry) => ({
+          ...entry,
+          years: formatYears(entry.years),
+
+          requirement: {
+            name: subject.name,
+            code: subject.code,
+            totalEntries: subject.entries.length,
+          },
+        }))
+      )
+      .flat();
+  }, [data]);
+
+  // Calculate requirement code counts from filtered table data
+  const getRequirementCodeCounts = () => {
+    const counts = new Map<string, number>();
+    table.getFilteredRowModel().rows.forEach((row) => {
+      const code = row.original.requirement.code;
+      counts.set(code, (counts.get(code) || 0) + 1);
+    });
+    return counts;
+  };
+  const columnVisibility = useMemo(
+    () =>
+      Object.fromEntries(
+        baseColumns.map((column) => {
+          let isVisible = true;
+          if (column.id === "status") {
+            isVisible = !columnFilters.some(
+              (filter) => filter.id === column.id
+            );
+          }
+          return [column.id, isVisible];
+        })
+      ),
+    [columnFilters]
+  );
+
+  const table = useTable(preparedData, baseColumns, {
+    state: { columnFilters, columnVisibility },
     onColumnFiltersChange: setColumnFilters,
-    initialState: {
-      sorting: [{ id: "years", desc: true }],
-    },
   });
 
-  return (
-    <div className="flex flex-col gap-5">
-      <h2 className="text-lg font-semibold text-foreground">Credit Summary</h2>
+  const getRowRenderer: RowRendererFactory<PreparedProgramRequirementEntry> =
+    (table) => (row, rowIndex) => {
+      const cells = row.getVisibleCells();
 
-      <TableRenderer
-        table={table}
-        mobileHeader={
-          <div className="flex gap-3">
-            <MiniTableHeader className="flex-1 py-0">
-              <SortableColumn {...table.getColumn("years")!}>
-                Years
-              </SortableColumn>
+      return (
+        <TableRow
+          key={row.id}
+          data-requirement-code={row.original.requirement.code}
+          className="border-t group-last:first:rounded-bl-md group-last:last:rounded-br-md transition-colors"
+          onMouseEnter={(e) => {
+            const requirementCode = e.currentTarget.dataset.requirementCode;
+            const allRelatedRows = document.querySelectorAll(
+              `tr[data-requirement-code="${requirementCode}"]`
+            );
+            allRelatedRows.forEach((rowElement) => {
+              rowElement.classList.add("bg-muted/50");
+            });
+          }}
+          onMouseLeave={(e) => {
+            const requirementCode = e.currentTarget.dataset.requirementCode;
+            const allRelatedRows = document.querySelectorAll(
+              `tr[data-requirement-code="${requirementCode}"]`
+            );
+            allRelatedRows.forEach((rowElement) => {
+              rowElement.classList.remove("bg-muted/50");
+            });
+          }}
+        >
+          {cells.map((cell) => {
+            let rowSpan;
+            const isRequirementNameCell = cell.column.id === "requirement.name";
+            if (isRequirementNameCell) {
+              //using rowIndex instead of row.index because row.index doesn't work with filtered rows
+              const isFirstRowForRequirement = checkIsFirstRowForRequirement(
+                rowIndex,
+                row,
+                table
+              );
 
-              <SortableColumn {...table.getColumn("totalCredits")!}>
-                Total Credits
-              </SortableColumn>
-            </MiniTableHeader>
-          </div>
-        }
-        emptyState={{ emoji: "🎓", text: "No entries found." }}
-        columns={columns}
-        renderMobileRow={(row) => {
-          const entry = row.original;
-          return <CreditSummaryEntryCard entry={entry} />;
-        }}
+              if (isFirstRowForRequirement) {
+                // Calculate count from filtered table data
+                const counts = getRequirementCodeCounts();
+                rowSpan = counts.get(row.original.requirement.code) || 0;
+              } else {
+                return null;
+              }
+            }
+
+            // For other columns, render normally
+            const content = renderTableCell(cell);
+
+            return (
+              <TableCell
+                key={cell.id}
+                rowSpan={rowSpan}
+                className={cn("whitespace-nowrap", {
+                  "border-r": isRequirementNameCell,
+                })}
+              >
+                {content}
+              </TableCell>
+            );
+          })}
+        </TableRow>
+      );
+    };
+  const yearsSelect = (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="years-filter">Years</Label>
+      <TableFilterSelect
+        id="years-filter"
+        column={table.getColumn("years")!}
+        options={Array.from(new Set(preparedData.map((item) => item.years)))
+          .reverse()
+          .map((years) => ({
+            label: years,
+            value: years,
+          }))}
+        placeholder="Select years"
+        className="flex-1 md:max-w-[150px]"
       />
+    </div>
+  );
+
+  const statusSelect = (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor="status-filter">Status</Label>
+      <TableFilterSelect
+        id="status-filter"
+        column={table.getColumn("status")!}
+        options={enumKeys(ProgramRequirementEntryStatus).map((status) => {
+          const { icon, text, className } = entryStatusBadgeVisualData[status];
+          return {
+            className: cn("flex items-center gap-2", className),
+            label: text,
+            value: status,
+            icon,
+          };
+        })}
+        placeholder="Select status"
+        className="flex-1 md:max-w-[190px]"
+      />
+    </div>
+  );
+  const isMobile = useIsMobile();
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-2">
+          <BookOpenText className="h-5 w-5 text-brand" />
+          <h2 className="text-lg font-semibold">Courses Summary</h2>
+        </div>
+        <span className="text-sm text-muted-foreground">
+          {table.getFilteredRowModel().rows.length} of {preparedData.length}{" "}
+          entries
+        </span>
+      </div>
+      <div className="flex flex-col gap-4">
+        {!isMobile && (
+          <div className="flex flex-col md:flex-row flex-wrap gap-3">
+            {yearsSelect}
+            {statusSelect}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="subject-search">Subject</Label>
+              <TableFilterSearchBar
+                id="subject-search"
+                table={table}
+                columnName="name"
+                placeholder="Subject name..."
+              />
+            </div>
+          </div>
+        )}
+        <TableRenderer
+          table={table}
+          mobileHeader={
+            <div className="flex gap-3">
+              <TableFilterSearchBar
+                id="subject-search-mobile"
+                table={table}
+                columnName="name"
+                placeholder="Subject name..."
+              />
+              <ResponsiveFilters triggerClassName="h-full">
+                {yearsSelect}
+                {statusSelect}
+              </ResponsiveFilters>
+            </div>
+          }
+          emptyState={{ emoji: "🎓", text: "No entries found." }}
+          columns={baseColumns}
+          rowRendererFactory={getRowRenderer}
+          renderMobileRow={(row, rowIndex) => {
+            const entry = row.original;
+            const isFirstRowForRequirement = checkIsFirstRowForRequirement(
+              rowIndex,
+              row,
+              table
+            );
+            return (
+              <div className="flex flex-col gap-2">
+                {isFirstRowForRequirement && (
+                  <h3 className="mt-2 font-medium uppercase text-xs text-muted-foreground">
+                    {entry.requirement.name}
+                  </h3>
+                )}
+                <CreditSummaryEntryCard {...entry} />
+              </div>
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }
 
-function CreditSummaryEntryCard({ entry }: { entry: CourseRequirement }) {
+function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
   return (
     <ContentCard
       data-clickable
@@ -97,22 +412,77 @@ function CreditSummaryEntryCard({ entry }: { entry: CourseRequirement }) {
       }
       items={[
         {
-          label: "Total Credits",
-          value: formatCreditValue(
-            entry.entries.reduce((acc, curr) => acc + curr.creditAmount, 0)
-          ),
+          label: "Progress",
+          value: formatProgress(entry),
         },
+        { label: "Years", value: entry.years },
         {
-          label: "Credits in Progress",
-          value: formatCreditValue(
-            entry.entries.reduce(
-              (acc, curr) =>
-                acc + (curr.isCreditAmountPending ? curr.creditAmount : 0),
-              0
-            )
-          ),
+          label: "Status",
+          value: <EntryStatusBadge status={entry.status} />,
         },
       ]}
     />
+  );
+}
+
+const entryStatusBadgeVisualData: Record<
+  ProgramRequirementEntryStatus,
+  { icon: LucideIcon; className: string; text: string }
+> = {
+  [ProgramRequirementEntryStatus.Included]: {
+    icon: CheckCircle,
+    className: "text-green-500",
+    text: "Included",
+  },
+  [ProgramRequirementEntryStatus.Pending]: {
+    icon: Clock,
+    className: "text-yellow-500",
+    text: "In Progress",
+  },
+  [ProgramRequirementEntryStatus.Excluded]: {
+    icon: XCircle,
+    className: "text-gray-500",
+    text: "Not Included",
+  },
+  [ProgramRequirementEntryStatus.AlreadyCounted]: {
+    icon: CircleDashed,
+    className: "text-gray-500",
+    text: "Already Counted",
+  },
+};
+function EntryStatusBadge({
+  status,
+  alternativeRequirementEntry,
+}: {
+  status: ProgramRequirementEntryStatus;
+  alternativeRequirementEntry?: PreparedProgramRequirementEntry;
+}) {
+  const { icon: Icon, className, text } = entryStatusBadgeVisualData[status];
+
+  return (
+    <ConditionalTooltip
+      content={
+        alternativeRequirementEntry ? (
+          <p>
+            This requirement is already counted in{" "}
+            <span className="font-medium">
+              {alternativeRequirementEntry.requirement.name} (
+              {alternativeRequirementEntry.years})
+            </span>
+            .
+          </p>
+        ) : null
+      }
+      isEnabled={!!alternativeRequirementEntry}
+    >
+      <div
+        className={cn("flex items-center gap-2", className, {
+          "cursor-help": !!alternativeRequirementEntry,
+        })}
+      >
+        <Icon className="size-4" />
+        <span className="text-sm">{text}</span>
+      </div>
+    </ConditionalTooltip>
   );
 }

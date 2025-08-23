@@ -2,21 +2,14 @@
 import { trpc } from "@/app/trpc";
 import { ContentCard } from "@/components/misc/content-card";
 import { ResponsiveFilters } from "@/components/misc/responsive-filters";
-import { SearchBar } from "@/components/misc/search-bar";
 import { Label } from "@/components/ui/label";
 import { MiniTableHeader } from "@/components/ui/mini-table-header";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SortableColumn } from "@/components/ui/sortable-column";
+import { TableFilterSearchBar } from "@/components/ui/table-filter-search-bar";
+import { TableFilterSelect } from "@/components/ui/table-filter-select";
 import { TableRenderer } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
-import { cn } from "@/helpers/cn";
 import {
   displayTableCellWithFallback,
   sortColumnWithNullablesLast,
@@ -25,11 +18,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTable } from "@/hooks/use-table";
 import { TranscriptEntry } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Column,
-  ColumnFiltersState,
-  createColumnHelper,
-} from "@tanstack/react-table";
+import { ColumnFiltersState, createColumnHelper } from "@tanstack/react-table";
 import { useState } from "react";
 
 const columnHelper = createColumnHelper<TranscriptEntry>();
@@ -85,7 +74,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
   const gradeSelect = (
     <div className="flex flex-col gap-2">
       <Label htmlFor="grade-filter">Grade</Label>
-      <FilterSelect
+      <TableFilterSelect
         id="grade-filter"
         column={table.getColumn("grade")!}
         options={Array.from(new Set(data.map((item) => item.grade))).map(
@@ -113,56 +102,32 @@ function Content({ data }: { data: TranscriptEntry[] }) {
       </div>
       <div className="flex flex-col gap-4">
         {!isMobile && (
-          <ResponsiveFilters>
-            <div className="flex flex-col md:flex-row flex-wrap gap-3">
-              {gradeSelect}
+          <div className="flex flex-col md:flex-row flex-wrap gap-3">
+            {gradeSelect}
 
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="subject-search">Subject</Label>
-                <SearchBar
-                  id="subject-search"
-                  placeholder="Search by subject name..."
-                  value={
-                    (table.getColumn("subjectName")?.getFilterValue() as
-                      | string
-                      | undefined) ?? ""
-                  }
-                  onChange={(e) =>
-                    table
-                      .getColumn("subjectName")
-                      ?.setFilterValue(e.target.value)
-                  }
-                  className={cn("flex-1 md:max-w-[230px]")}
-                />
-              </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="subject-search">Subject</Label>
+              <TableFilterSearchBar
+                id="subject-search"
+                table={table}
+                columnName="subjectName"
+                placeholder="Subject name..."
+              />
             </div>
-          </ResponsiveFilters>
+          </div>
         )}
         <TableRenderer
           table={table}
           mobileHeader={
             <div className="flex gap-3">
               <MiniTableHeader className="flex-1 pl-0 py-0">
-                <SearchBar
+                <TableFilterSearchBar
                   id="subject-search-mobile"
-                  placeholder="Search by subject name..."
-                  value={
-                    (table.getColumn("subjectName")?.getFilterValue() as
-                      | string
-                      | undefined) ?? ""
-                  }
-                  onChange={(e) =>
-                    table
-                      .getColumn("subjectName")
-                      ?.setFilterValue(e.target.value)
-                  }
-                  containerClassName="w-full"
-                  className={cn(
-                    "flex-1 md:max-w-[230px]",
-                    "py-0 pr-0 border-none"
-                  )}
+                  table={table}
+                  columnName="subjectName"
+                  className="py-0 pr-0 border-none"
+                  placeholder="Subject name..."
                 />
-
                 <SortableColumn {...table.getColumn("finalGrade")!}>
                   Final
                 </SortableColumn>
@@ -184,47 +149,6 @@ function Content({ data }: { data: TranscriptEntry[] }) {
   );
 }
 
-type FiltersObject = Pick<TranscriptEntry, "year" | "grade" | "subjectName">;
-type FilterSelectValue = FiltersObject[keyof FiltersObject];
-
-function FilterSelect<T extends FilterSelectValue>({
-  id,
-  options,
-  placeholder,
-  column,
-  className,
-}: {
-  id: string;
-  options: { label: string; value: T }[];
-  placeholder: string;
-  column: Column<TranscriptEntry, unknown>;
-  className?: string;
-}) {
-  return (
-    <Select
-      value={(column.getFilterValue() as T)?.toString() ?? "all"}
-      onValueChange={(value) => {
-        if (value === "all") {
-          column.setFilterValue(undefined);
-        } else {
-          column.setFilterValue(value as T);
-        }
-      }}
-    >
-      <SelectTrigger id={id} className={`w-full ${className}`}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">All</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value.toString()}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
 function TranscriptEntryCard({ entry }: { entry: TranscriptEntry }) {
   return (
     <ContentCard

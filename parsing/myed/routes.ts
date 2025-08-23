@@ -386,11 +386,63 @@ export const myEdParsingRoutes = {
     path: "/creditSummary.do?navkey=myInfo.credits.summary",
     expect: "html",
   }),
-  graduationSummary: new Route().step({
-    method: "GET",
-    path: "/graduationSummary.do?includeProjection=false&navkey=myInfo.gradSummary.graduation",
-    expect: "html",
-  }),
+  graduationSummary: new Route()
+    .step({
+      method: "GET",
+      path: "/graduationSummary.do?includeProjection=false&navkey=myInfo.gradSummary.graduation",
+      expect: "html",
+    })
+    .metadata(({ responses, metadata }) => {
+      const $ = responses[0]! as cheerio.CheerioAPI;
+      const areAlreadyCountedEntriesHidden =
+        $("#hideAlreadyCounted").attr("checked") === "checked";
+      const areExcessCoursesSeparated =
+        $("#separateExcessCourses").attr("checked") === "checked";
+      metadata.areAlreadyCountedEntriesHidden = areAlreadyCountedEntriesHidden;
+      metadata.areExcessCoursesSeparated = areExcessCoursesSeparated;
+    })
+    .step(
+      () => {
+        return {
+          method: "POST",
+          path: "/preferenceUpdate.do",
+          contentType: "application/x-www-form-urlencoded",
+          body: {
+            preference: "sys.graduation.course.separate.excessive",
+            value: "true",
+          },
+          expect: "json",
+        };
+      },
+      ({ metadata: { areExcessCoursesSeparated } }) =>
+        !areExcessCoursesSeparated
+    )
+    .step(
+      () => {
+        return {
+          method: "POST",
+          path: "/preferenceUpdate.do",
+          contentType: "application/x-www-form-urlencoded",
+          body: {
+            preference: "sys.graduation.course.hideNotAssigned",
+            value: "false",
+          },
+          expect: "json",
+        };
+      },
+      ({ metadata: { areAlreadyCountedEntriesHidden } }) =>
+        areAlreadyCountedEntriesHidden
+    )
+    .step(
+      {
+        method: "GET",
+        path: "/graduationSummary.do?includeProjection=false&navkey=myInfo.gradSummary.graduation",
+        expect: "html",
+      },
+      ({
+        metadata: { areAlreadyCountedEntriesHidden, areExcessCoursesSeparated },
+      }) => areAlreadyCountedEntriesHidden || !areExcessCoursesSeparated
+    ),
 };
 export type MyEdParsingRoutes = typeof myEdParsingRoutes;
 export type MyEdParsingRoute = keyof MyEdParsingRoutes;

@@ -5,11 +5,13 @@ export function CircularProgress({
   letter,
   fillColor,
   size,
+  thickness,
 }: {
   value: number;
   letter?: string;
   fillColor: string;
   size: "small" | "normal";
+  thickness?: number;
 }) {
   const circumference = Math.PI * 20;
   const strokeDashoffset = circumference - (value / 100) * circumference;
@@ -28,7 +30,7 @@ export function CircularProgress({
           r="10"
           fill="none"
           stroke="currentColor"
-          strokeWidth={size === "small" ? "2.5" : "1.5"}
+          strokeWidth={thickness ?? (size === "small" ? "2.5" : "1.5")}
           className="text-muted-foreground/20"
         />
         {/* Progress circle */}
@@ -38,7 +40,7 @@ export function CircularProgress({
           r="10"
           fill="none"
           stroke="currentColor"
-          strokeWidth={size === "small" ? "2.5" : "1.5"}
+          strokeWidth={thickness ?? (size === "small" ? "2.5" : "1.5")}
           strokeDasharray={circumference}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
