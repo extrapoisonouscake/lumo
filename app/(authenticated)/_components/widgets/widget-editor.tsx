@@ -99,7 +99,7 @@ const getNewWidgetConfiguration = (type: Widgets) => {
     type,
     width: 1,
     height: 1,
-    custom: { ...WIDGET_CUSTOM_DEFAULTS[type] },
+    custom: WIDGET_CUSTOM_DEFAULTS[type],
   };
   return newWidget;
 };
@@ -123,8 +123,9 @@ export function WidgetEditor({
   const isTouchDraggingRef = React.useRef(false);
   const autoScrollDirectionRef = React.useRef<0 | 1 | -1>(0);
   const autoScrollRafRef = React.useRef<number | null>(null);
-  const gridRef = React.useRef<HTMLDivElement | null>(null);
-  const scrollElRef = React.useRef<HTMLElement | null>(null);
+  const globalDragOverHandlerRef = React.useRef<
+    ((e: DragEvent) => void) | null
+  >(null);
 
   // Update grid columns based on screen size
   useEffect(() => {
@@ -155,20 +156,14 @@ export function WidgetEditor({
   // Auto-scroll helpers
   const updateAutoScroll = useCallback(
     (clientY: number) => {
-      const threshold = 80;
-      const speedPerFrame = 16;
+      const topThreshold = 240; // large top zone for comfort
+      const bottomThreshold = 80; // small bottom zone, no mobile offset
+      const speedPerFrame = 32;
+      const { innerHeight } = window;
 
       let dir: 0 | 1 | -1 = 0;
-      const scrollEl = scrollElRef.current;
-      if (scrollEl && scrollEl !== document.body) {
-        const rect = scrollEl.getBoundingClientRect();
-        if (clientY < rect.top + threshold) dir = -1;
-        else if (clientY > rect.bottom - threshold) dir = 1;
-      } else {
-        const { innerHeight } = window;
-        if (clientY < threshold) dir = -1;
-        else if (clientY > innerHeight - threshold) dir = 1;
-      }
+      if (clientY < topThreshold) dir = -1;
+      else if (clientY > innerHeight - bottomThreshold) dir = 1;
 
       if (dir !== 0) {
         autoScrollDirectionRef.current = dir;
@@ -178,13 +173,8 @@ export function WidgetEditor({
               autoScrollDirectionRef.current !== 0 &&
               (draggedIndex !== null || isTouchDraggingRef.current)
             ) {
-              const el = scrollElRef.current;
               const delta = autoScrollDirectionRef.current * speedPerFrame;
-              if (el && el !== document.body) {
-                el.scrollTop += delta;
-              } else {
-                window.scrollBy({ top: delta, behavior: "auto" });
-              }
+              window.scrollBy({ top: delta, behavior: "auto" });
               autoScrollRafRef.current = requestAnimationFrame(step);
             } else {
               stopAutoScroll();
@@ -213,26 +203,7 @@ export function WidgetEditor({
     };
   }, [stopAutoScroll]);
 
-  useEffect(() => {
-    const getScrollableParent = (
-      el: HTMLElement | null
-    ): HTMLElement | null => {
-      let node: HTMLElement | null = el;
-      while (node) {
-        const style = window.getComputedStyle(node);
-        const overflowY = style.overflowY;
-        const canScroll = node.scrollHeight > node.clientHeight;
-        if ((overflowY === "auto" || overflowY === "scroll") && canScroll) {
-          return node;
-        }
-        node = node.parentElement;
-      }
-      return (
-        (document.scrollingElement as HTMLElement) ?? document.documentElement
-      );
-    };
-    scrollElRef.current = getScrollableParent(gridRef.current);
-  }, []);
+  // Window scrolling only (no container detection per request)
 
   const handleStartEditing = () => {
     setIsEditing(true);
@@ -315,6 +286,16 @@ export function WidgetEditor({
       e.dataTransfer.setData("text/plain", `widget:${widgetIndex.toString()}`);
       e.dataTransfer.effectAllowed = "move";
       setDraggedIndex(widgetIndex);
+      if (!globalDragOverHandlerRef.current) {
+        const onDocDragOver = (ev: DragEvent) => {
+          ev.preventDefault();
+          if (typeof ev.clientY === "number") updateAutoScroll(ev.clientY);
+        };
+        globalDragOverHandlerRef.current = onDocDragOver;
+        document.addEventListener("dragover", onDocDragOver, {
+          passive: false,
+        });
+      }
     },
     []
   );
@@ -325,6 +306,16 @@ export function WidgetEditor({
       e.dataTransfer.setData("text/plain", `palette:${widgetType}`);
       e.dataTransfer.effectAllowed = "copy";
       setIsDraggingFromPalette(true);
+      if (!globalDragOverHandlerRef.current) {
+        const onDocDragOver = (ev: DragEvent) => {
+          ev.preventDefault();
+          if (typeof ev.clientY === "number") updateAutoScroll(ev.clientY);
+        };
+        globalDragOverHandlerRef.current = onDocDragOver;
+        document.addEventListener("dragover", onDocDragOver, {
+          passive: false,
+        });
+      }
 
       // Create a custom drag image showing the widget type
       const dragElement = e.currentTarget.cloneNode(true) as HTMLElement;
@@ -389,6 +380,13 @@ export function WidgetEditor({
       setDragOverIndex(null);
       setIsDraggingFromPalette(false);
       setDraggedIndex(null);
+      if (globalDragOverHandlerRef.current) {
+        document.removeEventListener(
+          "dragover",
+          globalDragOverHandlerRef.current
+        );
+        globalDragOverHandlerRef.current = null;
+      }
     },
     [moveWidget, configuration, draggedIndex, dragOverIndex]
   );
@@ -399,6 +397,13 @@ export function WidgetEditor({
     setDragOverIndex(null);
     setDraggedIndex(null);
     stopAutoScroll();
+    if (globalDragOverHandlerRef.current) {
+      document.removeEventListener(
+        "dragover",
+        globalDragOverHandlerRef.current
+      );
+      globalDragOverHandlerRef.current = null;
+    }
   }, []);
 
   // Add drag leave handler to clear drop target highlighting when dragging away
@@ -661,7 +666,6 @@ export function WidgetEditor({
               gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
             }}
             onDragLeave={handleDragLeave}
-            ref={gridRef}
           >
             {buildDisplayList(
               responsiveWidgets,

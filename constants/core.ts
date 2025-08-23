@@ -48,7 +48,7 @@ export type WidgetGridItem<T extends Widgets = Widgets> = {
   type: T;
   width: number;
   height: number;
-  custom: WidgetCustomProps[T];
+  custom?: WidgetCustomProps[T];
 };
 
 export type WidgetsConfiguration = WidgetGridItem[];
