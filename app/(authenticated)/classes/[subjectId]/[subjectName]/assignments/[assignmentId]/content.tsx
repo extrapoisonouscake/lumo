@@ -1,6 +1,5 @@
 "use client";
 import { TitleManager } from "@/components/misc/title-manager";
-import { BackButton } from "@/components/ui/back-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +58,6 @@ export function AssignmentPageContent({
   const { data: subject } = useSubjectSummary(subjectId, "current");
   return (
     <>
-      <BackButton />
       <QueryWrapper query={assignment} skeleton={<ContentSkeleton />}>
         {(data) => {
           const {

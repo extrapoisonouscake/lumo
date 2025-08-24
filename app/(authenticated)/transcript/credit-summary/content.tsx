@@ -106,7 +106,6 @@ function Content({ data }: { data: CreditSummaryEntry[] }) {
 function CreditSummaryEntryCard({ entry }: { entry: CreditSummaryEntry }) {
   return (
     <ContentCard
-      data-clickable
       header={
         <div className="flex items-start justify-between">
           <h3 className="font-medium text-base text-foreground">

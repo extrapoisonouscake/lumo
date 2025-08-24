@@ -42,8 +42,8 @@ export function GraduationSummaryProgramsList({
   const sortedData = useMemo(
     () =>
       programs.sort((a) => {
-        //completed programs always at the bottom
-        return a.completedUnits >= a.requiredUnits ? 1 : -1;
+        //completed or excluded programs always at the bottom
+        return a.completedUnits >= a.requiredUnits || !a.isIncluded ? 1 : 0;
       }),
     [programs]
   );
@@ -51,14 +51,17 @@ export function GraduationSummaryProgramsList({
     content = <ErrorCard emoji="🎓" message="No programs found" />;
   } else {
     content = (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
-        {sortedData.map((program, index) => (
-          <ProgramCard
-            key={`${program.code}-${index}`}
-            program={program}
-            onViewRequirements={() => setCurrentProgramIndex(index)}
-          />
-        ))}
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+          {sortedData.map((program, index) => (
+            <ProgramCard
+              key={`${program.code}-${index}`}
+              program={program}
+              onViewRequirements={() => setCurrentProgramIndex(index)}
+            />
+          ))}
+        </div>
+        <TotalProgressCard programs={sortedData} />
       </div>
     );
   }
@@ -106,7 +109,40 @@ export function GraduationSummaryProgramsList({
     </div>
   );
 }
-
+function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
+  const includedPrograms = useMemo(
+    () => programs.filter((program) => program.isIncluded),
+    [programs]
+  );
+  const totalCompletedUnits = useMemo(
+    () =>
+      includedPrograms.reduce(
+        (acc, program) => acc + program.completedUnits,
+        0
+      ),
+    [includedPrograms]
+  );
+  const totalRequiredUnits = useMemo(
+    () =>
+      includedPrograms.reduce((acc, program) => acc + program.requiredUnits, 0),
+    [includedPrograms]
+  );
+  return (
+    <Card className="px-4 py-3 flex-row flex-wrap justify-between gap-2">
+      <p className="text-sm font-medium">Total</p>
+      <div className="flex items-center gap-1.5">
+        <p className="text-sm text-muted-foreground font-medium">
+          {totalCompletedUnits} / {totalRequiredUnits} units
+        </p>
+        <CircularProgress
+          value={(totalCompletedUnits / totalRequiredUnits) * 100}
+          fillColor="brand"
+          size="small"
+        />
+      </div>
+    </Card>
+  );
+}
 function ProgramCard({
   program,
   onViewRequirements,

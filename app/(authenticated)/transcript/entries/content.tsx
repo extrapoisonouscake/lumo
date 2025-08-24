@@ -152,7 +152,6 @@ function Content({ data }: { data: TranscriptEntry[] }) {
 function TranscriptEntryCard({ entry }: { entry: TranscriptEntry }) {
   return (
     <ContentCard
-      data-clickable
       header={
         <div className="flex items-start justify-between">
           <h3 className="font-medium text-base text-foreground">

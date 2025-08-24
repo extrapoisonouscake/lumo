@@ -39,14 +39,14 @@ function RecentGradesWidget(
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
   let subjectsToUse = subjects.data?.subjects.main;
-  if (widget.custom?.subjectId) {
-    const subject = subjectsToUse?.find(
+  if (subjectsToUse && widget.custom?.subjectId) {
+    const subject = subjectsToUse.find(
       (s) => s.id === widget.custom!.subjectId
     );
     if (subject) {
       subjectsToUse = [subject];
     } else {
-      subjectsToUse = [];
+      subjectsToUse = undefined;
       richError = {};
     }
   }

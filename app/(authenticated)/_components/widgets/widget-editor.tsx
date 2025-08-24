@@ -600,7 +600,7 @@ export function WidgetEditor({
                 variant="outline"
                 onClick={handleStartEditing}
                 size="sm"
-                className="border-none px-0 h-fit sm:h-9 sm:px-3 sm:border-solid"
+                className="px-0 size-7 sm:h-9 sm:w-fit sm:px-3"
                 leftIcon={<PencilRulerIcon />}
               >
                 <p className="hidden sm:block">Customize</p>

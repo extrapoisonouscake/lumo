@@ -3,7 +3,6 @@ import { TitleManager } from "@/components/misc/title-manager";
 
 import { useParams, useSearchParams } from "next/navigation";
 
-import { BackButton } from "@/components/ui/back-button";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { useSubjectAssignments } from "@/hooks/trpc/use-subject-assignments";
 import { useSubjectSummary } from "@/hooks/trpc/use-subject-summary";
@@ -32,7 +31,6 @@ export default function SubjectPage() {
   });
   return (
     <div className="flex flex-col gap-3">
-      <BackButton />
       <QueryWrapper query={summary} skeleton={<SubjectPageSkeleton />}>
         {(summary) => (
           <>
