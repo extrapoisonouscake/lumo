@@ -2,7 +2,7 @@
 
 import { PageHeading } from "@/components/layout/page-heading";
 import { ErrorCard } from "@/components/misc/error-card";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonProps } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ResponsiveDialog,
@@ -11,6 +11,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   WIDGET_CUSTOM_DEFAULTS,
   WIDGET_MAX_DIMENSIONS,
@@ -114,7 +115,7 @@ export function WidgetEditor({
   const [configuration, setConfiguration] =
     useState<WidgetsConfiguration>(initialConfiguration);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-  const [gridColumns, setGridColumns] = useState(4);
+
   const [customizingWidget, setCustomizingWidget] =
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
@@ -127,26 +128,7 @@ export function WidgetEditor({
     ((e: DragEvent) => void) | null
   >(null);
 
-  // Update grid columns based on screen size
-  useEffect(() => {
-    const updateGridColumns = () => {
-      const width = window.innerWidth;
-      if (width < 768) {
-        setGridColumns(1); // Mobile: 1 column
-      } else if (width < 1024) {
-        setGridColumns(2); // Tablet: 2 columns
-      } else if (width < 1440) {
-        setGridColumns(3); // Desktop: 3 columns
-      } else {
-        setGridColumns(4); // Large: 4 columns
-      }
-    };
-
-    updateGridColumns();
-    window.addEventListener("resize", updateGridColumns);
-    return () => window.removeEventListener("resize", updateGridColumns);
-  }, []);
-
+  const gridColumns = useGridColumns();
   // Calculate responsive widgets with appropriate sizing
   const responsiveWidgets = useMemo(
     () => calculateResponsiveLayout(configuration, gridColumns),
@@ -571,7 +553,7 @@ export function WidgetEditor({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Editor Controls */}
 
       <PageHeading
@@ -596,15 +578,7 @@ export function WidgetEditor({
                 </Button>
               </>
             ) : (
-              <Button
-                variant="outline"
-                onClick={handleStartEditing}
-                size="sm"
-                className="px-0 size-7 sm:h-9 sm:w-fit sm:px-3"
-                leftIcon={<PencilRulerIcon />}
-              >
-                <p className="hidden sm:block">Customize</p>
-              </Button>
+              <CustomizeButton onClick={handleStartEditing} />
             )}
           </div>
         }
@@ -660,13 +634,7 @@ export function WidgetEditor({
             draggedIndex,
           }}
         >
-          <div
-            className="grid gap-4 auto-rows-min grid-flow-dense"
-            style={{
-              gridTemplateColumns: `repeat(${gridColumns}, 1fr)`,
-            }}
-            onDragLeave={handleDragLeave}
-          >
+          <WidgetsGrid onDragLeave={handleDragLeave} gridColumns={gridColumns}>
             {buildDisplayList(
               responsiveWidgets,
               draggedIndex,
@@ -752,7 +720,7 @@ export function WidgetEditor({
               onSaveCustomization={handleSaveCustomization}
               onClose={handleCancelCustomization}
             />
-          </div>
+          </WidgetsGrid>
         </WidgetContext.Provider>
       ) : (
         <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
@@ -843,4 +811,75 @@ function CustomizationModal({
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );
+}
+function WidgetsGrid({
+  className,
+  gridColumns,
+  ...props
+}: React.ComponentProps<"div"> & { gridColumns?: number }) {
+  return (
+    <div
+      className={cn(
+        "grid gap-4 auto-rows-min grid-flow-dense grid-cols-[repeat(var(--grid-columns),1fr)]",
+        className
+      )}
+      style={
+        {
+          "--grid-columns": gridColumns,
+        } as React.CSSProperties
+      }
+      {...props}
+    />
+  );
+}
+export function WidgetEditorSkeleton() {
+  const gridColumns = useGridColumns();
+  return (
+    <div className="flex flex-col gap-4">
+      <PageHeading
+        rightContent={<CustomizeButton className="pointer-events-none" />}
+      />
+      <WidgetsGrid className="grid-cols-1 min-[768px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1440px]:grid-cols-4">
+        {Array.from({ length: gridColumns > 1 ? 3 : 2 }).map((_, index) => (
+          <Skeleton className="w-full h-[80px] sm:h-[170px] rounded-lg" />
+        ))}
+      </WidgetsGrid>
+    </div>
+  );
+}
+function CustomizeButton({ className, ...props }: ButtonProps) {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      className={cn("px-0 size-7 sm:h-9 sm:w-fit sm:px-3", className)}
+      leftIcon={<PencilRulerIcon />}
+      {...props}
+    >
+      <p className="hidden sm:block">Customize</p>
+    </Button>
+  );
+}
+function useGridColumns() {
+  const [gridColumns, setGridColumns] = useState(4);
+  // Update grid columns based on screen size
+  useEffect(() => {
+    const updateGridColumns = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setGridColumns(1); // Mobile: 1 column
+      } else if (width < 1024) {
+        setGridColumns(2); // Tablet: 2 columns
+      } else if (width < 1440) {
+        setGridColumns(3); // Desktop: 3 columns
+      } else {
+        setGridColumns(4); // Large: 4 columns
+      }
+    };
+
+    updateGridColumns();
+    window.addEventListener("resize", updateGridColumns);
+    return () => window.removeEventListener("resize", updateGridColumns);
+  }, []);
+  return gridColumns;
 }
