@@ -1,7 +1,9 @@
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import useEmblaCarousel from "embla-carousel-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TOTAL_WEEKS = 21;
@@ -113,65 +115,87 @@ export function WeekdaySlider({
   // Loading slide component
 
   return (
-    <div className="overflow-hidden" ref={emblaRef}>
-      <div className="flex">
-        {slides.map((days, slideIndex) => (
-          <div
-            key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
-            className="flex-[0_0_100%] flex justify-center"
-          >
-            <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
-              {days ? (
-                days.map((day) => {
-                  const isCurrent = day.date.isSame(currentDate, "day");
-                  const isToday = day.date.isSame(new Date(), "day");
-                  return (
-                    <div
-                      key={day.date.format("YYYY-MM-DD")}
-                      className={cn(
-                        "flex flex-col items-center gap-1 cursor-pointer"
-                      )}
-                      onClick={() => {
-                        // Ensure consistent timezone handling by using startOf('day')
-                        const clickedDate = day.date.startOf("day").toDate();
-                        setDate(clickedDate);
-                      }}
-                    >
-                      <p
-                        className={cn(
-                          "text-sm transition-colors duration-200",
-                          isCurrent
-                            ? "text-primary font-medium"
-                            : "text-muted-foreground"
-                        )}
-                      >
-                        {day.name}
-                      </p>
+    <div className="relative">
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => {
+          emblaApi?.scrollPrev();
+        }}
+        className="p-0 pr-1 bg-background h-full w-fit z-10 absolute left-0 top-1/2 -translate-y-1/2 hover:bg-background group"
+      >
+        <ChevronLeft className="text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Button>
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {slides.map((days, slideIndex) => (
+            <div
+              key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
+              className="flex-[0_0_100%] flex justify-center px-5"
+            >
+              <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
+                {days ? (
+                  days.map((day) => {
+                    const isCurrent = day.date.isSame(currentDate, "day");
+                    const isToday = day.date.isSame(new Date(), "day");
+                    return (
                       <div
+                        key={day.date.format("YYYY-MM-DD")}
                         className={cn(
-                          "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-muted/20",
-                          {
-                            "bg-primary text-primary-foreground shadow-sm hover:bg-primary/75":
-                              isCurrent,
-                          },
-                          {
-                            "bg-secondary hover:bg-secondary/75":
-                              isToday && !isCurrent,
-                          }
+                          "flex flex-col items-center gap-1 cursor-pointer"
                         )}
+                        onClick={() => {
+                          // Ensure consistent timezone handling by using startOf('day')
+                          const clickedDate = day.date.startOf("day").toDate();
+                          setDate(clickedDate);
+                        }}
                       >
-                        {day.day}
+                        <p
+                          className={cn(
+                            "text-sm transition-colors duration-200",
+                            isCurrent
+                              ? "text-primary font-medium"
+                              : "text-muted-foreground"
+                          )}
+                        >
+                          {day.name}
+                        </p>
+                        <div
+                          className={cn(
+                            "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-muted/20",
+                            {
+                              "bg-primary text-primary-foreground shadow-sm hover:bg-primary/75":
+                                isCurrent,
+                            },
+                            {
+                              "bg-secondary hover:bg-secondary/75":
+                                isToday && !isCurrent,
+                            }
+                          )}
+                        >
+                          {day.day}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <WeekdaysSkeleton />
-              )}
+                    );
+                  })
+                ) : (
+                  <WeekdaysSkeleton />
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => {
+          emblaApi?.scrollNext();
+        }}
+        className="p-0 pl-1 bg-background h-full w-fit z-10 absolute right-0 top-1/2 -translate-y-1/2 hover:bg-background group"
+      >
+        <ChevronRight className="text-muted-foreground group-hover:text-foreground transition-colors" />
+      </Button>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { prepareAssignmentForDBStorage } from "@/trigger/send-notifications";
 import { SubjectTerm, SubjectYear } from "@/types/school";
 import { after } from "next/server";
@@ -21,7 +22,18 @@ export const subjectsRouter = router({
         .default({})
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
-      return getMyEd("subjects", input);
+      const response = await getMyEd("subjects", input);
+      if (response.subjects.main.length === 0) {
+        const allTermsResponse = await getMyEd("subjects", {
+          isPreviousYear: input?.isPreviousYear,
+          termId: MYED_ALL_GRADE_TERMS_SELECTOR,
+        });
+        return {
+          ...allTermsResponse,
+          isDerivedAllTerms: true,
+        };
+      }
+      return response;
     }),
   getSubjectInfo: authenticatedProcedure
     .input(

@@ -7,6 +7,7 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { SubjectsTable } from "./table";
 
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
 import { SubjectYear } from "@/types/school";
@@ -20,7 +21,7 @@ export function SubjectsPageContent() {
   const isPreviousYear = year === "previous";
   const query = useSubjectsData({
     isPreviousYear,
-    termId: term,
+    termId: isPreviousYear && !term ? MYED_ALL_GRADE_TERMS_SELECTOR : term,
   });
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
@@ -88,6 +89,9 @@ function LoadedContent({
               term ??
               (typeof currentTermIndex === "number"
                 ? response.terms[currentTermIndex]!.id
+                : //when the term is not set and year is previous, automatically select all terms
+                "isDerivedAllTerms" in response || year === "previous"
+                ? MYED_ALL_GRADE_TERMS_SELECTOR
                 : undefined)
             }
           />

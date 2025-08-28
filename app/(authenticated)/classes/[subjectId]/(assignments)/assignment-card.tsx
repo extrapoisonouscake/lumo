@@ -35,6 +35,7 @@ export function AssignmentCard({
             shouldHighlightIfMissing && isMissing,
         }
       )}
+      shouldShowArrow={true}
       items={[
         {
           label: "Due Date",
@@ -68,9 +69,7 @@ export function AssignmentCard({
       header={
         <div className="gap-1.5 flex flex-col items-start">
           {assignment.feedback && (
-            <Badge className="font-medium bg-blue-500/10 text-blue-500">
-              Teacher Comment
-            </Badge>
+            <Badge className="bg-brand/10 text-brand">Teacher Comment</Badge>
           )}
           <h3 className="font-medium text-base">{name}</h3>
         </div>

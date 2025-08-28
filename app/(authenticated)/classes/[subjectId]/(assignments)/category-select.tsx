@@ -59,7 +59,7 @@ export function CategorySelectSkeleton() {
   return (
     <div className="flex flex-col gap-2">
       <Label>Category</Label>
-      <SelectSkeleton value="Select a category..." />
+      <SelectSkeleton value="AllAll" />
     </div>
   );
 }

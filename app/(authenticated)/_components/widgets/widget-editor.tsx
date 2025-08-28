@@ -697,7 +697,7 @@ export function WidgetEditor({
                     "min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all",
 
                     {
-                      "border-brand bg-brand/15 text-brand":
+                      "border-brand bg-brand/10 text-brand":
                         dragOverIndex === configuration.length &&
                         isDraggingFromPalette,
                     }

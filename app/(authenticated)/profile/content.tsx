@@ -139,7 +139,7 @@ function ProfileCard(data: PersonalDetails) {
       <div className="flex flex-col gap-1.5 items-center md:items-start">
         <h1 className="text-2xl font-semibold">{formatUserFullName(data)}</h1>
         <div className="flex gap-1.5 flex-wrap">
-          <Badge className="text-sm font-normal bg-brand/15 text-brand">
+          <Badge className="text-sm font-normal bg-brand/10 text-brand">
             Grade {data.grade}
           </Badge>
           <Badge variant="outline" className="text-sm font-normal">
@@ -161,7 +161,7 @@ function ProfileContentSkeleton() {
           </Skeleton>
           <div className="flex gap-1.5 flex-wrap">
             <Skeleton>
-              <Badge className="text-sm font-normal bg-brand/15 text-brand">
+              <Badge className="text-sm font-normal bg-brand/10 text-brand">
                 Grade 11
               </Badge>
             </Skeleton>
@@ -239,7 +239,7 @@ function UserProperty({
 }) {
   return (
     <div className="flex gap-3 py-4 px-5 border-b last:border-b-0 items-center">
-      <div className="rounded-full p-2 bg-brand/15 text-brand">
+      <div className="rounded-full p-2 bg-brand/10 text-brand">
         <Icon className="size-5" />
       </div>
       <div className="flex flex-col gap-0.5">

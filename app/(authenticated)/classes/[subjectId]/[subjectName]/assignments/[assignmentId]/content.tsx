@@ -186,7 +186,7 @@ export function AssignmentPageContent({
                       <Badge
                         variant={!submission ? "secondary" : "default"}
                         className={cn("font-medium", {
-                          "bg-brand/20 text-brand": submission,
+                          "bg-brand/10 text-brand": submission,
                         })}
                       >
                         {submission ? "Submitted" : "Not Submitted"}

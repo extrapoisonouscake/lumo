@@ -44,7 +44,7 @@ export function MaintenancePageContent() {
             <Card className="w-full border-l-[4px] border-l-brand bg-gradient-to-r from-brand/5 to-transparent">
               <CardHeader className="pb-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-brand/15">
+                  <div className="p-2 rounded-full bg-brand/10">
                     <MegaphoneIcon className="size-4 text-brand" />
                   </div>
                   <div className="flex flex-col">

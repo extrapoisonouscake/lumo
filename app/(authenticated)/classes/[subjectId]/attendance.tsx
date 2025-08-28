@@ -40,7 +40,7 @@ export function SubjectAttendance({
             size="sm"
             leftIcon={<ListX />}
           >
-            Absences
+            Attendance
           </Button>
         </ResponsiveDialogTrigger>
         <ResponsiveDialogContent className="pb-0">

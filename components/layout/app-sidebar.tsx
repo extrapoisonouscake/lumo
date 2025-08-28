@@ -105,7 +105,7 @@ function PagesMenu() {
                   asChild
                   isActive={isActive && (isMobile || !page.items?.length)}
                   className={cn({
-                    "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 data-[active=true]:hover:bg-brand/10 data-[active=true]:hover:text-brand transition-colors":
+                    "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 hover:data-[active=true]:bg-brand/10 hover:data-[active=true]:text-brand transition-colors":
                       isMobile,
                   })}
                 >
