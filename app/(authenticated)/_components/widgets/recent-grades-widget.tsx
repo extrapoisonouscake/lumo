@@ -96,7 +96,7 @@ function RecentGradesWidget(
     if (recentGradedAssignments.length === 0) {
       richError = {
         emoji: "📊",
-        message: "No recent grades",
+        message: "No recent grades.",
       };
     } else {
       content = (

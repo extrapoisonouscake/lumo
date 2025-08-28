@@ -1,6 +1,7 @@
 "use client";
 import { formatUserFullName, UserAvatar } from "@/components/misc/user";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +11,7 @@ import { PersonalDetails } from "@/types/school";
 import {
   AsteriskIcon,
   CarIcon,
+  CopyIcon,
   DoorClosedIcon,
   EarthIcon,
   GraduationCapIcon,
@@ -23,6 +25,7 @@ import {
   SquareParkingIcon,
   UserIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 import styles from "./styles.module.css";
 
 export default function ProfileContent() {
@@ -56,11 +59,13 @@ export default function ProfileContent() {
                   label="Student Number"
                   value={studentNumber}
                   icon={HashIcon}
+                  isCopyable
                 />
                 <UserProperty
                   label="PEN (Personal Education Number)"
                   value={personalEducationNumber}
                   icon={HashIcon}
+                  isCopyable
                 />
 
                 <AddressList {...addresses} />
@@ -232,10 +237,12 @@ function UserProperty({
   label,
   value,
   icon: Icon,
+  isCopyable,
 }: {
   label: string;
   value: string | number | undefined;
   icon: LucideIcon;
+  isCopyable?: boolean;
 }) {
   return (
     <div className="flex gap-3 py-4 px-5 border-b last:border-b-0 items-center">
@@ -246,9 +253,24 @@ function UserProperty({
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <p className="text-base">
-          {value ?? <span className="italic text-muted-foreground">N/A</span>}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="text-base">
+            {value ?? <span className="italic text-muted-foreground">N/A</span>}
+          </p>
+          {isCopyable && value && (
+            <Button
+              size="smallIcon"
+              variant="ghost"
+              className="text-muted-foreground p-0 size-fit"
+              onClick={() => {
+                navigator.clipboard.writeText(value.toString());
+                toast.success("Copied to clipboard.");
+              }}
+            >
+              <CopyIcon className="!size-3.5" />
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );

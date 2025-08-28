@@ -70,15 +70,15 @@ export const announcementsNotAvailableReasonToVisualData = {
   },
   [AnnouncementsNotAvailableReason.SchoolNotAvailable]: {
     emoji: "😔",
-    message: "Your school is not supported yet",
+    message: "Your school is not supported yet.",
   },
   [AnnouncementsNotAvailableReason.NoAnnouncements]: {
     emoji: "⏳",
-    message: "No announcements for today yet",
+    message: "No announcements for today yet.",
   },
   [AnnouncementsNotAvailableReason.NotAWeekday]: {
     emoji: "📭",
-    message: "No announcements for today",
+    message: "No announcements for today.",
   },
 };
 export function AnnouncementsNotAvailableCard({

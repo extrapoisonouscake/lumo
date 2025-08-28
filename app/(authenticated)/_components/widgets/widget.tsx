@@ -69,7 +69,7 @@ export function Widget({
         onDragEnd={isEditing ? handleDragEnd : undefined}
         onTouchStart={isEditing ? (e) => startTouchDrag(e, index) : undefined}
         className={cn(
-          "relative transition-transform flex-1 w-full",
+          "relative transition-transform flex-1 w-full sm:min-h-[200px]",
           { "!shadow-sm": isBeingResized },
           { "-translate-y-1": dragOverIndex === index },
           { "even:animate-jiggle odd:animate-jiggle-alt": isEditing },
