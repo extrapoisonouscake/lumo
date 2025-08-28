@@ -26,7 +26,7 @@ import { user_settings, users } from "@/db/schema";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { hashString } from "@/helpers/hashString";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
-import { fetchMyEd } from "@/instances/fetchMyEd";
+import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { FlatRouteStep } from "@/parsing/myed/routes";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
@@ -153,7 +153,7 @@ export async function getFreshAuthCookies() {
     {
       credentials: "include",
     },
-    "https://myeducation.gov.bc.ca"
+    MyEdBaseURLs.CUSTOM
   );
 
   const cookiesPairs = loginTokenResponse.headers.getSetCookie();
@@ -197,7 +197,7 @@ export async function fetchAuthCookiesAndStudentId(
           "Content-Type": "application/x-www-form-urlencoded",
         },
       },
-      "https://myeducation.gov.bc.ca/app/rest"
+      MyEdBaseURLs.NEW
     );
     const data = await response.json();
     cookies = parseCookiesFromSetCookieHeader(
@@ -207,6 +207,7 @@ export async function fetchAuthCookiesAndStudentId(
           name as MyEdAuthenticationCookiesName
         )
     ) as AuthCookies;
+    //activating the cookies
     await fetch(data.aspenUrl, {
       headers: {
         Cookie: convertObjectToCookieString(cookies),
@@ -222,10 +223,6 @@ export async function fetchAuthCookiesAndStudentId(
       rawLoginErrorMessageToIDMap[response.message] ?? response.message;
     throw new LoginError(errorMessage);
   }
-
-  // if (needsPasswordChange($)) {
-  //   throw new LoginError(LoginErrors.passwordChangeRequired, cookies);
-  // }
 
   const studentId = await fetchStudentId(cookies);
   return {
@@ -262,29 +259,7 @@ export function parseAuthGenericErrorMessage($: cheerio.CheerioAPI) {
   });
   return errorMessage;
 }
-// function parseLoginErrorMessage($: cheerio.CheerioAPI) {
-//   const rawErrorMessage = $('.panel div[style="color:red"]')
-//     .text()
-//     .trim()
-//     .replace(/\n/g, " ");
-//   return rawErrorMessage
-//     ? rawErrorMessageToIDMap[rawErrorMessage] ?? LoginError.unexpectedError
-//     : undefined;
-// }
-function needsPasswordChange($: cheerio.CheerioAPI) {
-  let wasFound = false;
-  $('script[language="JavaScript"], script[language="Javascript"]').each(
-    function () {
-      const scriptContent = $(this).html();
-      if (!scriptContent) return;
-      if (scriptContent.includes("changePassword.do?parentForm=logonForm")) {
-        wasFound = true;
-        return false;
-      }
-    }
-  );
-  return wasFound;
-}
+
 const logoutStep: FlatRouteStep = {
   method: "GET",
   path: "logout.do",

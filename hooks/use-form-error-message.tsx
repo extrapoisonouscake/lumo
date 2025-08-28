@@ -1,12 +1,10 @@
 import { ErrorAlert } from "@/components/ui/error-alert";
 import { UI_ANIMATION_TRANSITION } from "@/constants/ui";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 
-export function useFormErrorMessage(initialErrorMessage?: string | null) {
-  const [errorMessage, setErrorMessage] = useState<string | null | undefined>(
-    initialErrorMessage ?? null
-  );
+export function useFormErrorMessage(initialErrorMessage?: ReactNode | null) {
+  const [errorMessage, setErrorMessage] = useState(initialErrorMessage ?? null);
 
   const node = (
     <AnimatePresence mode="wait">

@@ -1,18 +1,14 @@
 "use client";
 
-import { queryClient, trpc, trpcClient } from "@/app/trpc";
-import { AuthCookies } from "@/helpers/getAuthCookies";
+import { queryClient, trpcClient } from "@/app/trpc";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
 import MyEducationBCLogo from "@/public/myeducationbc.svg";
-import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
 import { useEffect, useState } from "react";
-import { ChangePasswordModal } from "./change-password-modal";
 import { LoginForm } from "./form";
-import { initClientLogin } from "./helpers";
 import { PasswordResetSection } from "./password-reset-section";
 import { SuccessfulRegistrationDialog } from "./successful-registration-dialog";
 export function LoginPageContent() {
@@ -22,17 +18,13 @@ export function LoginPageContent() {
 
   const queryRegistrationResult = searchParams.get("registration_result") as
     | "success"
-    | "pending"
     | null;
   const [registrationResult, setRegistrationResult] = useState(
     queryRegistrationResult
   );
-  const [temporaryAuthCookies, setTemporaryAuthCookies] = useState<
-    AuthCookies | undefined
-  >(undefined);
-  const forceLoginMutation = useMutation(
-    trpc.myed.auth.forceLogin.mutationOptions()
-  );
+
+  const [isPasswordResetModalOpen, setIsPasswordResetModalOpen] =
+    useState(false);
   useEffect(() => {
     queryClient.removeQueries();
     trpcClient.myed.health.query().then((res) => {
@@ -46,31 +38,36 @@ export function LoginPageContent() {
     <>
       {!!registrationResult && (
         <SuccessfulRegistrationDialog
-          result={registrationResult}
-          setResult={setRegistrationResult}
+          hideDialog={() => setRegistrationResult(null)}
         />
       )}
       <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto gap-5">
         <div className="flex flex-col items-center gap-3 w-full">
           <div className="flex flex-col gap-2 items-center">
-            <div className="size-12 p-3 rounded-full bg-muted flex items-center justify-center">
-              <MyEducationBCLogo className="size-full" />
+            <div className="flex gap-2 items-center">
+              <div className="size-10 p-2.5 rounded-full bg-muted flex items-center justify-center">
+                <MyEducationBCLogo className="size-full" />
+              </div>
+              <div className="after:content-['.....'] after:text-xl after:leading-none after:align-[8px] after:text-muted-foreground/25 after:tracking-wide after:font-sans" />
+              <div className="size-10 p-2.5 rounded-full bg-muted flex items-center justify-center">
+                <MyEducationBCLogo className="size-full" />
+              </div>
             </div>
-            <div className="text-center space-y-1">
-              <h2 className="text-lg font-medium">
-                Sign In with MyEducationBC
-              </h2>
+            <div className="text-center space-y-1.5">
+              <h2 className="text-xl font-medium">Sign In</h2>
               <p className="text-sm text-muted-foreground text-center max-w-[350px]">
-                Use your official MyEducationBC username and password to access
-                your account. All data is securely synchronized with the school
+                Use your MyEducationBC username and password to access your
+                account. All data is securely synchronized with the school
                 portal.
               </p>
             </div>
           </div>
           <div className="w-full flex flex-col gap-2">
             <LoginForm
-              setTemporaryAuthCookies={setTemporaryAuthCookies}
               form={form}
+              openResetPasswordModal={() => {
+                setIsPasswordResetModalOpen(true);
+              }}
             />
 
             <div className="flex items-center justify-between gap-2">
@@ -80,6 +77,8 @@ export function LoginPageContent() {
                   form.setValue("password", "");
                 }}
                 getInitialUsername={() => form.getValues("username")}
+                isOpen={isPasswordResetModalOpen}
+                setIsOpen={setIsPasswordResetModalOpen}
               />
               <Link
                 href="/register"
@@ -97,7 +96,7 @@ export function LoginPageContent() {
           endorsement by the Government of British Columbia.
         </p>
       </div>
-      <ChangePasswordModal
+      {/* <ChangePasswordModal
         getCredentials={() => ({
           username: form.getValues("username"),
           password: form.getValues("password"),
@@ -122,7 +121,7 @@ export function LoginPageContent() {
           setTemporaryAuthCookies(undefined);
         }}
         authCookies={temporaryAuthCookies}
-      />
+      /> */}
     </>
   );
 }

@@ -137,7 +137,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
               </ResponsiveFilters>
             </div>
           }
-          emptyState={{ emoji: "🎓", text: "No entries found." }}
+          emptyState={{ emoji: "🎓", message: "No entries found." }}
           columns={columns}
           renderMobileRow={(row) => {
             const entry = row.original;

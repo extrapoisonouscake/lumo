@@ -5,7 +5,6 @@ import { FormPasswordInput } from "@/components/ui/form-password-input";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { AuthCookies } from "@/helpers/getAuthCookies";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 
 import {
@@ -18,24 +17,45 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { trpc } from "@/app/trpc";
 import { initClientLogin } from "../helpers";
-function getFullErrorMessage(error: string | null | undefined) {
+function getFullErrorMessage(
+  error: string | null,
+  openResetPasswordModal: () => void
+) {
+  if (error === LoginErrors.accountDisabled) {
+    return (
+      <>
+        <p>
+          Your account has been disabled. Click{" "}
+          <span
+            onClick={openResetPasswordModal}
+            className="cursor-pointer underline"
+          >
+            here
+          </span>{" "}
+          to reset your password or contact your school administrator.
+        </p>
+      </>
+    );
+  }
   return (
     loginErrorIDToMessageMap[error as LoginErrors] ||
     "An unexpected error occurred."
   );
 }
 export function LoginForm({
-  setTemporaryAuthCookies,
   form,
+  openResetPasswordModal,
 }: {
-  setTemporaryAuthCookies: (cookies: AuthCookies) => void;
   form: UseFormReturn<LoginSchema>;
+  openResetPasswordModal: () => void;
 }) {
   const searchParams = useSearchParams();
   const initialErrorCode = searchParams.get("error");
   const { errorMessageNode, errorMessage, setErrorMessage } =
     useFormErrorMessage(
-      initialErrorCode ? getFullErrorMessage(initialErrorCode) : null
+      initialErrorCode
+        ? getFullErrorMessage(initialErrorCode, openResetPasswordModal)
+        : null
     );
   const loginMutation = useMutation(trpc.myed.auth.login.mutationOptions());
   const router = useRouter();
@@ -49,14 +69,8 @@ export function LoginForm({
       initClientLogin(router.push);
     } else {
       const message = response.message;
-      if (
-        message === LoginErrors.passwordChangeRequired &&
-        response.authCookies
-      ) {
-        setTemporaryAuthCookies(response.authCookies);
-      } else {
-        setErrorMessage(getFullErrorMessage(message));
-      }
+
+      setErrorMessage(getFullErrorMessage(message, openResetPasswordModal));
     }
   }
 
@@ -68,7 +82,11 @@ export function LoginForm({
         {...form}
         className="flex flex-col gap-3 w-full"
       >
-        <FormInput placeholder="1234567" name="username" label="Username" />
+        <FormInput
+          placeholder="1234567"
+          name="username"
+          label="Username/Student Number"
+        />
         <FormPasswordInput name="password" />
         <SubmitButton isLoading={form.formState.isSubmitting}>
           Sign In

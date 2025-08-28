@@ -1,6 +1,5 @@
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
-import { fetchMyEd } from "@/instances/fetchMyEd";
-import * as cheerio from "cheerio";
+import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { z } from "zod";
 
 import { publicProcedure, router } from "../../../base";
@@ -9,17 +8,11 @@ import {
   deleteSession,
   fetchStudentId,
   getFreshAuthCookies,
-  LoginError,
-  parseAuthGenericErrorMessage,
-  parseHTMLTokenFromResponse,
   performLogin,
-  rawLoginErrorMessageToIDMap,
   setUpLogin,
 } from "./helpers";
 import {
   authCookiesSchema,
-  changePasswordSchema,
-  genericErrorMessageVariableRegex,
   isKnownLoginError,
   LoginErrors,
   loginSchema,
@@ -30,270 +23,136 @@ import {
 } from "./public";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
-import { MYED_HTML_TOKEN_INPUT_NAME } from "@/constants/myed";
-import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
-import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
+import { AuthCookies } from "@/helpers/getAuthCookies";
+import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
-import { isAuthenticatedContext } from "../../../context";
 import { fetchAuthCookiesAndStudentId } from "./helpers";
-
-const convertObjectToWeirdStringRepresentation = (
-  obj: Record<string, string>
-) => {
-  return Object.entries(obj)
-    .map(([key, value]) => `{${key},${value}}`)
-    .join(",");
-};
 
 const registrationFieldsByType: Record<
   RegistrationType,
   {
-    generalInfo: Array<keyof typeof RegistrationInternalFields>;
+    addressInfo: Array<keyof typeof RegistrationInternalFields>;
+    personalInfo: Array<keyof typeof RegistrationInternalFields>;
     userInfo: Array<keyof typeof RegistrationInternalFields>;
   }
 > = {
   [RegistrationType.guardianForStudent]: {
-    generalInfo: [
-      "firstName",
-      "lastName",
-      "streetAddress",
-      "city",
-      "region",
-      "postalCode",
-      "phone",
-      "schoolDistrict",
-    ],
+    addressInfo: ["streetAddress", "poBox", "city", "region", "postalCode"],
+    personalInfo: ["firstName", "lastName", "phone", "email", "schoolDistrict"],
     userInfo: [
-      "email",
       "password",
+      "schoolDistrict",
       "securityQuestionType",
       "securityQuestionAnswer",
     ],
   },
 };
-
+const REGISTRATION_PRETTIFIED_ERROR_MESSAGES: Record<string, string> = {
+  "Validation successful, but an account already exists for the person associated with this data.":
+    "The email address you provided is already in use.",
+};
 const register = publicProcedure
   .input(registerSchema)
   .mutation(async ({ input }) => {
     const type = input.type;
     const fields = input.fields as Record<string, any>;
-    const generalInfo = Object.fromEntries(
-      registrationFieldsByType[type].generalInfo.map((field) => [
-        RegistrationInternalFields[field],
-        fields[field],
-      ])
+    const fieldsWithType = registrationFieldsByType[type];
+    const mapFieldsToInternalFields = (
+      field: keyof typeof RegistrationInternalFields
+    ) => [RegistrationInternalFields[field], fields[field]];
+
+    const addressInfo = Object.fromEntries(
+      fieldsWithType.addressInfo.map(mapFieldsToInternalFields)
     );
-    const userInfo = Object.fromEntries(
-      registrationFieldsByType[type].userInfo.map((field) => [
-        RegistrationInternalFields[field],
-        fields[field],
-      ])
+    const personalInfo = Object.fromEntries(
+      fieldsWithType.personalInfo.map(mapFieldsToInternalFields)
     );
-    const query = new URLSearchParams({
-      userEvent: "930",
-      deploymentId: "aspen",
-      actType: "0",
-      validation: "",
-      general: convertObjectToWeirdStringRepresentation(generalInfo),
-      userInfo: convertObjectToWeirdStringRepresentation(userInfo),
-    });
-    const cookies = await getFreshAuthCookies();
-    const responseXML = await fetchMyEd(
-      `/accountCreation.do?${query.toString()}`,
-      {
-        headers: {
-          Cookie: convertObjectToCookieString(cookies),
+    const userInfo = {
+      ...Object.fromEntries(
+        fieldsWithType.userInfo.map(mapFieldsToInternalFields)
+      ),
+      preferredLocale: "en_US",
+      loginName: fields.email,
+    };
+    const body = {
+      addressModel: addressInfo,
+      personModel: personalInfo,
+      userModel: userInfo,
+    };
+
+    try {
+      await fetchMyEd<{
+        userOid: string;
+        personOid: string;
+        addressOid: string;
+      }>(
+        `/account`,
+        {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      }
-    ).then((res) => res.text());
-    const $ = cheerio.load(responseXML, { xml: true });
-    const responseElement = $("response");
-    const isError = responseElement.attr("result") === "error";
-
-    const message = responseElement.attr("message");
-    if (isError) {
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message });
+        MyEdBaseURLs.NEW
+      );
+    } catch (e: any) {
+      const body = (await e.json()) as { code: number; message: string };
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message:
+          REGISTRATION_PRETTIFIED_ERROR_MESSAGES[body.message] ?? body.message,
+      });
     }
-    const canLoginImmediately = message !== "true"; //just how it works originally
-    return { canLoginImmediately };
   });
-
-const resetPasswordModifiedErrorMessages: Record<string, string> = {
-  "The login ID you entered is invalid.":
-    "The username you entered is invalid.",
+//the keys are common parts of known error messages
+const resetPasswordErrorMessagesModifiers: Record<
+  string,
+  (message: string) => string
+> = {
+  "Unable to find user with login id": () =>
+    `We couldn't find a user with such username.`,
+  "Password recovery is disabled for user": () =>
+    `Password recovery is disabled for this user.`,
 };
 
-const resetPassword = publicProcedure
+const sendPasswordResetEmail = publicProcedure
   .input(passwordResetSchema)
   .mutation(async ({ input }) => {
     const cookies = await getFreshAuthCookies();
     const params = new URLSearchParams({
-      userEvent: input.securityQuestion ? "930" : "10010",
-      deploymentId: "aspen",
-      username: input.username,
-      email: input.email,
-
-      ...(input.securityQuestion
-        ? {
-            question: input.securityQuestion,
-            answer: input.securityAnswer,
-          }
-        : {}),
+      loginId: input.username,
+      source: "logon",
     });
-    const response = await fetchMyEd("/passwordRecovery.do", {
-      method: "POST",
-      headers: {
-        Cookie: convertObjectToCookieString(cookies),
-      },
-      body: params,
-    });
-    const responseHTML = await response.text();
-    const $ = cheerio.load(responseHTML);
-    const errorMessage = parseAuthGenericErrorMessage($);
-    if (errorMessage) {
-      let normalizedMessage =
-        resetPasswordModifiedErrorMessages[errorMessage] ?? errorMessage;
-      if (normalizedMessage.at(-1) !== ".") {
-        normalizedMessage += ".";
-      }
+    try {
+      await fetchMyEd<void | { code: number; message: string }>(
+        "/auth/passwordRecovery",
+        {
+          method: "POST",
+          headers: {
+            Cookie: convertObjectToCookieString(cookies),
+          },
+          body: params,
+        },
+        MyEdBaseURLs.NEW
+      );
+    } catch (e: any) {
+      const body = (await e.json()) as Exclude<
+        Awaited<ReturnType<typeof e.json>>,
+        void
+      >;
+      const modifier = Object.entries(resetPasswordErrorMessagesModifiers).find(
+        ([fragment]) => body.message.includes(fragment)
+      )?.[1];
+      const normalizedMessage = modifier
+        ? modifier(body.message)
+        : body.message;
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: normalizedMessage,
       });
     }
-    const bodyOnLoadAttribute = $("body").attr("onLoad");
-    let securityQuestion;
-    if (!bodyOnLoadAttribute?.includes("message.email.passwordEmailSent")) {
-      securityQuestion = $(
-        ".logonDetailContainer tr:nth-child(5) label"
-      ).text();
-    }
-    return {
-      securityQuestion,
-    };
   });
-
-const changePasswordPriorityErrorMessageRegex =
-  /showMessageWindow\((?:[^,]+,){4}\s*(['"`])(.*?)\1/;
-
-const changePassword = publicProcedure
-  .input(changePasswordSchema)
-  .mutation(async ({ input, ctx }) => {
-    const isLoggedIn = isAuthenticatedContext(ctx);
-    let authCookies: AuthCookies;
-    if (isLoggedIn) {
-      const myedCookieStore = await MyEdCookieStore.create();
-      authCookies = getAuthCookies(myedCookieStore);
-    } else {
-      const externalCookies = input.authCookies;
-      if (!externalCookies) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Cookies are required.",
-        });
-      }
-      authCookies = externalCookies;
-    }
-    const cookiesString = convertObjectToCookieString(authCookies);
-    const loginPageResponse = await fetchMyEd("/changePassword.do", {
-      headers: { Cookie: cookiesString },
-    });
-
-    const htmlToken = await parseHTMLTokenFromResponse(loginPageResponse);
-    const params = new URLSearchParams({
-      userEvent: "140",
-      deploymentId: "aspen",
-      current: input.oldPassword,
-      password: input.newPassword,
-      confirm: input.newPassword,
-      [MYED_HTML_TOKEN_INPUT_NAME]: htmlToken,
-    });
-    try {
-      const response = await fetchMyEd("/changePassword.do", {
-        method: "POST",
-        headers: {
-          Cookie: cookiesString,
-        },
-        body: params,
-      });
-      const responseHTML = await response.text();
-      const $ = cheerio.load(responseHTML);
-      let priorityErrorMessage, secondaryErrorMessage;
-      $("script[language='JavaScript']").each(function () {
-        const scriptContent = $(this).html();
-        if (!scriptContent) return;
-        const priorityMatch = scriptContent.match(
-          changePasswordPriorityErrorMessageRegex
-        );
-        if (priorityMatch) {
-          priorityErrorMessage = priorityMatch[2];
-          return false;
-        }
-        const secondaryMatch = scriptContent.match(
-          genericErrorMessageVariableRegex
-        );
-        if (secondaryMatch) {
-          secondaryErrorMessage = secondaryMatch[2];
-        }
-      });
-      const finalErrorMessage = priorityErrorMessage ?? secondaryErrorMessage;
-      if (finalErrorMessage) {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: finalErrorMessage,
-        });
-      }
-      if (authCookies) {
-        await finalizePasswordChange({
-          authCookies,
-          username: input.username as NonNullable<typeof input.username>,
-          password: input.newPassword,
-          htmlToken,
-        });
-      }
-    } catch (e) {
-      throw new TRPCError({
-        code: "INTERNAL_SERVER_ERROR",
-        message: "An unexpected error occurred.",
-      });
-    }
-  });
-
-async function finalizePasswordChange({
-  authCookies,
-  username,
-  password,
-  htmlToken,
-}: {
-  authCookies: AuthCookies;
-  username: string;
-  password: string;
-  htmlToken: string;
-}) {
-  const params = new URLSearchParams({
-    userEvent: "300",
-    userParam: password,
-    deploymentId: "aspen",
-    username,
-    password: "",
-    [MYED_HTML_TOKEN_INPUT_NAME]: htmlToken,
-  });
-  const response = await fetchMyEd("/logon.do", {
-    method: "POST",
-    headers: {
-      Cookie: convertObjectToCookieString(authCookies),
-    },
-    body: params,
-  });
-  const responseHTML = await response.text();
-  const $ = cheerio.load(responseHTML);
-  const rawErrorMessage = parseAuthGenericErrorMessage($);
-  if (rawErrorMessage) {
-    const errorMessage =
-      rawLoginErrorMessageToIDMap[rawErrorMessage] ?? rawErrorMessage;
-    throw new LoginError(errorMessage);
-  }
-}
 
 type LoginResponse =
   | { success: true }
@@ -332,15 +191,42 @@ export const authRouter = router({
       });
     }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
-    const fields = await ctx.getMyEd("registrationFields");
-    return { ip: ctx.ip, ...fields };
+    const response = await fetchMyEd<{
+      cities: string[];
+      securityQuestions: string[];
+      states: string[];
+      lowestLevelOrganizations: Record<string, string>;
+      passwordRecoveryEnabled: boolean;
+      minimumAnswerLength: number;
+      passwordMinLength: number;
+      passwordRequireMixedCaseEnabled: boolean;
+      passwordRequireDigitsEnabled: boolean;
+      passwordRequireNonAlphaEnabled: boolean;
+      passwordValidateWithHeuristicsEnabled: boolean;
+    }>("/account/accountCreationConfig", {}, MyEdBaseURLs.NEW);
+    const body = await response.json();
+    return {
+      ip: ctx.ip,
+      schoolDistricts: body.lowestLevelOrganizations,
+      securityQuestions: body.securityQuestions,
+      passwordRequirements: {
+        minLength: body.passwordMinLength,
+        requireMixedCase: body.passwordRequireMixedCaseEnabled,
+        requireDigits: body.passwordRequireDigitsEnabled,
+        requireNonAlpha: body.passwordRequireNonAlphaEnabled,
+      } satisfies PasswordRequirements,
+      securityQuestionRequirements: {
+        minLength: body.minimumAnswerLength,
+      },
+    };
   }),
   register,
+
   logOut: authenticatedProcedure.mutation(async () => {
     await deleteSession();
   }),
-  changePassword,
-  resetPassword,
+
+  sendPasswordResetEmail,
   //* if the name is changed, change in trpc client initialization as well
   ensureValidSession: authenticatedProcedure.mutation(async ({ ctx }) => {
     if (ctx.tokens) {

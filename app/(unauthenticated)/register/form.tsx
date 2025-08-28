@@ -19,6 +19,7 @@ import {
   registerTypeSchemas,
   RegistrationType,
 } from "@/lib/trpc/routes/myed/auth/public";
+import { PasswordRequirements } from "@/types/auth";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { ReactNode, useMemo, useState } from "react";
@@ -143,7 +144,15 @@ const getFields: <T extends RegistrationType>({
 } & Omit<RegistrationFormProps, "defaultCountry">) => Record<
   RegistrationStep,
   { name: string; node: ReactNode }[]
-> = ({ type, form, country, schoolDistricts, securityQuestionOptions }) => {
+> = ({
+  type,
+  form,
+  country,
+  schoolDistricts,
+  securityQuestionOptions,
+  passwordRequirements,
+  securityQuestionRequirements,
+}) => {
   switch (type) {
     case RegistrationType.guardianForStudent:
       const fields = {
@@ -225,7 +234,12 @@ const getFields: <T extends RegistrationType>({
           },
           {
             name: "password",
-            node: <ExtendedFormPasswordInput name="fields.password" />,
+            node: (
+              <ExtendedFormPasswordInput
+                name="fields.password"
+                requirements={passwordRequirements}
+              />
+            ),
           },
           {
             name: "securityQuestionType",
@@ -247,6 +261,7 @@ const getFields: <T extends RegistrationType>({
             node: (
               <FormPasswordInput
                 required
+                minLength={securityQuestionRequirements.minLength}
                 name="fields.securityQuestionAnswer"
                 label="Security Answer"
                 placeholder="Start typing..."
@@ -324,9 +339,9 @@ const getFields: <T extends RegistrationType>({
             name="fields.schoolDistrict"
             label="School District"
             placeholder="Click to select..."
-            options={schoolDistricts.map((district) => ({
-              value: district,
-              label: district,
+            options={Object.entries(schoolDistricts).map(([id, label]) => ({
+              value: id,
+              label,
             }))}
           />
         ),
@@ -340,9 +355,13 @@ const REGISTRATION_TYPES_OPTIONS = [
   { value: RegistrationType.guardianForStudent, label: "Student" },
 ];
 interface RegistrationFormProps {
-  schoolDistricts: string[];
+  schoolDistricts: Record<string, string>;
   defaultCountry: string | null;
   securityQuestionOptions: string[];
+  passwordRequirements: PasswordRequirements;
+  securityQuestionRequirements: {
+    minLength: number;
+  };
 }
 export function RegistrationForm({
   defaultCountry,
@@ -373,11 +392,7 @@ export function RegistrationForm({
     }
     try {
       const response = await registerMutation.mutateAsync(data);
-      router.push(
-        `/login?registration_result=${
-          response.canLoginImmediately ? "success" : "pending"
-        }`
-      );
+      router.push(`/login?registration_result=success`);
     } catch (error) {
       if (isTRPCError(error)) {
         setErrorMessage(error.message);
@@ -392,7 +407,13 @@ export function RegistrationForm({
     | AllowedRegistrationCountries
     | "";
   const fields = useMemo(
-    () => getFields({ type, form, country, ...props }),
+    () =>
+      getFields({
+        type,
+        form,
+        country,
+        ...props,
+      }),
     [type, form, country, ...Object.values(props)]
   );
   return (

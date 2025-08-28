@@ -12,7 +12,7 @@ import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ReactNode } from "react";
 import { AppleEmoji } from "../misc/apple-emoji";
-import { ErrorCard } from "../misc/error-card";
+import { ErrorCard, ErrorCardProps } from "../misc/error-card";
 import {
   Table,
   TableBody,
@@ -35,10 +35,7 @@ export type RowRendererFactory<T> = (
 ) => (row: Row<T>, trueIndex: number) => ReactNode;
 
 // Define the type for the empty state
-export type EmptyStateProps = {
-  emoji?: string;
-  text?: string;
-};
+
 const NO_CONTENT_MESSAGE = "No content.";
 export function TableRenderer<T>({
   table,
@@ -59,7 +56,7 @@ export function TableRenderer<T>({
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
-  emptyState?: EmptyStateProps | string;
+  emptyState?: ErrorCardProps | string;
   renderMobileRow?: (row: Row<T>, rowIndex: number) => ReactNode;
 }) {
   const { rows } = table.getRowModel();
@@ -77,7 +74,7 @@ export function TableRenderer<T>({
             }
           >
             {typeof emptyState !== "string"
-              ? emptyState?.text
+              ? emptyState?.message
               : emptyState ?? NO_CONTENT_MESSAGE}
           </ErrorCard>
         )}
@@ -142,7 +139,7 @@ export function TableRenderer<T>({
                           <AppleEmoji value={emptyState.emoji} />
                         </span>
                       )}
-                      <span>{emptyState?.text || NO_CONTENT_MESSAGE}</span>
+                      <span>{emptyState?.message || NO_CONTENT_MESSAGE}</span>
                     </div>
                   )
                 ) : (

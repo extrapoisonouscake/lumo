@@ -1,19 +1,5 @@
-import { trpc } from "@/app/trpc";
 import { AuthCookies } from "@/helpers/getAuthCookies";
-import { useFormErrorMessage } from "@/hooks/use-form-error-message";
-import { useFormValidation } from "@/hooks/use-form-validation";
-import { isTRPCError } from "@/lib/trpc/helpers";
-import {
-  changePasswordSchema,
-  ChangePasswordSchema,
-  LoginSchema,
-} from "@/lib/trpc/routes/myed/auth/public";
-import { useMutation } from "@tanstack/react-query";
-import { Form } from "../ui/form";
-import { FormInput } from "../ui/form-input";
-import { FormPasswordInput } from "../ui/form-password-input";
-import { SubmitButton } from "../ui/submit-button";
-import { ExtendedFormPasswordInput } from "./extended-password-input";
+import { LoginSchema } from "@/lib/trpc/routes/myed/auth/public";
 export function ChangePasswordForm({
   onSuccess,
   authCookies,
@@ -23,38 +9,38 @@ export function ChangePasswordForm({
   authCookies?: AuthCookies;
   getInitialCredentials?: () => LoginSchema;
 }) {
-  const initialCredentials = getInitialCredentials?.();
-  const form = useFormValidation(changePasswordSchema, {
-    defaultValues: {
-      authCookies,
-      username: initialCredentials?.username,
-      oldPassword: initialCredentials?.password,
-    },
-  });
-  const { errorMessage, setErrorMessage, errorMessageNode } =
-    useFormErrorMessage();
-  const changePasswordMutation = useMutation(
-    trpc.myed.auth.changePassword.mutationOptions()
-  );
-  const onSubmit = async (data: ChangePasswordSchema) => {
-    if (errorMessage) {
-      setErrorMessage(null);
-    }
-    try {
-      const response = await changePasswordMutation.mutateAsync(data);
-      onSuccess();
-    } catch (e) {
-      if (isTRPCError(e)) {
-        setErrorMessage(e.message);
-      } else {
-        setErrorMessage("An unexpected error occurred.");
-      }
-    }
-  };
+  // const initialCredentials = getInitialCredentials?.();
+  // const form = useFormValidation(changePasswordSchema, {
+  //   defaultValues: {
+  //     authCookies,
+  //     username: initialCredentials?.username,
+  //     oldPassword: initialCredentials?.password,
+  //   },
+  // });
+  // const { errorMessage, setErrorMessage, errorMessageNode } =
+  //   useFormErrorMessage();
+  // const changePasswordMutation = useMutation(
+  //   trpc.myed.auth.changePassword.mutationOptions()
+  // );
+  // const onSubmit = async (data: ChangePasswordSchema) => {
+  //   if (errorMessage) {
+  //     setErrorMessage(null);
+  //   }
+  //   try {
+  //     const response = await changePasswordMutation.mutateAsync(data);
+  //     onSuccess();
+  //   } catch (e) {
+  //     if (isTRPCError(e)) {
+  //       setErrorMessage(e.message);
+  //     } else {
+  //       setErrorMessage("An unexpected error occurred.");
+  //     }
+  //   }
+  // };
 
   return (
     <>
-      <Form {...form} onSubmit={onSubmit}>
+      {/* <Form {...form} onSubmit={onSubmit}>
         {errorMessageNode}
 
         {!initialCredentials && (
@@ -73,7 +59,7 @@ export function ChangePasswordForm({
           label="Confirm password"
         />
         <SubmitButton>Submit</SubmitButton>
-      </Form>
+      </Form> */}
     </>
   );
 }

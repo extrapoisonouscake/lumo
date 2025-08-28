@@ -2,13 +2,19 @@ import {
   FormPasswordInput,
   FormPasswordInputProps,
 } from "@/components/ui/form-password-input";
-import { passwordRequirements } from "@/lib/zod";
+import { getPasswordRequirementsArray } from "@/lib/zod";
+import { PasswordRequirements } from "@/types/auth";
 import { Check, X } from "lucide-react";
 import { useFormContext } from "react-hook-form";
 
-export function ExtendedFormPasswordInput(props: FormPasswordInputProps) {
+export function ExtendedFormPasswordInput(
+  props: FormPasswordInputProps & {
+    requirements: PasswordRequirements;
+  }
+) {
   const { watch } = useFormContext();
   const value = watch(props.name);
+  const passwordRequirements = getPasswordRequirementsArray(props.requirements);
   return (
     <div className="flex flex-col gap-2">
       <FormPasswordInput shouldShowError={false} required {...props} />

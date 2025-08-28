@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-export const MYED_ROOT_URL = "https://myeducation.gov.bc.ca/aspen";
+export const MYED_DOMAIN = "https://myeducation.gov.bc.ca";
 export const MYED_HTML_TOKEN_INPUT_NAME = "org.apache.struts.taglib.html.TOKEN";
 export const MYED_ALL_GRADE_TERMS_SELECTOR = "all";
 export const MYED_SESSION_COOKIE_NAME = "JSESSIONID";

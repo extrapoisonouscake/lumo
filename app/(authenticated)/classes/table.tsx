@@ -194,6 +194,10 @@ export function SubjectsTable({
   });
   return (
     <TableRenderer
+      emptyState={{
+        emoji: "🎓",
+        message: "No classes found",
+      }}
       rowRendererFactory={getRowRenderer}
       table={table}
       columns={columns}

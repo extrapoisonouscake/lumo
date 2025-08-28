@@ -92,7 +92,7 @@ function Content({ data }: { data: CreditSummaryEntry[] }) {
             </MiniTableHeader>
           </div>
         }
-        emptyState={{ emoji: "🎓", text: "No entries found." }}
+        emptyState={{ emoji: "🎓", message: "No entries found." }}
         columns={columns}
         renderMobileRow={(row) => {
           const entry = row.original;

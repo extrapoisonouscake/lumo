@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { Params } from "next/dist/server/request/params";
 
-export const WEBSITE_TITLE = "MyEd+";
+export const WEBSITE_TITLE = "Lumo";
 
 export interface BreadcrumbDataItem {
   name: string;

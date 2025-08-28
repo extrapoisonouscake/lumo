@@ -183,7 +183,7 @@ export function SubjectAssignmentsTable({
   });
   return (
     <TableRenderer
-      emptyState={{ text: EMPTY_ASSIGNMENTS_MESSAGE, emoji: "📚" }}
+      emptyState={{ message: EMPTY_ASSIGNMENTS_MESSAGE, emoji: "📚" }}
       table={table}
       columns={columns}
       rowRendererFactory={getRowRenderer}

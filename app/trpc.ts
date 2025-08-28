@@ -31,7 +31,7 @@ const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
 const TRPC_URL = `${
   NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://192.168.1.112:3000"
+    : "http://localhost:3000"
 }/api/trpc`;
 const queue = new PrioritizedRequestQueue();
 

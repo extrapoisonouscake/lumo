@@ -9,11 +9,9 @@ import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 
 export function SuccessfulRegistrationDialog({
-  result,
-  setResult,
+  hideDialog,
 }: {
-  result: "success" | "pending";
-  setResult: (newResult: typeof result | null) => void;
+  hideDialog: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(true);
   const router = useRouter();
@@ -24,7 +22,7 @@ export function SuccessfulRegistrationDialog({
         setIsOpen(open);
         if (!open) {
           setTimeout(() => {
-            setResult(null);
+            hideDialog();
             router.replace("/login");
           }, 500);
         }
@@ -35,9 +33,10 @@ export function SuccessfulRegistrationDialog({
           <DialogTitle>Successfully registered!</DialogTitle>
         </DialogHeader>
         <p className="text-sm text-muted-foreground">
-          {result === "success"
-            ? "A confirmation email will be sent to the address you specified. You may now sign into MyEdPlus. Use your email address and the password you provided during the request process."
-            : "A verification email will be sent to the email address you specified. Please click on the confirmation link in the email to activate your account. Check your spam folder if you don't see it in your inbox."}
+          A verification email will be sent to the address you specified. Please
+          click on the confirmation link in the email to verify your address.
+          Once completed, your account will be activated and you'll be able to
+          login using the email and password you just entered.
         </p>
       </DialogContent>
     </Dialog>

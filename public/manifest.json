@@ -1,6 +1,6 @@
 {
-  "name": "MyEdPlus",
-  "short_name": "MyEd+",
+  "name": "Lumo",
+  "short_name": "Lumo",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",

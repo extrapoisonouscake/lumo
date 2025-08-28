@@ -22,9 +22,11 @@ export function SettingsPageContent() {
     >
       {(data) => (
         <RegistrationForm
-          schoolDistricts={data.schoolDistrictOptions}
+          passwordRequirements={data.passwordRequirements}
+          securityQuestionRequirements={data.securityQuestionRequirements}
+          schoolDistricts={data.schoolDistricts}
           defaultCountry={ip3country.lookupStr(data.ip)}
-          securityQuestionOptions={data.securityQuestionOptions}
+          securityQuestionOptions={data.securityQuestions}
         />
       )}
     </QueryWrapper>

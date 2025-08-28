@@ -11,6 +11,7 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
+import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import {
   Select,
   SelectContent,
@@ -129,9 +130,9 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
   );
   return (
     <Card className="px-4 py-3 flex-row flex-wrap justify-between gap-2">
-      <p className="text-sm font-medium">Total</p>
+      <p className="text-sm text-muted-foreground">Total</p>
       <div className="flex items-center gap-1.5">
-        <p className="text-sm text-muted-foreground font-medium">
+        <p className="text-sm font-medium">
           {totalCompletedUnits} / {totalRequiredUnits} units
         </p>
         <CircularProgress
@@ -283,12 +284,14 @@ function RequirementDialog({
             {currentProgram?.name || currentProgram?.code} - Requirements
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody className="flex flex-col gap-4">
+        <ResponsiveDialogBody>
           {currentProgram?.requirements &&
           currentProgram.requirements.length > 0 ? (
-            currentProgram.requirements.map((requirement, index) => (
-              <RequirementCard key={index} requirement={requirement} />
-            ))
+            <ScrollShadow containerClassName="flex flex-col gap-4">
+              {currentProgram.requirements.map((requirement, index) => (
+                <RequirementCard key={index} requirement={requirement} />
+              ))}
+            </ScrollShadow>
           ) : (
             <ErrorCard
               emoji="🤔"

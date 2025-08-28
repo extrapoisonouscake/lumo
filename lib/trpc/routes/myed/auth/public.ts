@@ -2,13 +2,12 @@ import { AuthCookieName } from "@/helpers/getAuthCookies";
 import { zodEnum } from "@/types/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { z, ZodType } from "zod";
-import { passwordZodType } from "../../../../zod";
+
 export enum LoginErrors {
   accountDisabled = "account-disabled",
   invalidAuth = "invalid-auth",
   invalidParameters = "invalid-parameters",
   unexpectedError = "unexpected-error",
-  passwordChangeRequired = "password-change-required",
 }
 export const loginErrorIDToMessageMap = {
   [LoginErrors.accountDisabled]:
@@ -17,7 +16,6 @@ export const loginErrorIDToMessageMap = {
   [LoginErrors.invalidParameters]: "Invalid parameters.",
   [LoginErrors.unexpectedError]:
     "An unexpected error occurred. Try again later.",
-  [LoginErrors.passwordChangeRequired]: "Change your password to continue.",
 };
 
 export const isKnownLoginError = (error: string): error is LoginErrors => {
@@ -82,7 +80,7 @@ export const registerTypeSchemas = {
         message: "Invalid email address.",
       })
       .default(""),
-    password: passwordZodType.default(""),
+    password: z.string().default(""), //myed handles this
     securityQuestionType: z
       .string()
       .min(1, { message: "Required." })
@@ -125,43 +123,24 @@ export const registerSchema = z
   });
 export type RegisterSchema = z.infer<typeof registerSchema>;
 export enum RegistrationInternalFields {
-  firstName = "psnNameFirst",
-  lastName = "psnNameLast",
-  streetAddress = "relPsnAdrPhys_adrAddress01",
-  poBox = "relPsnAdrPhys_adrAddress02",
-  city = "relPsnAdrPhys_adrCity",
-  region = "relPsnAdrPhys.adrState",
-  postalCode = "relPsnAdrPhys_adrPostalCode",
-  phone = "psnPhone01",
-  schoolDistrict = "psnFieldC025",
-  email = "relUsrPsnOid_psnEmail01",
-  password = "usrPw",
-  securityQuestionType = "usrPwdRcQ",
-  securityQuestionAnswer = "usrPwdRcA",
+  firstName = "firstName",
+  lastName = "lastName",
+  streetAddress = "addressLine01",
+  poBox = "addressLine02",
+  city = "city",
+  region = "state",
+  postalCode = "postalCode",
+  phone = "phone01",
+  schoolDistrict = "lowestLevelOrganizationOid",
+  email = "email01",
+  password = "password",
+  securityQuestionType = "recoveryQuestion",
+  securityQuestionAnswer = "recoveryAnswer",
 }
-export const passwordResetSchema = z
-  .object({
-    username: z.string().min(1, { message: "Required." }).default(""),
-    email: z
-      .string()
-      .min(1, { message: "Required." })
-      .email({
-        message: "Invalid email address.",
-      })
-      .default(""),
-    securityQuestion: z.string().optional(),
-    securityAnswer: z.string().optional(),
-  })
-  .refine(
-    (data) => {
-      return !(+(data.securityQuestion || "") ^ +(data.securityAnswer || ""));
-    },
-    {
-      message:
-        "Both the security question and the security answer must be provided if one is present.",
-      path: ["securityQuestion", "securityAnswer"],
-    }
-  );
+export const passwordResetSchema = z.object({
+  username: z.string().min(1, { message: "Required." }).default(""),
+});
+
 export type PasswordResetSchema = z.infer<typeof passwordResetSchema>;
 export const authCookiesSchema = z.object({
   JSESSIONID: z.string().min(1, { message: "Required." }),
@@ -169,38 +148,6 @@ export const authCookiesSchema = z.object({
 
   ApplicationGatewayAffinity: z.string().min(1, { message: "Required." }),
 } satisfies Record<AuthCookieName, ZodType>);
-export const changePasswordSchema = z
-  .object({
-    oldPassword: z.string().min(1, { message: "Required." }).default(""),
-    newPassword: passwordZodType.default(""),
-    confirmPassword: z.string().min(1, { message: "Required." }).default(""),
-    authCookies: authCookiesSchema.optional(),
-    username: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (data.newPassword !== data.confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Passwords must match.",
-        path: ["confirmPassword"],
-      });
-    }
-    if (data.newPassword === data.oldPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "New password cannot be the same as the old password.",
-        path: ["newPassword"],
-      });
-    }
-    if (+!!(data.authCookies || "") ^ +!!(data.username || "")) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "authCookies and username must be provided together.",
-        path: ["authCookies", "username"],
-      });
-    }
-    return true;
-  });
-export type ChangePasswordSchema = z.infer<typeof changePasswordSchema>;
+
 export const genericErrorMessageVariableRegex =
   /var\s+msg\s*=\s*(['"])(.*?)\1;/;

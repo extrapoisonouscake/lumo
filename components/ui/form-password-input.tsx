@@ -18,7 +18,7 @@ export function FormPasswordInput({
       type={showPassword ? "text" : "password"}
       placeholder="········"
       label={label}
-      rightIcon={<Icon className="cursor-pointer size-4 opacity-50" />}
+      rightIcon={<Icon className="cursor-pointer size-4 opacity-80" />}
       rightIconContainerProps={{
         className: "cursor-pointer",
         onClick: () => setShowPassword(!showPassword),

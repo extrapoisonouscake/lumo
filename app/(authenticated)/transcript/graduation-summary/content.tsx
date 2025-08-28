@@ -369,7 +369,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               </ResponsiveFilters>
             </div>
           }
-          emptyState={{ emoji: "🎓", text: "No entries found." }}
+          emptyState={{ emoji: "🎓", message: "No entries found." }}
           columns={baseColumns}
           rowRendererFactory={getRowRenderer}
           renderMobileRow={(row, rowIndex) => {
