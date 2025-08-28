@@ -1,4 +1,4 @@
-import { MYED_ROOT_URL } from "@/constants/myed";
+import { MYED_DOMAIN } from "@/constants/myed";
 
 import { NextRequest, NextResponse } from "next/server";
 const getTargetUrl = (path: string) => `rest/${path}`;
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
       headers: {
         ...Object.fromEntries(request.headers),
         cookie: request.headers.get("Custom-Cookie") || "",
-        host: new URL(MYED_ROOT_URL).host,
+        host: new URL(MYED_DOMAIN).host,
       },
       credentials: "include",
     });
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       headers: {
         ...request.headers,
         cookie: request.headers.get("custom-cookie") || "",
-        host: new URL(MYED_ROOT_URL).host,
+        host: new URL(MYED_DOMAIN).host,
       },
       body,
       credentials: "include",

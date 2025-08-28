@@ -1,7 +1,8 @@
-import { MYED_ROOT_URL } from "@/constants/myed";
+import { MYED_DOMAIN } from "@/constants/myed";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { getAuthCookies } from "@/helpers/getAuthCookies";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
+import { MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { NextRequest } from "next/server";
 
 export async function GET(
@@ -9,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
-  const url = `${MYED_ROOT_URL}/${path.join("/")}`;
+  const url = `${MYED_DOMAIN}${MyEdBaseURLs.ASPEN}/${path.join("/")}`;
 
   try {
     const store = await MyEdCookieStore.create();
