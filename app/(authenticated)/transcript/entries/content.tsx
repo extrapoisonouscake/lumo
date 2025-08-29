@@ -132,7 +132,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
                   Final
                 </SortableColumn>
               </MiniTableHeader>
-              <ResponsiveFilters triggerClassName="h-full">
+              <ResponsiveFilters triggerClassName="h-full" table={table}>
                 {gradeSelect}
               </ResponsiveFilters>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { CircularProgress } from "@/components/misc/circular-progress";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,7 +28,7 @@ import {
   WidgetComponentProps,
   WidgetCustomizationContentRenderer,
 } from "./index";
-import { Widget } from "./widget";
+import { Widget, WidgetErrorCard } from "./widget";
 
 function RecentGradesWidget(
   widget: WidgetComponentProps<Widgets.RECENT_GRADES>
@@ -38,13 +39,14 @@ function RecentGradesWidget(
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
+  let customSubject;
   let subjectsToUse = subjects.data?.subjects.main;
   if (subjectsToUse && widget.custom?.subjectId) {
-    const subject = subjectsToUse.find(
+    customSubject = subjectsToUse.find(
       (s) => s.id === widget.custom!.subjectId
     );
-    if (subject) {
-      subjectsToUse = [subject];
+    if (customSubject) {
+      subjectsToUse = [customSubject];
     } else {
       subjectsToUse = undefined;
       richError = {};
@@ -94,10 +96,7 @@ function RecentGradesWidget(
     content = <ContentSkeleton progress={assignments.progress * 100} />;
   } else {
     if (recentGradedAssignments.length === 0) {
-      richError = {
-        emoji: "📊",
-        message: "No recent grades.",
-      };
+      content = <WidgetErrorCard emoji="📊" message="No recent grades." />;
     } else {
       content = (
         <div className={cn(`grid gap-2`, gridColsClassName)}>
@@ -116,7 +115,12 @@ function RecentGradesWidget(
   }
   return (
     <Widget {...widget} richError={richError}>
-      {content}
+      <div className="flex flex-col gap-4 flex-1">
+        {customSubject && (
+          <Badge variant="secondary">{customSubject.name}</Badge>
+        )}
+        {content}
+      </div>
     </Widget>
   );
 }

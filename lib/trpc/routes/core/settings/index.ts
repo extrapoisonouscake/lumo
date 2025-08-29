@@ -10,6 +10,7 @@ import {
 
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
 import {
+  USER_SETTINGS_COOKIE_PREFIX,
   USER_SETTINGS_DEFAULT_VALUES,
   WidgetsConfiguration,
 } from "@/constants/core";
@@ -33,7 +34,10 @@ const settingsCookieOptions = {
 };
 export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
-    return getUserSettings(ctx);
+    const results = await getUserSettings(ctx);
+    const cookieStore = ctx.cookieStore;
+    cookieStore.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(results));
+    return results;
   }),
 
   updateGenericUserSetting: authenticatedProcedure

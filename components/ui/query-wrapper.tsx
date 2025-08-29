@@ -3,7 +3,10 @@ import { ReactNode } from "react";
 import { ErrorCard } from "../misc/error-card";
 
 interface QueryWrapperProps<TData, TError> {
-  query: QueryObserverResult<TData, TError>;
+  query: Pick<
+    QueryObserverResult<TData, TError>,
+    "isLoading" | "isError" | "data"
+  >;
   children: (data: TData) => ReactNode;
   skeleton?: ReactNode;
   onError?: ReactNode;

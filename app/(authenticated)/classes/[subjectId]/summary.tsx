@@ -1,5 +1,6 @@
 "use client";
 import { HalfDonutTextChart } from "@/components/misc/half-donut-text-chart";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,11 +9,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { HalfDonutProgressChart } from "@/components/ui/charts/half-donut-progress-chart";
+import { QueryWrapper } from "@/components/ui/query-wrapper";
+import {
+  ResponsiveDialog,
+  ResponsiveDialogBody,
+  ResponsiveDialogContent,
+  ResponsiveDialogHeader,
+  ResponsiveDialogTitle,
+  ResponsiveDialogTrigger,
+} from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
+import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
 import { UserSettings } from "@/types/core";
 import { type SubjectSummary, SubjectTerm } from "@/types/school";
-import { Check } from "lucide-react";
+import { Check, DoorClosedIcon, InfoIcon, User } from "lucide-react";
 import { useState } from "react";
 import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
@@ -28,14 +40,10 @@ const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FourthQuarter]: "Quarter IV",
 };
 
-export function SubjectSummary({
-  id,
-  term,
-  name,
-  academics,
-  year,
-  shouldShowLetterGrade,
-}: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">) {
+export function SubjectSummary(
+  summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
+) {
+  const { id, term, name, academics, year, shouldShowLetterGrade } = summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted
@@ -89,7 +97,65 @@ export function SubjectSummary({
           </span>
         </div>
       </CardContent>
+      <InfoDialog {...summary} />
     </Card>
+  );
+}
+function InfoDialog({ name, id, year, term }: SubjectSummary) {
+  const subject = useSubjectData({
+    id,
+    isPreviousYear: year === "previous",
+    termId: term,
+  });
+  return (
+    <ResponsiveDialog>
+      <ResponsiveDialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="absolute bottom-0 right-0 text-muted-foreground hover:bg-transparent"
+        >
+          <InfoIcon />
+        </Button>
+      </ResponsiveDialogTrigger>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>{name}</ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
+        <ResponsiveDialogBody className="flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <User className="size-4 text-muted-foreground" />
+            <div>
+              <p className="text-muted-foreground text-sm">Teacher(s)</p>
+              <QueryWrapper
+                query={subject}
+                skeleton={<Skeleton>Teacher Tach</Skeleton>}
+              >
+                {({ teachers }) => (
+                  <p className="font-medium text-sm">{teachers.join(", ")}</p>
+                )}
+              </QueryWrapper>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <DoorClosedIcon className="size-4 text-muted-foreground" />
+            <div>
+              <p className="text-muted-foreground text-sm">Room</p>
+              <QueryWrapper
+                query={subject}
+                skeleton={<Skeleton>Room Tache</Skeleton>}
+              >
+                {({ room }) => (
+                  <p className="font-medium text-sm">
+                    {room ?? NULL_VALUE_DISPLAY_FALLBACK}
+                  </p>
+                )}
+              </QueryWrapper>
+            </div>
+          </div>
+        </ResponsiveDialogBody>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
 export function SubjectSummarySkeleton() {
@@ -131,6 +197,7 @@ export function SubjectSummarySkeleton() {
           <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
         </div>
       </CardContent>
+      <Skeleton className="size-4 absolute bottom-2 right-2" />
     </Card>
   );
 }

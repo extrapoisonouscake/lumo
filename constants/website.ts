@@ -23,7 +23,7 @@ interface StaticWebsitePage extends WebsitePage {
   showOnMobile?: boolean;
   items?: { title: string; href: string }[];
 }
-export const unauthenticatedPathnames = ["/login", "/register", "/maintenance"];
+export const unauthenticatedPathnames = ["/login", "/register"];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { breadcrumb: [{ name: "Home" }], icon: Home, showOnMobile: true },
   "/classes": {

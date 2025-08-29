@@ -11,7 +11,6 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   WIDGET_CUSTOM_DEFAULTS,
   WIDGET_MAX_DIMENSIONS,
@@ -23,6 +22,18 @@ import {
 } from "@/constants/core";
 import { cn } from "@/helpers/cn";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
+import {
+  DndContext,
+  KeyboardSensor,
+  MouseSensor,
+  ScreenReaderInstructions,
+  TouchSensor,
+  UniqueIdentifier,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import {
   CheckIcon,
   PencilRulerIcon,
@@ -67,31 +78,24 @@ export const WidgetContext = createContext<{
     e: React.MouseEvent | React.TouchEvent,
     widgetId: string
   ) => void;
-
-  dragOverIndex: number | null;
-  handleDragStart: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
-  handleDragOver: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
-  handleDrop: (e: React.DragEvent<HTMLDivElement>, index: number) => void;
-  handleDragEnd: () => void;
-  startTouchDrag: (e: React.TouchEvent, index: number) => void;
   gridColumns: number;
   dragState: WidgetDragState;
-  draggedIndex: number | null;
 }>({
   isEditing: false,
   handleRemoveWidget: () => {},
   handleCustomizeWidget: () => {},
   handleResizeStart: () => {},
-  dragOverIndex: null,
-  handleDragStart: () => {},
-  handleDragOver: () => {},
-  handleDrop: () => {},
-  handleDragEnd: () => {},
-  startTouchDrag: () => {},
+
   gridColumns: 4,
   dragState: initialDragState,
-  draggedIndex: null,
 });
+const screenReaderInstructions: ScreenReaderInstructions = {
+  draggable: `
+    To pick up a sortable item, press the space bar.
+    While sorting, use the arrow keys to move the item.
+    Press space again to drop the item in its new position, or press escape to cancel.
+  `,
+};
 const getNewWidgetConfiguration = (type: Widgets) => {
   // Get the default size for this widget type (start with 2x2 or max allowed)
 
@@ -119,56 +123,27 @@ export function WidgetEditor({
   const [customizingWidget, setCustomizingWidget] =
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
-  const [isDraggingFromPalette, setIsDraggingFromPalette] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  const getIndex = (id: UniqueIdentifier) =>
+    configuration.findIndex((w) => w.id === id);
+  const getPosition = (id: UniqueIdentifier) => getIndex(id) + 1;
+  const activeIndex = activeId != null ? getIndex(activeId) : -1;
+
   const isTouchDraggingRef = React.useRef(false);
   const autoScrollDirectionRef = React.useRef<0 | 1 | -1>(0);
   const autoScrollRafRef = React.useRef<number | null>(null);
-  const globalDragOverHandlerRef = React.useRef<
-    ((e: DragEvent) => void) | null
-  >(null);
 
   const gridColumns = useGridColumns();
   // Calculate responsive widgets with appropriate sizing
   const responsiveWidgets = useMemo(
     () => calculateResponsiveLayout(configuration, gridColumns),
     [configuration, gridColumns]
-  );
-
-  // Auto-scroll helpers
-  const updateAutoScroll = useCallback(
-    (clientY: number) => {
-      const topThreshold = 240; // large top zone for comfort
-      const bottomThreshold = 80; // small bottom zone, no mobile offset
-      const speedPerFrame = 32;
-      const { innerHeight } = window;
-
-      let dir: 0 | 1 | -1 = 0;
-      if (clientY < topThreshold) dir = -1;
-      else if (clientY > innerHeight - bottomThreshold) dir = 1;
-
-      if (dir !== 0) {
-        autoScrollDirectionRef.current = dir;
-        if (autoScrollRafRef.current == null) {
-          const step = () => {
-            if (
-              autoScrollDirectionRef.current !== 0 &&
-              (draggedIndex !== null || isTouchDraggingRef.current)
-            ) {
-              const delta = autoScrollDirectionRef.current * speedPerFrame;
-              window.scrollBy({ top: delta, behavior: "auto" });
-              autoScrollRafRef.current = requestAnimationFrame(step);
-            } else {
-              stopAutoScroll();
-            }
-          };
-          autoScrollRafRef.current = requestAnimationFrame(step);
-        }
-      } else {
-        stopAutoScroll();
-      }
-    },
-    [draggedIndex]
   );
 
   const stopAutoScroll = useCallback(() => {
@@ -192,11 +167,11 @@ export function WidgetEditor({
   };
 
   const handleSave = async (providedConfiguration?: WidgetsConfiguration) => {
+    if (!providedConfiguration) setIsEditing(false);
     await updateSetting.mutateAsync({
       key: "widgetsConfiguration",
       value: providedConfiguration ?? configuration,
     });
-    if (!providedConfiguration) setIsEditing(false);
   };
 
   const handleCancel = () => {
@@ -261,140 +236,6 @@ export function WidgetEditor({
     },
     [configuration]
   );
-
-  // Drag and drop handlers for moving
-  const handleDragStart = useCallback(
-    (e: React.DragEvent, widgetIndex: number) => {
-      e.dataTransfer.setData("text/plain", `widget:${widgetIndex.toString()}`);
-      e.dataTransfer.effectAllowed = "move";
-      setDraggedIndex(widgetIndex);
-      if (!globalDragOverHandlerRef.current) {
-        const onDocDragOver = (ev: DragEvent) => {
-          ev.preventDefault();
-          if (typeof ev.clientY === "number") updateAutoScroll(ev.clientY);
-        };
-        globalDragOverHandlerRef.current = onDocDragOver;
-        document.addEventListener("dragover", onDocDragOver, {
-          passive: false,
-        });
-      }
-    },
-    []
-  );
-
-  // New drag start handler for palette buttons
-  const handlePaletteDragStart = useCallback(
-    (e: React.DragEvent, widgetType: Widgets) => {
-      e.dataTransfer.setData("text/plain", `palette:${widgetType}`);
-      e.dataTransfer.effectAllowed = "copy";
-      setIsDraggingFromPalette(true);
-      if (!globalDragOverHandlerRef.current) {
-        const onDocDragOver = (ev: DragEvent) => {
-          ev.preventDefault();
-          if (typeof ev.clientY === "number") updateAutoScroll(ev.clientY);
-        };
-        globalDragOverHandlerRef.current = onDocDragOver;
-        document.addEventListener("dragover", onDocDragOver, {
-          passive: false,
-        });
-      }
-
-      // Create a custom drag image showing the widget type
-      const dragElement = e.currentTarget.cloneNode(true) as HTMLElement;
-      dragElement.style.transform = "rotate(5deg)";
-      dragElement.style.opacity = "0.8";
-      document.body.appendChild(dragElement);
-      e.dataTransfer.setDragImage(dragElement, 20, 20);
-
-      // Clean up the drag image after a short delay
-      setTimeout(() => {
-        document.body.removeChild(dragElement);
-      }, 0);
-    },
-    []
-  );
-
-  const handleDragOver = useCallback(
-    (e: React.DragEvent, targetIndex: number) => {
-      e.preventDefault();
-
-      // Set appropriate drop effect based on drag source
-      if (isDraggingFromPalette) {
-        e.dataTransfer.dropEffect = "copy";
-      } else {
-        e.dataTransfer.dropEffect = "move";
-      }
-
-      setDragOverIndex(targetIndex);
-      if ("clientY" in e) {
-        updateAutoScroll(e.clientY);
-      }
-    },
-    [isDraggingFromPalette]
-  );
-  const handleDrop = useCallback(
-    (e: React.DragEvent, targetIndex: number) => {
-      e.preventDefault();
-      const dragData = e.dataTransfer.getData("text/plain");
-
-      try {
-        if (dragData.startsWith("widget:")) {
-          // Moving existing widget using placeholder location
-          if (draggedIndex !== null && dragOverIndex !== null) {
-            moveWidget(draggedIndex, dragOverIndex);
-          }
-        } else if (dragData.startsWith("palette:")) {
-          // Creating new widget from palette
-          const widgetType = dragData.replace("palette:", "") as Widgets;
-
-          const newWidget = getNewWidgetConfiguration(widgetType);
-
-          // Insert the new widget at the target position
-          const insertionIndex = dragOverIndex ?? targetIndex;
-          const newConfiguration = [...configuration];
-          newConfiguration.splice(insertionIndex, 0, newWidget);
-          setConfiguration(newConfiguration);
-        }
-      } catch (error) {
-        console.error("Error parsing drag data:", error);
-      }
-
-      setDragOverIndex(null);
-      setIsDraggingFromPalette(false);
-      setDraggedIndex(null);
-      if (globalDragOverHandlerRef.current) {
-        document.removeEventListener(
-          "dragover",
-          globalDragOverHandlerRef.current
-        );
-        globalDragOverHandlerRef.current = null;
-      }
-    },
-    [moveWidget, configuration, draggedIndex, dragOverIndex]
-  );
-
-  // Add drag end handler to reset palette drag state
-  const handleDragEnd = useCallback(() => {
-    setIsDraggingFromPalette(false);
-    setDragOverIndex(null);
-    setDraggedIndex(null);
-    stopAutoScroll();
-    if (globalDragOverHandlerRef.current) {
-      document.removeEventListener(
-        "dragover",
-        globalDragOverHandlerRef.current
-      );
-      globalDragOverHandlerRef.current = null;
-    }
-  }, []);
-
-  // Add drag leave handler to clear drop target highlighting when dragging away
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    // Only clear if we're leaving the grid container entirely
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setDragOverIndex(null);
-    }
-  }, []);
 
   // Handle resize functionality
   const handleResizeStart = useCallback(
@@ -495,63 +336,6 @@ export function WidgetEditor({
     [configuration, updateWidgetInConfiguration]
   );
 
-  // Touch drag support for mobile devices (defined after moveWidget to avoid used-before-assigned)
-  const startTouchDrag = useCallback(
-    (e: React.TouchEvent, index: number) => {
-      if (!isEditing) return;
-      setDraggedIndex(index);
-      isTouchDraggingRef.current = true;
-
-      const handleTouchMove = (ev: TouchEvent) => {
-        if (!isTouchDraggingRef.current) return;
-        if (ev.touches.length === 0) return;
-        const t = ev.touches[0]!;
-        ev.preventDefault();
-
-        const el = document.elementFromPoint(t.clientX, t.clientY);
-        let targetEl: HTMLElement | null = el as HTMLElement | null;
-        let foundIndex: number | null = null;
-        while (targetEl) {
-          if (targetEl.hasAttribute("data-widget-index")) {
-            const idxStr = targetEl.getAttribute("data-widget-index")!;
-            const idx = parseInt(idxStr, 10);
-            if (!Number.isNaN(idx)) {
-              foundIndex = idx;
-            }
-            break;
-          }
-          targetEl = targetEl.parentElement;
-        }
-        if (foundIndex !== null) {
-          setDragOverIndex(foundIndex);
-        }
-        updateAutoScroll(t.clientY);
-      };
-
-      const handleTouchEnd = () => {
-        if (draggedIndex !== null && dragOverIndex !== null) {
-          moveWidget(draggedIndex, dragOverIndex);
-        }
-        isTouchDraggingRef.current = false;
-        setDraggedIndex(null);
-        setDragOverIndex(null);
-        stopAutoScroll();
-        document.removeEventListener("touchmove", handleTouchMove as any);
-        document.removeEventListener("touchend", handleTouchEnd);
-        document.removeEventListener("touchcancel", handleTouchEnd);
-      };
-
-      document.addEventListener("touchmove", handleTouchMove as any, {
-        passive: false,
-      });
-      document.addEventListener("touchend", handleTouchEnd, { passive: true });
-      document.addEventListener("touchcancel", handleTouchEnd, {
-        passive: true,
-      });
-    },
-    [isEditing, draggedIndex, dragOverIndex, moveWidget]
-  );
-
   return (
     <div className="flex flex-col gap-4">
       {/* Editor Controls */}
@@ -571,7 +355,9 @@ export function WidgetEditor({
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => handleSave()}
+                  onClick={() => {
+                    handleSave();
+                  }}
                   leftIcon={<CheckIcon />}
                 >
                   <p className="hidden sm:block">Save</p>
@@ -591,7 +377,7 @@ export function WidgetEditor({
             <div className="flex flex-col gap-1">
               <h3 className="text-sm font-medium">Add Widgets</h3>
               <p className="text-xs text-muted-foreground">
-                Click to add or drag to place widgets
+                Click to add a widget
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -600,10 +386,7 @@ export function WidgetEditor({
                   key={widgetType}
                   variant="outline"
                   size="sm"
-                  draggable={true}
                   onClick={() => handleAddWidget(widgetType)}
-                  onDragStart={(e) => handlePaletteDragStart(e, widgetType)}
-                  onDragEnd={handleDragEnd}
                   className="flex items-center gap-2 cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
                 >
                   <PlusIcon className="size-4" />
@@ -623,104 +406,85 @@ export function WidgetEditor({
             handleRemoveWidget,
             handleCustomizeWidget,
             handleResizeStart,
-            dragOverIndex,
-            handleDragStart,
-            handleDragOver,
-            handleDrop,
-            handleDragEnd,
-            startTouchDrag,
+
             gridColumns,
             dragState,
-            draggedIndex,
           }}
         >
-          <WidgetsGrid onDragLeave={handleDragLeave} gridColumns={gridColumns}>
-            {buildDisplayList(
-              responsiveWidgets,
-              draggedIndex,
-              dragOverIndex
-            ).map((entry, index) => {
-              if (entry.type === "placeholder") {
-                return (
-                  <div
-                    key="__placeholder__"
-                    className={cn("h-full flex flex-col gap-2 items-center")}
-                    style={{
-                      gridColumn: `span ${Math.min(
-                        entry.size.width,
-                        gridColumns
-                      )}`,
-                      gridRow: `span ${entry.size.height}`,
-                      minHeight:
-                        gridColumns === 1
-                          ? "108px"
-                          : `${entry.size.height * 200}px`,
-                      minWidth: 0,
-                    }}
-                    data-widget-index={index}
-                    onDragOver={(e) => handleDragOver(e, index)}
-                    onDragEnter={(e) => handleDragOver(e, index)}
-                    onDrop={(e) => handleDrop(e, index)}
-                    aria-hidden
-                  >
-                    <div className="w-full h-full rounded-lg border border-dashed border-muted-foreground/40 bg-muted/20" />
-                    <p className="text-xs font-medium invisible">Placeholder</p>
-                  </div>
-                );
+          <DndContext
+            accessibility={{
+              screenReaderInstructions,
+            }}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={({ active }) => {
+              if (!active) {
+                return;
               }
-              const widgetExport = WIDGET_COMPONENTS[entry.widget.type];
 
-              const isCustomizable = isCustomizableWidget(widgetExport);
-              const WidgetComponent = isCustomizable
-                ? widgetExport.component
-                : widgetExport;
+              setActiveId(active.id);
+            }}
+            onDragEnd={({ over }) => {
+              setActiveId(null);
 
-              return (
-                <WidgetComponent
-                  key={entry.widget.id}
-                  {...entry.widget}
-                  isEditing={isEditing}
-                  index={index}
+              if (over) {
+                const overIndex = getIndex(over.id);
+                if (activeIndex !== overIndex) {
+                  setConfiguration((items) =>
+                    arrayMove(items, activeIndex, overIndex)
+                  );
+                }
+              }
+            }}
+            onDragCancel={() => setActiveId(null)}
+          >
+            <SortableContext disabled={!isEditing} items={responsiveWidgets}>
+              <WidgetsGrid gridColumns={gridColumns}>
+                {responsiveWidgets.map((entry, index) => {
+                  const widgetExport = WIDGET_COMPONENTS[entry.type];
+
+                  const isCustomizable = isCustomizableWidget(widgetExport);
+                  const WidgetComponent = isCustomizable
+                    ? widgetExport.component
+                    : widgetExport;
+
+                  return (
+                    <WidgetComponent
+                      key={entry.id}
+                      {...entry}
+                      isEditing={isEditing}
+                      index={index}
+                    />
+                  );
+                })}
+
+                {/* Drop zone for adding at the end */}
+                {isEditing && (
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className={cn(
+                        "min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all"
+                      )}
+                    >
+                      <PlusIcon className="size-6" />
+                      <p className="text-sm text-muted-foreground">
+                        A new widget will appear here.
+                      </p>
+                    </div>
+                    <p className="text-xs invisible">
+                      Dummy title for the drop zone
+                    </p>
+                  </div>
+                )}
+
+                <CustomizationModal
+                  widget={customizingWidget}
+                  onSaveCustomization={handleSaveCustomization}
+                  onClose={handleCancelCustomization}
                 />
-              );
-            })}
-
-            {/* Drop zone for adding at the end */}
-            {isEditing && (
-              <div
-                className="flex flex-col items-center gap-2"
-                onDragOver={(e) => handleDragOver(e, configuration.length)}
-                onDrop={(e) => handleDrop(e, configuration.length)}
-              >
-                <div
-                  className={cn(
-                    "min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all",
-
-                    {
-                      "border-brand bg-brand/10 text-brand":
-                        dragOverIndex === configuration.length &&
-                        isDraggingFromPalette,
-                    }
-                  )}
-                >
-                  <PlusIcon className="size-6" />
-                  {isDraggingFromPalette &&
-                  dragOverIndex === configuration.length
-                    ? "Release to add widget here"
-                    : "Drop widget here"}
-                </div>
-                <p className="text-xs invisible">
-                  Dummy title for the drop zone
-                </p>
-              </div>
-            )}
-
-            <CustomizationModal
-              widget={customizingWidget}
-              onSaveCustomization={handleSaveCustomization}
-              onClose={handleCancelCustomization}
-            />
-          </WidgetsGrid>
+              </WidgetsGrid>
+            </SortableContext>
+          </DndContext>
         </WidgetContext.Provider>
       ) : (
         <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
@@ -745,36 +509,6 @@ function calculateResponsiveLayout(
   });
 }
 
-function buildDisplayList(
-  widgets: ResponsiveWidget[],
-  draggedIndex: number | null,
-  dragOverIndex: number | null
-): Array<
-  | { type: "widget"; widget: ResponsiveWidget }
-  | { type: "placeholder"; size: { width: number; height: number } }
-> {
-  if (draggedIndex == null || dragOverIndex == null) {
-    return widgets.map((w) => ({ type: "widget", widget: w }));
-  }
-  const dragged = widgets[draggedIndex];
-  if (!dragged) return widgets.map((w) => ({ type: "widget", widget: w }));
-  const list = widgets.filter((_, i) => i !== draggedIndex);
-  const insertAt = Math.min(Math.max(dragOverIndex, 0), list.length);
-  const before = list
-    .slice(0, insertAt)
-    .map((w) => ({ type: "widget" as const, widget: w }));
-  const after = list
-    .slice(insertAt)
-    .map((w) => ({ type: "widget" as const, widget: w }));
-  return [
-    ...before,
-    {
-      type: "placeholder",
-      size: { width: dragged.width, height: dragged.height },
-    },
-    ...after,
-  ];
-}
 function CustomizationModal({
   onSaveCustomization,
   widget,
@@ -832,21 +566,7 @@ function WidgetsGrid({
     />
   );
 }
-export function WidgetEditorSkeleton() {
-  const gridColumns = useGridColumns();
-  return (
-    <div className="flex flex-col gap-4">
-      <PageHeading
-        rightContent={<CustomizeButton className="pointer-events-none" />}
-      />
-      <WidgetsGrid className="grid-cols-1 min-[768px]:grid-cols-2 min-[1024px]:grid-cols-3 min-[1440px]:grid-cols-4">
-        {Array.from({ length: gridColumns > 1 ? 3 : 2 }).map((_, index) => (
-          <Skeleton className="w-full h-[80px] sm:h-[170px] rounded-lg" />
-        ))}
-      </WidgetsGrid>
-    </div>
-  );
-}
+
 function CustomizeButton({ className, ...props }: ButtonProps) {
   return (
     <Button

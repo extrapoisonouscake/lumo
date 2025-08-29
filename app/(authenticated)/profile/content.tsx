@@ -11,6 +11,7 @@ import { PersonalDetails } from "@/types/school";
 import {
   AsteriskIcon,
   CarIcon,
+  CheckIcon,
   CopyIcon,
   DoorClosedIcon,
   EarthIcon,
@@ -25,6 +26,7 @@ import {
   SquareParkingIcon,
   UserIcon,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import styles from "./styles.module.css";
 
@@ -253,26 +255,38 @@ function UserProperty({
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0.5">
           <p className="text-base">
             {value ?? <span className="italic text-muted-foreground">N/A</span>}
           </p>
-          {isCopyable && value && (
-            <Button
-              size="smallIcon"
-              variant="ghost"
-              className="text-muted-foreground p-0 size-fit"
-              onClick={() => {
-                navigator.clipboard.writeText(value.toString());
-                toast.success("Copied to clipboard.");
-              }}
-            >
-              <CopyIcon className="!size-3.5" />
-            </Button>
-          )}
+          {isCopyable && value && <CopyButton value={value.toString()} />}
         </div>
       </div>
     </div>
+  );
+}
+function CopyButton({ value }: { value: string }) {
+  const [isCopied, setIsCopied] = useState(false);
+  const Icon = isCopied ? CheckIcon : CopyIcon;
+  return (
+    <Button
+      size="smallIcon"
+      variant="ghost"
+      className={cn(
+        "text-muted-foreground p-1 size-fit hover:bg-transparent",
+        isCopied && "text-brand hover:text-brand"
+      )}
+      onClick={() => {
+        navigator.clipboard.writeText(value.toString());
+        toast.success("Copied to clipboard.");
+        setIsCopied(true);
+        setTimeout(() => {
+          setIsCopied(false);
+        }, 1000);
+      }}
+    >
+      <Icon className="!size-3.5" strokeWidth={2.5} />
+    </Button>
   );
 }
 function UserPropertySkeleton() {

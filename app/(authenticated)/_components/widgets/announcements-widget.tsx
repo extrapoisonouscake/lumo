@@ -21,7 +21,9 @@ const pluralizeAnnouncements = pluralize(announcementsPluralForms);
 export default function AnnouncementsWidgetComponent(
   widget: WidgetComponentProps
 ) {
-  const announcements = useAnnouncements();
+  const announcements = useAnnouncements({
+    enabled: !widget.isEditing,
+  });
 
   let content: React.ReactNode;
   let richError: ErrorCardProps | undefined;

@@ -43,20 +43,20 @@ export const ScheduleLoadableSectionreakRowVisualData: Record<
   ScheduleBreakRowType,
   { emoji: string; label: string }
 > = {
-  "short-break": { emoji: "➡️", label: "Go to next class" },
+  "short-break": { emoji: "➡️", label: "Passing Period" },
   "long-break": { emoji: "🛋️", label: "Break" },
   lunch: { emoji: "🥪", label: "Lunch" },
 };
 const columnHelper = createColumnHelper<ScheduleRow>();
-const hoursFormat = "h:mm A";
+const HOURS_FORMAT = "h:mm A";
 const columns = [
   columnHelper.display({
     header: "Time",
     id: "time",
     cell: ({ row }) => {
       return `${timezonedDayJS(row.original.startsAt).format(
-        hoursFormat
-      )} - ${timezonedDayJS(row.original.endsAt).format(hoursFormat)}`;
+        HOURS_FORMAT
+      )} - ${timezonedDayJS(row.original.endsAt).format(HOURS_FORMAT)}`;
     },
   }),
   columnHelper.accessor("name", {

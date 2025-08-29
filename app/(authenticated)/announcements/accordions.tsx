@@ -17,10 +17,7 @@ function AnnouncementEntry({ text, isNew }: { text: string; isNew?: boolean }) {
       <div className="flex-1 flex justify-between gap-2">
         <span className="flex-1">{text}</span>
         {isNew && (
-          <Badge
-            variant="secondary"
-            className="text-xs px-1.5 py-0.5 h-4 flex-shrink-0 mt-1"
-          >
+          <Badge className="text-xs px-1.5 py-0.5 h-4 flex-shrink-0 mt-1">
             NEW
           </Badge>
         )}

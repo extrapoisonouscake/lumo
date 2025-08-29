@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { WIDGET_MAX_DIMENSIONS } from "@/constants/core";
 import { cn } from "@/helpers/cn";
+import {
+  AnimateLayoutChanges,
+  defaultAnimateLayoutChanges,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { GripVerticalIcon, Settings2Icon, TrashIcon } from "lucide-react";
 import { useContext } from "react";
 import {
@@ -12,7 +18,8 @@ import {
   WidgetComponentProps,
 } from ".";
 import { WidgetContext } from "./widget-editor";
-
+const animateLayoutChanges: AnimateLayoutChanges = (args) =>
+  defaultAnimateLayoutChanges({ ...args, wasDragging: true });
 export function Widget({
   isEditing,
   className,
@@ -27,18 +34,25 @@ export function Widget({
   contentClassName?: string;
 }) {
   const {
-    dragOverIndex,
-    handleDragStart,
-    handleDragOver,
-    handleRemoveWidget,
-    handleDrop,
-    handleResizeStart,
-    handleCustomizeWidget,
-    handleDragEnd,
-    gridColumns,
     dragState,
-    startTouchDrag,
+    gridColumns,
+    handleCustomizeWidget,
+    handleRemoveWidget,
+    handleResizeStart,
   } = useContext(WidgetContext);
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: data.id, animateLayoutChanges });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition,
+  };
   const widgetExport = WIDGET_COMPONENTS[data.type];
 
   const isCustomizable = isCustomizableWidget(widgetExport);
@@ -50,29 +64,62 @@ export function Widget({
   const maxDimension = WIDGET_MAX_DIMENSIONS[data.type];
   return (
     <div
-      className={cn("group h-full flex flex-col gap-2 items-center", {
-        "cursor-move": isEditing,
+      className={cn("group h-full flex flex-col gap-2 items-center relative", {
+        "z-10": isDragging,
       })}
+      ref={setNodeRef}
       style={{
         gridColumn: `span ${Math.min(data.width, gridColumns)}`,
         gridRow: `span ${data.height}`,
         minHeight: gridColumns === 1 ? "auto" : `${data.height * 200}px`,
         minWidth: 0, // Prevents grid item from growing beyond its column}}
+        ...style,
       }}
     >
+      {isEditing && (
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
+          {isCustomizable && (
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={() => handleCustomizeWidget(data)}
+              className="size-6 rounded bg-background backdrop-blur-sm"
+            >
+              <Settings2Icon className="!size-[14px]" />
+            </Button>
+          )}
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => {
+              handleRemoveWidget(data.id);
+            }}
+            className="size-6 rounded bg-background backdrop-blur-sm text-red-600 hover:text-red-700"
+          >
+            <TrashIcon className="!size-[14px]" />
+          </Button>
+          <Button
+            size="icon"
+            variant="outline"
+            className="cursor-move size-6 rounded bg-background backdrop-blur-sm"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVerticalIcon className="size-3 text-muted-foreground" />
+          </Button>
+        </div>
+      )}
       <Card
         data-widget-index={index}
-        draggable={isEditing}
-        onDragStart={isEditing ? (e) => handleDragStart(e, index) : undefined}
-        onDragOver={isEditing ? (e) => handleDragOver(e, index) : undefined}
-        onDrop={isEditing ? (e) => handleDrop(e, index) : undefined}
-        onDragEnd={isEditing ? handleDragEnd : undefined}
-        onTouchStart={isEditing ? (e) => startTouchDrag(e, index) : undefined}
+        {...attributes}
+        {...listeners}
         className={cn(
-          "relative transition-transform flex-1 w-full sm:min-h-[200px]",
+          "flex-1 w-full sm:min-h-[200px] cursor-auto",
           { "!shadow-sm": isBeingResized },
-          { "-translate-y-1": dragOverIndex === index },
-          { "even:animate-jiggle odd:animate-jiggle-alt": isEditing },
+
+          {
+            "cursor-move even:animate-jiggle odd:animate-jiggle-alt": isEditing,
+          },
           className
         )}
         style={{
@@ -82,35 +129,6 @@ export function Widget({
         {/* Widget Header */}
 
         {/* Control Buttons */}
-        {isEditing && (
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
-            {isCustomizable && (
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={() => handleCustomizeWidget(data)}
-                className="size-6 rounded bg-background backdrop-blur-sm"
-              >
-                <Settings2Icon className="!size-[14px]" />
-              </Button>
-            )}
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => handleRemoveWidget(data.id)}
-              className="size-6 rounded bg-background backdrop-blur-sm text-red-600 hover:text-red-700"
-            >
-              <TrashIcon className="!size-[14px]" />
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              className="cursor-move size-6 rounded bg-background backdrop-blur-sm"
-            >
-              <GripVerticalIcon className="size-3 text-muted-foreground" />
-            </Button>
-          </div>
-        )}
 
         {/* Resize Handle */}
         {isEditing && (maxDimension.height > 1 || maxDimension.width > 1) && (

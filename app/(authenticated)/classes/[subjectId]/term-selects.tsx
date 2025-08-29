@@ -1,5 +1,6 @@
 "use client";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
+import { timezonedDayJS } from "@/instances/dayjs";
 import { SubjectYear, TermEntry } from "@/types/school";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "nextjs-toploader/app";
@@ -31,7 +32,12 @@ export function TermSelects({
   const searchParams = useSearchParams();
   const [year, setYear] = useState(initialYear);
   const [term, setTerm] = useState(initialTerm);
-
+  const date = timezonedDayJS();
+  // we can't determine the exact year over the summer
+  const isSafeToShowExactYears = date.month() <= 5 || date.month() >= 8;
+  const currentYear = date.year();
+  const isSecondYear = date.month() < 9;
+  const secondYear = isSecondYear ? currentYear : currentYear + 1;
   const shouldShowTermSelect = terms.length > 0;
   useEffect(() => {
     setTerm(initialTerm);
@@ -62,8 +68,16 @@ export function TermSelects({
               <SelectValue placeholder="Select a year..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="previous">Previous</SelectItem>
-              <SelectItem value="current">Current</SelectItem>
+              <SelectItem value="previous">
+                {isSafeToShowExactYears
+                  ? `${secondYear - 2} – ${secondYear - 1}`
+                  : "Previous"}
+              </SelectItem>
+              <SelectItem value="current">
+                {isSafeToShowExactYears
+                  ? `${secondYear - 1} – ${secondYear}`
+                  : "Current"}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -113,7 +127,7 @@ export function TermSelectsSkeleton({
       {shouldShowYearSelect && (
         <div className="flex flex-col gap-2">
           <Label>Year</Label>
-          <SelectSkeleton value="Current" />
+          <SelectSkeleton value="2020 - 2020" />
         </div>
       )}
       <div className="flex flex-col gap-2">

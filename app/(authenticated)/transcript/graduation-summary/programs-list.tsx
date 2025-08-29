@@ -167,10 +167,7 @@ function ProgramCard({
             {displayName}
           </h3>
           {isExcluded && (
-            <Badge
-              variant="outline"
-              className="text-sm text-muted-foreground font-medium"
-            >
+            <Badge variant="outline" className="text-muted-foreground">
               <XCircle className="h-3 w-3 mr-1" />
               Excluded
             </Badge>

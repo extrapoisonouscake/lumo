@@ -70,7 +70,7 @@ export function PageHeading({
   rightContent?: React.ReactNode;
 }) {
   return (
-    <div className="flex justify-between gap-4 items-center">
+    <div className="flex justify-between gap-4 items-start">
       {leftContent ?? <DefaultLeftContent />}
 
       <div className="w-fit flex gap-2.5 items-center">

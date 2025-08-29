@@ -17,3 +17,11 @@ export function useSubjectsData(
   );
   return query;
 }
+export function useSubjectData({
+  id,
+  ...rest
+}: { id: string } & Parameters<typeof useSubjectsData>[0]) {
+  const query = useSubjectsData(rest);
+  const subject = query.data?.subjects.main.find((s) => s.id === id);
+  return { ...query, data: subject };
+}

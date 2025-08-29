@@ -40,7 +40,7 @@ export function ErrorCard({
         textClassName={cn(
           "text-3xl",
           size === "sm" && "text-2xl",
-          "leading-none"
+          "leading-tight"
         )}
         imageClassName={cn("size-[30px]", size === "sm" && "size-[20px]")}
       />

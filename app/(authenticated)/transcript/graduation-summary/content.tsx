@@ -363,7 +363,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
                 columnName="name"
                 placeholder="Subject name..."
               />
-              <ResponsiveFilters triggerClassName="h-full">
+              <ResponsiveFilters triggerClassName="h-full" table={table}>
                 {yearsSelect}
                 {statusSelect}
               </ResponsiveFilters>

@@ -43,8 +43,10 @@ const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
   return hasOneRelevant;
 };
 
-export function useAnnouncements() {
-  const settings = useUserSettings(false);
+export function useAnnouncements({
+  enabled = true,
+}: { enabled?: boolean } = {}) {
+  const settings = useUserSettings();
   let shouldFetch = !!settings;
   let error: AnnouncementsNotAvailableReason | undefined;
   if (settings) {
@@ -68,7 +70,7 @@ export function useAnnouncements() {
   const query = useQuery({
     ...trpc.core.schoolSpecific.getAnnouncements.queryOptions(),
     gcTime: 0,
-    enabled: shouldFetch,
+    enabled: shouldFetch && enabled,
     select: (data) => {
       const { sections } = data;
       let result;

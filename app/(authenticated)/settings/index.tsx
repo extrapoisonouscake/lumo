@@ -34,7 +34,7 @@ const fields: Array<
   },
 ];
 export function SettingsContent() {
-  const userSettings = useUserSettings(false);
+  const userSettings = useUserSettings();
   if (!userSettings)
     return (
       <div className="flex w-full justify-center">

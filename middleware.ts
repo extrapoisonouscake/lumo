@@ -46,7 +46,7 @@ export default async function middleware(request: NextRequest) {
       return Response.redirect(new URL("/", request.url));
     }
   } else {
-    if (!isOnUnauthenticatedPage) {
+    if (!isOnUnauthenticatedPage && pathname !== "/maintenance") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }

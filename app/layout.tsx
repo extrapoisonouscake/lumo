@@ -7,13 +7,13 @@ import { ReactNode } from "react";
 import { Providers } from "../components/providers";
 import "./globals.css";
 
-import { createCaller } from "@/lib/trpc";
-
-import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import {
+  USER_SETTINGS_COOKIE_PREFIX,
+  USER_SETTINGS_DEFAULT_VALUES,
+} from "@/constants/core";
 import { THEME_COLOR_TAG_ID, WEBSITE_TITLE } from "@/constants/website";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
-import { createTRPCContext } from "@/lib/trpc/context";
 import { cookies } from "next/headers";
 
 export const viewport: Viewport = {
@@ -45,15 +45,12 @@ export default async function RootLayout({
   const isLoggedIn = serverAuthChecks.isLoggedIn(store);
   let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
   if (isLoggedIn) {
-    const caller = createCaller(await createTRPCContext());
-    let userSettings;
-    try {
-      userSettings = await caller.core.settings.getSettings();
-    } catch {
-      //in case of invalid tokens
-      userSettings = USER_SETTINGS_DEFAULT_VALUES;
+    const cachedThemeColor = JSON.parse(
+      store.get(`${USER_SETTINGS_COOKIE_PREFIX}`)?.value ?? "{}"
+    ).themeColor;
+    if (cachedThemeColor) {
+      themeColor = cachedThemeColor;
     }
-    themeColor = userSettings.themeColor;
   }
 
   return (
