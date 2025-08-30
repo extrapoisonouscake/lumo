@@ -22,15 +22,17 @@ const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });
 export function Widget({
   isEditing,
+  isPreview,
   className,
   contentClassName,
+  containerClassName,
   index,
   children,
   richError,
   ...data
 }: WidgetComponentProps & {
   children: React.ReactNode;
-  className?: string;
+
   contentClassName?: string;
 }) {
   const {
@@ -47,7 +49,9 @@ export function Widget({
     setNodeRef,
     transform,
     transition,
-  } = useSortable({ id: data.id, animateLayoutChanges });
+    isOver,
+    over,
+  } = useSortable({ id: data.id, data, animateLayoutChanges });
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -64,9 +68,15 @@ export function Widget({
   const maxDimension = WIDGET_MAX_DIMENSIONS[data.type];
   return (
     <div
-      className={cn("group h-full flex flex-col gap-2 items-center relative", {
-        "z-10": isDragging,
-      })}
+      className={cn(
+        "group size-full flex flex-col gap-2 items-center relative transition-all",
+        {
+          "z-10 opacity-30": isDragging,
+          "scale-[0.98]": isOver,
+          "min-w-[500px]": isPreview,
+        },
+        containerClassName
+      )}
       ref={setNodeRef}
       style={{
         gridColumn: `span ${Math.min(data.width, gridColumns)}`,
@@ -114,11 +124,11 @@ export function Widget({
         {...attributes}
         {...listeners}
         className={cn(
-          "flex-1 w-full sm:min-h-[200px] cursor-auto",
+          "flex-1 w-full sm:min-h-[200px] cursor-auto relative",
           { "!shadow-sm": isBeingResized },
 
           {
-            "cursor-move even:animate-jiggle odd:animate-jiggle-alt": isEditing,
+            "cursor-move": isEditing,
           },
           className
         )}
@@ -126,23 +136,20 @@ export function Widget({
           transition: isBeingResized ? "none" : "all 0.2s ease",
         }}
       >
-        {/* Widget Header */}
-
-        {/* Control Buttons */}
-
-        {/* Resize Handle */}
-        {isEditing && (maxDimension.height > 1 || maxDimension.width > 1) && (
-          <div
-            className="absolute -bottom-1.5 -right-1.5 z-10 pl-2 pt-2 hidden sm:flex justify-end items-end cursor-se-resize"
-            style={{
-              borderTopLeftRadius: "100%",
-            }}
-            onMouseDown={(e) => handleResizeStart(e, data.id)}
-            onTouchStart={(e) => handleResizeStart(e, data.id)}
-          >
-            <div className="size-3 rounded-br-full border-r-2 border-b-2 border-primary" />
-          </div>
-        )}
+        {isEditing &&
+          !isPreview &&
+          (maxDimension.height > 1 || maxDimension.width > 1) && (
+            <div
+              className="absolute -bottom-1.5 -right-1.5 z-10 pl-2 pt-2 hidden sm:flex justify-end items-end cursor-se-resize"
+              style={{
+                borderTopLeftRadius: "100%",
+              }}
+              onMouseDown={(e) => handleResizeStart(e, data.id)}
+              onTouchStart={(e) => handleResizeStart(e, data.id)}
+            >
+              <div className="size-3 rounded-br-full border-r-2 border-b-2 border-primary" />
+            </div>
+          )}
 
         {/* Widget Content */}
         <CardContent
@@ -158,7 +165,13 @@ export function Widget({
         </CardContent>
       </Card>
 
-      <p className="text-xs font-medium">{WIDGET_NAMES[data.type]}</p>
+      <p
+        className={cn("text-xs font-medium transition-opacity opacity-100", {
+          "opacity-0": isDragging || isPreview,
+        })}
+      >
+        {WIDGET_NAMES[data.type]}
+      </p>
     </div>
   );
 }

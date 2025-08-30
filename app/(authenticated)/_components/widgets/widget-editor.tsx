@@ -24,16 +24,25 @@ import { cn } from "@/helpers/cn";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import {
   DndContext,
+  DragOverlay,
+  DropAnimation,
   KeyboardSensor,
   MouseSensor,
   ScreenReaderInstructions,
   TouchSensor,
   UniqueIdentifier,
-  closestCenter,
+  defaultDropAnimationSideEffects,
+  pointerWithin,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { SortableContext, arrayMove } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
 import {
   CheckIcon,
   PencilRulerIcon,
@@ -48,6 +57,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { WIDGET_COMPONENTS, WIDGET_NAMES, isCustomizableWidget } from "./index";
 
 // Clean interface definitions
@@ -108,6 +118,15 @@ const getNewWidgetConfiguration = (type: Widgets) => {
   };
   return newWidget;
 };
+const dropAnimationConfig: DropAnimation = {
+  sideEffects: defaultDropAnimationSideEffects({
+    styles: {
+      active: {
+        opacity: "0.5",
+      },
+    },
+  }),
+};
 export function WidgetEditor({
   configuration: initialConfiguration,
 }: {
@@ -118,12 +137,13 @@ export function WidgetEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [configuration, setConfiguration] =
     useState<WidgetsConfiguration>(initialConfiguration);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const [customizingWidget, setCustomizingWidget] =
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
-  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [activeWidget, setActiveWidget] = useState<ResponsiveWidget | null>(
+    null
+  );
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
@@ -132,10 +152,7 @@ export function WidgetEditor({
 
   const getIndex = (id: UniqueIdentifier) =>
     configuration.findIndex((w) => w.id === id);
-  const getPosition = (id: UniqueIdentifier) => getIndex(id) + 1;
-  const activeIndex = activeId != null ? getIndex(activeId) : -1;
 
-  const isTouchDraggingRef = React.useRef(false);
   const autoScrollDirectionRef = React.useRef<0 | 1 | -1>(0);
   const autoScrollRafRef = React.useRef<number | null>(null);
 
@@ -179,9 +196,13 @@ export function WidgetEditor({
     setConfiguration(initialConfiguration);
   };
 
-  const handleAddWidget = (type: Widgets) => {
+  const handleAddWidget = (type: Widgets, index = 0) => {
     const newWidget = getNewWidgetConfiguration(type);
-    setConfiguration([...configuration, newWidget]);
+    setConfiguration([
+      ...configuration.slice(0, index),
+      newWidget,
+      ...configuration.slice(index),
+    ]);
   };
   const handleRemoveWidget = (widgetId: string) => {
     const newConfiguration = configuration.filter(
@@ -221,21 +242,6 @@ export function WidgetEditor({
   const handleCancelCustomization = () => {
     setCustomizingWidget(null);
   };
-
-  // Move widget to a different position
-  const moveWidget = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      if (fromIndex < 0 || fromIndex >= configuration.length) return;
-
-      const newConfiguration = [...configuration];
-      const [movedWidget] = newConfiguration.splice(fromIndex, 1);
-      if (!movedWidget) return;
-
-      newConfiguration.splice(toIndex, 0, movedWidget);
-      setConfiguration(newConfiguration);
-    },
-    [configuration]
-  );
 
   // Handle resize functionality
   const handleResizeStart = useCallback(
@@ -337,145 +343,143 @@ export function WidgetEditor({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Editor Controls */}
-
-      <PageHeading
-        rightContent={
-          <div className="flex items-center gap-2">
-            {isEditing ? (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  leftIcon={<XIcon className="size-4 sm:hidden" />}
-                >
-                  <p className="hidden sm:block">Cancel</p>
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    handleSave();
-                  }}
-                  leftIcon={<CheckIcon />}
-                >
-                  <p className="hidden sm:block">Save</p>
-                </Button>
-              </>
-            ) : (
-              <CustomizeButton onClick={handleStartEditing} />
-            )}
-          </div>
+    <DndContext
+      accessibility={{
+        screenReaderInstructions,
+      }}
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragStart={({ active }) => {
+        if (active) {
+          setActiveWidget(active.data.current as ResponsiveWidget);
         }
-      />
+      }}
+      onDragEnd={({ over, active }) => {
+        setActiveWidget(null);
 
-      {/* Widget Palette */}
-      {isEditing && (
-        <Card>
-          <CardContent className="p-4 flex flex-col gap-3">
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-medium">Add Widgets</h3>
-              <p className="text-xs text-muted-foreground">
-                Click to add a widget
-              </p>
+        if (over) {
+          const overIndex = getIndex(over.id);
+          if (active.data.current?.elementType === "add-widget") {
+            handleAddWidget(
+              active.data.current.type,
+              over.data.current?.elementType === "drop-zone"
+                ? configuration.length
+                : overIndex
+            );
+            return;
+          }
+          const activeIndex = getIndex(active.id);
+          if (activeIndex !== overIndex) {
+            setConfiguration((items) =>
+              arrayMove(items, activeIndex, overIndex)
+            );
+          }
+        }
+      }}
+      onDragCancel={() => setActiveWidget(null)}
+    >
+      <div className="flex flex-col gap-4">
+        {/* Editor Controls */}
+
+        <PageHeading
+          rightContent={
+            <div
+              className={cn("flex items-center rounded-lg sm:gap-2", {
+                "border sm:border-none": isEditing,
+              })}
+            >
+              {isEditing ? (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-0 h-7 px-2 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
+                    onClick={handleCancel}
+                    leftIcon={<XIcon className="size-4 sm:hidden" />}
+                  >
+                    <p className="hidden sm:block">Cancel</p>
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      handleSave();
+                    }}
+                    className="border-0 h-7 sm:h-9 sm:border"
+                    leftIcon={<CheckIcon />}
+                  >
+                    <p className="hidden sm:block">Save</p>
+                  </Button>
+                </>
+              ) : (
+                <CustomizeButton onClick={handleStartEditing} />
+              )}
             </div>
-            <div className="flex flex-wrap gap-2">
-              {Object.values(Widgets).map((widgetType) => (
-                <Button
-                  key={widgetType}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleAddWidget(widgetType)}
-                  className="flex items-center gap-2 cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
-                >
-                  <PlusIcon className="size-4" />
-                  {WIDGET_NAMES[widgetType]}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          }
+        />
 
-      {/* Responsive Widget Grid */}
-      {configuration.length > 0 ? (
-        <WidgetContext.Provider
-          value={{
-            isEditing,
-            handleRemoveWidget,
-            handleCustomizeWidget,
-            handleResizeStart,
-
-            gridColumns,
-            dragState,
-          }}
-        >
-          <DndContext
-            accessibility={{
-              screenReaderInstructions,
-            }}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={({ active }) => {
-              if (!active) {
-                return;
-              }
-
-              setActiveId(active.id);
-            }}
-            onDragEnd={({ over }) => {
-              setActiveId(null);
-
-              if (over) {
-                const overIndex = getIndex(over.id);
-                if (activeIndex !== overIndex) {
-                  setConfiguration((items) =>
-                    arrayMove(items, activeIndex, overIndex)
-                  );
-                }
-              }
-            }}
-            onDragCancel={() => setActiveId(null)}
-          >
-            <SortableContext disabled={!isEditing} items={responsiveWidgets}>
-              <WidgetsGrid gridColumns={gridColumns}>
-                {responsiveWidgets.map((entry, index) => {
-                  const widgetExport = WIDGET_COMPONENTS[entry.type];
-
-                  const isCustomizable = isCustomizableWidget(widgetExport);
-                  const WidgetComponent = isCustomizable
-                    ? widgetExport.component
-                    : widgetExport;
-
-                  return (
-                    <WidgetComponent
-                      key={entry.id}
-                      {...entry}
-                      isEditing={isEditing}
-                      index={index}
+        {/* Widget Palette */}
+        {isEditing && (
+          <>
+            <Card>
+              <CardContent className="p-4 flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-sm font-medium">Widgets</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Start dragging to add new widgets.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {Object.values(Widgets).map((widgetType) => (
+                    <AddWidgetButton
+                      key={`${widgetType}-${configuration.length}`}
+                      type={widgetType}
+                      onClick={() => handleAddWidget(widgetType)}
                     />
-                  );
-                })}
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            {createPortal(
+              <DragOverlay className="!w-full max-w-[350px] sm:max-w-[clamp(300px,100%,600px)] flex justify-center">
+                {activeWidget
+                  ? renderWidget({
+                      entry: activeWidget,
+                      index: 0,
+                      isEditing,
+                      isPreview: true,
+                    })
+                  : null}
+              </DragOverlay>,
+              document.body
+            )}
+          </>
+        )}
+
+        {/* Responsive Widget Grid */}
+        {configuration.length > 0 ? (
+          <WidgetContext.Provider
+            value={{
+              isEditing,
+              handleRemoveWidget,
+              handleCustomizeWidget,
+              handleResizeStart,
+
+              gridColumns,
+              dragState,
+            }}
+          >
+            <SortableContext
+              disabled={!isEditing}
+              items={responsiveWidgets}
+              strategy={rectSortingStrategy}
+            >
+              <WidgetsGrid gridColumns={gridColumns}>
+                {responsiveWidgets.map((entry, index) =>
+                  renderWidget({ entry, index, isEditing })
+                )}
 
                 {/* Drop zone for adding at the end */}
-                {isEditing && (
-                  <div className="flex flex-col items-center gap-2">
-                    <div
-                      className={cn(
-                        "min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-muted-foreground text-sm transition-all"
-                      )}
-                    >
-                      <PlusIcon className="size-6" />
-                      <p className="text-sm text-muted-foreground">
-                        A new widget will appear here.
-                      </p>
-                    </div>
-                    <p className="text-xs invisible">
-                      Dummy title for the drop zone
-                    </p>
-                  </div>
-                )}
+                {isEditing && <DropZone />}
 
                 <CustomizationModal
                   widget={customizingWidget}
@@ -484,15 +488,42 @@ export function WidgetEditor({
                 />
               </WidgetsGrid>
             </SortableContext>
-          </DndContext>
-        </WidgetContext.Provider>
-      ) : (
-        <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
-      )}
-    </div>
+          </WidgetContext.Provider>
+        ) : (
+          <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
+        )}
+      </div>
+    </DndContext>
   );
 }
+function renderWidget({
+  entry,
+  index,
+  isEditing,
+  isPreview,
+}: {
+  entry: ResponsiveWidget;
+  index: number;
+  isEditing: boolean;
+  isPreview?: boolean;
+}) {
+  const widgetExport = WIDGET_COMPONENTS[entry.type];
 
+  const isCustomizable = isCustomizableWidget(widgetExport);
+  const WidgetComponent = isCustomizable
+    ? widgetExport.component
+    : widgetExport;
+
+  return (
+    <WidgetComponent
+      key={entry.id}
+      {...entry}
+      isEditing={isEditing}
+      index={index}
+      isPreview={isPreview}
+    />
+  );
+}
 // Calculate responsive layout with downsizing logic
 function calculateResponsiveLayout(
   widgets: WidgetsConfiguration,
@@ -602,4 +633,60 @@ function useGridColumns() {
     return () => window.removeEventListener("resize", updateGridColumns);
   }, []);
   return gridColumns;
+}
+function AddWidgetButton({
+  type,
+  onClick,
+}: {
+  type: Widgets;
+  onClick: () => void;
+}) {
+  const newWidget = useMemo(() => getNewWidgetConfiguration(type), [type]);
+
+  const { setNodeRef, attributes, listeners } = useDraggable({
+    id: newWidget.id,
+    data: {
+      elementType: "add-widget",
+      ...newWidget,
+    },
+  });
+  return (
+    <Button
+      key={type}
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      variant="outline"
+      size="sm"
+      onClick={onClick}
+      className="flex items-center gap-2 cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
+    >
+      <PlusIcon className="size-4" />
+      {WIDGET_NAMES[type]}
+    </Button>
+  );
+}
+function DropZone() {
+  const { setNodeRef, isOver } = useDroppable({
+    id: "drop-zone",
+    data: {
+      elementType: "drop-zone",
+    },
+  });
+  return (
+    <div ref={setNodeRef} className="flex flex-col items-center gap-2">
+      <div
+        className={cn(
+          "text-muted-foreground min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-sm transition-all",
+          {
+            "border-brand text-brand": isOver,
+          }
+        )}
+      >
+        <PlusIcon className="size-6" />
+        <p className="text-sm">Drop new widgets here</p>
+      </div>
+      <p className="text-xs invisible">Dummy title for the drop zone</p>
+    </div>
+  );
 }

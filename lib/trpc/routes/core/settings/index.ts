@@ -16,6 +16,7 @@ import {
 } from "@/constants/core";
 import { db } from "@/db";
 import { user_settings } from "@/db/schema";
+import { cookieDefaultOptions } from "@/helpers/MyEdCookieStore";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
 import { sha256 } from "@/helpers/sha256";
 import { encryption } from "@/lib/encryption";
@@ -36,7 +37,11 @@ export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
     const results = await getUserSettings(ctx);
     const cookieStore = ctx.cookieStore;
-    cookieStore.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(results));
+    cookieStore.set(
+      USER_SETTINGS_COOKIE_PREFIX,
+      JSON.stringify(results),
+      cookieDefaultOptions
+    );
     return results;
   }),
 

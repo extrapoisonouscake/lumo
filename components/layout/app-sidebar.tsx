@@ -87,7 +87,7 @@ function PagesMenu() {
           url === "/" ? url === pathname : pathname.startsWith(url);
         const mainItemContent = (
           <>
-            {page.icon && <page.icon className="size-5" />}
+            {page.icon && <page.icon />}
             {page.breadcrumb[0]!.name}
           </>
         );

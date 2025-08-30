@@ -117,7 +117,9 @@ function RecentGradesWidget(
     <Widget {...widget} richError={richError}>
       <div className="flex flex-col gap-4 flex-1">
         {customSubject && (
-          <Badge variant="secondary">{customSubject.name}</Badge>
+          <Badge variant="outline" className="text-brand">
+            {customSubject.name}
+          </Badge>
         )}
         {content}
       </div>

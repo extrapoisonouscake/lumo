@@ -7,8 +7,8 @@ export const WIDGET_NAMES: Record<Widgets, string> = {
   [Widgets.ANNOUNCEMENTS]: "School Announcements",
   [Widgets.RECENT_GRADES]: "Recent Grades",
   [Widgets.OVERDUE_ASSIGNMENTS]: "Overdue Assignments",
-  [Widgets.NEW_ASSIGNMENTS]: "New Assignments",
-  [Widgets.DYNAMIC_ASSIGNMENTS]: "Dynamic Assignments",
+  // [Widgets.NEW_ASSIGNMENTS]: "New Assignments",
+  // [Widgets.DYNAMIC_ASSIGNMENTS]: "Dynamic Assignments",
   [Widgets.SCHEDULE_TODAY]: "Today's Schedule",
   [Widgets.ATTENDANCE_SUMMARY]: "Attendance Summary",
 };
@@ -18,6 +18,9 @@ export type WidgetComponentProps<T extends Widgets = Widgets> =
     isEditing?: boolean;
     index: number;
     richError?: ErrorCardProps;
+    isPreview?: boolean;
+    className?: string;
+    containerClassName?: string;
   };
 
 // For customizable widgets
@@ -65,9 +68,9 @@ export const WIDGET_COMPONENTS: Record<Widgets, WidgetExport> = {
   [Widgets.RECENT_GRADES]: require("./recent-grades-widget").default,
   [Widgets.OVERDUE_ASSIGNMENTS]: require("./overdue-assignments-widget")
     .default,
-  [Widgets.NEW_ASSIGNMENTS]: require("./new-assignments-widget").default,
-  [Widgets.DYNAMIC_ASSIGNMENTS]: require("./dynamic-assignments-widget")
-    .default,
+  // [Widgets.NEW_ASSIGNMENTS]: require("./new-assignments-widget").default,
+  // [Widgets.DYNAMIC_ASSIGNMENTS]: require("./dynamic-assignments-widget")
+  //   .default,
   [Widgets.SCHEDULE_TODAY]: require("./schedule-today-widget").default,
   [Widgets.ATTENDANCE_SUMMARY]: require("./attendance-summary-widget").default,
 };

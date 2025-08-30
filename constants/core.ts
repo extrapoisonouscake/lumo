@@ -7,8 +7,8 @@ export enum Widgets {
   ANNOUNCEMENTS = "announcements",
   RECENT_GRADES = "recent_grades",
   OVERDUE_ASSIGNMENTS = "overdue_assignments",
-  NEW_ASSIGNMENTS = "new_assignments",
-  DYNAMIC_ASSIGNMENTS = "dynamic_assignments",
+  // NEW_ASSIGNMENTS = "new_assignments",
+  // DYNAMIC_ASSIGNMENTS = "dynamic_assignments",
   SCHEDULE_TODAY = "schedule_today",
   ATTENDANCE_SUMMARY = "attendance_summary",
 }
@@ -29,13 +29,14 @@ export type WidgetCustomProps = {
   };
   [Widgets.OVERDUE_ASSIGNMENTS]: {
     subjectId?: string;
+    shouldHideOnEmpty?: boolean;
   };
-  [Widgets.NEW_ASSIGNMENTS]: {
-    subjectId?: string;
-  };
-  [Widgets.DYNAMIC_ASSIGNMENTS]: {
-    subjectId?: string;
-  };
+  // [Widgets.NEW_ASSIGNMENTS]: {
+  //   subjectId?: string;
+  // };
+  // [Widgets.DYNAMIC_ASSIGNMENTS]: {
+  //   subjectId?: string;
+  // };
   [Widgets.ATTENDANCE_SUMMARY]: {
     subjectId?: string;
   };
@@ -58,8 +59,8 @@ export const WIDGET_CUSTOMIZATION_OPTIONS: Record<Widgets, boolean> = {
   [Widgets.ANNOUNCEMENTS]: true,
   [Widgets.RECENT_GRADES]: true,
   [Widgets.OVERDUE_ASSIGNMENTS]: true,
-  [Widgets.NEW_ASSIGNMENTS]: true,
-  [Widgets.DYNAMIC_ASSIGNMENTS]: true,
+  // [Widgets.NEW_ASSIGNMENTS]: true,
+  // [Widgets.DYNAMIC_ASSIGNMENTS]: true,
   [Widgets.SCHEDULE_TODAY]: false,
   [Widgets.ATTENDANCE_SUMMARY]: false, // Simple widget, no customization needed
 };
@@ -74,8 +75,8 @@ export const WIDGET_MAX_DIMENSIONS: Record<
   [Widgets.ANNOUNCEMENTS]: { width: 1, height: 1 },
   [Widgets.RECENT_GRADES]: { width: 2, height: 2 },
   [Widgets.OVERDUE_ASSIGNMENTS]: { width: 2, height: 2 },
-  [Widgets.NEW_ASSIGNMENTS]: { width: 2, height: 2 },
-  [Widgets.DYNAMIC_ASSIGNMENTS]: { width: 2, height: 2 },
+  // [Widgets.NEW_ASSIGNMENTS]: { width: 2, height: 2 },
+  // [Widgets.DYNAMIC_ASSIGNMENTS]: { width: 2, height: 2 },
   [Widgets.SCHEDULE_TODAY]: { width: 2, height: 1 },
   [Widgets.ATTENDANCE_SUMMARY]: { width: 2, height: 1 },
 };

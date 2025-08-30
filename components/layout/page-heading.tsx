@@ -8,8 +8,6 @@ import {
 import { useParams, usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { Settings } from "lucide-react";
-import Link from "next/link";
 import { BackButton } from "../ui/back-button";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
@@ -76,12 +74,8 @@ export function PageHeading({
       <div className="w-fit flex gap-2.5 items-center">
         {rightContent}
         <div className="w-fit flex sm:hidden gap-3 items-center">
-          <div className="flex items-center gap-2.5">
-            <Link href="/settings">
-              <Settings className="size-4" />
-            </Link>
-            <ThemeToggle isInSidebar={false} shouldShowText={false} />
-          </div>
+          <ThemeToggle isInSidebar={false} shouldShowText={false} />
+
           <UserHeader className="w-fit" />
         </div>
       </div>

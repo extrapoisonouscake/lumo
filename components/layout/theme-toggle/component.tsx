@@ -37,7 +37,11 @@ export function ThemeToggleComponent({
             {triggerContent}
           </SidebarMenuButton>
         ) : (
-          <Button variant="ghost" size="smallIcon" className="w-fit">
+          <Button
+            variant="ghost"
+            size="smallIcon"
+            className="w-fit hover:bg-transparent"
+          >
             {triggerContent}
           </Button>
         )}

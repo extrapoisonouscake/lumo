@@ -1,6 +1,10 @@
 "use client";
 
-import { WidgetSize } from "@/constants/core";
+import { ErrorCardProps } from "@/components/misc/error-card";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Widgets, WidgetSize } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
 import { useRecentAssignments } from "@/hooks/trpc/use-subjects-assignments";
@@ -9,15 +13,20 @@ import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { AssignmentStatus } from "@/types/school";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   getAssignmentURL,
   getPercentageString,
 } from "../../classes/[subjectId]/(assignments)/helpers";
-import { WidgetComponentProps } from "./index";
+import {
+  WidgetComponentProps,
+  WidgetCustomizationContentRenderer,
+} from "./index";
 import { Widget } from "./widget";
 
-export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
+function OverdueAssignmentsWidget(
+  widget: WidgetComponentProps<Widgets.OVERDUE_ASSIGNMENTS>
+) {
   const { size, isEditing } = widget;
   const settings = useUserSettings();
   const subjects = useSubjectsData({
@@ -63,15 +72,22 @@ export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
         return "grid-cols-1";
     }
   }, [size]);
-
-  if (overdueAssignments.length === 0 && !isEditing) {
-    return null;
+  let richError: ErrorCardProps | undefined;
+  if (overdueAssignments.length === 0) {
+    if (widget.custom?.shouldHideOnEmpty && !isEditing) {
+      return null;
+    }
+    richError = {
+      emoji: "✅",
+      message: "No overdue assignments.",
+    };
   }
 
   return (
     <Widget
       {...widget}
       contentClassName={cn(`grid gap-2 ${gridCols}`, "h-full")}
+      richError={richError}
     >
       {overdueAssignments.map((assignment) => {
         return (
@@ -114,3 +130,39 @@ export default function OverdueAssignmentsWidget(widget: WidgetComponentProps) {
     </Widget>
   );
 }
+
+const getCustomizationContent: WidgetCustomizationContentRenderer<
+  Widgets.OVERDUE_ASSIGNMENTS
+> = (initialValues, onSave) => {
+  const [value, setValue] = useState(initialValues.shouldHideOnEmpty);
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            id="terms"
+            checked={value}
+            onCheckedChange={(value) => setValue(value as boolean)}
+          />
+          <Label htmlFor="terms">
+            Hide if there are no overdue assignments
+          </Label>
+        </div>
+      </div>
+      <Button
+        onClick={() => {
+          onSave({
+            ...initialValues,
+            shouldHideOnEmpty: value,
+          });
+        }}
+      >
+        Save
+      </Button>
+    </>
+  );
+};
+export default {
+  component: OverdueAssignmentsWidget,
+  getCustomizationContent,
+};

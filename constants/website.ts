@@ -1,8 +1,9 @@
 import {
+  BookOpenText,
   Calendar,
   Home,
-  Library,
   LucideIcon,
+  Menu,
   ScrollText,
   Settings,
 } from "lucide-react";
@@ -28,7 +29,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { breadcrumb: [{ name: "Home" }], icon: Home, showOnMobile: true },
   "/classes": {
     breadcrumb: [{ name: "Classes" }],
-    icon: Library,
+    icon: BookOpenText,
     showOnMobile: true,
   },
   "/schedule": {
@@ -61,6 +62,10 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
       //   href: "/programs-of-study",
       // },
     ],
+  },
+  "/other": {
+    breadcrumb: [{ name: "Menu" }],
+    icon: Menu,
     showOnMobile: true,
   },
   "/settings": {
