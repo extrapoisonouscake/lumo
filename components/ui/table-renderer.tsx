@@ -93,7 +93,9 @@ export function TableRenderer<T>({
     );
   }
   const content = (
-    <div className={cn("rounded-lg r border", containerClassName)}>
+    <div
+      className={cn("rounded-xl r border overflow-auto", containerClassName)}
+    >
       <Table {...props} containerClassName={tableContainerClassName}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

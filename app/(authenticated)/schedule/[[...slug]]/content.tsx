@@ -3,7 +3,6 @@ import { PageHeading } from "@/components/layout/page-heading";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "nextjs-toploader/app";
 import { useState } from "react";
 import { SCHEDULE_QUERY_DATE_FORMAT } from "./constants";
 import { ScheduleDayPicker } from "./day-picker";
@@ -20,16 +19,17 @@ export function SchedulePageContent({
 }) {
   const [date, setDate] = useState(convertQueryDayToDate(initialDay));
 
-  const router = useRouter();
   const currentSearchParams = useSearchParams();
 
   const dateSetHandler = (newDate: Date) => {
     setDate(newDate);
-
-    router.push(
-      `/schedule${
-        newDate ? `/${formatDateToStandard(newDate)}` : ""
-      }?${currentSearchParams.toString()}`
+    const searchParamsString = currentSearchParams.toString();
+    window.history.pushState(
+      {},
+      "",
+      `/schedule${newDate ? `/${formatDateToStandard(newDate)}` : ""}${
+        searchParamsString ? "?" + searchParamsString : ""
+      }`
     );
   };
   const isMobile = useIsMobile();

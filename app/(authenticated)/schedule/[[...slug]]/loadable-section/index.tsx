@@ -156,6 +156,7 @@ function Content({
   date: Date;
   subjects?: Subject[];
 }) {
+  const userSettings = useUserSettings();
   if ("knownError" in schedule) {
     return (
       <ErrorCard
@@ -163,7 +164,6 @@ function Content({
       />
     );
   }
-  const userSettings = useUserSettings();
   const shouldShowWeekday =
     getActualWeekdayIndex(date) === 5 &&
     schedule.weekday !== timezonedDayJS().format("dddd");

@@ -76,7 +76,7 @@ export default function DynamicAssignmentsWidget({
           <Link
             href={getAssignmentURL(assignment, assignment.subject)}
             className={cn(
-              "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-lg border",
+              "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-xl border",
               isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
             )}
           >

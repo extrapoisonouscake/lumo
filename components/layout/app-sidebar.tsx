@@ -90,7 +90,9 @@ function PagesMenu() {
         const mainItemContent = (
           <>
             {page.icon && <page.icon />}
-            {page.breadcrumb[0]!.name}
+            <span className={cn({ "leading-none": isMobile })}>
+              {page.breadcrumb[0]!.name}
+            </span>
           </>
         );
         return (
@@ -117,7 +119,9 @@ function PagesMenu() {
                       <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                     </div>
                   ) : (
-                    <Link href={url}>{mainItemContent}</Link>
+                    <Link href={url} className="py-2 gap-2">
+                      {mainItemContent}
+                    </Link>
                   )}
                 </SidebarMenuButton>
               </CollapsibleTrigger>

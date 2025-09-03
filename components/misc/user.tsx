@@ -13,13 +13,13 @@ export function UserAvatar({
   return (
     <Avatar
       className={cn(
-        "size-8 rounded-full bg-background sm:rounded-lg text-sm",
+        "size-8 rounded-full bg-background sm:rounded-xl text-sm",
         className
       )}
     >
       <AvatarImage className="object-cover object-center" src={photoURL} />
       <AvatarFallback
-        className="rounded-full sm:rounded-lg text-inherit"
+        className="rounded-full sm:rounded-xl text-inherit"
         style={{
           background: `hsl(var(--brand) / 0.2)`,
           color: `hsl(var(--brand))`,

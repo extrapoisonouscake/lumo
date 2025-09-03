@@ -53,7 +53,7 @@ export default function AnnouncementsWidgetComponent(
           </p>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2 rounded-lg">
+            <div className="flex items-center gap-2 rounded-xl">
               <div
                 className={cn(
                   "w-2 h-2 rounded-full",
@@ -121,13 +121,13 @@ function ContentSkeleton() {
         </Skeleton>
 
         <div className="space-y-2">
-          <div className="flex items-center gap-2 rounded-lg">
+          <div className="flex items-center gap-2 rounded-xl">
             <Skeleton className="w-2 h-2 rounded-full" />
             <Skeleton className="text-sm font-medium text-foreground">
               1 new announcement
             </Skeleton>
           </div>
-          <div className="flex items-center gap-2 rounded-lg">
+          <div className="flex items-center gap-2 rounded-xl">
             <Skeleton className="w-2 h-2 rounded-full" />
             <Skeleton className="text-sm font-medium text-foreground">
               1 personal announcement

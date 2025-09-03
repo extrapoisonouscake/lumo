@@ -105,7 +105,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
         <TableRenderer
           table={table}
           desktopHeader={
-            <div className="flex flex-col md:flex-row flex-wrap gap-3">
+            <div className="flex flex-col md:flex-row flex-wrap gap-2">
               {gradeSelect}
 
               <div className="flex flex-col gap-2">
@@ -120,7 +120,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
             </div>
           }
           mobileHeader={
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <MiniTableHeader className="flex-1 pl-0 py-0">
                 <TableFilterSearchBar
                   id="subject-search-mobile"

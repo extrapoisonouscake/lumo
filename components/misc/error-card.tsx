@@ -10,13 +10,14 @@ export interface ErrorCardProps {
   variant?: "default" | "ghost";
   className?: string;
   size?: "sm" | "md";
+  isTightText?: boolean;
 }
 const errorCardVariants = cva(
-  "p-3 flex flex-col gap-1.5 items-center justify-center",
+  "flex flex-col gap-1.5 items-center justify-center",
   {
     variants: {
       variant: {
-        default: "p-3",
+        default: "p-4",
         ghost: "border-none p-0",
       },
     },
@@ -32,6 +33,7 @@ export function ErrorCard({
   emoji = "‼️",
   variant = "default",
   className,
+  isTightText = false,
 }: ErrorCardProps) {
   return (
     <Card className={cn(errorCardVariants({ variant, className }))}>
@@ -40,12 +42,14 @@ export function ErrorCard({
         textClassName={cn(
           "text-3xl",
           size === "sm" && "text-2xl",
-          "leading-tight"
+          isTightText ? "leading-tight" : "leading-none"
         )}
         imageClassName={cn("size-[30px]", size === "sm" && "size-[20px]")}
       />
 
-      <p className="text-sm text-center">{message ?? children}</p>
+      <p className={cn("text-sm text-center", !isTightText && "leading-none")}>
+        {message ?? children}
+      </p>
     </Card>
   );
 }

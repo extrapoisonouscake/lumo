@@ -49,7 +49,7 @@ export function ResponsiveFilters<T>({
           <div className="flex items-center gap-1.5">
             Filters
             {filtersCount > 0 && (
-              <div className="px-1.5 bg-brand rounded-lg text-primary-foreground">
+              <div className="px-1.5 bg-brand rounded-xl text-primary-foreground">
                 {filtersCount}
               </div>
             )}

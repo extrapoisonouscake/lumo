@@ -60,7 +60,7 @@ const DialogContent = ({
     >
       <div
         className={cn(
-          "rounded-lg flex flex-col gap-6 p-6 border bg-background shadow-lg relative max-h-[calc(100vh-4rem)]",
+          "rounded-xl flex flex-col gap-6 p-6 border bg-background shadow-lg relative max-h-[calc(100vh-4rem)]",
           className
         )}
       >

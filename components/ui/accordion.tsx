@@ -8,7 +8,7 @@ import { cn } from "@/helpers/cn";
 import { cva } from "class-variance-authority";
 
 const Accordion = AccordionPrimitive.Root;
-export const accordionItemVariants = cva("rounded-lg r border border-input");
+export const accordionItemVariants = cva("rounded-xl r border border-input");
 const AccordionItem = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Item>

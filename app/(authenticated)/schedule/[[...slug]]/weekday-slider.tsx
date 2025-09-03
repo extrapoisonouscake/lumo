@@ -6,7 +6,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const TOTAL_WEEKS = 21;
+const TOTAL_WEEKS = 7;
 const LOADING_SLIDES = 2; // One at each end
 const TOTAL_SLIDES = TOTAL_WEEKS + LOADING_SLIDES;
 const CENTER_INDEX = Math.floor(TOTAL_SLIDES / 2);

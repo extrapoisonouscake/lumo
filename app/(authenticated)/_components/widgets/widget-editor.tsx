@@ -389,7 +389,7 @@ export function WidgetEditor({
         <PageHeading
           rightContent={
             <div
-              className={cn("flex items-center rounded-lg sm:gap-2", {
+              className={cn("flex items-center rounded-xl sm:gap-2", {
                 "border sm:border-none": isEditing,
               })}
             >
@@ -693,7 +693,7 @@ function DropZone() {
     <div ref={setNodeRef} className="flex flex-col items-center gap-2">
       <div
         className={cn(
-          "text-muted-foreground min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-lg flex flex-col gap-3 items-center justify-center text-sm transition-all",
+          "text-muted-foreground min-h-[120px] sm:min-h-[200px] w-full flex-1 border border-dashed border-muted-foreground/25 rounded-xl flex flex-col gap-3 items-center justify-center text-sm transition-all",
           {
             "border-brand text-brand": isOver,
           }

@@ -45,7 +45,7 @@ export function UserHeader({ className }: { className?: string }) {
 export function UserHeaderSkeleton({ className }: { className?: string }) {
   return (
     <UserButton isLoading className={cn(className, "hover:bg-transparent")}>
-      <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-lg" />
+      <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-xl" />
 
       <div className="hidden sm:grid flex-1 gap-1 text-left text-sm leading-tight">
         <Skeleton className="truncate w-fit">
@@ -69,7 +69,7 @@ function UserButton({
       size="lg"
       isActive={!isLoading && pathname === "/profile"}
       className={cn(
-        "p-0 h-fit sm:h-12 rounded-full sm:rounded-lg sm:p-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+        "p-0 h-fit sm:h-12 rounded-full sm:rounded-xl sm:p-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
         className
       )}
       {...props}

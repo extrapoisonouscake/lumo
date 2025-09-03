@@ -353,7 +353,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
         <TableRenderer
           table={table}
           desktopHeader={
-            <div className="flex flex-col md:flex-row flex-wrap gap-3">
+            <div className="flex flex-col md:flex-row flex-wrap gap-2">
               {yearsSelect}
               {statusSelect}
               <div className="flex flex-col gap-2">
@@ -368,7 +368,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             </div>
           }
           mobileHeader={
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <TableFilterSearchBar
                 id="subject-search-mobile"
                 table={table}

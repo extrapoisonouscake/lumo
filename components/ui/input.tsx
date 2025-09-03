@@ -38,7 +38,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            "flex h-10 w-full rounded-lg r border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground",
+            "flex h-10 w-full rounded-xl r border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground",
             { "pl-9": leftIcon, "pr-9": rightIcon },
             className
           )}
@@ -49,7 +49,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <div
             {...rightIconContainerProps}
             className={cn(
-              "absolute rounded-lg right-[1px] px-3 top-[1px] bottom-[1px] h-[calc(100%-2px)] flex items-center justify-center bg-background",
+              "absolute rounded-xl right-[1px] px-3 top-[1px] bottom-[1px] h-[calc(100%-2px)] flex items-center justify-center bg-background",
               rightIconContainerProps?.className
             )}
           >

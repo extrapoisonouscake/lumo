@@ -164,7 +164,11 @@ export function Widget({
             contentClassName
           )}
         >
-          {richError ? <WidgetErrorCard {...richError} /> : children}
+          {richError ? (
+            <WidgetErrorCard isTightText {...richError} />
+          ) : (
+            children
+          )}
         </CardContent>
       </Card>
 

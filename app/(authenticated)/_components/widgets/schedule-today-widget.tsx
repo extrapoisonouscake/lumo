@@ -263,7 +263,7 @@ function ScheduleElementCard({
     </>
   );
   const baseClassName = cn(
-    "group/card flex gap-1 items-center justify-between bg-muted/25 rounded-lg border p-3",
+    "group/card flex gap-1 items-center justify-between bg-muted/25 rounded-xl border p-3",
     {
       "hover:bg-muted/40 transition-colors duration-300": isSubject,
     },
