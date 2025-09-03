@@ -33,10 +33,9 @@ export function SubjectAttendance({
     <>
       <ResponsiveDialog>
         <ResponsiveDialogTrigger asChild>
-          {/* does it need rounded-tl-md? */}
           <Button
             variant="outline"
-            className="h-8 rounded-tl-md"
+            className="h-8 rounded-lg"
             size="sm"
             leftIcon={<ListX />}
           >

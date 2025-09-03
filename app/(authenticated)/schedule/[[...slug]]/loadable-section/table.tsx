@@ -358,6 +358,8 @@ export function ScheduleBreak({
 }
 function ScheduleMobileRow(row: ScheduleRow) {
   const isSubject = row.type === "subject";
+  const isTeacherAdvisory =
+    isSubject && row.name === TEACHER_ADVISORY_ABBREVIATION;
   const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
   const content = (
     <Card
@@ -405,7 +407,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
           <p>{row.room}</p>
         </div>
       )}
-      {isSubject && (
+      {isSubject && !isTeacherAdvisory && (
         <ChevronRight className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
       )}
     </Card>
@@ -416,7 +418,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
     }),
   };
 
-  if (isSubject) {
+  if (isSubject && !isTeacherAdvisory) {
     return (
       <Link
         href={getSubjectPageURLWithDefinedYear({

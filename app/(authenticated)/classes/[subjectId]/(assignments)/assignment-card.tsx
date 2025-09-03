@@ -96,9 +96,9 @@ export function AssignmentCardSkeleton() {
       </Skeleton>
 
       <div className="grid grid-cols-2 gap-3 text-sm">
-        <SkeletonColumn heading="Due Date" value="00/00/0000 00/00/0000" />
+        <SkeletonColumn heading="Due Date" value="00/00/0000" />
 
-        <SkeletonColumn heading="ScoreScore" value="00 / 100 00 / 100" />
+        <SkeletonColumn heading="ScoreScore" value="00 / 100 (30%)" />
       </div>
     </Card>
   );

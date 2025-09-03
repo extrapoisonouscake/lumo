@@ -41,7 +41,11 @@ import { UserSettings } from "@/types/core";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { TermSelects } from "../term-selects";
-import { AssignmentCard, AssignmentScoreDisplay } from "./assignment-card";
+import {
+  AssignmentCard,
+  AssignmentCardSkeleton,
+  AssignmentScoreDisplay,
+} from "./assignment-card";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
 import { ASSIGNMENT_STATUS_LABELS, getAssignmentURL } from "./helpers";
 
@@ -139,11 +143,12 @@ export function SubjectAssignmentsTable({
   categoryId,
   categories,
   term,
-
+  isLoading,
   className,
 }: MyEdEndpointResponse<"subjectAssignments"> & {
   className?: string;
   term: string | undefined;
+  isLoading?: boolean;
   categoryId: string | "all";
   categories: SubjectSummary["academics"]["categories"];
 }) {
@@ -158,12 +163,14 @@ export function SubjectAssignmentsTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const columns = useMemo(
     () =>
-      getColumns({
-        ...settings,
-        categoriesMap: Object.fromEntries(
-          categories.map((category) => [category.id, category.name])
-        ),
-      }),
+      isLoading
+        ? columnsSkeletons
+        : getColumns({
+            ...settings,
+            categoriesMap: Object.fromEntries(
+              categories.map((category) => [category.id, category.name])
+            ),
+          }),
     [settings.shouldShowPercentages]
   );
   const columnVisibility = useMemo(
@@ -306,7 +313,7 @@ export function SubjectAssignmentsTable({
               id="subject-search"
               table={table}
               columnName="name"
-              placeholder="Subject name..."
+              placeholder="Subject Name..."
             />
           </div>
         </div>
@@ -319,7 +326,7 @@ export function SubjectAssignmentsTable({
               table={table}
               columnName="name"
               className="py-0 pr-0 border-none"
-              placeholder="Assignment name..."
+              placeholder="Assignment Name..."
             />
             <SortableColumn {...table.getColumn("assignedAt")!}>
               Date
@@ -337,6 +344,9 @@ export function SubjectAssignmentsTable({
         </div>
       }
       renderMobileRow={({ original: row }) => {
+        if (isLoading) {
+          return <AssignmentCardSkeleton />;
+        }
         return (
           <Link
             href={getAssignmentURL(row, {
@@ -364,6 +374,7 @@ export function SubjectAssignmentsTableSkeleton({
 }) {
   return (
     <SubjectAssignmentsTable
+      isLoading
       subjectId="1"
       assignments={mockAssignments(5)}
       terms={[]}

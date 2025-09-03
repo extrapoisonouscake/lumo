@@ -114,7 +114,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
                   id="subject-search"
                   table={table}
                   columnName="subjectName"
-                  placeholder="Subject name..."
+                  placeholder="Subject Name..."
                 />
               </div>
             </div>
@@ -127,7 +127,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
                   table={table}
                   columnName="subjectName"
                   className="py-0 pr-0 border-none"
-                  placeholder="Subject name..."
+                  placeholder="Subject Name..."
                 />
                 <SortableColumn {...table.getColumn("finalGrade")!}>
                   Final

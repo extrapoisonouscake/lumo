@@ -189,5 +189,5 @@ export function ScheduleContentSkeleton() {
   return <ScheduleTable isLoading />;
 }
 function GridLayout({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-2 gap-4 auto-rows-max">{children}</div>;
+  return <div className="grid grid-cols-2 gap-2 auto-rows-max">{children}</div>;
 }
