@@ -433,6 +433,7 @@ function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
         { label: "Years", value: entry.years },
         {
           label: "Status",
+          className: "space-y-0.5",
           value: <EntryStatusBadge status={entry.status} />,
         },
       ]}
