@@ -34,35 +34,33 @@ export function SubjectsPageContent() {
   );
 
   return (
-    <div className="flex flex-col gap-2">
-      <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
-        {(response) => {
-          return (
-            <LoadedContent
-              response={{
-                ...response,
-                subjects: {
-                  ...response.subjects,
-                  main: response.subjects.main.map((subject) => {
-                    const academics =
-                      subjectSummaries.data[subject.id]?.academics;
-                    return {
-                      ...subject,
-                      average:
-                        academics?.posted.overall ?? academics?.running.overall,
-                    };
-                  }),
-                },
-              }}
-              //*timewise
-              currentTermIndex={currentTermIndex}
-              year={year}
-              term={term}
-            />
-          );
-        }}
-      </QueryWrapper>
-    </div>
+    <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
+      {(response) => {
+        return (
+          <LoadedContent
+            response={{
+              ...response,
+              subjects: {
+                ...response.subjects,
+                main: response.subjects.main.map((subject) => {
+                  const academics =
+                    subjectSummaries.data[subject.id]?.academics;
+                  return {
+                    ...subject,
+                    average:
+                      academics?.posted.overall ?? academics?.running.overall,
+                  };
+                }),
+              },
+            }}
+            //*timewise
+            currentTermIndex={currentTermIndex}
+            year={year}
+            term={term}
+          />
+        );
+      }}
+    </QueryWrapper>
   );
 }
 function SubjectsPageSkeleton() {
