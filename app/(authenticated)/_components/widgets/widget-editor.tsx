@@ -392,16 +392,19 @@ export function WidgetEditor({
           })}
           rightContent={
             <div
-              className={cn("flex items-center rounded-xl sm:gap-2", {
-                "border sm:border-none": isEditing,
-              })}
+              className={cn(
+                "flex items-center rounded-lg sm:rounded-xl sm:gap-2",
+                {
+                  "border sm:border-none": isEditing,
+                }
+              )}
             >
               {isEditing ? (
                 <>
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-0 h-7 px-2 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
+                    className="rounded-lg sm:rounded-xl border-0 h-7 px-2 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
                     onClick={handleCancel}
                     leftIcon={<XIcon className="size-4 sm:hidden" />}
                   >
@@ -412,7 +415,7 @@ export function WidgetEditor({
                     onClick={() => {
                       handleSave();
                     }}
-                    className="border-0 h-7 sm:h-9 sm:border"
+                    className="rounded-lg sm:rounded-xl border-0 h-7 sm:h-9 sm:border"
                     leftIcon={<CheckIcon />}
                   >
                     <p className="hidden sm:block">Save</p>
@@ -436,7 +439,6 @@ export function WidgetEditor({
             dragState,
           }}
         >
-          {" "}
           {/* Widget Palette */}
           {isEditing && (
             <>
