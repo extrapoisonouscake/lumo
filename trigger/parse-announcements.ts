@@ -84,7 +84,7 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     randomize: false,
     minTimeoutInMs: delayMs,
     maxTimeoutInMs: delayMs,
-    maxAttempts: Math.round((24 * 60) / delayMinutes),
+    maxAttempts: Math.round((6 * 60) / delayMinutes),
   },
   queue: {
     concurrencyLimit: 1,
