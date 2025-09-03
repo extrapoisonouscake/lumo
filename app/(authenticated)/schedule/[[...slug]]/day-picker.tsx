@@ -1,20 +1,11 @@
 "use client";
 //* TO-DO cleanup date functions
-import { Button, ButtonProps } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RotateCcw } from "lucide-react";
 import { useState } from "react";
-function ChevronButton(props: ButtonProps) {
-  return (
-    <Button
-      variant="outline"
-      className="size-10 bg-transparent p-0"
-      {...props}
-      disabled={false}
-    />
-  );
-}
+
 export function ScheduleDayPicker({
   date,
   setDate,
@@ -44,7 +35,7 @@ export function ScheduleDayPicker({
               <Button
                 onClick={resetDate}
                 variant="outline"
-                className="w-full"
+                className="w-full rounded-lg"
                 leftIcon={<RotateCcw />}
               >
                 Back to today

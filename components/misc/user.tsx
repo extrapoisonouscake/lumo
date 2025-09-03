@@ -13,7 +13,7 @@ export function UserAvatar({
   return (
     <Avatar
       className={cn(
-        "size-8 rounded-full bg-background sm:rounded-xl text-sm",
+        "size-8 rounded-full bg-background sm:rounded-lg text-sm",
         className
       )}
     >

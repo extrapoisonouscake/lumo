@@ -616,7 +616,10 @@ function CustomizeButton({ className, ...props }: ButtonProps) {
     <Button
       variant="outline"
       size="sm"
-      className={cn("px-0 size-7 sm:h-9 sm:w-fit sm:px-3", className)}
+      className={cn(
+        "rounded-lg sm:rounded-xl px-0 size-7 sm:h-9 sm:w-fit sm:px-3",
+        className
+      )}
       leftIcon={<PencilRulerIcon />}
       {...props}
     >

@@ -362,18 +362,21 @@ function ScheduleMobileRow(row: ScheduleRow) {
   const content = (
     <Card
       data-clickable={isSubject}
-      className={cn("p-4 group relative flex-row gap-2 justify-between", {
-        "bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] overflow-hidden":
-          isCurrent,
-        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]:": isCurrent && isSubject,
-        "border-none py-2.5 rounded-md": !isSubject,
-      })}
+      className={cn(
+        "p-4 group relative flex-row gap-2 justify-between items-start",
+        {
+          "bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] overflow-hidden":
+            isCurrent,
+          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]:": isCurrent && isSubject,
+          "border-none py-2.5 rounded-md items-center": !isSubject,
+        }
+      )}
     >
       {isCurrent && (
         <div className="w-1 h-full bg-brand absolute left-0 top-0" />
       )}
       <div
-        className={cn("flex flex-col gap-0.5", {
+        className={cn("flex flex-col gap-0.5 w-full", {
           "flex-row justify-between flex-1": !isSubject,
         })}
       >
@@ -381,11 +384,12 @@ function ScheduleMobileRow(row: ScheduleRow) {
           {timezonedDayJS(row.startsAt).format(HOURS_FORMAT)} –{" "}
           {timezonedDayJS(row.endsAt).format(HOURS_FORMAT)}
         </p>
+
         {isSubject ? (
           <p className="font-medium">{row.name}</p>
         ) : (
           <ScheduleBreak
-            className="text-muted-foreground text-sm"
+            className="text-muted-foreground text-sm whitespace-nowrap"
             type={row.type}
           />
         )}
@@ -396,13 +400,13 @@ function ScheduleMobileRow(row: ScheduleRow) {
         )}
       </div>
       {isSubject && (
-        <div className="flex flex-col justify-between items-end h-[calc(50%+20px/2)] min-h-[50px]">
-          <div className="flex gap-1 items-center text-muted-foreground text-sm">
-            <DoorOpen className="size-4" />
-            <p>{row.room}</p>
-          </div>
-          <ChevronRight className="size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <div className="flex gap-1 items-center text-muted-foreground text-sm">
+          <DoorOpen className="size-4" />
+          <p>{row.room}</p>
         </div>
+      )}
+      {isSubject && (
+        <ChevronRight className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
       )}
     </Card>
   );

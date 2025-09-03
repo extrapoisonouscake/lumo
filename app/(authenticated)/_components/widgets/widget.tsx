@@ -164,11 +164,7 @@ export function Widget({
             contentClassName
           )}
         >
-          {richError ? (
-            <WidgetErrorCard isTightText {...richError} />
-          ) : (
-            children
-          )}
+          {richError ? <WidgetErrorCard {...richError} /> : children}
         </CardContent>
       </Card>
 
@@ -187,6 +183,7 @@ export function WidgetErrorCard({ className, ...props }: ErrorCardProps) {
     <ErrorCard
       variant="ghost"
       size="sm"
+      isTightText
       {...props}
       className={cn("flex-1 p-0", className)}
     />

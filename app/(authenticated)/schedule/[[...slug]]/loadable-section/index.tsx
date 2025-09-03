@@ -42,7 +42,7 @@ const getSpringBreakDates = (year: number) => {
 const getSummerBreakDates = (year: number) => {
   const june15th = timezonedDayJS(`${year}-06-15`);
 
-  const labourDay = timezonedDayJS(`${year}-09-01`).day(2);
+  const labourDay = timezonedDayJS(`${year}-09-01`);
 
   return [june15th, labourDay] as const;
 };
