@@ -387,6 +387,9 @@ export function WidgetEditor({
         {/* Editor Controls */}
 
         <PageHeading
+          className={cn({
+            "sticky sm:static top-0 bg-background -my-4 py-4 z-20": isEditing,
+          })}
           rightContent={
             <div
               className={cn("flex items-center rounded-xl sm:gap-2", {

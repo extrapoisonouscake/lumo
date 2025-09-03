@@ -8,6 +8,7 @@ import {
 import { useParams, usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { cn } from "@/helpers/cn";
 import { BackButton } from "../ui/back-button";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
@@ -63,12 +64,14 @@ export const usePageData = () => {
 export function PageHeading({
   leftContent,
   rightContent,
+  className,
 }: {
   leftContent?: React.ReactNode;
   rightContent?: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex justify-between gap-4 items-start">
+    <div className={cn("flex justify-between gap-4 items-start", className)}>
       {leftContent ?? <DefaultLeftContent />}
 
       <div className="w-fit flex gap-2.5 items-center">

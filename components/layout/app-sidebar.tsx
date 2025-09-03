@@ -119,7 +119,7 @@ function PagesMenu() {
                       <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                     </div>
                   ) : (
-                    <Link href={url} className="py-2 gap-2">
+                    <Link prefetch href={url} className="py-2 gap-2">
                       {mainItemContent}
                     </Link>
                   )}

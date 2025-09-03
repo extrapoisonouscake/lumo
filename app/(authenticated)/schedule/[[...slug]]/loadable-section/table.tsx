@@ -138,7 +138,7 @@ export const mockScheduleSubjects = (length: number) => {
       rows.push({
         startsAt: new Date(),
         endsAt: new Date(),
-        type: "short-break" as const,
+        type: "long-break" as const,
       });
     }
   }
@@ -457,7 +457,7 @@ function ScheduleMobileRowSkeleton(row: ScheduleRow) {
           <Skeleton className="w-fit">
             <ScheduleBreak
               className="text-muted-foreground text-sm"
-              type={"long-break"}
+              type={row.type}
             />
           </Skeleton>
         )}
