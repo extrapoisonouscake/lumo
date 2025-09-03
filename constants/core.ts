@@ -123,11 +123,11 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   themeColor: "162 23% 49%",
   widgetsConfiguration: [
     {
-      id: "announcements-1",
-      type: Widgets.ANNOUNCEMENTS,
+      id: "schedule-today-1",
+      type: Widgets.SCHEDULE_TODAY,
       width: 1,
       height: 1,
-      custom: WIDGET_CUSTOM_DEFAULTS[Widgets.ANNOUNCEMENTS],
+      custom: WIDGET_CUSTOM_DEFAULTS[Widgets.SCHEDULE_TODAY],
     },
     {
       id: "recent-grades-1",
@@ -135,20 +135,6 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
       width: 1,
       height: 1,
       custom: WIDGET_CUSTOM_DEFAULTS[Widgets.RECENT_GRADES],
-    },
-    {
-      id: "overdue-assignments-1",
-      type: Widgets.OVERDUE_ASSIGNMENTS,
-      width: 1,
-      height: 1,
-      custom: WIDGET_CUSTOM_DEFAULTS[Widgets.OVERDUE_ASSIGNMENTS],
-    },
-    {
-      id: "schedule-today-1",
-      type: Widgets.SCHEDULE_TODAY,
-      width: 1,
-      height: 1,
-      custom: WIDGET_CUSTOM_DEFAULTS[Widgets.SCHEDULE_TODAY],
     },
   ],
 };

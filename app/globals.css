@@ -59,9 +59,11 @@ ul {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
-    --mobile-menu-inset-bottom: calc(var(--safe-area-inset-bottom) / 2);
-    --mobile-menu-height: calc(4.25rem + var(--mobile-menu-inset-bottom));
+    --adjusted-safe-area-inset-bottom: calc(env(safe-area-inset-bottom, 0) / 2);
+
+    --mobile-menu-height: calc(
+      4.25rem + var(--adjusted-safe-area-inset-bottom)
+    );
   }
   .dark {
     --background: 240 10% 3.9%;

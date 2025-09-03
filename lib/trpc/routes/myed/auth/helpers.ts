@@ -20,7 +20,11 @@ import {
 import { sendMyEdRequest } from "@/parsing/myed/sendMyEdRequest";
 import * as cheerio from "cheerio";
 
-import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import {
+  USER_SETTINGS_DEFAULT_VALUES,
+  Widgets,
+  WidgetsConfiguration,
+} from "@/constants/core";
 import { KNOWN_SCHOOL_MYED_NAME_TO_ID } from "@/constants/schools";
 import { user_settings, users } from "@/db/schema";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
@@ -62,15 +66,20 @@ const initStudentFirstLogin = async ({
   );
   const knownSchool = KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName];
   await db.insert(users).values({ id: hashedStudentId });
-
-  // const encryptedCredentials = credentials
-  // ? {
-  //     username: encryption.encrypt(credentials.username),
-  //     password: encryption.encrypt(credentials.password),
-  //   }
-  // : undefined;
+  const widgetsConfiguration: WidgetsConfiguration = [
+    ...USER_SETTINGS_DEFAULT_VALUES.widgetsConfiguration,
+  ];
+  if (knownSchool) {
+    widgetsConfiguration.push({
+      id: "announcements-1",
+      type: Widgets.ANNOUNCEMENTS,
+      width: 1,
+      height: 1,
+    });
+  }
   await db.insert(user_settings).values({
     ...USER_SETTINGS_DEFAULT_VALUES,
+    widgetsConfiguration: widgetsConfiguration,
     userId: hashedStudentId,
     schoolId: knownSchool,
   });

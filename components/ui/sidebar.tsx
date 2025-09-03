@@ -197,7 +197,7 @@ const Sidebar = React.forwardRef<
         <div
           ref={ref}
           className={cn(
-            "fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t bg-sidebar text-sidebar-foreground sm:hidden pb-[--mobile-menu-inset-bottom]",
+            "fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t bg-sidebar text-sidebar-foreground sm:hidden pb-[--adjusted-safe-area-inset-bottom]",
             className
           )}
           {...props}
