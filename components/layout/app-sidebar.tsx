@@ -78,7 +78,9 @@ function PagesMenu() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const pages = Object.entries(websitePagesWithStaticPaths).filter(
-    ([_, page]) => !page.isHiddenInSidebar && (!isMobile || page.showOnMobile)
+    ([_, page]) =>
+      !page.isHiddenInSidebar &&
+      (isMobile ? page.showOnMobile : page.showOnDesktop ?? true)
   );
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>

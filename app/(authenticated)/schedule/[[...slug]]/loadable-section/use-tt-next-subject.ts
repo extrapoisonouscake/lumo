@@ -13,13 +13,16 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
   const [currentRowIndex, setCurrentRowIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (data && timeToNextSubject !== null) {
-        setTimeToNextSubject((prev) =>
-          typeof prev === "number" ? prev - 1000 : null
-        );
-      }
-    }, 1000);
+    const getInterval = () => {
+      return setInterval(() => {
+        if (data && timeToNextSubject !== null) {
+          setTimeToNextSubject((prev) =>
+            typeof prev === "number" ? prev - 1000 : null
+          );
+        }
+      }, 1000);
+    };
+    let intervalId = getInterval();
     let newTimeoutId: NodeJS.Timeout;
     const refresh = () => {
       if (!data) return;
@@ -92,6 +95,9 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
       }
 
       setTimeToNextSubject(visibleMillisecondsToNextSubject);
+
+      clearInterval(intervalId);
+      intervalId = getInterval();
 
       if (timeoutId) clearTimeout(timeoutId);
       newTimeoutId = setTimeout(() => {

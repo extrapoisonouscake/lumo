@@ -19,6 +19,7 @@ import {
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
@@ -101,12 +102,13 @@ export function SubjectSummary(
     </Card>
   );
 }
-function InfoDialog({ name, id, year, term }: SubjectSummary) {
+function InfoDialog({ name, id, year }: SubjectSummary) {
   const subject = useSubjectData({
     id,
     isPreviousYear: year === "previous",
-    termId: term,
+    termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
+
   return (
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
@@ -122,7 +124,7 @@ function InfoDialog({ name, id, year, term }: SubjectSummary) {
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle>{name}</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody className="flex flex-col gap-4">
+        <ResponsiveDialogBody className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
             <User className="size-4 text-muted-foreground" />
             <div>

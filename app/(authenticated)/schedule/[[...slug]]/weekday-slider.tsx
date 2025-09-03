@@ -115,23 +115,23 @@ export function WeekdaySlider({
   // Loading slide component
 
   return (
-    <div className="relative">
+    <div className="flex gap-2 items-center">
       <Button
         size="icon"
         variant="ghost"
         onClick={() => {
           emblaApi?.scrollPrev();
         }}
-        className="p-0 pr-2 bg-background h-full w-fit z-10 absolute left-0 top-1/2 -translate-y-1/2 hover:bg-background group"
+        className="p-0 h-full w-fit hover:bg-transparent group"
       >
         <ChevronLeft className="text-muted-foreground/80 group-hover:text-foreground transition-colors" />
       </Button>
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div className="overflow-hidden rounded-[18px] flex-1" ref={emblaRef}>
         <div className="flex">
           {slides.map((days, slideIndex) => (
             <div
               key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
-              className="flex-[0_0_100%] flex justify-center px-6"
+              className="flex-[0_0_100%] flex justify-center"
             >
               <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
                 {days ? (
@@ -194,7 +194,7 @@ export function WeekdaySlider({
         onClick={() => {
           emblaApi?.scrollNext();
         }}
-        className="p-0 pl-2 bg-background h-full w-fit z-10 absolute right-0 top-1/2 -translate-y-1/2 hover:bg-background group"
+        className="p-0 h-full w-fit hover:bg-transparent group"
       >
         <ChevronRight className="text-muted-foreground/80 group-hover:text-foreground transition-colors" />
       </Button>

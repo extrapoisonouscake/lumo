@@ -31,7 +31,7 @@ export function AssignmentCard({
       className={cn(
         "cursor-pointer transition-colors gap-2 hover:bg-muted/50",
         {
-          "border-red-500/50 dark:border-red-500/40":
+          "border-red-500/30 dark:border-red-500/20":
             shouldHighlightIfMissing && isMissing,
         }
       )}
@@ -45,23 +45,12 @@ export function AssignmentCard({
         },
         {
           label: "Score",
-          valueClassName: "flex items-center gap-1",
+
           value: (
-            <>
-              <p
-                className={cn(
-                  { "text-red-500": isMissing },
-                  { "text-blue-500/70": status === AssignmentStatus.Exempt }
-                )}
-              >
-                {formatAssignmentScore(shouldShowPercentages)(assignment)}
-              </p>
-              <ScoreIcon
-                classAverage={assignment.classAverage}
-                score={assignment.score}
-                status={assignment.status}
-              />
-            </>
+            <AssignmentScoreDisplay
+              assignment={assignment}
+              shouldShowPercentages={shouldShowPercentages}
+            />
           ),
         },
         ...(weight ? [{ label: "Weight", value: weight }] : []),
@@ -69,7 +58,7 @@ export function AssignmentCard({
       header={
         <div className="gap-1.5 flex flex-col items-start">
           {assignment.feedback && (
-            <Badge className="bg-brand/10 text-brand">Teacher Comment</Badge>
+            <Badge variant="secondary">Teacher Comment</Badge>
           )}
           <h3 className="font-medium text-base">{name}</h3>
         </div>
@@ -129,6 +118,36 @@ function SkeletonColumn({
       <Skeleton>
         <p>{value}</p>
       </Skeleton>
+    </div>
+  );
+}
+export function AssignmentScoreDisplay({
+  assignment,
+  shouldShowPercentages,
+}: {
+  assignment: Assignment;
+  shouldShowPercentages: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <p
+        className={cn(
+          { "text-red-500": assignment.status === AssignmentStatus.Missing },
+          { "text-blue-500/70": assignment.status === AssignmentStatus.Exempt },
+          {
+            "text-muted-foreground":
+              assignment.status === AssignmentStatus.Unknown ||
+              assignment.status === AssignmentStatus.Ungraded,
+          }
+        )}
+      >
+        {formatAssignmentScore(shouldShowPercentages)(assignment)}
+      </p>
+      <ScoreIcon
+        classAverage={assignment.classAverage}
+        score={assignment.score}
+        status={assignment.status}
+      />
     </div>
   );
 }

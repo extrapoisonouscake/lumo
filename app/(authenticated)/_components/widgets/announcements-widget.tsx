@@ -135,17 +135,6 @@ function ContentSkeleton() {
           </div>
         </div>
       </div>
-
-      <Skeleton className="mt-auto w-full self-center">
-        <Button
-          size="sm"
-          variant="ghost"
-          className="w-full hover:bg-transparent text-muted-foreground"
-          rightIcon={<ArrowUpRightIcon className="size-4" />}
-        >
-          View all
-        </Button>
-      </Skeleton>
     </div>
   );
 }

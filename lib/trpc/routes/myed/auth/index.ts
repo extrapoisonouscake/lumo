@@ -23,6 +23,10 @@ import {
 } from "./public";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
+import {
+  USER_CACHE_COOKIE_PREFIX,
+  USER_SETTINGS_COOKIE_PREFIX,
+} from "@/constants/core";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
@@ -222,8 +226,10 @@ export const authRouter = router({
   }),
   register,
 
-  logOut: authenticatedProcedure.mutation(async () => {
+  logOut: authenticatedProcedure.mutation(async ({ ctx: { cookieStore } }) => {
     await deleteSession();
+    cookieStore.delete(USER_CACHE_COOKIE_PREFIX);
+    cookieStore.delete(USER_SETTINGS_COOKIE_PREFIX);
   }),
 
   sendPasswordResetEmail,

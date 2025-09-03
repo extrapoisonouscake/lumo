@@ -41,10 +41,12 @@ export function TableRenderer<T>({
   table,
   columns,
   mobileHeader,
+  desktopHeader,
   rowRendererFactory,
   containerClassName,
   tableContainerClassName,
   emptyState,
+  mobileContainerClassName,
   renderMobileRow,
   ...props
 }: {
@@ -52,18 +54,27 @@ export function TableRenderer<T>({
   columns: ((AccessorKeyColumnDefBase<any, any> | DisplayColumnDef<any, any>) &
     Partial<IdIdentifier<any, any>>)[];
   mobileHeader?: ReactNode;
+  desktopHeader?: ReactNode;
   rowRendererFactory?: RowRendererFactory<T>;
 } & {
   tableContainerClassName?: TableProps["containerClassName"];
   containerClassName?: string;
   emptyState?: ErrorCardProps | string;
   renderMobileRow?: (row: Row<T>, rowIndex: number) => ReactNode;
+  mobileContainerClassName?: string;
 }) {
   const { rows } = table.getRowModel();
   const isMobile = useIsMobile();
+
   if (isMobile && renderMobileRow) {
     return (
-      <div className="flex flex-col gap-4">
+      <div
+        className={cn(
+          "flex flex-col gap-4",
+          containerClassName,
+          mobileContainerClassName
+        )}
+      >
         {mobileHeader}
         {rows.length ? (
           rows.map(renderMobileRow)
@@ -81,24 +92,22 @@ export function TableRenderer<T>({
       </div>
     );
   }
-  return (
+  const content = (
     <div className={cn("rounded-lg r border", containerClassName)}>
       <Table {...props} containerClassName={tableContainerClassName}>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
+              {headerGroup.headers.map((header) => (
+                <TableHead key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                </TableHead>
+              ))}
             </TableRow>
           ))}
         </TableHeader>
@@ -152,4 +161,13 @@ export function TableRenderer<T>({
       </Table>
     </div>
   );
+  if (desktopHeader) {
+    return (
+      <div className={cn("flex flex-col gap-4", containerClassName)}>
+        {desktopHeader}
+        {content}
+      </div>
+    );
+  }
+  return content;
 }

@@ -1,5 +1,7 @@
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { rankItem } from "@tanstack/match-sorter-utils";
 import { Cell, ColumnDef, flexRender, Row } from "@tanstack/react-table";
+import { FilterFn } from "@tanstack/table-core";
 
 export const renderTableCell = <T, H>(cell: Cell<T, H>) =>
   flexRender(cell.column.columnDef.cell, cell.getContext());
@@ -44,3 +46,15 @@ export const sortColumnWithNullablesLast =
       ? a.localeCompare(b)
       : a - b;
   };
+
+export const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
+  // Rank the item
+
+  const itemRank = rankItem(row.getValue(columnId), value);
+
+  // Store the itemRank info
+  addMeta({ itemRank });
+
+  // Return if the item should be filtered in/out
+  return itemRank.passed;
+};

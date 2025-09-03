@@ -2,6 +2,7 @@ import { cn } from "@/helpers/cn";
 import { SelectProps } from "@radix-ui/react-select";
 import { Column } from "@tanstack/react-table";
 import { LucideIcon } from "lucide-react";
+import { Label } from "./label";
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
 
 export function TableFilterSelect<ColumnType>({
   id,
+  label,
   options,
   placeholder,
   column,
@@ -19,6 +21,7 @@ export function TableFilterSelect<ColumnType>({
   ...props
 }: {
   id: string;
+  label?: string;
   options: {
     label: string;
     value: any;
@@ -29,7 +32,7 @@ export function TableFilterSelect<ColumnType>({
   column: Column<ColumnType, unknown>;
   className?: string;
 } & SelectProps) {
-  return (
+  const select = (
     <Select
       value={column.getFilterValue()?.toString() ?? "all"}
       onValueChange={(value) => {
@@ -57,4 +60,13 @@ export function TableFilterSelect<ColumnType>({
       </SelectContent>
     </Select>
   );
+  if (label) {
+    return (
+      <div className="flex flex-col gap-2">
+        <Label htmlFor={id}>{label}</Label>
+        {select}
+      </div>
+    );
+  }
+  return select;
 }

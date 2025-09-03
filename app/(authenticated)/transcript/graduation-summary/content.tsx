@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/table-renderer";
 import { cn } from "@/helpers/cn";
 import { enumKeys } from "@/helpers/enumKeys";
-import { renderTableCell } from "@/helpers/tables";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { fuzzyFilter, renderTableCell } from "@/helpers/tables";
 import { useTable } from "@/hooks/use-table";
 import {
   ProgramRequirement,
@@ -65,6 +64,8 @@ type PreparedProgramRequirementEntry = Omit<
     code: string;
     totalEntries: number;
   };
+
+  "name-code": string;
 };
 const formatProgress = (entry: PreparedProgramRequirementEntry) => {
   const completedUnits = entry.completedUnits;
@@ -86,7 +87,8 @@ const baseColumns = [
 
   columnHelper.accessor("name", {
     header: "Subject",
-    filterFn: "includesString",
+    // @ts-expect-error custom filter fn
+    filterFn: "fuzzy",
   }),
   columnHelper.accessor("code", {
     header: "Code",
@@ -137,6 +139,10 @@ const baseColumns = [
       );
     },
   }),
+  columnHelper.accessor("name-code", {
+    // @ts-expect-error custom filter fn
+    filterFn: "fuzzy",
+  }),
 ];
 
 export function GraduationSummaryContent() {
@@ -180,6 +186,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
           ...entry,
           years: formatYears(entry.years),
 
+          "name-code": `${entry.name} ${entry.code}`,
           requirement: {
             name: subject.name,
             code: subject.code,
@@ -216,7 +223,16 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   );
 
   const table = useTable(preparedData, baseColumns, {
-    state: { columnFilters, columnVisibility },
+    state: {
+      columnFilters,
+      columnVisibility: {
+        ...columnVisibility,
+        "name-code": false,
+      },
+    },
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     onColumnFiltersChange: setColumnFilters,
   });
 
@@ -287,44 +303,40 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       );
     };
   const yearsSelect = (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="years-filter">Years</Label>
-      <TableFilterSelect
-        id="years-filter"
-        column={table.getColumn("years")!}
-        options={Array.from(new Set(preparedData.map((item) => item.years)))
-          .reverse()
-          .map((years) => ({
-            label: years,
-            value: years,
-          }))}
-        placeholder="Select years"
-        className="flex-1 md:max-w-[150px]"
-      />
-    </div>
+    <TableFilterSelect
+      id="years-filter"
+      column={table.getColumn("years")!}
+      options={Array.from(new Set(preparedData.map((item) => item.years)))
+        .reverse()
+        .map((years) => ({
+          label: years,
+          value: years,
+        }))}
+      placeholder="Select years"
+      className="flex-1 md:max-w-[150px]"
+      label="Years"
+    />
   );
 
   const statusSelect = (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="status-filter">Status</Label>
-      <TableFilterSelect
-        id="status-filter"
-        column={table.getColumn("status")!}
-        options={enumKeys(ProgramRequirementEntryStatus).map((status) => {
-          const { icon, text, className } = entryStatusBadgeVisualData[status];
-          return {
-            className: cn("flex items-center gap-2", className),
-            label: text,
-            value: status,
-            icon,
-          };
-        })}
-        placeholder="Select status"
-        className="flex-1 md:max-w-[190px]"
-      />
-    </div>
+    <TableFilterSelect
+      id="status-filter"
+      column={table.getColumn("status")!}
+      options={enumKeys(ProgramRequirementEntryStatus).map((status) => {
+        const { icon, text, className } = entryStatusBadgeVisualData[status];
+        return {
+          className: cn("flex items-center gap-2", className),
+          label: text,
+          value: status,
+          icon,
+        };
+      })}
+      placeholder="Select status"
+      className="flex-1 md:max-w-[190px]"
+      label="Status"
+    />
   );
-  const isMobile = useIsMobile();
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -338,32 +350,36 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
         </span>
       </div>
       <div className="flex flex-col gap-4">
-        {!isMobile && (
-          <div className="flex flex-col md:flex-row flex-wrap gap-3">
-            {yearsSelect}
-            {statusSelect}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="subject-search">Subject</Label>
-              <TableFilterSearchBar
-                id="subject-search"
-                table={table}
-                columnName="name"
-                placeholder="Subject name..."
-              />
-            </div>
-          </div>
-        )}
         <TableRenderer
           table={table}
+          desktopHeader={
+            <div className="flex flex-col md:flex-row flex-wrap gap-3">
+              {yearsSelect}
+              {statusSelect}
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="subject-search">Subject</Label>
+                <TableFilterSearchBar
+                  id="subject-search"
+                  table={table}
+                  columnName="name-code"
+                  placeholder="Subject name..."
+                />
+              </div>
+            </div>
+          }
           mobileHeader={
             <div className="flex gap-3">
               <TableFilterSearchBar
                 id="subject-search-mobile"
                 table={table}
-                columnName="name"
+                columnName="name-code"
                 placeholder="Subject name..."
               />
-              <ResponsiveFilters triggerClassName="h-full" table={table}>
+              <ResponsiveFilters
+                triggerClassName="h-full"
+                table={table}
+                filterKeys={["years", "status"]}
+              >
                 {yearsSelect}
                 {statusSelect}
               </ResponsiveFilters>
@@ -404,8 +420,8 @@ function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
           <h3 className="font-medium text-base text-foreground">
             {entry.name}
           </h3>
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <span className="text-muted-foreground">{entry.code}</span>
+          <p className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
+            {entry.code}
           </p>
         </div>
       }
@@ -475,7 +491,7 @@ function EntryStatusBadge({
       isEnabled={!!alternativeRequirementEntry}
     >
       <div
-        className={cn("flex items-center gap-2", className, {
+        className={cn("flex items-center gap-1.5", className, {
           "cursor-help": !!alternativeRequirementEntry,
         })}
       >

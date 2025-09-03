@@ -12,9 +12,9 @@ import { TableRenderer } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import {
   displayTableCellWithFallback,
+  fuzzyFilter,
   sortColumnWithNullablesLast,
 } from "@/helpers/tables";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useTable } from "@/hooks/use-table";
 import { TranscriptEntry } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
@@ -25,7 +25,8 @@ const columnHelper = createColumnHelper<TranscriptEntry>();
 const columns = [
   columnHelper.accessor("subjectName", {
     header: "Subject",
-    filterFn: "includesString",
+    // @ts-expect-error custom filter fn
+    filterFn: "fuzzy",
   }),
 
   columnHelper.accessor("grade", {
@@ -67,29 +68,29 @@ export function TranscriptContent() {
 function Content({ data }: { data: TranscriptEntry[] }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useTable(data, columns, {
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     state: { columnFilters },
     onColumnFiltersChange: setColumnFilters,
   });
 
   const gradeSelect = (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor="grade-filter">Grade</Label>
-      <TableFilterSelect
-        id="grade-filter"
-        column={table.getColumn("grade")!}
-        options={Array.from(new Set(data.map((item) => item.grade))).map(
-          (grade) => ({
-            label: `${grade}`,
-            value: grade,
-          })
-        )}
-        placeholder="Select grade"
-        className="flex-1 md:max-w-[150px]"
-      />
-    </div>
+    <TableFilterSelect
+      id="grade-filter"
+      column={table.getColumn("grade")!}
+      options={Array.from(new Set(data.map((item) => item.grade))).map(
+        (grade) => ({
+          label: `${grade}`,
+          value: grade,
+        })
+      )}
+      placeholder="Select grade"
+      className="flex-1 md:max-w-[150px]"
+      label="Grade"
+    />
   );
 
-  const isMobile = useIsMobile();
   return (
     <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -101,23 +102,23 @@ function Content({ data }: { data: TranscriptEntry[] }) {
         </span>
       </div>
       <div className="flex flex-col gap-4">
-        {!isMobile && (
-          <div className="flex flex-col md:flex-row flex-wrap gap-3">
-            {gradeSelect}
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="subject-search">Subject</Label>
-              <TableFilterSearchBar
-                id="subject-search"
-                table={table}
-                columnName="subjectName"
-                placeholder="Subject name..."
-              />
-            </div>
-          </div>
-        )}
         <TableRenderer
           table={table}
+          desktopHeader={
+            <div className="flex flex-col md:flex-row flex-wrap gap-3">
+              {gradeSelect}
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="subject-search">Subject</Label>
+                <TableFilterSearchBar
+                  id="subject-search"
+                  table={table}
+                  columnName="subjectName"
+                  placeholder="Subject name..."
+                />
+              </div>
+            </div>
+          }
           mobileHeader={
             <div className="flex gap-3">
               <MiniTableHeader className="flex-1 pl-0 py-0">
@@ -132,7 +133,11 @@ function Content({ data }: { data: TranscriptEntry[] }) {
                   Final
                 </SortableColumn>
               </MiniTableHeader>
-              <ResponsiveFilters triggerClassName="h-full" table={table}>
+              <ResponsiveFilters
+                triggerClassName="h-full"
+                table={table}
+                filterKeys={["grade"]}
+              >
                 {gradeSelect}
               </ResponsiveFilters>
             </div>
@@ -157,8 +162,8 @@ function TranscriptEntryCard({ entry }: { entry: TranscriptEntry }) {
           <h3 className="font-medium text-base text-foreground">
             {entry.subjectName}
           </h3>
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <span className="text-muted-foreground">Grade {entry.grade}</span>
+          <p className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
+            Grade {entry.grade}
           </p>
         </div>
       }

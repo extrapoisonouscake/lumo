@@ -1,12 +1,8 @@
 "use client";
 import {
+  ColumnFiltersState,
   createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   Row,
-  useReactTable,
 } from "@tanstack/react-table";
 
 import { SortableColumn } from "@/components/ui/sortable-column";
@@ -16,33 +12,53 @@ import {
 } from "@/components/ui/table-renderer";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
-import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { Assignment, AssignmentStatus } from "@/types/school";
-import { useMemo } from "react";
+import { Assignment, AssignmentStatus, SubjectSummary } from "@/types/school";
+import { useMemo, useState } from "react";
 
+import { ResponsiveFilters } from "@/components/misc/responsive-filters";
+import { Label } from "@/components/ui/label";
+import { MiniTableHeader } from "@/components/ui/mini-table-header";
 import {
   TableCell,
   TableCellWithRedirectIcon,
   TableRow,
 } from "@/components/ui/table";
-import { fractionFormatter } from "@/constants/intl";
+import { TableFilterSearchBar } from "@/components/ui/table-filter-search-bar";
+import { TableFilterSelect } from "@/components/ui/table-filter-select";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
-import { renderTableCell } from "@/helpers/tables";
+import { enumKeys } from "@/helpers/enumKeys";
+import {
+  fuzzyFilter,
+  renderTableCell,
+  sortColumnWithNullablesLast,
+} from "@/helpers/tables";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { useTable } from "@/hooks/use-table";
+import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import { UserSettings } from "@/types/core";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { TermSelects } from "../term-selects";
+import { AssignmentCard, AssignmentScoreDisplay } from "./assignment-card";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
-import { formatAssignmentScore } from "./helpers";
-import { useAssignmentNavigation } from "./use-assignment-navigation";
+import { ASSIGNMENT_STATUS_LABELS, getAssignmentURL } from "./helpers";
 
 const columnHelper = createColumnHelper<Assignment>();
-const getColumns = (
-  shouldShowWeightColumn: boolean,
-  shouldShowPercentages: UserSettings["shouldShowPercentages"]
-) => [
+const getColumns = ({
+  shouldShowPercentages,
+  shouldHighlightMissingAssignments,
+  categoriesMap,
+}: {
+  shouldShowPercentages: UserSettings["shouldShowPercentages"];
+  shouldHighlightMissingAssignments: UserSettings["shouldHighlightMissingAssignments"];
+  categoriesMap: Record<string, string>;
+}) => [
   columnHelper.accessor("name", {
     header: "Name",
+    // @ts-expect-error custom filter fn
+    filterFn: "fuzzy",
     cell: ({ cell }) => (
       <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
     ),
@@ -60,32 +76,45 @@ const getColumns = (
     sortDescFirst: false,
     sortUndefined: "last",
   }),
-  columnHelper.display({
+  columnHelper.accessor("score", {
     header: "Score",
 
     cell: ({ row }) => {
-      return formatAssignmentScore(shouldShowPercentages)(row.original);
+      return (
+        <AssignmentScoreDisplay
+          assignment={row.original}
+          shouldShowPercentages={shouldShowPercentages}
+        />
+      );
     },
   }),
-  ...(shouldShowWeightColumn
-    ? [
-        columnHelper.accessor("weight", {
-          header: "Weight",
-          cell: ({ cell }) => {
-            const value = cell.getValue();
-            if (!value) return NULL_VALUE_DISPLAY_FALLBACK;
-            return fractionFormatter.format(value);
-          },
-        }),
-      ]
-    : []),
+  columnHelper.accessor("categoryId", {
+    filterFn: "equalsString",
+    header: "Category",
+    cell: ({ cell }) => {
+      return categoriesMap[cell.getValue()];
+    },
+  }),
+  columnHelper.accessor("assignedAt", {
+    sortingFn: sortColumnWithNullablesLast<"assignedAt", Assignment>(),
+  }),
+  columnHelper.accessor("status", {
+    filterFn: "equalsString",
+  }),
 ];
-const columnsSkeletons = makeTableColumnsSkeletons(getColumns(false, true), {
-  name: 12,
-  dueAt: 10,
-  maxScore: 2,
-  score: 2,
-});
+const columnsSkeletons = makeTableColumnsSkeletons(
+  getColumns({
+    shouldShowPercentages: false,
+    shouldHighlightMissingAssignments: false,
+    categoriesMap: {},
+  }),
+  {
+    name: 12,
+    dueAt: 10,
+    maxScore: 2,
+    score: 6,
+  }
+);
 const mockAssignments = (length: number) =>
   [...Array(length)].map(
     () =>
@@ -104,26 +133,55 @@ const mockAssignments = (length: number) =>
       } satisfies Assignment)
   );
 export function SubjectAssignmentsTable({
-  data: externalData,
+  assignments: originalAssignments,
+  terms,
+  currentTermIndex,
+  categoryId,
+  categories,
+  term,
 
   className,
-}: {
-  data: Assignment[];
+}: MyEdEndpointResponse<"subjectAssignments"> & {
   className?: string;
+  term: string | undefined;
+  categoryId: string | "all";
+  categories: SubjectSummary["academics"]["categories"];
 }) {
   const settings = useUserSettings();
-  const data = useMemo(
-    () => prepareTableDataForSorting(externalData),
-    [externalData]
+  const assignments = useMemo(
+    () =>
+      settings.shouldHighlightMissingAssignments
+        ? sortAssignmentsWithMissingFirst(originalAssignments)
+        : originalAssignments,
+    [originalAssignments, settings.shouldHighlightMissingAssignments]
   );
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const columns = useMemo(
     () =>
-      getColumns(
-        data && data.some((assignment) => "weight" in assignment),
-        settings.shouldShowPercentages
-      ),
-    [data, settings.shouldShowPercentages]
+      getColumns({
+        ...settings,
+        categoriesMap: Object.fromEntries(
+          categories.map((category) => [category.id, category.name])
+        ),
+      }),
+    [settings.shouldShowPercentages]
   );
+  const columnVisibility = useMemo(
+    () =>
+      Object.fromEntries(
+        columns.map((column) => {
+          let isVisible = true;
+          if (column.id === "weight") {
+            isVisible = assignments.some(
+              (assignment) => "weight" in assignment
+            );
+          }
+          return [column.id, isVisible];
+        })
+      ),
+    [assignments]
+  );
+
   const getRowClassName = useMemo(
     () =>
       settings.shouldHighlightMissingAssignments
@@ -135,17 +193,27 @@ export function SubjectAssignmentsTable({
           }
         : undefined,
 
-    [data, settings.shouldHighlightMissingAssignments]
+    [assignments, settings.shouldHighlightMissingAssignments]
   );
 
-  const { navigateToAssignment } = useAssignmentNavigation();
-
+  const router = useRouter();
+  const { subjectId, subjectName } = useParams() as {
+    subjectId: string;
+    subjectName: string;
+  };
   const getRowRenderer: RowRendererFactory<Assignment> = (table) => (row) => {
     const cells = row.getVisibleCells();
     return (
       <TableRow
         key={row.id}
-        onClick={() => navigateToAssignment(row.original)}
+        onClick={() =>
+          router.push(
+            getAssignmentURL(row.original, {
+              id: subjectId,
+              name: subjectName,
+            })
+          )
+        }
         style={table.options.meta?.getRowStyles?.(row)}
         className={cn(
           table.options.meta?.getRowClassName?.(row),
@@ -167,20 +235,59 @@ export function SubjectAssignmentsTable({
     );
   };
 
-  const table = useReactTable<Assignment>({
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    enableSortingRemoval: false,
+  const table = useTable(assignments, columns, {
     meta: {
       getRowClassName,
     },
-    data,
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
+    state: {
+      columnFilters,
+      columnVisibility: {
+        ...columnVisibility,
+        status: false,
+        assignedAt: false,
+      },
+    },
+    onColumnFiltersChange: setColumnFilters,
+
     sortDescFirst: false,
-    manualPagination: true,
-    columns,
   });
+  const termsSelect = terms ? (
+    <TermSelects
+      terms={terms}
+      initialTerm={
+        term || (currentTermIndex ? terms[currentTermIndex]!.id : undefined)
+      }
+      shouldShowAllOption={false}
+      shouldShowYearSelect={false}
+    />
+  ) : null;
+  const categorySelect = (
+    <TableFilterSelect
+      label="Category"
+      id="category-filter"
+      options={categories.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }))}
+      column={table.getColumn("categoryId")!}
+      placeholder="Select a category..."
+    />
+  );
+  const statusSelect = (
+    <TableFilterSelect
+      label="Status"
+      id="status-filter"
+      options={enumKeys(AssignmentStatus).map((status) => ({
+        label: ASSIGNMENT_STATUS_LABELS[status],
+        value: status,
+      }))}
+      column={table.getColumn("status")!}
+      placeholder="Select a status..."
+    />
+  );
   return (
     <TableRenderer
       emptyState={{ message: EMPTY_ASSIGNMENTS_MESSAGE, emoji: "📚" }}
@@ -188,6 +295,65 @@ export function SubjectAssignmentsTable({
       columns={columns}
       rowRendererFactory={getRowRenderer}
       containerClassName={className}
+      desktopHeader={
+        <div className="flex flex-col md:flex-row flex-wrap gap-3">
+          {termsSelect}
+          {statusSelect}
+          {categorySelect}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="subject-search">Name</Label>
+            <TableFilterSearchBar
+              id="subject-search"
+              table={table}
+              columnName="name"
+              placeholder="Subject name..."
+            />
+          </div>
+        </div>
+      }
+      mobileHeader={
+        <div className="flex gap-3">
+          <MiniTableHeader className="flex-1 pl-0 py-0">
+            <TableFilterSearchBar
+              id="assignment-search-mobile"
+              table={table}
+              columnName="name"
+              className="py-0 pr-0 border-none"
+              placeholder="Assignment name..."
+            />
+            <SortableColumn {...table.getColumn("assignedAt")!}>
+              Date
+            </SortableColumn>
+          </MiniTableHeader>
+          <ResponsiveFilters
+            triggerClassName="h-full"
+            table={table}
+            filterKeys={["categoryId"]}
+          >
+            {termsSelect}
+            {statusSelect}
+            {categorySelect}
+          </ResponsiveFilters>
+        </div>
+      }
+      renderMobileRow={({ original: row }) => {
+        return (
+          <Link
+            href={getAssignmentURL(row, {
+              id: subjectId as string,
+              name: subjectName as string,
+            })}
+          >
+            <AssignmentCard
+              shouldHighlightIfMissing={
+                settings.shouldHighlightMissingAssignments
+              }
+              shouldShowPercentages={settings.shouldShowPercentages}
+              assignment={row}
+            />
+          </Link>
+        );
+      }}
     />
   );
 }
@@ -196,16 +362,29 @@ export function SubjectAssignmentsTableSkeleton({
 }: {
   className?: string;
 }) {
-  const table = useReactTable<Assignment>({
-    data: mockAssignments(5),
-    getCoreRowModel: getCoreRowModel(),
-    columns: columnsSkeletons,
-  });
   return (
-    <TableRenderer
-      containerClassName={className}
-      table={table}
-      columns={columnsSkeletons}
+    <SubjectAssignmentsTable
+      subjectId="1"
+      assignments={mockAssignments(5)}
+      terms={[]}
+      currentTermIndex={0}
+      categoryId="all"
+      categories={[]}
+      term="current"
+      className={className}
     />
   );
+}
+function sortAssignmentsWithMissingFirst(assignments: Assignment[]) {
+  return assignments.sort((a, b) => {
+    const isAMissing = a.status === AssignmentStatus.Missing;
+    const isBMissing = b.status === AssignmentStatus.Missing;
+    if (isAMissing && !isBMissing) {
+      return -1;
+    }
+    if (!isAMissing && isBMissing) {
+      return 1;
+    }
+    return 0;
+  });
 }

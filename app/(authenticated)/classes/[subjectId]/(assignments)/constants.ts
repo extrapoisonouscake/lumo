@@ -1,1 +1,1 @@
-export const EMPTY_ASSIGNMENTS_MESSAGE = "No assignments yet.";
+export const EMPTY_ASSIGNMENTS_MESSAGE = "No assignments found.";

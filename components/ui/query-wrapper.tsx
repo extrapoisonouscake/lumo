@@ -18,7 +18,7 @@ export function QueryWrapper<TData, TError>({
   skeleton,
   onError,
 }: QueryWrapperProps<TData, TError>) {
-  if (query.isLoading && skeleton) {
+  if (query.isLoading) {
     return <>{skeleton}</>;
   }
 

@@ -5,6 +5,7 @@ import { MiniTableHeader } from "@/components/ui/mini-table-header";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { SortableColumn } from "@/components/ui/sortable-column";
 import { TableRenderer } from "@/components/ui/table-renderer";
+import { fuzzyFilter } from "@/helpers/tables";
 import { useTable } from "@/hooks/use-table";
 import { CreditSummaryEntry } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
@@ -20,7 +21,8 @@ const columns = [
     header: ({ column }) => {
       return <SortableColumn {...column}>Years</SortableColumn>;
     },
-    filterFn: "includesString",
+    // @ts-expect-error custom filter fn
+    filterFn: "fuzzy",
     cell: ({ cell }) => {
       return cell.getValue().join(" - ");
     },
@@ -67,6 +69,9 @@ function Content({ data }: { data: CreditSummaryEntry[] }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const table = useTable(data, columns, {
     state: { columnFilters },
+    filterFns: {
+      fuzzy: fuzzyFilter,
+    },
     onColumnFiltersChange: setColumnFilters,
     initialState: {
       sorting: [{ id: "years", desc: true }],
@@ -111,8 +116,8 @@ function CreditSummaryEntryCard({ entry }: { entry: CreditSummaryEntry }) {
           <h3 className="font-medium text-base text-foreground">
             {entry.years.join(" - ")}
           </h3>
-          <p className="flex items-center gap-2 text-muted-foreground">
-            <span className="text-muted-foreground">Grade {entry.grade}</span>
+          <p className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
+            Grade {entry.grade}
           </p>
         </div>
       }

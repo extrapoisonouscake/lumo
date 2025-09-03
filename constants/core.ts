@@ -2,7 +2,7 @@ import { UserSettings } from "@/types/core";
 
 export const INTERNAL_DATE_FORMAT = "YYYY-MM-DD";
 export const USER_SETTINGS_COOKIE_PREFIX = "settings";
-
+export const USER_CACHE_COOKIE_PREFIX = "user-cache";
 export enum Widgets {
   ANNOUNCEMENTS = "announcements",
   RECENT_GRADES = "recent_grades",

@@ -85,9 +85,11 @@ export function PageHeading({
 function DefaultLeftContent() {
   const pathname = usePathname();
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-2.5 h-full">
       <SidebarTrigger className="hidden sm:flex" />
-      {!websitePagesWithStaticPaths[pathname] && <BackButton />}
+      {!websitePagesWithStaticPaths[pathname] && (
+        <BackButton className="h-full" />
+      )}
     </div>
   );
 }

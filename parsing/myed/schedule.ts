@@ -1,3 +1,4 @@
+import { decodeHtmlEntities } from "@/helpers/decodeHtmlEntities";
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS, timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
@@ -63,13 +64,16 @@ export function parseSchedule({
       if (!contentCellHTML) return;
       const [subjectId, name, teachersString, room] =
         removeLineBreaks(contentCellHTML).split("<br>");
+
+      // Decode HTML entities in the name (e.g., &amp; becomes &)
+      const decodedName = name ? decodeHtmlEntities(name) : name;
       const subject = {
         startsAt: getDateFromSubjectTimeStringWithDay(startsAt!),
         endsAt: getDateFromSubjectTimeStringWithDay(endsAt!),
-        name: prettifyEducationalName(name!),
-        actualName: name,
+        name: prettifyEducationalName(decodedName!),
+        actualName: decodedName,
         teachers: teachersString!.split("; "),
-        room: room || null,
+        room: room ? prettifyEducationalName(room) : null,
       };
       if (!subject.name) return;
       return subject;
@@ -80,5 +84,6 @@ export function parseSchedule({
   )[];
 
   const weekday = getWeekday($tableBody);
+
   return { weekday, subjects };
 }

@@ -45,6 +45,7 @@ import {
 } from "@dnd-kit/sortable";
 import {
   CheckIcon,
+  MoveIcon,
   PencilRulerIcon,
   PlusIcon,
   Settings2Icon,
@@ -141,9 +142,9 @@ export function WidgetEditor({
   const [customizingWidget, setCustomizingWidget] =
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
-  const [activeWidget, setActiveWidget] = useState<ResponsiveWidget | null>(
-    null
-  );
+  const [activeWidget, setActiveWidget] = useState<
+    (ResponsiveWidget & { isPreview?: boolean }) | null
+  >(null);
   const sensors = useSensors(
     useSensor(MouseSensor),
     useSensor(TouchSensor),
@@ -351,7 +352,11 @@ export function WidgetEditor({
       collisionDetection={pointerWithin}
       onDragStart={({ active }) => {
         if (active) {
-          setActiveWidget(active.data.current as ResponsiveWidget);
+          const widget = active.data.current as DraggableElement;
+          setActiveWidget({
+            ...widget,
+            isPreview: widget.elementType === "add-widget",
+          });
         }
       }}
       onDragEnd={({ over, active }) => {
@@ -417,57 +422,63 @@ export function WidgetEditor({
           }
         />
 
-        {/* Widget Palette */}
-        {isEditing && (
-          <>
-            <Card>
-              <CardContent className="p-4 flex flex-col gap-3">
-                <div className="flex flex-col gap-1">
-                  <h3 className="text-sm font-medium">Widgets</h3>
-                  <p className="text-xs text-muted-foreground">
-                    Start dragging to add new widgets.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {Object.values(Widgets).map((widgetType) => (
-                    <AddWidgetButton
-                      key={`${widgetType}-${configuration.length}`}
-                      type={widgetType}
-                      onClick={() => handleAddWidget(widgetType)}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            {createPortal(
-              <DragOverlay className="!w-full max-w-[350px] sm:max-w-[clamp(300px,100%,600px)] flex justify-center">
-                {activeWidget
-                  ? renderWidget({
-                      entry: activeWidget,
-                      index: 0,
-                      isEditing,
-                      isPreview: true,
-                    })
-                  : null}
-              </DragOverlay>,
-              document.body
-            )}
-          </>
-        )}
+        <WidgetContext.Provider
+          value={{
+            isEditing,
+            handleRemoveWidget,
+            handleCustomizeWidget,
+            handleResizeStart,
 
-        {/* Responsive Widget Grid */}
-        {configuration.length > 0 ? (
-          <WidgetContext.Provider
-            value={{
-              isEditing,
-              handleRemoveWidget,
-              handleCustomizeWidget,
-              handleResizeStart,
-
-              gridColumns,
-              dragState,
-            }}
-          >
+            gridColumns,
+            dragState,
+          }}
+        >
+          {" "}
+          {/* Widget Palette */}
+          {isEditing && (
+            <>
+              <Card>
+                <CardContent className="p-4 flex flex-col gap-3">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="font-medium">Widgets</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Start dragging to add new widgets.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.values(Widgets).map((widgetType) => (
+                      <AddWidgetButton
+                        key={`${widgetType}-${configuration.length}`}
+                        type={widgetType}
+                        onClick={() => handleAddWidget(widgetType)}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              {createPortal(
+                <DragOverlay
+                  className={
+                    activeWidget?.isPreview
+                      ? "flex justify-center !w-[calc(100vw-1rem*2)] sm:max-w-[clamp(300px,100%,600px)]"
+                      : undefined
+                  }
+                >
+                  {activeWidget
+                    ? renderWidget({
+                        entry: activeWidget,
+                        index: 0,
+                        isEditing,
+                        isOverlay: true,
+                      })
+                    : null}
+                </DragOverlay>,
+                document.body
+              )}
+            </>
+          )}
+          {/* Responsive Widget Grid */}
+          {configuration.length > 0 ? (
             <SortableContext
               disabled={!isEditing}
               items={responsiveWidgets}
@@ -488,10 +499,10 @@ export function WidgetEditor({
                 />
               </WidgetsGrid>
             </SortableContext>
-          </WidgetContext.Provider>
-        ) : (
-          <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
-        )}
+          ) : (
+            <ErrorCard emoji="📊">No widgets added yet</ErrorCard>
+          )}
+        </WidgetContext.Provider>
       </div>
     </DndContext>
   );
@@ -500,12 +511,14 @@ function renderWidget({
   entry,
   index,
   isEditing,
-  isPreview,
+
+  isOverlay,
 }: {
   entry: ResponsiveWidget;
   index: number;
   isEditing: boolean;
-  isPreview?: boolean;
+
+  isOverlay?: boolean;
 }) {
   const widgetExport = WIDGET_COMPONENTS[entry.type];
 
@@ -520,7 +533,7 @@ function renderWidget({
       {...entry}
       isEditing={isEditing}
       index={index}
-      isPreview={isPreview}
+      isOverlay={isOverlay}
     />
   );
 }
@@ -634,6 +647,9 @@ function useGridColumns() {
   }, []);
   return gridColumns;
 }
+type DraggableElement = ResponsiveWidget & {
+  elementType: "add-widget" | "widget";
+};
 function AddWidgetButton({
   type,
   onClick,
@@ -659,9 +675,9 @@ function AddWidgetButton({
       variant="outline"
       size="sm"
       onClick={onClick}
-      className="flex items-center gap-2 cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
+      className="flex items-center gap-2 cursor-grab"
     >
-      <PlusIcon className="size-4" />
+      <MoveIcon className="size-4" />
       {WIDGET_NAMES[type]}
     </Button>
   );

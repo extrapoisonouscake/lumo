@@ -99,11 +99,11 @@ export interface PersonalDetails {
   };
 }
 export enum AssignmentStatus {
-  Unknown,
-  Ungraded,
   Graded,
   Missing,
   Exempt,
+  Ungraded,
+  Unknown,
 }
 export interface AssignmentSubmission {
   id: string;

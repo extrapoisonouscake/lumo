@@ -27,7 +27,7 @@ export const Skeleton = ({
 
       <div
         className={cn(isLoading ? "invisible flex" : "visible", {
-          "[&>*]:leading-none": shouldShrink,
+          "leading-none [&>*]:leading-none": shouldShrink,
         })}
       >
         {children}

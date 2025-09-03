@@ -18,7 +18,8 @@ export type WidgetComponentProps<T extends Widgets = Widgets> =
     isEditing?: boolean;
     index: number;
     richError?: ErrorCardProps;
-    isPreview?: boolean;
+    isOverlay?: boolean;
+
     className?: string;
     containerClassName?: string;
   };

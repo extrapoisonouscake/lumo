@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-table";
 
 import { AppleEmoji } from "@/components/misc/apple-emoji";
+import { Card } from "@/components/ui/card";
 import {
   TableCell,
   TableCellWithRedirectIcon,
@@ -28,6 +29,10 @@ import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
+import { ChevronRight, DoorOpen } from "lucide-react";
+
+import { Link } from "@/components/ui/link";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
@@ -48,7 +53,7 @@ export const ScheduleLoadableSectionreakRowVisualData: Record<
   lunch: { emoji: "🥪", label: "Lunch" },
 };
 const columnHelper = createColumnHelper<ScheduleRow>();
-const HOURS_FORMAT = "h:mm A";
+const HOURS_FORMAT = "h:mm";
 const columns = [
   columnHelper.display({
     header: "Time",
@@ -139,6 +144,7 @@ export const mockScheduleSubjects = (length: number) => {
   }
   return rows;
 };
+const getSubjectPageURLWithDefinedYear = getSubjectPageURL("current");
 export const addBreaksToSchedule = (data: ScheduleSubject[]): ScheduleRow[] => {
   const preparedData = prepareTableDataForSorting(data);
   const filledIntervals: ScheduleRow[] = [];
@@ -229,11 +235,10 @@ export function ScheduleTable({
           shouldRedirect
             ? () =>
                 router.push(
-                  getSubjectPageURL({
+                  //* MyEd doesn't show previous year schedule
+                  getSubjectPageURLWithDefinedYear({
                     id: rowOriginal.id!,
                     name: rowOriginal.name,
-                    //* MyEd doesn't show previous year schedule
-                    year: "current",
                   })
                 )
             : undefined
@@ -326,6 +331,12 @@ export function ScheduleTable({
         table={table}
         columns={columns}
         rowRendererFactory={getRowRenderer}
+        renderMobileRow={
+          isLoading
+            ? (row) => <ScheduleMobileRowSkeleton {...row.original} />
+            : (row) => <ScheduleMobileRow {...row.original} />
+        }
+        mobileContainerClassName="gap-1"
       />
     </>
   );
@@ -343,5 +354,118 @@ export function ScheduleBreak({
       {visualData.label}{" "}
       <AppleEmoji imageClassName="size-4" value={visualData.emoji} width={16} />
     </div>
+  );
+}
+function ScheduleMobileRow(row: ScheduleRow) {
+  const isSubject = row.type === "subject";
+  const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
+  const content = (
+    <Card
+      data-clickable={isSubject}
+      className={cn("p-4 group relative flex-row gap-2 justify-between", {
+        "bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] overflow-hidden":
+          isCurrent,
+        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]:": isCurrent && isSubject,
+        "border-none py-2.5 rounded-md": !isSubject,
+      })}
+    >
+      {isCurrent && (
+        <div className="w-1 h-full bg-brand absolute left-0 top-0" />
+      )}
+      <div
+        className={cn("flex flex-col gap-0.5", {
+          "flex-row justify-between flex-1": !isSubject,
+        })}
+      >
+        <p className="text-sm text-muted-foreground">
+          {timezonedDayJS(row.startsAt).format(HOURS_FORMAT)} –{" "}
+          {timezonedDayJS(row.endsAt).format(HOURS_FORMAT)}
+        </p>
+        {isSubject ? (
+          <p className="font-medium">{row.name}</p>
+        ) : (
+          <ScheduleBreak
+            className="text-muted-foreground text-sm"
+            type={row.type}
+          />
+        )}
+        {isSubject && (
+          <p className="text-sm text-muted-foreground">
+            {row.teachers.join("; ")}
+          </p>
+        )}
+      </div>
+      {isSubject && (
+        <div className="flex flex-col justify-between items-end h-[calc(50%+20px/2)] min-h-[50px]">
+          <div className="flex gap-1 items-center text-muted-foreground text-sm">
+            <DoorOpen className="size-4" />
+            <p>{row.room}</p>
+          </div>
+          <ChevronRight className="size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+        </div>
+      )}
+    </Card>
+  );
+  const commonProps = {
+    className: cn("group", {
+      "sticky top-0 bottom-[--mobile-menu-height]": isCurrent,
+    }),
+  };
+
+  if (isSubject) {
+    return (
+      <Link
+        href={getSubjectPageURLWithDefinedYear({
+          id: row.id!,
+          name: row.name,
+        })}
+        {...commonProps}
+      >
+        {content}
+      </Link>
+    );
+  } else {
+    return <div {...commonProps}>{content}</div>;
+  }
+}
+
+function ScheduleMobileRowSkeleton(row: ScheduleRow) {
+  const isSubject = row.type === "subject";
+  return (
+    <Card
+      className={cn("p-4 group relative flex-row gap-2 justify-between", {
+        "border-none py-2.5 rounded-md": !isSubject,
+      })}
+    >
+      <div
+        className={cn("flex flex-col gap-2.5", {
+          "flex-row justify-between flex-1": !isSubject,
+        })}
+      >
+        <Skeleton className="text-sm text-muted-foreground w-fit">
+          00:00 - 00
+        </Skeleton>
+        {isSubject ? (
+          <Skeleton className="font-medium w-fit h-5">namenamename</Skeleton>
+        ) : (
+          <Skeleton className="w-fit">
+            <ScheduleBreak
+              className="text-muted-foreground text-sm"
+              type={"long-break"}
+            />
+          </Skeleton>
+        )}
+        {isSubject && (
+          <Skeleton className="text-sm text-muted-foreground w-fit">
+            Teacher, Teacher
+          </Skeleton>
+        )}
+      </div>
+      {isSubject && (
+        <div className="flex flex-col justify-between items-end">
+          <Skeleton className="text-sm w-fit">300</Skeleton>
+        </div>
+      )}
+    </Card>
   );
 }

@@ -8,10 +8,11 @@ import { useSubjectAssignments } from "@/hooks/trpc/use-subject-assignments";
 import { useSubjectSummary } from "@/hooks/trpc/use-subject-summary";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { SubjectYear } from "@/types/school";
+
 import {
-  SubjectAssignments,
-  SubjectAssignmentsSkeleton,
-} from "./(assignments)";
+  SubjectAssignmentsTable,
+  SubjectAssignmentsTableSkeleton,
+} from "./(assignments)/table";
 import { SubjectSummary, SubjectSummarySkeleton } from "./summary";
 
 export default function SubjectPage() {
@@ -42,10 +43,10 @@ export default function SubjectPage() {
               />
               <QueryWrapper
                 query={assignments}
-                skeleton={<SubjectAssignmentsSkeleton />}
+                skeleton={<SubjectAssignmentsTableSkeleton />}
               >
                 {(assignments) => (
-                  <SubjectAssignments
+                  <SubjectAssignmentsTable
                     {...assignments}
                     term={termId ?? undefined}
                     categories={summary.academics.categories}
@@ -64,7 +65,7 @@ export function SubjectPageSkeleton() {
   return (
     <div className="flex flex-col gap-4">
       <SubjectSummarySkeleton />
-      <SubjectAssignmentsSkeleton />
+      <SubjectAssignmentsTableSkeleton />
     </div>
   );
 }

@@ -273,10 +273,9 @@ function ScheduleElementCard({
   if (isSubject) {
     return (
       <Link
-        href={getSubjectPageURL({
+        href={getSubjectPageURL("current")({
           id: element.id!,
           name: element.name,
-          year: "current",
         })}
         className={baseClassName}
         style={style}

@@ -22,6 +22,7 @@ export interface WebsitePage {
 interface StaticWebsitePage extends WebsitePage {
   isHiddenInSidebar?: boolean;
   showOnMobile?: boolean;
+  showOnDesktop?: boolean;
   items?: { title: string; href: string }[];
 }
 export const unauthenticatedPathnames = ["/login", "/register"];
@@ -67,6 +68,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     breadcrumb: [{ name: "Menu" }],
     icon: Menu,
     showOnMobile: true,
+    showOnDesktop: false,
   },
   "/settings": {
     breadcrumb: [{ name: "Settings" }],

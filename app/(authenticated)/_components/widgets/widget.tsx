@@ -22,7 +22,7 @@ const animateLayoutChanges: AnimateLayoutChanges = (args) =>
   defaultAnimateLayoutChanges({ ...args, wasDragging: true });
 export function Widget({
   isEditing,
-  isPreview,
+  isOverlay,
   className,
   contentClassName,
   containerClassName,
@@ -32,7 +32,6 @@ export function Widget({
   ...data
 }: WidgetComponentProps & {
   children: React.ReactNode;
-
   contentClassName?: string;
 }) {
   const {
@@ -51,7 +50,11 @@ export function Widget({
     transition,
     isOver,
     over,
-  } = useSortable({ id: data.id, data, animateLayoutChanges });
+  } = useSortable({
+    id: data.id,
+    data: { ...data, elementType: "widget" },
+    animateLayoutChanges,
+  });
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -66,6 +69,7 @@ export function Widget({
     dragState.widgetId === data.id &&
     dragState.dragType === "resize";
   const maxDimension = WIDGET_MAX_DIMENSIONS[data.type];
+
   return (
     <div
       className={cn(
@@ -73,7 +77,6 @@ export function Widget({
         {
           "z-10 opacity-30": isDragging,
           "scale-[0.98]": isOver,
-          "min-w-[500px]": isPreview,
         },
         containerClassName
       )}
@@ -137,7 +140,7 @@ export function Widget({
         }}
       >
         {isEditing &&
-          !isPreview &&
+          !isOverlay &&
           (maxDimension.height > 1 || maxDimension.width > 1) && (
             <div
               className="absolute -bottom-1.5 -right-1.5 z-10 pl-2 pt-2 hidden sm:flex justify-end items-end cursor-se-resize"
@@ -167,7 +170,7 @@ export function Widget({
 
       <p
         className={cn("text-xs font-medium transition-opacity opacity-100", {
-          "opacity-0": isDragging || isPreview,
+          "opacity-0": isOverlay || isDragging,
         })}
       >
         {WIDGET_NAMES[data.type]}

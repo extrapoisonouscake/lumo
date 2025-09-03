@@ -41,7 +41,7 @@ export const prettifyEducationalName = (name: string) => {
   if (replacement) return replacement;
 
   const processedName = lowerCaseName
-    .split(/(\s+|[-–—])/g)
+    .split(/(\s+|[()[\]{}–—-])/g)
     .map((word, i) => {
       if (
         educationAbbreviations.has(word.toUpperCase()) ||

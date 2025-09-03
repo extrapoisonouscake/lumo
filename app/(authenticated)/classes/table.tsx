@@ -150,9 +150,8 @@ export function SubjectsTable({
             !isTeacherAdvisory
               ? () =>
                   router.push(
-                    getSubjectPageURL({
+                    getSubjectPageURL(year)({
                       ...row.original,
-                      year,
                     })
                   )
               : undefined

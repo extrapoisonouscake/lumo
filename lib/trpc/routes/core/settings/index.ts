@@ -37,11 +37,10 @@ export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
     const results = await getUserSettings(ctx);
     const cookieStore = ctx.cookieStore;
-    cookieStore.set(
-      USER_SETTINGS_COOKIE_PREFIX,
-      JSON.stringify(results),
-      cookieDefaultOptions
-    );
+    cookieStore.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(results), {
+      ...cookieDefaultOptions,
+      httpOnly: false,
+    });
     return results;
   }),
 

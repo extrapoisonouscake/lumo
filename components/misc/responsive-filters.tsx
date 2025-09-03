@@ -2,6 +2,7 @@ import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Table } from "@tanstack/table-core";
 import { Settings2Icon } from "lucide-react";
+import { useMemo } from "react";
 import { Button } from "../ui/button";
 import {
   ResponsiveDialog,
@@ -18,28 +19,41 @@ export function ResponsiveFilters<T>({
   triggerClassName,
 
   table,
+  filterKeys,
 }: {
   children: React.ReactNode;
   triggerClassName?: string;
   table: Table<T>;
+  filterKeys: (keyof T)[];
 }) {
   const isMobile = useIsMobile();
+
+  const filters = table.getState().columnFilters;
+  const filtersCount = useMemo(
+    () =>
+      filters.filter((filter) => filterKeys.includes(filter.id as keyof T))
+        .length,
+    [filters, filterKeys]
+  );
   if (!isMobile) {
     return children;
   }
-  const hasFilters = table.getState().columnFilters.length > 0;
   return (
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
         <Button
           leftIcon={<Settings2Icon />}
           variant="outline"
-          className={cn("w-fit relative", triggerClassName, {
-            "after:absolute after:-top-1 after:-right-1 after:bg-brand after:size-2.5 after:rounded-full":
-              hasFilters,
-          })}
+          className={cn("w-fit relative", triggerClassName)}
         >
-          Filters
+          <div className="flex items-center gap-1.5">
+            Filters
+            {filtersCount > 0 && (
+              <div className="px-1.5 bg-brand rounded-lg text-primary-foreground">
+                {filtersCount}
+              </div>
+            )}
+          </div>
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
@@ -57,7 +71,7 @@ export function ResponsiveFilters<T>({
               <Button
                 className="w-full"
                 variant="outline"
-                disabled={!hasFilters}
+                disabled={filtersCount === 0}
                 onClick={() => {
                   table.resetColumnFilters();
                 }}
