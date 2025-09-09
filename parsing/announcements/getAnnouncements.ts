@@ -4,7 +4,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 
 import { mistral } from "@/instances/mistral";
 import { redis } from "@/instances/redis";
-import { AnnouncementSectionData } from "@/types/school";
+import { AnnouncementEntry, AnnouncementSectionData } from "@/types/school";
 import { FinishReason } from "@mistralai/mistralai/models/components/chatcompletionchoice";
 export const withAnnouncementsPrefix = (key: string) => `announcements:${key}`;
 export const getAnnouncementsRedisSchoolPrefix = (school: KnownSchools) =>
@@ -88,35 +88,47 @@ export async function parseAnnouncements(
     )) as AnnouncementSectionData[];
   }
   let preparedData;
+  const transformData = ({
+    section,
+    getIsNew,
+  }: {
+    section: AIOutputItem;
+    getIsNew: (text: string) => AnnouncementEntry["isNew"];
+  }): AnnouncementSectionData => {
+    if (section.type !== "list") return section;
+    return {
+      ...section,
+      content: section.content.map((entry) => ({
+        text: entry,
+        isNew: getIsNew(entry),
+      })),
+    };
+  };
   if (previousDayData) {
     preparedData = data.map((section, i) => {
       const previousDaySection = previousDayData[i];
-      if (
-        !previousDaySection ||
-        previousDaySection.type !== "list" ||
-        section.type !== "list"
-      ) {
+      if (!previousDaySection || previousDaySection.type !== "list") {
         return section;
       }
-      return {
-        ...section,
-        content: section.content.map((entry) => ({
-          text: entry,
-          isNew: !previousDaySection.content.some(
-            (previousDayEntry) => previousDayEntry.text === entry
+      return transformData({
+        section,
+        getIsNew: (text) =>
+          !previousDaySection.content.some(
+            (previousDayEntry) => previousDayEntry.text === text
           ),
-        })),
-      };
+      });
     });
   } else {
-    preparedData = data;
+    preparedData = data.map((section) =>
+      transformData({ section, getIsNew: () => undefined })
+    );
   }
 
   await Promise.all([
     redis.set(redisKey, JSON.stringify(preparedData)),
     previousDayDataKey && redis.del(previousDayDataKey),
   ]);
-  return data;
+  return preparedData;
 }
 function extractBrackets(string: string) {
   const start = string.indexOf("[");
