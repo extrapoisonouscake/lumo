@@ -93,7 +93,7 @@ export const checkSchoolAnnouncementsTask = schemaTask({
     school: z.enum(zodEnum(knownSchoolsIDs)),
     date: z.date(),
   }),
-  handleError: async (payload, error) => {
+  handleError: async ({ payload, error }) => {
     console.error(error);
   },
   run: async ({ school, date }, { ctx }) => {
@@ -169,7 +169,7 @@ export const checkAllAnnouncementsTask = schedules.task({
 export const cancelTaskRuns = async (taskId: string, excludedRunId: string) => {
   const response = await runs.list({
     taskIdentifier: [taskId],
-    status: ["QUEUED", "EXECUTING", "REATTEMPTING", "DELAYED", "FROZEN"],
+    status: ["QUEUED", "DEQUEUED", "EXECUTING", "WAITING", "DELAYED"],
   });
   for (const run of response.data) {
     if (run.id === excludedRunId) continue;

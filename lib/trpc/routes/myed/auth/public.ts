@@ -50,6 +50,7 @@ export const registerTypeSchemas = {
     postalCode: z.string().min(1, { message: "Required." }).default(""),
     phone: z
       .string()
+      .default("")
       .transform((arg, ctx) => {
         const phone = parsePhoneNumberFromString(arg, {
           defaultCountry: "US",
@@ -66,19 +67,18 @@ export const registerTypeSchemas = {
         }
 
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: "custom",
           message: "Invalid phone number.",
         });
         return z.NEVER;
-      })
-      .default(""),
+      }),
     schoolDistrict: z.string().min(1, { message: "Required." }).default(""),
     email: z
-      .string()
-      .min(1, { message: "Required." })
       .email({
         message: "Invalid email address.",
       })
+      .min(1, { message: "Required." })
+
       .default(""),
     password: z.string().default(""), //myed handles this
     securityQuestionType: z
@@ -114,12 +114,14 @@ export const registerSchema = z
       const result = schemaForType.safeParse(fields);
       if (!result.success) {
         for (const issue of result.error.issues) {
-          ctx.addIssue({ ...issue, path: ["fields", ...issue.path] });
+          ctx.issues.push({
+            ...issue,
+            path: ["fields", ...issue.path],
+            input: undefined,
+          });
         }
       }
     }
-
-    return true;
   });
 export type RegisterSchema = z.infer<typeof registerSchema>;
 export enum RegistrationInternalFields {

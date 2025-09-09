@@ -391,7 +391,7 @@ export function RegistrationForm({
       setErrorMessage(null);
     }
     try {
-      const response = await registerMutation.mutateAsync(data);
+      await registerMutation.mutateAsync(data);
       router.push(`/login?registration_result=success`);
     } catch (error) {
       if (isTRPCError(error)) {
@@ -454,24 +454,26 @@ export function RegistrationForm({
           {currentStep < RegistrationStep.Security ? (
             <Button
               onClick={async () => {
-                const currentStepFieldsNames = fields[currentStep].map(
-                  (field) => field.name
-                );
+                const currentStepFieldsNames = fields[currentStep]
+                  .map((field) => field.name)
+                  .filter((name) => name !== "type");
                 const schema = registerTypeSchemas[type];
                 const stepSchema = schema.pick(
                   Object.fromEntries(
                     currentStepFieldsNames.map((name) => [name, true])
                   ) as any
                 );
-                const isValid = stepSchema.safeParse(form.getValues().fields);
-                if (isValid.success) {
+
+                const result = stepSchema.safeParse(form.getValues().fields);
+
+                if (result.success) {
                   const nextStep = currentStep + 1;
                   setCurrentStep(nextStep);
                   if (maxVisitedStep < nextStep) {
                     setMaxVisitedStep(nextStep);
                   }
                 } else {
-                  for (const error of isValid.error.errors) {
+                  for (const error of result.error.issues) {
                     form.setError(`fields.${error.path}` as any, {
                       message: error.message,
                     });

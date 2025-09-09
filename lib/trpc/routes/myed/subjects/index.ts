@@ -19,7 +19,7 @@ export const subjectsRouter = router({
           termId: z.string().optional(),
         })
         .optional()
-        .default({})
+        .default({ isPreviousYear: false })
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
       const response = await getMyEd("subjects", input);

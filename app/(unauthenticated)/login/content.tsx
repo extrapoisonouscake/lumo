@@ -45,22 +45,24 @@ export function LoginPageContent() {
       <div className="flex flex-col items-center justify-center w-full max-w-[500px] mx-auto gap-5">
         <div className="flex flex-col items-center gap-3 w-full">
           <div className="flex flex-col gap-2 items-center">
-            <div className="flex gap-1.5 items-center">
-              <div className="size-10 p-2.5 rounded-full bg-muted flex items-center justify-center">
+            <div className="flex items-center">
+              <div className="size-14 p-3 rounded-full bg-muted flex items-center justify-center z-10">
                 <Logo className="size-full text-brand" />
               </div>
-              <div className="after:content-['.....'] after:text-xl after:leading-none after:align-[8px] after:text-muted-foreground/25 after:tracking-wide after:font-sans" />
-              <div className="size-10 p-2.5 rounded-full bg-muted flex items-center justify-center">
-                <MyEducationBCLogo className="size-full" />
+
+              <div className="-ml-2.5 size-14 p-3.5 rounded-full bg-muted/50 flex items-center justify-center">
+                <MyEducationBCLogo className="opacity-70 size-full" />
               </div>
             </div>
             <div className="text-center space-y-1.5">
               <h2 className="text-xl font-medium">Sign In</h2>
-              <p className="text-sm text-muted-foreground text-center max-w-[350px]">
-                Use your MyEducationBC username and password to sign in to Lumo.
-                <br />
-                Your data is encrypted and securely stored.
-              </p>
+              <div className="space-y-0.5 text-sm text-muted-foreground text-center max-w-[450px]">
+                <p>
+                  Use your MyEducationBC username and password to sign in to
+                  Lumo.
+                </p>
+                <p>Your data is fully encrypted and stored on your device.</p>
+              </div>
             </div>
           </div>
           <div className="w-full flex flex-col gap-2">
@@ -90,7 +92,7 @@ export function LoginPageContent() {
             </div>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-xs text-muted-foreground/65 text-center">
           MyEducationBC is a trademark of the Government of British Columbia.
           Its logo is used here solely to indicate auth integration
           compatibility. This use does not imply any affiliation with or
