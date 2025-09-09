@@ -36,13 +36,16 @@ export default function AnnouncementsWidgetComponent(
       content = <ContentSkeleton />;
     }
   } else {
-    const { newAnnouncementsCount, sections, personalSection } =
+    const { oldAnnouncementsCount, sections, personalSection } =
       announcements.data;
-    const hasPersonalAnnouncements = personalSection.length > 0;
     const totalAnnouncementsCount = sections.reduce(
       (acc, section) => acc + section.content.length,
       0
     );
+    const newAnnouncementsCount =
+      totalAnnouncementsCount - oldAnnouncementsCount;
+    const hasPersonalAnnouncements = personalSection.length > 0;
+
     contentClassName = "pb-1";
     content = (
       <div className="flex-1 flex flex-col gap-3">
