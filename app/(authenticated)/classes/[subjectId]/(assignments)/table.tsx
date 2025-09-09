@@ -45,6 +45,7 @@ import {
   AssignmentCard,
   AssignmentCardSkeleton,
   AssignmentScoreDisplay,
+  TeacherCommentBadge,
 } from "./assignment-card";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
 import { ASSIGNMENT_STATUS_LABELS, getAssignmentURL } from "./helpers";
@@ -63,9 +64,21 @@ const getColumns = ({
     header: "Name",
     // @ts-expect-error custom filter fn
     filterFn: "fuzzy",
-    cell: ({ cell }) => (
-      <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
-    ),
+    cell: ({ cell, row }) => {
+      const nameNode = (
+        <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
+      );
+      if (row.original.feedback) {
+        return (
+          <div className="flex items-center gap-1.5">
+            {nameNode}
+            <TeacherCommentBadge size="sm" />
+          </div>
+        );
+      } else {
+        return nameNode;
+      }
+    },
   }),
   columnHelper.accessor("dueAt", {
     header: ({ column }) => {
@@ -133,7 +146,6 @@ const mockAssignments = (length: number) =>
         status: AssignmentStatus.Unknown,
         classAverage: 0,
         categoryId: "",
-        submission: null,
       } satisfies Assignment)
   );
 export function SubjectAssignmentsTable({

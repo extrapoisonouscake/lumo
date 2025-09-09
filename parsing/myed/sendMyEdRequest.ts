@@ -43,7 +43,7 @@ export async function sendMyEdRequest<
     ).join("; ");
   }
   const userAgent = await getUserAgent();
-  const initHeaders = {
+  const initHeaders: Record<string, string> = {
     Cookie: cookiesString,
     "User-Agent": userAgent,
   };
@@ -56,36 +56,32 @@ export async function sendMyEdRequest<
   for (const step of stepsArray) {
     let params: RequestInit = { method: step.method, headers: initHeaders };
     if (step.method === "POST") {
-      params = {
-        ...params,
-
-        headers: {
-          ...params.headers,
-          "Content-Type": step.contentType,
-        },
-      };
+      if (step.contentType !== "multipart/form-data") {
+        (params.headers as Record<string, string>)["Content-Type"] =
+          step.contentType;
+      }
     }
 
-    if (step.body) {
+    if (step.body || step.method !== "GET") {
       if (
         step.contentType === "application/x-www-form-urlencoded" ||
         step.method === "GET"
       ) {
-        const queryString = new URLSearchParams({
-          ...removeNullableProperties(step.body),
-          ...(step.htmlToken
-            ? { [MYED_HTML_TOKEN_INPUT_NAME]: step.htmlToken }
-            : {}),
-        });
+        const query = new URLSearchParams(
+          removeNullableProperties(step.body ?? {})
+        );
+        if (step.htmlToken) {
+          query.set(MYED_HTML_TOKEN_INPUT_NAME, step.htmlToken);
+        }
         if (step.contentType === "application/x-www-form-urlencoded") {
-          params.body = queryString;
+          params.body = query;
         } else {
-          step.path += `?${queryString}`;
+          step.path += `?${query}`;
           step.body = undefined;
         }
-      } else if (step.contentType === "form-data") {
+      } else if (step.contentType === "multipart/form-data") {
         const formData = new FormData();
-        for (const [key, value] of Object.entries(step.body)) {
+        for (const [key, value] of Object.entries(step.body ?? {})) {
           formData.append(key, value);
         }
         formData.append(MYED_HTML_TOKEN_INPUT_NAME, step.htmlToken);

@@ -19,7 +19,7 @@ export function UserAvatar({
     >
       <AvatarImage className="object-cover object-center" src={photoURL} />
       <AvatarFallback
-        className="rounded-full sm:rounded-xl text-inherit"
+        className="rounded-full sm:rounded-lg text-inherit"
         style={{
           background: `hsl(var(--brand) / 0.2)`,
           color: `hsl(var(--brand))`,

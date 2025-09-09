@@ -28,8 +28,8 @@ export type FlatRouteStep = {
       method: "POST";
       contentType:
         | "application/x-www-form-urlencoded"
-        | "form-data"
-        | "applicatiob/json";
+        | "multipart/form-data"
+        | "application/json";
       htmlToken: string;
     }
 );
@@ -222,6 +222,26 @@ export class Route<
     });
   }
 }
+const generateAssignmentFileSubmissionStateParams = ({
+  assignmentId,
+  studentId,
+}: {
+  assignmentId: string;
+  studentId: string;
+}) => {
+  const params = new URLSearchParams({
+    prefix: assignmentId.slice(0, 3),
+    oid: assignmentId,
+    context: "academics.classes.list.gcd.detail",
+    studentId: studentId,
+    deploymentId: "aspen",
+  });
+  return {
+    method: "GET" as const,
+    path: `/portalAssignmentDetailPopup.do?${params.toString()}`,
+    expect: "html" as const,
+  };
+};
 //TODO: divide steps into "required" and the ones that make request independent of state
 export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
@@ -443,6 +463,42 @@ export const myEdParsingRoutes = {
         metadata: { areAlreadyCountedEntriesHidden, areExcessCoursesSeparated },
       }) => areAlreadyCountedEntriesHidden || !areExcessCoursesSeparated
     ),
+  assignmentFileSubmissionState: new Route<{ assignmentId: string }>().step(
+    ({ params: { assignmentId }, studentId }) => {
+      return generateAssignmentFileSubmissionStateParams({
+        assignmentId,
+        studentId,
+      });
+    }
+  ),
+  uploadAssignmentFile: new Route<{ assignmentId: string; file: File }>()
+    .step(({ studentId, params: { assignmentId } }) =>
+      generateAssignmentFileSubmissionStateParams({ assignmentId, studentId })
+    )
+    .step(({ studentId, params: { assignmentId, file } }) => ({
+      method: "POST",
+      path: "/assignmentUpload.do",
+      body: {
+        formFile: file,
+        assignmentOid: assignmentId,
+        studentOid: studentId,
+        userEvent: "970",
+      },
+      contentType: "multipart/form-data",
+      expect: "html",
+    })),
+  deleteAssignmentFile: new Route<{ assignmentId: string }>()
+    .step({
+      method: "GET",
+      path: `/home.do`,
+      expect: "html",
+    })
+    .step(({ params: { assignmentId } }) => ({
+      method: "POST",
+      path: `/portalAssignmentDetail.do?userEvent=2050&submissionOid=${assignmentId}`,
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    })),
 };
 export type MyEdParsingRoutes = typeof myEdParsingRoutes;
 export type MyEdParsingRoute = keyof MyEdParsingRoutes;

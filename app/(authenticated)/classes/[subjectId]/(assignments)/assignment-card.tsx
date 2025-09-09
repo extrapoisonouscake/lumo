@@ -1,5 +1,5 @@
 import { ContentCard } from "@/components/misc/content-card";
-import { Badge } from "@/components/ui/badge";
+import { Badge, BadgeProps } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
@@ -57,9 +57,7 @@ export function AssignmentCard({
       ]}
       header={
         <div className="gap-1.5 flex flex-col items-start">
-          {assignment.feedback && (
-            <Badge variant="secondary">Teacher Comment</Badge>
-          )}
+          {assignment.feedback && <TeacherCommentBadge />}
           <h3 className="font-medium text-base">{name}</h3>
         </div>
       }
@@ -149,5 +147,12 @@ export function AssignmentScoreDisplay({
         status={assignment.status}
       />
     </div>
+  );
+}
+export function TeacherCommentBadge(props: BadgeProps) {
+  return (
+    <Badge variant="secondary" {...props}>
+      Teacher Comment
+    </Badge>
   );
 }

@@ -111,4 +111,5 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
   return null;
 };
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
+export const VISIBLE_TIME_FORMAT = "h:mm A";
 export const THEME_COLOR_TAG_ID = "theme-color-tag";

@@ -105,4 +105,23 @@ export const subjectsRouter = router({
     .query(async ({ input, ctx: { getMyEd } }) => {
       return getMyEd("subjectAttendance", input);
     }),
+  getAssignmentSubmissionState: authenticatedProcedure
+    .input(
+      z.object({
+        assignmentId: z.string(),
+      })
+    )
+    .query(async ({ input, ctx: { getMyEd } }) => {
+      return getMyEd("assignmentFileSubmissionState", input);
+    }),
+
+  deleteAssignmentSubmission: authenticatedProcedure
+    .input(
+      z.object({
+        assignmentId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx: { getMyEd } }) => {
+      return getMyEd("deleteAssignmentFile", input);
+    }),
 });

@@ -1,0 +1,27 @@
+{
+  "name": "Lumo",
+  "short_name": "Lumo",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://lumobc.ca/manifest.json"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicons/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/favicons/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    { "src": "/favicons/icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

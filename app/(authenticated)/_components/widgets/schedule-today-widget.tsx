@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { formatCountdown } from "@/helpers/format-countdown";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
+import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
@@ -70,20 +71,20 @@ const NO_MORE_CLASSES_RICH_ERROR: ErrorCardProps = {
   message: "No more classes today!",
 };
 const getClassesNotYetStartedRichError: (
-  countdown: string
-) => ErrorCardProps = (countdown) => ({
+  countdownPart: string
+) => ErrorCardProps = (countdownPart) => ({
   emoji: "🕒",
-  message: `Classes start in ${countdown}`,
+  message: `Classes start ${countdownPart}`,
 });
 function Content({ subjects }: { subjects: ScheduleSubject[] }) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const previousRowIndexRef = useRef<number | null>(null);
-  const subjectsWithBreaks = useMemo(
-    () => addBreaksToSchedule(subjects),
-    [subjects]
+  const rows = useMemo(() => addBreaksToSchedule(subjects), [subjects]);
+  const subjectsWithoutTA = subjects.filter(
+    (subject) => subject.name !== TEACHER_ADVISORY_ABBREVIATION
   );
-  const { currentRowIndex } = useTTNextSubject(subjectsWithBreaks);
+  const { currentRowIndex } = useTTNextSubject(rows);
 
   const [actualRowIndex, setActualRowIndex] = useState<number | null>(null);
 
@@ -106,25 +107,23 @@ function Content({ subjects }: { subjects: ScheduleSubject[] }) {
     previousRowIndexRef.current = currentRowIndex;
   }, [currentRowIndex]);
   let mainContent;
-  const hasNoMoreClasses = timezonedDayJS().isAfter(
-    subjectsWithBreaks.at(-1)!.endsAt
-  );
+  const hasNoMoreClasses = timezonedDayJS().isAfter(rows.at(-1)!.endsAt);
   if (actualRowIndex === null) {
     const now = timezonedDayJS();
     if (hasNoMoreClasses) {
       mainContent = (
         <WidgetErrorCard className="pb-4" {...NO_MORE_CLASSES_RICH_ERROR} />
       );
-    } else if (now.isBefore(subjectsWithBreaks[0]!.startsAt)) {
-      mainContent = <ClassesNotYetStartedCard subjects={subjectsWithBreaks} />;
+    } else if (now.isBefore(rows[0]!.startsAt)) {
+      mainContent = <ClassesNotYetStartedCard subjects={rows} />;
     } else {
       //unknown error
       mainContent = <ScheduleCardsSkeleton />;
     }
   } else {
-    const currentSubject = subjectsWithBreaks[actualRowIndex]!;
-    const nextSubject = subjectsWithBreaks[actualRowIndex + 1];
-    const thirdSubject = subjectsWithBreaks[actualRowIndex + 2];
+    const currentSubject = rows[actualRowIndex]!;
+    const nextSubject = rows[actualRowIndex + 1];
+    const thirdSubject = rows[actualRowIndex + 2];
     mainContent = (
       <div
         className="overflow-hidden pb-4"
@@ -170,12 +169,15 @@ function Content({ subjects }: { subjects: ScheduleSubject[] }) {
     );
   }
   const subjectsPassed = hasNoMoreClasses
-    ? subjects.length
+    ? subjectsWithoutTA.length
     : currentRowIndex === null
     ? 0
-    : subjectsWithBreaks
+    : rows
         .slice(0, currentRowIndex + 1)
-        .filter((row) => row.type === "subject").length;
+        .filter(
+          (row) =>
+            row.type === "subject" && row.name !== TEACHER_ADVISORY_ABBREVIATION
+        ).length;
   return (
     <div className="flex flex-col gap-3 flex-1">
       <div className="flex gap-2 items-center justify-between">
@@ -186,11 +188,11 @@ function Content({ subjects }: { subjects: ScheduleSubject[] }) {
         <CircularProgress
           value={
             ((typeof currentRowIndex === "number"
-              ? currentRowIndex + 1
+              ? subjectsPassed
               : hasNoMoreClasses
-              ? subjectsWithBreaks.length
+              ? subjectsWithoutTA.length
               : 0) /
-              subjectsWithBreaks.length) *
+              subjectsWithoutTA.length) *
             100
           }
           fillColor="brand"
@@ -298,7 +300,9 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
   return (
     <WidgetErrorCard
       className="pb-4"
-      {...getClassesNotYetStartedRichError(countdown)}
+      {...getClassesNotYetStartedRichError(
+        timeToNextSubject > 1000 * 60 * 15 ? "soon" : `in ${countdown}`
+      )}
     />
   );
 }

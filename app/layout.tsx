@@ -34,6 +34,7 @@ export const metadata: Metadata = {
     default: WEBSITE_TITLE,
     template: `%s | ${WEBSITE_TITLE}`,
   },
+  icons: [{ url: "/favicons/icon.svg", type: "image/svg+xml" }],
 };
 
 export default async function RootLayout({

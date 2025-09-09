@@ -120,7 +120,7 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldShowPercentages: true,
   shouldHighlightMissingAssignments: true,
   shouldShowLetterGrade: false,
-  themeColor: "162 23% 49%",
+  themeColor: "162 23.3% 45.7%",
   widgetsConfiguration: [
     {
       id: "schedule-today-1",

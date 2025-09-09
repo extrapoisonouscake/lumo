@@ -10,7 +10,7 @@ function StyledToggleGroupItem({
   return (
     <ToggleGroupItem
       size="sm"
-      className="bg-transparent hover:bg-transparent data-[state=on]:bg-muted size-7"
+      className="bg-transparent hover:bg-transparent data-[state=on]:bg-background"
       {...props}
     />
   );
@@ -37,7 +37,7 @@ export function LetterGradeSwitch({
   return (
     <ToggleGroup
       type="single"
-      className="border rounded-lg gap-0 overflow-hidden"
+      className="bg-muted rounded-lg p-1 gap-0"
       value={value ? "on" : "off"}
       onValueChange={handleValueChange}
     >

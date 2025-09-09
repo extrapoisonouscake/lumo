@@ -10,7 +10,11 @@ import {
   MyEdRestEndpoint,
 } from "./routes";
 
-import { parseSubjectAssignment, parseSubjectAssignments } from "./assignments";
+import {
+  parseAssignmentFileSubmissionState,
+  parseSubjectAssignment,
+  parseSubjectAssignments,
+} from "./assignments";
 import { parsePersonalDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
 import { parseCurrentWeekday, parseSchedule } from "./schedule";
@@ -27,7 +31,7 @@ import {
   parseTranscriptEntries,
 } from "./transcript";
 import { ParserFunctionArguments } from "./types";
-
+const voidFunction = () => {};
 const endpointToParsingFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
@@ -42,6 +46,9 @@ const endpointToParsingFunction = {
   transcriptEntries: parseTranscriptEntries,
   creditSummary: parseCreditSummary,
   graduationSummary: parseGraduationSummary,
+  assignmentFileSubmissionState: parseAssignmentFileSubmissionState,
+  uploadAssignmentFile: voidFunction,
+  deleteAssignmentFile: voidFunction,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>

@@ -1,7 +1,6 @@
 "use client";
 import { TitleManager } from "@/components/misc/title-manager";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,20 +17,13 @@ import { useSubjectAssignment } from "@/hooks/trpc/use-subject-assignment";
 import { useSubjectSummary } from "@/hooks/trpc/use-subject-summary";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
-import {
-  Assignment,
-  AssignmentStatus,
-  AssignmentSubmission,
-  SubjectSummary,
-} from "@/types/school";
+import { AssignmentStatus, SubjectSummary } from "@/types/school";
 import {
   Award,
   Calendar,
   CheckCircle,
   CircleSlash,
   Clock,
-  DownloadIcon,
-  FileText,
   HelpCircle,
   LucideIcon,
   MessageSquare,
@@ -39,11 +31,11 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
 import {
   ASSIGNMENT_STATUS_LABELS,
   formatScore,
 } from "../../../(assignments)/helpers";
+import { SubmissionSection } from "./submission";
 
 export function AssignmentPageContent({
   subjectId,
@@ -56,13 +48,13 @@ export function AssignmentPageContent({
   const settings = useUserSettings();
   //* this response is not used to get absences, year doesn't matter
   const { data: subject } = useSubjectSummary(subjectId, "current");
+
   return (
     <>
       <QueryWrapper query={assignment} skeleton={<ContentSkeleton />}>
         {(data) => {
           const {
             name,
-            submission,
             score,
 
             dueAt,
@@ -97,12 +89,12 @@ export function AssignmentPageContent({
               />
               <div className="flex flex-col gap-4">
                 {/* Header Card */}
-                <AssignmentHeader name={name} status={status} />
+                <AssignmentHeader name={name} status={status} dueAt={dueAt} />
 
                 <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
                   {/* Score Information */}
-                  <SectionCard title="Score" icon={Award}>
-                    <PropertyRow
+                  <AssignmentSectionCard title="Score" icon={Award}>
+                    <AssignmentPropertyRow
                       label="Score"
                       value={
                         <div className="flex items-center gap-2">
@@ -138,21 +130,24 @@ export function AssignmentPageContent({
                     />
 
                     {weight && (
-                      <PropertyRow label="Weight" value={`${weight}%`} />
+                      <AssignmentPropertyRow
+                        label="Weight"
+                        value={`${weight}%`}
+                      />
                     )}
                     <CategoryRow
                       categories={subject?.academics?.categories}
                       categoryId={categoryId}
                     />
-                  </SectionCard>
+                  </AssignmentSectionCard>
 
                   {/* Dates Information */}
-                  <SectionCard title="Dates" icon={Calendar}>
+                  <AssignmentSectionCard title="Dates" icon={Calendar}>
                     <DueDateRow
                       value={dueAt}
                       isMissing={status === AssignmentStatus.Missing}
                     />
-                    <PropertyRow
+                    <AssignmentPropertyRow
                       label="Date Assigned"
                       value={
                         assignedAt
@@ -162,64 +157,23 @@ export function AssignmentPageContent({
                           : NULL_VALUE_DISPLAY_FALLBACK
                       }
                     />
-                  </SectionCard>
-                </div>
-                {feedback && (
-                  <SectionCard
-                    title="Feedback"
-                    icon={MessageSquare}
-                    contentClassName="gap-0.5 text-sm"
-                  >
-                    {feedback.split("\n").map((line, i) => (
-                      <p className="leading-relaxed" key={i}>
-                        {line}
-                      </p>
-                    ))}
-                  </SectionCard>
-                )}
-                {/* Submission Information */}
-                {submission && (
-                  <SectionCard
-                    title="Submission"
-                    icon={FileText}
-                    rightContent={
-                      <Badge
-                        variant={!submission ? "secondary" : "default"}
-                        className={cn("font-medium", {
-                          "bg-brand/10 text-brand": submission,
-                        })}
-                      >
-                        {submission ? "Submitted" : "Not Submitted"}
-                      </Badge>
-                    }
-                    contentClassName="gap-2 md:justify-between items-start md:flex-row md:pt-1"
-                  >
-                    <PropertyRow
-                      label="Date Submitted"
-                      className="justify-start"
-                      value={timezonedDayJS(submission.submittedAt).format(
-                        VISIBLE_DATE_FORMAT
-                      )}
-                    />
+                  </AssignmentSectionCard>
 
-                    <Link
-                      href={getSubmissionDownloadLink({
-                        ...submission,
-                        assignmentId: data.id,
-                      })}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {feedback && (
+                    <AssignmentSectionCard
+                      title="Feedback"
+                      icon={MessageSquare}
+                      contentClassName="gap-0.5 text-sm"
                     >
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        leftIcon={<DownloadIcon />}
-                      >
-                        Download
-                      </Button>
-                    </Link>
-                  </SectionCard>
-                )}
+                      {feedback.split("\n").map((line, i) => (
+                        <p className="leading-relaxed" key={i}>
+                          {line}
+                        </p>
+                      ))}
+                    </AssignmentSectionCard>
+                  )}
+                  <SubmissionSection assignmentId={assignmentId} />
+                </div>
               </div>
             </>
           );
@@ -235,17 +189,22 @@ const ASSIGNMENT_STATUS_TO_ICON = {
   [AssignmentStatus.Ungraded]: Clock,
   [AssignmentStatus.Unknown]: HelpCircle,
 };
-const CLASSNAMES_BY_STATUS = {
-  [AssignmentStatus.Graded]:
+
+const BADGE_COLOR_CLASSNAMES = {
+  positive:
     "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
-  [AssignmentStatus.Missing]:
-    "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
-  [AssignmentStatus.Exempt]:
-    "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
-  [AssignmentStatus.Ungraded]:
+  negative: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+  blue: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+  pending:
     "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
-  [AssignmentStatus.Unknown]:
-    "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
+  gray: "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400",
+};
+const BADGE_CLASSNAMES_BY_STATUS = {
+  [AssignmentStatus.Graded]: BADGE_COLOR_CLASSNAMES["positive"],
+  [AssignmentStatus.Missing]: BADGE_COLOR_CLASSNAMES["negative"],
+  [AssignmentStatus.Exempt]: BADGE_COLOR_CLASSNAMES["blue"],
+
+  [AssignmentStatus.Unknown]: BADGE_COLOR_CLASSNAMES["gray"],
 };
 function ContentSkeleton() {
   return (
@@ -255,17 +214,17 @@ function ContentSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
         {/* Score Information */}
-        <SectionCard title="Score" icon={Award}>
+        <AssignmentSectionCard title="Score" icon={Award}>
           <PropertyRowSkeleton />
 
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
-        </SectionCard>
+        </AssignmentSectionCard>
 
         {/* Dates Information */}
-        <SectionCard title="Dates" icon={Calendar}>
+        <AssignmentSectionCard title="Dates" icon={Calendar}>
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
           <PropertyRowSkeleton />
-        </SectionCard>
+        </AssignmentSectionCard>
       </div>
     </div>
   );
@@ -273,20 +232,32 @@ function ContentSkeleton() {
 function AssignmentHeader({
   name,
   status,
+  dueAt,
 }: {
   name: string;
   status: AssignmentStatus;
+  dueAt: Date;
 }) {
   const transformedStatus =
     status === AssignmentStatus.Unknown ? AssignmentStatus.Ungraded : status;
   const Icon = ASSIGNMENT_STATUS_TO_ICON[transformedStatus];
+  let className;
+  if (transformedStatus === AssignmentStatus.Ungraded) {
+    if (timezonedDayJS(dueAt).isBefore(new Date())) {
+      className = BADGE_COLOR_CLASSNAMES["pending"];
+    } else {
+      className = BADGE_COLOR_CLASSNAMES["gray"];
+    }
+  } else {
+    className = BADGE_CLASSNAMES_BY_STATUS[transformedStatus];
+  }
   return (
     <Card className="p-4 flex-row gap-3 flex-wrap">
       <CardTitle className="text-xl">{name}</CardTitle>
       <div className="flex items-center gap-2">
         <Badge
           className={cn(
-            CLASSNAMES_BY_STATUS[transformedStatus],
+            className,
             "flex items-center gap-1 pl-1 pr-2 py-1 font-medium"
           )}
         >
@@ -309,13 +280,14 @@ function AssignmentHeaderSkeleton() {
     </Card>
   );
 }
-function SectionCard({
+export function AssignmentSectionCard({
   children,
   title,
   icon: Icon,
   className,
   rightContent,
   contentClassName,
+  headerClassName,
 }: {
   children: React.ReactNode;
   title: string;
@@ -323,10 +295,16 @@ function SectionCard({
   className?: string;
   contentClassName?: string;
   rightContent?: React.ReactNode;
+  headerClassName?: string;
 }) {
   return (
     <Card className={cn(className)}>
-      <CardHeader className="pb-2 justify-between items-center flex-row">
+      <CardHeader
+        className={cn(
+          "pb-2 justify-between items-center flex-row",
+          headerClassName
+        )}
+      >
         <CardTitle className="text-base font-medium flex items-center gap-2">
           <Icon className="size-4 text-brand" />
           {title}
@@ -341,12 +319,8 @@ function SectionCard({
     </Card>
   );
 }
-function getSubmissionDownloadLink(
-  submission: AssignmentSubmission & { assignmentId: Assignment["id"] }
-) {
-  return `/api/aspen/rest/assignments/${submission.assignmentId}/submissions/${submission.id}/download`;
-}
-function PropertyRow({
+
+export function AssignmentPropertyRow({
   label,
   value,
   className,
@@ -394,7 +368,7 @@ const relativeTimeFormat = new Intl.RelativeTimeFormat("en", {
 });
 function DueDateRow({ value, isMissing }: { value: Date; isMissing: boolean }) {
   return (
-    <PropertyRow
+    <AssignmentPropertyRow
       label="Due Date"
       labelClassName={cn({ "text-red-500": isMissing })}
       value={
@@ -422,5 +396,5 @@ function CategoryRow({
   const category = categories?.find((c) => c.id === categoryId);
   if (!category)
     return <PropertyRowSkeleton labelLength={12} valueLength={12} />;
-  return <PropertyRow label="Category" value={category.name} />;
+  return <AssignmentPropertyRow label="Category" value={category.name} />;
 }

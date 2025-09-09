@@ -36,7 +36,7 @@ export function TermSelects({
   // we can't determine the exact year over the summer
   const isSafeToShowExactYears = date.month() <= 5 || date.month() >= 8;
   const currentYear = date.year();
-  const isSecondYear = date.month() < 9;
+  const isSecondYear = date.month() < 5;
   const secondYear = isSecondYear ? currentYear : currentYear + 1;
   const shouldShowTermSelect = terms.length > 0;
   useEffect(() => {

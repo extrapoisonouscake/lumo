@@ -10,11 +10,15 @@ export async function GET(
   { params }: { params: Promise<{ path: string[] }> }
 ) {
   const { path } = await params;
-  const url = `${MYED_DOMAIN}${MyEdBaseURLs.ASPEN}/${path.join("/")}`;
+  const query = request.nextUrl.searchParams;
+  const url = `${MYED_DOMAIN}${MyEdBaseURLs.ASPEN}/${path.join(
+    "/"
+  )}?${query.toString()}`;
 
   try {
     const store = await MyEdCookieStore.create();
     const authCookies = getAuthCookies(store);
+
     // Fetch the content from the original source
     const response = await fetch(url, {
       headers: {
@@ -28,6 +32,7 @@ export async function GET(
     }
 
     // Get the content data
+
     const contentData = await response.arrayBuffer();
 
     // Create a new headers object with all relevant headers except cookies

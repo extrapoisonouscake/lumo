@@ -25,7 +25,7 @@ export const getAnnouncementsPDFLinkRedisHashKey = (date: Date) =>
   );
 
 const PDF_PARSING_PROMPT =
-  `You're an agent that parses PDF files. Parse the provided PDF file and output the response in the JSON format. The response should be an array of objects representing sections of the document. Each section is started by a title (in the PDF this would be a big heading). Each object should contain ONLY the following keys: "type" ("list" if the section is a bullet-point list, or "table" if the section is a table) and "content". If the type is "list", "content" is an array where each item is a bullet point. If the type is "table", "content" is an array where each item is an inner array representing a row in the table. Include the table header as a separate array. DO NOT respond with anything other than the JSON. DO NOT use newlines.` +
+  `You're an agent that parses PDF files. Parse the provided PDF file and output the response in the JSON format. The response should be an array of objects representing sections of the document. Each section is started by a title (in the PDF this would be a big heading). Each object should contain ONLY the following keys: "type" ("list" if the section is a bullet-point list, or "table" if the section is a table) and "content". If the type is "list", "content" is an array where each item is a bullet point. If you encounter a nested list, treat it as a single string. If the type is "table", "content" is an array where each item is an inner array representing a row in the table. Include the table header as a separate array. DO NOT respond with anything other than the JSON. DO NOT use newlines.` +
   `Here is an example of the output format:
 [
   {
@@ -37,6 +37,9 @@ const PDF_PARSING_PROMPT =
     "content": [["Header 1", "Header 2"], ["Row 1, Column 1", "Row 1, Column 2"]]
   }
 ]`;
+type AIOutputItem =
+  | { type: "list"; content: string[] }
+  | { type: "table"; content: string[][] };
 export async function parseAnnouncements(
   fileUrl: string,
   school: KnownSchools,
@@ -71,9 +74,7 @@ export async function parseAnnouncements(
     console.error("failed to parse pdf", chatResponse);
     return;
   }
-  const data = JSON.parse(
-    extractBrackets(elements)
-  ) as AnnouncementSectionData[];
+  const data = JSON.parse(extractBrackets(elements)) as AIOutputItem[];
   if (data.length === 0) throw new Error("Something went wrong");
   const schoolPrefix = getAnnouncementsRedisSchoolPrefix(school);
 
@@ -100,9 +101,9 @@ export async function parseAnnouncements(
       return {
         ...section,
         content: section.content.map((entry) => ({
-          ...entry,
+          text: entry,
           isNew: !previousDaySection.content.some(
-            (previousDayEntry) => previousDayEntry.text === entry.text
+            (previousDayEntry) => previousDayEntry.text === entry
           ),
         })),
       };

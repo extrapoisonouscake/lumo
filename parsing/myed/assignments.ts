@@ -1,6 +1,13 @@
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
+import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { components } from "@/types/myed-rest";
-import { Assignment, AssignmentStatus, TermEntry } from "@/types/school";
+import {
+  Assignment,
+  AssignmentStatus,
+  AssignmentSubmissionFile,
+  AssignmentSubmissionState,
+  TermEntry,
+} from "@/types/school";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
 const scoreLabelToStatus: Record<string, AssignmentStatus> = {
@@ -31,13 +38,6 @@ function convertAssignment({
     feedback: remark ?? null,
     categoryId: categoryOid,
     maxScore: totalPoints,
-    submission: submission
-      ? {
-          id: submission.gssOid,
-          type: submission.type,
-          submittedAt: new Date(submission.timeSubmitted),
-        }
-      : null,
   };
   if (scoreElement) {
     const { scoreLabel, score, pointMax } = scoreElement;
@@ -111,4 +111,47 @@ export function parseSubjectAssignment({
   const assignment =
     responses[0] as OpenAPI200JSONResponse<"/students/{studentOid}/assignments/{assignmentOid}">;
   return convertAssignment(assignment);
+}
+export function parseAssignmentFileSubmissionState({
+  responses,
+}: ParserFunctionArguments<"assignmentFileSubmissionState">): AssignmentSubmissionState {
+  const $ = responses.at(-1)!;
+  const $container = $('[class="submissionItemDropTarget"]'); //exact selector match
+  if ($container.children().length === 0) {
+    return {
+      isAllowed: false,
+    };
+  }
+  const $submitButton = $container.find("#submitButton");
+  const isOpen = $submitButton.length > 0;
+  const $nameSpan = $container.find(
+    'span[onclick^="javascript:downloadSubmission"]'
+  );
+  let file: AssignmentSubmissionFile | undefined;
+  if ($nameSpan.length > 0) {
+    const id = $nameSpan.attr("onclick")?.split("'")[1];
+    const submittedAt = locallyTimezonedDayJS(
+      $nameSpan.text().split(/[()]/)[1],
+      "M/D/YYYY h:mm A"
+    ).toDate();
+    let name: string;
+    $nameSpan.contents().filter(function () {
+      if (this.nodeType === 8 && this.nodeValue.startsWith("\nUncomment")) {
+        name = this.nodeValue.split("\n")[2]!;
+      }
+      return true;
+    });
+
+    file = {
+      id: id!,
+      name: name!,
+      submittedAt,
+    };
+  }
+
+  return {
+    isAllowed: true,
+    file,
+    isOpen,
+  };
 }

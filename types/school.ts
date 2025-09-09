@@ -105,11 +105,19 @@ export enum AssignmentStatus {
   Ungraded,
   Unknown,
 }
-export interface AssignmentSubmission {
+export type AssignmentSubmissionFile = {
   id: string;
-  type: "FILE" | "NOTE" | "GOOGLE_DOC" | "QUIZ";
+  name: string;
   submittedAt: Date;
-}
+};
+export type AssignmentSubmissionState =
+  | { isAllowed: false }
+  | {
+      isAllowed: true;
+      file?: AssignmentSubmissionFile;
+
+      isOpen: boolean;
+    };
 export type Assignment = {
   id: string;
   name: string;
@@ -120,7 +128,6 @@ export type Assignment = {
   classAverage: number | null;
   categoryId: string;
   maxScore: number;
-  submission: AssignmentSubmission | null;
 } & (
   | {
       status: AssignmentStatus.Graded;
