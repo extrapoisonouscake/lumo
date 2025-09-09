@@ -183,7 +183,8 @@ function Content({ subjects }: { subjects: ScheduleSubject[] }) {
       <div className="flex gap-2 items-center justify-between">
         <p className="text-xs font-medium text-muted-foreground">
           {!!subjectsPassed && `${subjectsPassed}/`}
-          {subjects.length} {pluralize(classesPluralForms)(subjects.length)}
+          {subjectsWithoutTA.length}{" "}
+          {pluralize(classesPluralForms)(subjectsWithoutTA.length)}
         </p>
         <CircularProgress
           value={
