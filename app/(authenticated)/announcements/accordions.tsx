@@ -13,7 +13,7 @@ import { AnnouncementsSectionTable } from "./table";
 
 function AnnouncementEntry({ text, isNew }: { text: string; isNew?: boolean }) {
   return (
-    <li className="flex items-center before:content-[''] before:size-[4.5px] before:rounded-full before:bg-foreground gap-3.5">
+    <li className="flex items-start before:mt-[calc((1.5rem-4.5px)/2)] before:content-[''] before:size-[4.5px] before:rounded-full before:bg-foreground gap-3.5">
       <div className="flex-1 flex justify-between gap-2">
         <span className="flex-1">{text}</span>
         {isNew && (

@@ -80,7 +80,7 @@ export function useAnnouncements({
 
         const personalItems = [];
         const filteredSections: AnnouncementSection[] = [];
-        let oldAnnouncementsCount = 0;
+        let newAnnouncementsCount = 0;
         for (let i = 0; i < sections.length; i++) {
           const section = sections[i]!;
           const { type, content } = section;
@@ -99,8 +99,8 @@ export function useAnnouncements({
             } else {
               listItems.push(item);
             }
-            if (!item.isNew) {
-              oldAnnouncementsCount++;
+            if (item.isNew) {
+              newAnnouncementsCount++;
             }
           }
 
@@ -110,10 +110,10 @@ export function useAnnouncements({
           ...data,
           sections: filteredSections,
           personalSection: personalItems,
-          oldAnnouncementsCount,
+          newAnnouncementsCount,
         } satisfies PersonalizedAnnouncements;
       } else {
-        result = { ...data, personalSection: [], oldAnnouncementsCount: 0 };
+        result = { ...data, personalSection: [], newAnnouncementsCount: 0 };
       }
       return result;
     },
@@ -131,5 +131,5 @@ export type PersonalizedAnnouncements = Omit<
 > & {
   sections: AnnouncementSection[];
   personalSection: AnnouncementEntry[];
-  oldAnnouncementsCount: number;
+  newAnnouncementsCount: number;
 };

@@ -11,7 +11,7 @@ export function getCachedClientResponse<ResponseType>(
   key: string,
   defaultValue?: any
 ) {
-  if (typeof window === "undefined") return defaultValue;
+  // if (typeof window === "undefined") return defaultValue;
   const cookies = Cookies.get();
   const value = cookies[key];
   if (!value) return defaultValue;

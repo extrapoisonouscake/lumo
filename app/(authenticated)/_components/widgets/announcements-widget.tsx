@@ -36,16 +36,20 @@ export default function AnnouncementsWidgetComponent(
       content = <ContentSkeleton />;
     }
   } else {
-    const { oldAnnouncementsCount, sections, personalSection } =
+    const { newAnnouncementsCount, sections, personalSection } =
       announcements.data;
-    const totalAnnouncementsCount = sections.reduce(
-      (acc, section) => acc + section.content.length,
-      0
-    );
-    const newAnnouncementsCount =
-      totalAnnouncementsCount - oldAnnouncementsCount;
+    const totalAnnouncementsCount =
+      sections.reduce((acc, section) => acc + section.content.length, 0) +
+      personalSection.length;
     const hasPersonalAnnouncements = personalSection.length > 0;
-
+    const hasNewAnnouncements = ![
+      ...sections,
+      { type: "list", content: personalSection },
+    ].some(
+      (section) =>
+        section.type === "list" &&
+        section.content.some((item) => typeof item.isNew === "undefined")
+    );
     contentClassName = "pb-1";
     content = (
       <div className="flex-1 flex flex-col gap-3">
@@ -56,31 +60,33 @@ export default function AnnouncementsWidgetComponent(
           </p>
 
           <div className="space-y-2">
-            <div className="flex items-center gap-2 rounded-xl">
-              <div
-                className={cn(
-                  "w-2 h-2 rounded-full",
-                  newAnnouncementsCount > 0
-                    ? "bg-red-500"
-                    : "bg-muted-foreground"
-                )}
-              />
-              <span className="text-sm font-medium text-foreground">
-                {newAnnouncementsCount > 0 ? (
-                  <>
-                    {newAnnouncementsCount} new{" "}
-                    {pluralizeAnnouncements(newAnnouncementsCount)}
-                  </>
-                ) : (
-                  "No new announcements"
-                )}
-              </span>
-            </div>
-            {hasPersonalAnnouncements && (
+            {hasNewAnnouncements && (
+              <div className="flex items-center gap-2 rounded-xl">
+                <div
+                  className={cn(
+                    "w-2 h-2 rounded-full",
+                    newAnnouncementsCount > 0
+                      ? "bg-red-500"
+                      : "bg-muted-foreground"
+                  )}
+                />
+                <span className="text-sm font-medium text-foreground">
+                  {newAnnouncementsCount > 0 ? (
+                    <>
+                      {newAnnouncementsCount} new{" "}
+                      {pluralizeAnnouncements(newAnnouncementsCount)}
+                    </>
+                  ) : (
+                    "No new announcements"
+                  )}
+                </span>
+              </div>
+            )}
+            {(hasPersonalAnnouncements || !hasNewAnnouncements) && (
               <div className="flex items-center gap-2 ">
                 <div className="w-2 h-2 rounded-full bg-brand" />
                 <span className="text-sm font-medium text-foreground">
-                  {announcements.data.personalSection.length} personal{" "}
+                  {announcements.data.personalSection.length ?? "No"} personal{" "}
                   {pluralizeAnnouncements(
                     announcements.data.personalSection.length
                   )}

@@ -36,11 +36,7 @@ export const schoolSpecificRouter = router({
     ]);
     if (cachedData) {
       const richData = dailyAnnouncementsRichTitlesData[schoolId];
-      const parsedData = (
-        process.env.NODE_ENV === "development"
-          ? JSON.parse(cachedData as string)
-          : cachedData
-      ) as AnnouncementSectionData[];
+      const parsedData = cachedData as AnnouncementSectionData[];
       data = parsedData.map((item, i) => ({
         ...item,
         ...richData[i]!,
