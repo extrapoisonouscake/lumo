@@ -131,7 +131,11 @@ export const checkSchoolAnnouncementsTask = schemaTask({
       }
     }
     await Promise.all([
-      cancelTaskRuns(ctx.task.id, ctx.run.id),
+      cancelTaskRuns({
+        tag: getTriggerSchoolTag(school),
+        taskId: ctx.task.id,
+        excludedRunId: ctx.run.id,
+      }),
       needToSetPDFURL && savePDFLink(school, date, directUrl),
     ]);
   },
@@ -151,6 +155,7 @@ export const savePDFLink = async (
     getRedisExpiryTimestamp(getMidnight(date))
   );
 };
+const getTriggerSchoolTag = (id: KnownSchools) => `school-${id}`;
 export const checkAllAnnouncementsTask = schedules.task({
   id: "check-for-all-announcements",
   cron: {
@@ -161,14 +166,24 @@ export const checkAllAnnouncementsTask = schedules.task({
     await checkSchoolAnnouncementsTask.batchTrigger(
       knownSchoolsIDs.map((id) => ({
         payload: { school: id, date: new Date() },
+        options: { tags: [getTriggerSchoolTag(id)] },
       }))
     );
   },
 });
 
-export const cancelTaskRuns = async (taskId: string, excludedRunId: string) => {
+export const cancelTaskRuns = async ({
+  tag,
+  taskId,
+  excludedRunId,
+}: {
+  tag?: string;
+  taskId: string;
+  excludedRunId: string;
+}) => {
   const response = await runs.list({
     taskIdentifier: [taskId],
+    tag,
     status: ["QUEUED", "DEQUEUED", "EXECUTING", "WAITING", "DELAYED"],
   });
   for (const run of response.data) {
