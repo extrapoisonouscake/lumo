@@ -63,7 +63,7 @@ export const directURLFunctionsBySchool: Record<
       const $ = cheerio.load(html);
 
       const parsedURL = $(
-        `h3:has(strong:contains("Daily Announcements:")) + h3 a:contains("Announcements for ${parsedDate.format(
+        `h3:has(strong:contains("Daily Announcements:")) + span a:contains("Announcements for ${parsedDate.format(
           "MMMM D"
         )}")`
       ).prop("href");
