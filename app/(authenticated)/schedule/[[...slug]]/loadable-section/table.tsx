@@ -364,7 +364,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
   const content = (
     <Card
       data-clickable={isSubject}
-      className={cn("p-4 group flex-row gap-2 justify-between items-start", {
+      className={cn("p-4 group relative flex-row gap-2 justify-between items-start", {
         "bg-background border-brand/65 shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] overflow-hidden":
           isCurrent,
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]:": isCurrent && isSubject,
