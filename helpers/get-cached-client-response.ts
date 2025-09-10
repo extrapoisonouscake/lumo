@@ -1,3 +1,4 @@
+import { QueryObserverResult } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 export function getCachedClientResponse<ResponseType>(
   key: string,
@@ -21,4 +22,16 @@ export function getCachedClientResponse<ResponseType>(
     ...JSON.parse(value),
   } as ResponseType;
   return response as ResponseType;
+}
+export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
+  query: QueryObserverResult<ResponseType, ErrorShape>,
+  data: ResponseType
+) {
+  return {
+    ...query,
+    status: "success",
+    isPending: false,
+    isLoading: false,
+    data: data,
+  };
 }

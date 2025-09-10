@@ -1,7 +1,7 @@
 "use client";
 import { Label } from "@/components/ui/label";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { THEME_COLOR_TAG_ID } from "@/constants/website";
+
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
@@ -32,8 +32,6 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
       theme
     );
     updateUserSettingState("themeColor", theme);
-    (document.getElementById(THEME_COLOR_TAG_ID) as HTMLMetaElement).content =
-      prepareThemeColor(theme);
   };
   const onChangeHandler = async (theme: string) => {
     updateThemeLocally(theme);

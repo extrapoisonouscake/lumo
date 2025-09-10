@@ -8,6 +8,7 @@ import {
   FileTextIcon,
   ImageIcon,
   MusicIcon,
+  PresentationIcon,
   UploadIcon,
   VideoIcon,
   XIcon,
@@ -43,6 +44,9 @@ const extensionToIcon = {
   webm: VideoIcon,
   mkv: VideoIcon,
   pdf: FileTextIcon,
+  docx: FileTextIcon,
+  doc: FileTextIcon,
+  pages: FileTextIcon,
   zip: ArchiveIcon,
   rar: ArchiveIcon,
   tar: ArchiveIcon,
@@ -50,6 +54,7 @@ const extensionToIcon = {
   xlsx: FileSpreadsheetIcon,
   xls: FileSpreadsheetIcon,
   csv: FileSpreadsheetIcon,
+  numbers: FileSpreadsheetIcon,
   js: FileCodeIcon,
   ts: FileCodeIcon,
   jsx: FileCodeIcon,
@@ -62,6 +67,9 @@ const extensionToIcon = {
   java: FileCodeIcon,
   cpp: FileCodeIcon,
   c: FileCodeIcon,
+  pptx: PresentationIcon,
+  ppt: PresentationIcon,
+  key: PresentationIcon,
 };
 // Helper function to get file type icon
 const getFileTypeIcon = (fileName: string) => {

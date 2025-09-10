@@ -1,6 +1,9 @@
 import { trpc } from "@/app/trpc";
 import { USER_CACHE_COOKIE_PREFIX } from "@/constants/core";
-import { getCachedClientResponse } from "@/helpers/get-cached-client-response";
+import {
+  getCachedClientResponse,
+  getReactQueryMockSuccessResponse,
+} from "@/helpers/get-cached-client-response";
 import { PersonalDetails } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
 
@@ -14,12 +17,6 @@ export function useStudentDetails({ enabled }: { enabled?: boolean } = {}) {
   );
 
   if (query.isPending && cachedResponse)
-    return {
-      ...query,
-      status: "success",
-      isPending: false,
-      isLoading: false,
-      data: cachedResponse,
-    };
+    return getReactQueryMockSuccessResponse(query, cachedResponse);
   return query;
 }

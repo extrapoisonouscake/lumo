@@ -302,7 +302,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
     <WidgetErrorCard
       className="pb-4"
       {...getClassesNotYetStartedRichError(
-        timeToNextSubject > 1000 * 60 * 15 ? "soon" : `in ${countdown}`
+        timeToNextSubject >= 1000 * 60 * 15 ? "soon" : `in ${countdown}`
       )}
     />
   );

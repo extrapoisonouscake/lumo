@@ -4,37 +4,58 @@ interface QueueItem<T> {
   requestFunction: RequestFunction<T>;
   resolve: (value: T | PromiseLike<T>) => void;
   reject: (reason?: any) => void;
-  group?: string; // Optional group identifier
+
+  isSecondary?: boolean;
 }
 
 export class PrioritizedRequestQueue {
   private queue: QueueItem<any>[] = [];
   private isProcessing: boolean = false;
 
-  /**
-   * Enqueues a request, ensuring global serialization and group prioritization.
-   */
-  enqueue<T>(requestFunction: RequestFunction<T>): Promise<T> {
+  private secondaryDelayMs: number = 100;
+  enqueue<T>(
+    requestFunction: RequestFunction<T>,
+    isSecondary?: boolean
+  ): Promise<T> {
     return new Promise((resolve, reject) => {
-      this.queue.push({
+      const queueItem: QueueItem<T> = {
         requestFunction,
         resolve,
         reject,
-      });
-      this.processQueue();
+        isSecondary,
+      };
+
+      this.queue.push(queueItem);
+
+      const hasEssentialRequests = this.queue.some((item) => !item.isSecondary);
+      // If this is a secondary request and we have essential requests, add a delay
+      if (isSecondary) {
+        if (hasEssentialRequests) {
+          return;
+        } else {
+          setTimeout(() => {
+            this.processQueue();
+          }, this.secondaryDelayMs);
+        }
+      } else {
+        this.processQueue();
+      }
     });
   }
 
-  /**
-   * Processes the queue, respecting group prioritization.
-   */
   private async processQueue(): Promise<void> {
     if (this.isProcessing || this.queue.length === 0) {
       return;
     }
-    const nextItem = this.queue.shift();
+    let nextItem;
+    const nextItemIndex = this.queue.findIndex((item) => !item.isSecondary);
+    if (nextItemIndex !== -1) {
+      nextItem = this.queue.splice(nextItemIndex, 1)[0];
+    } else {
+      nextItem = this.queue.shift();
+    }
     if (!nextItem) return;
-    const { requestFunction, resolve, reject } = nextItem;
+    const { requestFunction, resolve, reject, isSecondary } = nextItem;
     this.isProcessing = true;
     try {
       const result = await requestFunction();
@@ -44,6 +65,7 @@ export class PrioritizedRequestQueue {
       reject(error);
     } finally {
       this.isProcessing = false;
+
       this.processQueue(); // Continue processing the next item
     }
   }

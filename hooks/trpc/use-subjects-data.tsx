@@ -1,4 +1,10 @@
 import { trpc } from "@/app/trpc";
+import { SUBJECTS_CACHE_COOKIE_PREFIX } from "@/constants/core";
+import {
+  getCachedClientResponse,
+  getReactQueryMockSuccessResponse,
+} from "@/helpers/get-cached-client-response";
+import { RouterOutput } from "@/lib/trpc/types";
 import { useQuery } from "@tanstack/react-query";
 export function useSubjectsData(
   {
@@ -15,6 +21,15 @@ export function useSubjectsData(
       termId,
     })
   );
+  if (!isPreviousYear && !termId) {
+    const cachedResponse = getCachedClientResponse<
+      RouterOutput["myed"]["subjects"]["getSubjects"]
+    >(SUBJECTS_CACHE_COOKIE_PREFIX);
+
+    if (query.isPending && cachedResponse)
+      return getReactQueryMockSuccessResponse(query, cachedResponse);
+  }
+
   return query;
 }
 export function useSubjectData({

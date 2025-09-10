@@ -55,6 +55,7 @@ export function SubjectSummary(
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(
     shouldShowLetterGrade
   );
+
   return (
     <Card className="flex flex-col gap-3 relative items-center">
       <div className="block p-2 md:absolute top-0 left-0 w-full">

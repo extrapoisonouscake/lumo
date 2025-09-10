@@ -33,6 +33,11 @@ const TRPC_URL = `${
     ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000"
 }/api/trpc`;
+const SECONDARY_ROUTES = [
+  "user.getStudentDetails",
+  "subjects.getSubjects",
+  "subjects.getSubjectAttendance",
+];
 const queue = new PrioritizedRequestQueue();
 
 const fetchWithQueue: typeof fetch = async (input, init) => {
@@ -42,19 +47,23 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
       : input instanceof URL
       ? input
       : new URL(input.url);
+
   const pathParts = url.pathname.split("/");
   const lastPart = pathParts[pathParts.length - 1]!;
+  const [routeGroup, ...restRoute] = lastPart.split(".");
   // skipping the queueing if no call is made to the original API
-  if (!lastPart.startsWith("myed")) {
+  if (routeGroup !== "myed") {
     return fetch(input, init);
   }
+  const isSecondary = SECONDARY_ROUTES.includes(restRoute.join("."));
+
   return queue.enqueue(async () => {
     const response = await fetch(input, init);
     if (response.status === 503) {
-      // window.location.href = "/maintenance";
+      window.location.href = "/maintenance";
     }
     return response;
-  });
+  }, isSecondary);
 };
 
 export const trpcClient = createTRPCClient<AppRouter>({

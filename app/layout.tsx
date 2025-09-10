@@ -11,8 +11,7 @@ import {
   USER_SETTINGS_COOKIE_PREFIX,
   USER_SETTINGS_DEFAULT_VALUES,
 } from "@/constants/core";
-import { THEME_COLOR_TAG_ID, WEBSITE_TITLE } from "@/constants/website";
-import { prepareThemeColor } from "@/helpers/prepare-theme-color";
+import { WEBSITE_TITLE } from "@/constants/website";
 import { serverAuthChecks } from "@/helpers/server-auth-checks";
 import { cookies } from "next/headers";
 
@@ -70,8 +69,7 @@ export default async function RootLayout({
           />
           <meta
             name="theme-color"
-            id={THEME_COLOR_TAG_ID}
-            content={prepareThemeColor(themeColor)}
+            content="white"
             media="(prefers-color-scheme: light)"
           />
         </head>

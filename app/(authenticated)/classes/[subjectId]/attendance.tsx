@@ -1,4 +1,4 @@
-import { trpc } from "@/app/trpc";
+import { queryClient, trpc } from "@/app/trpc";
 import { ErrorCard } from "@/components/misc/error-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, ListX } from "lucide-react";
+import { useEffect } from "react";
 const UPPERCASE_REGEX = /(?=[A-Z])/;
 
 export function SubjectAttendance({
@@ -29,6 +30,14 @@ export function SubjectAttendance({
   id: Subject["id"];
   year: SubjectSummary["year"];
 }) {
+  useEffect(() => {
+    queryClient.prefetchQuery(
+      trpc.myed.subjects.getSubjectAttendance.queryOptions({
+        subjectId: id,
+        year,
+      })
+    );
+  }, []);
   return (
     <>
       <ResponsiveDialog>
@@ -67,6 +76,7 @@ function Content({
       year,
     })
   );
+
   return (
     <QueryWrapper
       query={query}
