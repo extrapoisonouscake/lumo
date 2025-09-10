@@ -34,6 +34,9 @@ export const metadata: Metadata = {
     template: `%s | ${WEBSITE_TITLE}`,
   },
   icons: [{ url: "/favicons/icon.svg", type: "image/svg+xml" }],
+  appleWebApp: {
+    capable: true,
+  },
 };
 
 export default async function RootLayout({
