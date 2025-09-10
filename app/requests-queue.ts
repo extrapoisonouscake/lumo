@@ -12,9 +12,10 @@ export class PrioritizedRequestQueue {
   private queue: QueueItem<any>[] = [];
   private isProcessing: boolean = false;
 
-  private secondaryDelayMs: number = 100;
+  private secondaryDelayMs: number = 200;
   enqueue<T>(
     requestFunction: RequestFunction<T>,
+
     isSecondary?: boolean
   ): Promise<T> {
     return new Promise((resolve, reject) => {
@@ -22,38 +23,59 @@ export class PrioritizedRequestQueue {
         requestFunction,
         resolve,
         reject,
+
         isSecondary,
       };
 
       this.queue.push(queueItem);
 
-      const hasEssentialRequests = this.queue.some((item) => !item.isSecondary);
       // If this is a secondary request and we have essential requests, add a delay
       if (isSecondary) {
+        const hasEssentialRequests = this.queue.some(
+          (item) => !item.isSecondary
+        );
         if (hasEssentialRequests) {
           return;
         } else {
           setTimeout(() => {
-            this.processQueue();
+            this.processQueue({ processSecondary: true });
           }, this.secondaryDelayMs);
         }
       } else {
-        this.processQueue();
+        this.processQueue({ processSecondary: false });
       }
     });
   }
 
-  private async processQueue(): Promise<void> {
-    if (this.isProcessing || this.queue.length === 0) {
+  private async processQueue({
+    processSecondary = false,
+  }: {
+    processSecondary: boolean;
+  }): Promise<void> {
+    if (this.queue.length === 0) {
+      return;
+    }
+    if (this.isProcessing) {
+      if (processSecondary) {
+        setTimeout(() => {
+          this.processQueue({ processSecondary });
+        }, this.secondaryDelayMs);
+      }
       return;
     }
     let nextItem;
-    const nextItemIndex = this.queue.findIndex((item) => !item.isSecondary);
-    if (nextItemIndex !== -1) {
-      nextItem = this.queue.splice(nextItemIndex, 1)[0];
+    const nextEssentialItemIndex = this.queue.findIndex(
+      (item) => !item.isSecondary
+    );
+    if (nextEssentialItemIndex !== -1) {
+      nextItem = this.queue.splice(nextEssentialItemIndex, 1)[0];
     } else {
+      if (!processSecondary) {
+        return;
+      }
       nextItem = this.queue.shift();
     }
+
     if (!nextItem) return;
     const { requestFunction, resolve, reject, isSecondary } = nextItem;
     this.isProcessing = true;
@@ -66,7 +88,7 @@ export class PrioritizedRequestQueue {
     } finally {
       this.isProcessing = false;
 
-      this.processQueue(); // Continue processing the next item
+      this.processQueue({ processSecondary: false }); // Continue processing the next item
     }
   }
 }

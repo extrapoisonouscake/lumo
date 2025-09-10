@@ -57,13 +57,17 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
   }
   const isSecondary = SECONDARY_ROUTES.includes(restRoute.join("."));
 
-  return queue.enqueue(async () => {
-    const response = await fetch(input, init);
-    if (response.status === 503) {
-      window.location.href = "/maintenance";
-    }
-    return response;
-  }, isSecondary);
+  return queue.enqueue(
+    async () => {
+      const response = await fetch(input, init);
+      if (response.status === 503) {
+        window.location.href = "/maintenance";
+      }
+      return response;
+    },
+
+    isSecondary
+  );
 };
 
 export const trpcClient = createTRPCClient<AppRouter>({

@@ -1,9 +1,17 @@
+import { RouterInput } from "@/lib/trpc/types";
 import { UserSettings } from "@/types/core";
+import { MYED_ALL_GRADE_TERMS_SELECTOR } from "./myed";
 
 export const INTERNAL_DATE_FORMAT = "YYYY-MM-DD";
 export const USER_SETTINGS_COOKIE_PREFIX = "settings";
 export const USER_CACHE_COOKIE_PREFIX = "user-cache";
-export const SUBJECTS_CACHE_COOKIE_PREFIX = "subjects-cache";
+export const getSubjectsCacheCookiePrefix = (
+  params: RouterInput["myed"]["subjects"]["getSubjects"]
+) => {
+  return `subjects-cache-${params?.isPreviousYear ? "previous" : "current"}-${
+    params?.termId ?? MYED_ALL_GRADE_TERMS_SELECTOR
+  }`;
+};
 export enum Widgets {
   ANNOUNCEMENTS = "announcements",
   RECENT_GRADES = "recent_grades",

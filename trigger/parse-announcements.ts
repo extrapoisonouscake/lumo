@@ -17,6 +17,7 @@ import {
   schemaTask,
 } from "@trigger.dev/sdk/v3";
 import * as cheerio from "cheerio";
+import fs from "fs";
 import { z } from "zod";
 export const directURLFunctionsBySchool: Record<
   KnownSchools,
@@ -46,9 +47,11 @@ export const directURLFunctionsBySchool: Record<
   },
   [KnownSchools.GPVanier]: async (date) => {
     const parsedDate = timezonedDayJS(date);
+    const monthShortName = parsedDate.format("MMMM").slice(0, 4);
     const directURL = `https://www.comoxvalleyschools.ca/gp-vanier-secondary/wp-content/uploads/sites/29/${parsedDate.year()}/${parsedDate.format(
       "MM"
-    )}/Announcements-for-${parsedDate.format("MMMM-D")}.pdf`;
+    )}/Announcements-for-${`${monthShortName}-${parsedDate.format("D")}`}.pdf`;
+
     const response = await fetch(directURL);
     if (!response.ok) {
       let homePageResponse;
@@ -60,11 +63,12 @@ export const directURLFunctionsBySchool: Record<
         throw new Error("Failed to fetch home page");
       }
       const html = await homePageResponse.text();
+      fs.writeFileSync("vanier.html", html);
       const $ = cheerio.load(html);
 
       const parsedURL = $(
-        `h3:has(strong:contains("Daily Announcements:")) + span a:contains("Announcements for ${parsedDate.format(
-          "MMMM D"
+        `h3:has(strong:contains("Daily Announcements:")) + span a:contains("Announcements for ${monthShortName} ${parsedDate.format(
+          "D"
         )}")`
       ).prop("href");
       if (!parsedURL) {

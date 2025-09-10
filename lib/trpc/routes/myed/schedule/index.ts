@@ -6,18 +6,13 @@ import { authenticatedProcedure } from "../../../procedures";
 export const scheduleRouter = router({
   getSchedule: authenticatedProcedure
     .input(
-      z
-        .object({
-          date: z.date().optional(),
-        })
-        .optional()
-        .default({})
+      z.object({
+        day: z.string(), //in myed format
+      })
     )
     .query(async ({ input, ctx: { getMyEd } }) => {
       const currentDate = timezonedDayJS().startOf("day");
-      const response = await getMyEd("schedule", {
-        date: !currentDate.isSame(input.date, "day") ? input.date : undefined,
-      });
+      const response = await getMyEd("schedule", input);
       return response;
     }),
 });

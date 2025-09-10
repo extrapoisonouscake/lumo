@@ -1,5 +1,5 @@
 import { trpc } from "@/app/trpc";
-import { SUBJECTS_CACHE_COOKIE_PREFIX } from "@/constants/core";
+import { getSubjectsCacheCookiePrefix } from "@/constants/core";
 import {
   getCachedClientResponse,
   getReactQueryMockSuccessResponse,
@@ -21,14 +21,13 @@ export function useSubjectsData(
       termId,
     })
   );
-  if (!isPreviousYear && !termId) {
-    const cachedResponse = getCachedClientResponse<
-      RouterOutput["myed"]["subjects"]["getSubjects"]
-    >(SUBJECTS_CACHE_COOKIE_PREFIX);
 
-    if (query.isPending && cachedResponse)
-      return getReactQueryMockSuccessResponse(query, cachedResponse);
-  }
+  const cachedResponse = getCachedClientResponse<
+    RouterOutput["myed"]["subjects"]["getSubjects"]
+  >(getSubjectsCacheCookiePrefix({ isPreviousYear, termId }));
+
+  if (query.isPending && cachedResponse)
+    return getReactQueryMockSuccessResponse(query, cachedResponse);
 
   return query;
 }

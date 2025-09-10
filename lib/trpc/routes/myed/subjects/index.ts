@@ -1,4 +1,4 @@
-import { SUBJECTS_CACHE_COOKIE_PREFIX } from "@/constants/core";
+import { getSubjectsCacheCookiePrefix } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cookieDefaultOptions } from "@/helpers/MyEdCookieStore";
 import { prepareAssignmentForDBStorage } from "@/trigger/send-notifications";
@@ -25,16 +25,16 @@ export const subjectsRouter = router({
     )
     .query(async ({ input, ctx: { getMyEd, cookieStore } }) => {
       const response = await getMyEd("subjects", input);
-      if (!input.isPreviousYear && !input.termId) {
-        cookieStore.set(
-          SUBJECTS_CACHE_COOKIE_PREFIX,
-          JSON.stringify(response),
-          {
-            ...cookieDefaultOptions,
-            httpOnly: false,
-          }
-        );
-      }
+
+      cookieStore.set(
+        getSubjectsCacheCookiePrefix(input),
+        JSON.stringify(response),
+        {
+          ...cookieDefaultOptions,
+          httpOnly: false,
+        }
+      );
+
       if (response.subjects.main.length === 0) {
         const allTermsResponse = await getMyEd("subjects", {
           isPreviousYear: input?.isPreviousYear,

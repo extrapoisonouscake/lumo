@@ -4,6 +4,7 @@ import { trpc } from "@/app/trpc";
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { ErrorCardProps } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MYED_DATE_FORMAT } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
 import { formatCountdown } from "@/helpers/format-countdown";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
@@ -27,7 +28,12 @@ import { WidgetComponentProps } from "./index";
 import { Widget, WidgetErrorCard } from "./widget";
 
 export default function ScheduleTodayWidget(widget: WidgetComponentProps) {
-  const todaySchedule = useQuery(trpc.myed.schedule.getSchedule.queryOptions());
+  const today = useMemo(() => timezonedDayJS().format(MYED_DATE_FORMAT), []);
+  const todaySchedule = useQuery(
+    trpc.myed.schedule.getSchedule.queryOptions({
+      day: today,
+    })
+  );
   let content, richError;
 
   if (todaySchedule.data) {

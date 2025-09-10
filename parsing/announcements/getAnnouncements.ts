@@ -6,6 +6,7 @@ import { mistral } from "@/instances/mistral";
 import { redis } from "@/instances/redis";
 import { AnnouncementEntry, AnnouncementSectionData } from "@/types/school";
 import { FinishReason } from "@mistralai/mistralai/models/components/chatcompletionchoice";
+import { logger } from "@trigger.dev/sdk";
 export const withAnnouncementsPrefix = (key: string) => `announcements:${key}`;
 export const getAnnouncementsRedisSchoolPrefix = (school: KnownSchools) =>
   withAnnouncementsPrefix(school);
@@ -25,7 +26,7 @@ export const getAnnouncementsPDFLinkRedisHashKey = (date: Date) =>
   );
 
 const PDF_PARSING_PROMPT =
-  `You're an agent that parses PDF files. Parse the provided PDF file and output the response in the JSON format. The response should be an array of objects representing sections of the document. Each section is started by a title (in the PDF this would be a big heading). Each object should contain ONLY the following keys: "type" ("list" if the section is a bullet-point list, or "table" if the section is a table) and "content". If the type is "list", "content" is an array where each item is a bullet point. If you encounter a nested list, treat it as a single string. If the type is "table", "content" is an array where each item is an inner array representing a row in the table. Include the table header as a separate array. DO NOT respond with anything other than the JSON. DO NOT use newlines.` +
+  `You're an agent that parses PDF files. Parse the provided PDF file and output the response in the JSON format, but in plain text (without language descriptors such as "json" or "javascript"). The response should be an array of objects representing sections of the document. Each section is started by a title (in the PDF this would be a big heading). Each object should contain ONLY the following keys: "type" ("list" if the section is a bullet-point list, or "table" if the section is a table) and "content". If the type is "list", "content" is an array where each item is a bullet point. If you encounter a nested list, treat it as a single string. If the type is "table", "content" is an array where each item is an inner array representing a row in the table. Include the table header as a separate array. DO NOT respond with anything other than the JSON. DO NOT use newlines.` +
   `Here is an example of the output format:
 [
   {
@@ -74,19 +75,18 @@ export async function parseAnnouncements(
     console.error("failed to parse pdf", chatResponse);
     return;
   }
+  logger.log("elements", { elements: extractBrackets(elements) });
   const data = JSON.parse(extractBrackets(elements)) as AIOutputItem[];
   if (data.length === 0) throw new Error("Something went wrong");
-  const schoolPrefix = getAnnouncementsRedisSchoolPrefix(school);
 
-  const previousDayDataKey = (
-    await redis.scan(0, { match: schoolPrefix })
-  )[1][0];
-  let previousDayData: AnnouncementSectionData[] | undefined;
-  if (previousDayDataKey) {
-    previousDayData = (await redis.get(
-      previousDayDataKey
-    )) as AnnouncementSectionData[];
-  }
+  const previousDayDataKey = getAnnouncementsRedisKey(
+    school,
+    timezonedDayJS(date).subtract(1, "day").toDate()
+  );
+  const previousDayData = (await redis.get(previousDayDataKey)) as
+    | AnnouncementSectionData[]
+    | null;
+
   let preparedData;
   const transformData = ({
     section,
@@ -104,9 +104,11 @@ export async function parseAnnouncements(
       })),
     };
   };
+  logger.log("previousDayDataKey", { previousDayDataKey, previousDayData });
   if (previousDayData) {
     preparedData = data.map((section, i) => {
       const previousDaySection = previousDayData[i];
+      logger.log("section", { section, previousDaySection });
       if (!previousDaySection || previousDaySection.type !== "list") {
         return section;
       }
@@ -137,6 +139,9 @@ function extractBrackets(string: string) {
   if (start === -1 || end === -1 || end < start) {
     return "";
   }
-
-  return string.slice(start, end + 1);
+  logger.log("extracting brackets", { string });
+  return string
+    .slice(start, end + 1)
+    .replaceAll("```json", "")
+    .replaceAll("```", "");
 }

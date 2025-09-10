@@ -245,7 +245,7 @@ const generateAssignmentFileSubmissionStateParams = ({
 //TODO: divide steps into "required" and the ones that make request independent of state
 export const myEdParsingRoutes = {
   //* query parameters mandatory for parsing to work
-  schedule: new Route<{ date?: Date }>()
+  schedule: new Route<{ day?: string }>()
     .step({
       method: "GET",
       path: "/studentScheduleContextList.do?navkey=myInfo.sch.list",
@@ -272,8 +272,8 @@ export const myEdParsingRoutes = {
       ({ metadata: { shouldSelectDateMode } }) => shouldSelectDateMode
     )
     .step(
-      ({ params: { date } }) => {
-        const day = timezonedDayJS(date).format(MYED_DATE_FORMAT);
+      ({ params: { day } }) => {
+        //day in myed formay
         return {
           method: "POST",
           path: "/studentScheduleContextList.do",
@@ -286,7 +286,10 @@ export const myEdParsingRoutes = {
           expect: "html",
         };
       },
-      ({ params: { date } }) => !!date
+      ({ params: { day } }) => {
+        const today = timezonedDayJS().format(MYED_DATE_FORMAT);
+        return today !== day;
+      }
     ),
   currentWeekday: new Route().step({
     method: "GET",

@@ -1,7 +1,10 @@
 import { trpc } from "@/app/trpc";
 import { ErrorCard, ErrorCardProps } from "@/components/misc/error-card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
-import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
+import {
+  MYED_ALL_GRADE_TERMS_SELECTOR,
+  MYED_DATE_FORMAT,
+} from "@/constants/myed";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
@@ -126,7 +129,7 @@ function Loader({ date }: { date: Date }) {
   const scheduleQuery = useQuery(
     trpc.myed.schedule.getSchedule.queryOptions(
       {
-        date,
+        day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
       },
       { trpc: { abortOnUnmount: true } }
     )
