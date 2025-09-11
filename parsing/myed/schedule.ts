@@ -57,7 +57,7 @@ export function parseSchedule({
       const timeString = removeLineBreaks($(timeTd).find("td").text());
       const [startsAt, endsAt] = timeString.split(" - ");
       const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(
-        timezonedDayJS(initialParams.date).startOf("minute")
+        timezonedDayJS(initialParams.day).startOf("minute")
       );
 
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
