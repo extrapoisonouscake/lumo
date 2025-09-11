@@ -17,8 +17,8 @@ function AnnouncementEntry({ text, isNew }: { text: string; isNew?: boolean }) {
       <div className="flex-1 flex justify-between gap-2">
         <span className="flex-1">{text}</span>
         {isNew && (
-          <Badge className="text-xs px-1.5 py-0.5 h-4 flex-shrink-0 mt-1">
-            NEW
+          <Badge size="sm" variant="secondary" className="h-fit mt-1 uppercase">
+            New
           </Badge>
         )}
       </div>
@@ -86,8 +86,8 @@ export function AnnouncementsAccordions({
 
 function AnnouncementList({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="flex flex-col gap-1.5 leading-6 list-disc list-inside">
-      <Linkify options={{ target: "_blank", className: "text-blue-500" }}>
+    <ul className="flex flex-col gap-1.5 leading-6 list-disc list-inside wrap-anywhere">
+      <Linkify options={{ target: "_blank", className: "text-brand" }}>
         {children}
       </Linkify>
     </ul>

@@ -14,7 +14,7 @@ import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-s
 import { ArrowUpRightIcon } from "lucide-react";
 import { AnnouncementsAccordions } from "./accordions";
 function AnnouncementsHeading() {
-  return <h3 className="font-medium text-lg">Announcements</h3>;
+  return <h3 className="font-medium">Announcements</h3>;
 }
 export function Announcements() {
   const announcements = useAnnouncements();

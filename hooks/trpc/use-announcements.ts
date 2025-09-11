@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useStudentDetails } from "./use-student-details";
 import { useUserSettings } from "./use-user-settings";
 const gradeRegex =
-  /\b(?:grade|grades|gr\.?)\s*(\d+(?:['’]?s)?(?:\s*(?:[-\/]|to|,|and|or)\s*\d+(?:['’]?s)?)*)\b/gi;
+  /\b(?:grade|grades|gr\.?)\s*((?:\d+(?:['']?s)?|[A-Z](?:['']?s)?)(?:\s*(?:[-\/]|to|,|and|&|or)\s*(?:\d+(?:['']?s)?|[A-Z](?:['']?s)?))*)\b/gi;
 const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
   let lastIndex = 0;
 

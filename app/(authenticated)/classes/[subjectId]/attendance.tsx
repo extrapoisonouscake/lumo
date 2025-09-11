@@ -195,7 +195,7 @@ function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
 
         {reason ? (
           <Badge
-            className="flex-shrink-0 border-0"
+            className="shrink-0 border-0"
             style={{
               backgroundColor: `hsla(${color}, 0.15)`,
               color: `hsl(${color})`,
@@ -204,7 +204,7 @@ function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
             {reason.split(UPPERCASE_REGEX).join(" ")}
           </Badge>
         ) : (
-          <Badge className="flex-shrink-0 bg-red-500/15 text-red-500">
+          <Badge className="shrink-0 bg-red-500/15 text-red-500">
             Unexcused
           </Badge>
         )}
@@ -241,7 +241,7 @@ function AbsenceCardSkeleton() {
         <Skeleton>
           <Badge
             variant="secondary"
-            className="flex-shrink-0 bg-destructive/15 text-destructive"
+            className="shrink-0 bg-destructive/15 text-destructive"
           >
             Reason
           </Badge>
