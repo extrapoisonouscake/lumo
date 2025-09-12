@@ -13,7 +13,7 @@
     "trigger:deploy": "npx trigger.dev deploy",
     "knip": "knip",
     "redis:dev": "docker run -it -d -p 8080:80 --name srh -e SRH_MODE=env -e SRH_TOKEN=token -e SRH_CONNECTION_STRING=\"redis://127.0.0.1:6379\" hiett/serverless-redis-http:latest",
-    "db:update": "drizzle-kit generate && drizzle-kit migrate",
+    "db:update": "drizzle-kit push",
     "prepare": "husky"
   },
   "dependencies": {

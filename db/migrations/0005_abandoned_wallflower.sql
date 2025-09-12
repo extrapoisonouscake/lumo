@@ -1,1 +1,0 @@
-ALTER TABLE "user_settings" ALTER COLUMN "widgets_configuration" SET DEFAULT '[{"id":"schedule-today-1","type":"schedule_today","width":1,"height":1},{"id":"recent-grades-1","type":"recent_grades","width":1,"height":1}]'::jsonb;

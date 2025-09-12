@@ -1,1 +1,0 @@
-ALTER TABLE "user_settings" ADD COLUMN "widgets_configuration" jsonb DEFAULT '[{"id":"announcements-1","type":"announcements","size":"3x2"},{"id":"recent-grades-1","type":"recent_grades","size":"2x1"},{"id":"overdue-assignments-1","type":"overdue_assignments","size":"1x1"},{"id":"schedule-today-1","type":"schedule_today","size":"2x1"}]'::jsonb NOT NULL;
