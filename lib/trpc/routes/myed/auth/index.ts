@@ -29,7 +29,6 @@ import {
   USER_SETTINGS_COOKIE_PREFIX,
 } from "@/constants/core";
 import { users } from "@/db/schema";
-import { AuthCookies } from "@/helpers/getAuthCookies";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
@@ -162,30 +161,17 @@ const sendPasswordResetEmail = publicProcedure
     }
   });
 
-type LoginResponse =
-  | { success: true }
-  | { success: false; message: LoginErrors; authCookies?: AuthCookies };
-
 export const authRouter = router({
-  login: publicProcedure
-    .input(loginSchema)
-    .mutation(async ({ input }): Promise<LoginResponse> => {
-      try {
-        await performLogin(input);
-        return {
-          success: true,
-        };
-      } catch (e: any) {
-        const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
-          ? e.message
-          : LoginErrors.unexpectedError;
-        return {
-          success: false,
-          message: safeErrorMessage,
-          authCookies: e.authCookies,
-        };
-      }
-    }),
+  login: publicProcedure.input(loginSchema).mutation(async ({ input }) => {
+    try {
+      await performLogin(input);
+    } catch (e: any) {
+      const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
+        ? e.message
+        : LoginErrors.unexpectedError;
+      throw new TRPCError({ code: "BAD_GATEWAY", message: safeErrorMessage });
+    }
+  }),
   forceLogin: publicProcedure
     .input(
       z.object({ authCookies: authCookiesSchema, credentials: loginSchema })

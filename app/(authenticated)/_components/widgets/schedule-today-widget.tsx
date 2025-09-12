@@ -99,7 +99,7 @@ const getClassesNotYetStartedRichError: (
   countdownPart: string
 ) => ErrorCardProps = (countdownPart) => ({
   emoji: "🕒",
-  message: `Classes start ${countdownPart}`,
+  message: `Classes start ${countdownPart}.`,
 });
 function Content({
   subjects,

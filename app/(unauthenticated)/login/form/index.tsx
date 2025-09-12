@@ -16,6 +16,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { trpc } from "@/app/trpc";
+import { isTRPCError } from "@/lib/trpc/helpers";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(
   error: string | null,
@@ -64,13 +65,16 @@ export function LoginForm({
     if (errorMessage) {
       setErrorMessage(null);
     }
-    const response = await loginMutation.mutateAsync(data);
-    if (response.success) {
-      initClientLogin(router.push);
-    } else {
-      const message = response.message;
+    try {
+      await loginMutation.mutateAsync(data);
 
-      setErrorMessage(getFullErrorMessage(message, openResetPasswordModal));
+      initClientLogin(router.push);
+    } catch (e) {
+      if (isTRPCError(e)) {
+        setErrorMessage(getFullErrorMessage(e.message, openResetPasswordModal));
+      } else {
+        setErrorMessage("Unknown error.");
+      }
     }
   }
 
