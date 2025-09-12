@@ -67,7 +67,9 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
                       Download
                     </Button>
                   </Link>
-                  <DeleteSubmissionButton assignmentId={assignmentId} />{" "}
+                  {data.isOpen && (
+                    <DeleteSubmissionButton assignmentId={assignmentId} />
+                  )}
                 </div>
               </>
             ) : (

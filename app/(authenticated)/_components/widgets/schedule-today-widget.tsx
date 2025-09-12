@@ -4,11 +4,15 @@ import { trpc } from "@/app/trpc";
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { ErrorCardProps } from "@/components/misc/error-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MYED_DATE_FORMAT } from "@/constants/myed";
+import {
+  MYED_ALL_GRADE_TERMS_SELECTOR,
+  MYED_DATE_FORMAT,
+} from "@/constants/myed";
 import { cn } from "@/helpers/cn";
 import { formatCountdown } from "@/helpers/format-countdown";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
+import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
@@ -34,6 +38,16 @@ export default function ScheduleTodayWidget(widget: WidgetComponentProps) {
       day: today,
     })
   );
+  const subjectsDataQuery = useSubjectsData({
+    isPreviousYear: false,
+    termId: MYED_ALL_GRADE_TERMS_SELECTOR,
+  });
+  const subjectNameToIdMap = useMemo(() => {
+    return subjectsDataQuery.data?.subjects.main.reduce((acc, subject) => {
+      acc[subject.actualName] = subject.id;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [subjectsDataQuery.data]);
   let content, richError;
 
   if (todaySchedule.data) {
@@ -46,7 +60,12 @@ export default function ScheduleTodayWidget(widget: WidgetComponentProps) {
           date: new Date(),
         }) || {};
     } else {
-      content = <Content subjects={todaySchedule.data.subjects} />;
+      content = (
+        <Content
+          subjects={todaySchedule.data.subjects}
+          nameToIdMap={subjectNameToIdMap}
+        />
+      );
     }
   } else if (todaySchedule.isLoading) {
     content = <ContentSkeleton />;
@@ -82,11 +101,26 @@ const getClassesNotYetStartedRichError: (
   emoji: "🕒",
   message: `Classes start ${countdownPart}`,
 });
-function Content({ subjects }: { subjects: ScheduleSubject[] }) {
+function Content({
+  subjects,
+  nameToIdMap,
+}: {
+  subjects: ScheduleSubject[];
+  nameToIdMap: Record<string, string> | undefined;
+}) {
   const [isAnimating, setIsAnimating] = useState(false);
 
   const previousRowIndexRef = useRef<number | null>(null);
-  const rows = useMemo(() => addBreaksToSchedule(subjects), [subjects]);
+  const rows = useMemo(
+    () =>
+      addBreaksToSchedule(
+        subjects.map((subject) => ({
+          ...subject,
+          id: nameToIdMap?.[subject.actualName],
+        }))
+      ),
+    [subjects, nameToIdMap]
+  );
   const subjectsWithoutTA = subjects.filter(
     (subject) => subject.name !== TEACHER_ADVISORY_ABBREVIATION
   );

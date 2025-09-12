@@ -152,7 +152,7 @@ export function AssignmentScoreDisplay({
 export function TeacherCommentBadge(props: BadgeProps) {
   return (
     <Badge variant="secondary" {...props}>
-      Teacher Comment
+      Comment
     </Badge>
   );
 }
