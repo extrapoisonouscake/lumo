@@ -13,7 +13,7 @@ export function RegistrationStepsBar({
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 relative">
-      <div className="h-[2px] flex-1 bg-muted w-full absolute left-0 top-[1.125rem]" />
+      <div className="h-[2px] flex-1 bg-muted w-full absolute left-0 top-4.5" />
       {STEPS.map((step, index) => {
         const allowClick = maxVisitedStep >= index && currentStep !== index;
         return (

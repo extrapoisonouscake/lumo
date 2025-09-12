@@ -96,9 +96,9 @@ export function Widget({
               size="icon"
               variant="outline"
               onClick={() => handleCustomizeWidget(data)}
-              className="size-6 rounded bg-background backdrop-blur-sm"
+              className="size-6 rounded-sm bg-background backdrop-blur-xs"
             >
-              <Settings2Icon className="!size-[14px]" />
+              <Settings2Icon className="size-[14px]!" />
             </Button>
           )}
           <Button
@@ -107,14 +107,14 @@ export function Widget({
             onClick={() => {
               handleRemoveWidget(data.id);
             }}
-            className="size-6 rounded bg-background backdrop-blur-sm text-red-600 hover:text-red-700"
+            className="size-6 rounded-sm bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
           >
-            <TrashIcon className="!size-[14px]" />
+            <TrashIcon className="size-[14px]!" />
           </Button>
           <Button
             size="icon"
             variant="outline"
-            className="cursor-move size-6 rounded bg-background backdrop-blur-sm"
+            className="cursor-move size-6 rounded-sm bg-background backdrop-blur-xs"
             {...attributes}
             {...listeners}
           >
@@ -128,7 +128,7 @@ export function Widget({
         {...listeners}
         className={cn(
           "flex-1 w-full sm:min-h-[200px] cursor-auto relative",
-          { "!shadow-sm": isBeingResized },
+          { "shadow-sm!": isBeingResized },
 
           {
             "cursor-move": isEditing,

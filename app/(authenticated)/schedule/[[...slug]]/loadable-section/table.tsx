@@ -280,7 +280,7 @@ export function ScheduleTable({
         !(row.original.name === TEACHER_ADVISORY_ABBREVIATION);
       const shouldBeClickable = !isLoading && isSubjectRow;
       return cn({
-        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-[--mobile-menu-height] bg-background shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
+        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-(--mobile-menu-height) bg-background shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
           timezonedDayJS().isBetween(
             row.original.startsAt,
             row.original.endsAt
@@ -363,13 +363,18 @@ function ScheduleMobileRow(row: ScheduleRow) {
   const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
   const content = (
     <Card
-      data-clickable={isSubject}
-      className={cn("p-4 group relative flex-row gap-2 justify-between items-start", {
-        "bg-background border-brand/65 shadow-[0_-1px_0_#000,_0_1px_0_var(hsl(--border-color))] overflow-hidden":
-          isCurrent,
-        "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]:": isCurrent && isSubject,
-        "border-none py-2.5 rounded-md items-center": !isSubject,
-      })}
+      data-is-subject={isSubject}
+      className={cn(
+        "p-4 group relative flex-row gap-2 justify-between items-start",
+        {
+          "bg-background border-brand/65 shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] overflow-hidden":
+            isCurrent,
+          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] shadow-[0_0_45px_hsl(var(--background))]!":
+            isCurrent && isSubject,
+          "border-none py-2.5 rounded-md items-center": !isSubject,
+          clickable: isSubject && !isTeacherAdvisory,
+        }
+      )}
     >
       <div
         className={cn("flex flex-col gap-0.5 w-full", {
@@ -407,9 +412,13 @@ function ScheduleMobileRow(row: ScheduleRow) {
     </Card>
   );
   const commonProps = {
-    className: cn("group", {
-      "sticky top-0 bottom-[--mobile-menu-height]": isCurrent,
-    }),
+    className: cn(
+      "group [&:has([data-is-subject=true])+:has([data-is-subject=true])]:mt-2.5",
+      {
+        "sticky z-10 top-4 bottom-[calc(var(--mobile-menu-height)+1rem)]":
+          isCurrent,
+      }
+    ),
   };
 
   if (isSubject && !isTeacherAdvisory) {

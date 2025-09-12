@@ -9,6 +9,7 @@ export const users = table(
     id: t.text("id").primaryKey(), //user student id
     username: t.text().unique(), //encrypted
     password: t.text(), //encrypted
+    lastLoggedInAt: t.timestamp("last_logged_in_at").defaultNow().notNull(),
   },
   (table) => {
     return [

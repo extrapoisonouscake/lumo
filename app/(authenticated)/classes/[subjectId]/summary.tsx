@@ -91,7 +91,7 @@ export function SubjectSummary(
             mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
             secondaryText={!isLetterGradeShown ? `/ 100` : ""}
             textContainerClassName={
-              isLetterGradeShown ? "top-[1.05rem]" : "top-[1.25rem]"
+              isLetterGradeShown ? "top-[1.05rem]" : "top-5"
             }
           />
           <span className="text-zinc-500 text-[10px] uppercase">

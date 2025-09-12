@@ -465,7 +465,7 @@ export function WidgetEditor({
                 <DragOverlay
                   className={
                     activeWidget?.isPreview
-                      ? "flex justify-center !w-[calc(100vw-1rem*2)] sm:max-w-[clamp(300px,100%,600px)]"
+                      ? "flex justify-center w-[calc(100vw-1rem*2)]! sm:max-w-[clamp(300px,100%,600px)]"
                       : undefined
                   }
                 >

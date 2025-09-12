@@ -94,7 +94,7 @@ function OverdueAssignmentsWidget(
           <Link
             href={getAssignmentURL(assignment, assignment.subject)}
             className={cn(
-              "flex flex-col bg-muted/25 hover:bg-muted/40 transition-colors rounded-xl border",
+              "clickable flex flex-col bg-muted/25 hover:bg-muted/40 rounded-xl border",
               isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
             )}
           >

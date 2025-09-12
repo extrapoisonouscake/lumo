@@ -1,3 +1,4 @@
+import { db } from "@/db";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { z } from "zod";
@@ -27,9 +28,12 @@ import {
   USER_CACHE_COOKIE_PREFIX,
   USER_SETTINGS_COOKIE_PREFIX,
 } from "@/constants/core";
+import { users } from "@/db/schema";
 import { AuthCookies } from "@/helpers/getAuthCookies";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
+import { eq } from "drizzle-orm";
+import { after } from "next/server";
 import { fetchAuthCookiesAndStudentId } from "./helpers";
 
 const registrationFieldsByType: Record<
@@ -251,6 +255,11 @@ export const authRouter = router({
           maxAge: 60 * 60,
         }
       );
+      after(() => {
+        db.update(users)
+          .set({ lastLoggedInAt: new Date() })
+          .where(eq(users.id, ctx.studentHashedId));
+      });
     } catch {
       await deleteSession();
       throw new TRPCError({ code: "UNAUTHORIZED" });

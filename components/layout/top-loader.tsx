@@ -2,11 +2,7 @@
 import NextTopLoader from "nextjs-toploader";
 import NProgress from "nprogress";
 import { useEffect } from "react";
-import resolveConfig from "tailwindcss/resolveConfig";
-import tailwindConfig from "../../tailwind.config";
-const fullConfig = resolveConfig(tailwindConfig);
-const colors = fullConfig.theme?.colors;
-const primaryColor = colors?.brand?.DEFAULT;
+
 export function TopLoader() {
   useEffect(() => {
     NProgress.configure({ parent: "#top-loader-container" });
@@ -16,7 +12,7 @@ export function TopLoader() {
       <NextTopLoader
         zIndex={40}
         shadow={false}
-        color={primaryColor}
+        color="var(--brand)"
         showSpinner={false}
       />
       <div className="fixed sm:sticky sm:h-0 sm:overflow-visible top-0 left-0 w-full z-50">

@@ -285,7 +285,7 @@ function CopyButton({ value }: { value: string }) {
         }, 1000);
       }}
     >
-      <Icon className="!size-3.5" strokeWidth={2.5} />
+      <Icon className="size-3.5!" strokeWidth={2.5} />
     </Button>
   );
 }

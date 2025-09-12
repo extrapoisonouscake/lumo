@@ -10,8 +10,7 @@ const TOTAL_WEEKS = 7;
 const LOADING_SLIDES = 2; // One at each end
 const TOTAL_SLIDES = TOTAL_WEEKS + LOADING_SLIDES;
 const CENTER_INDEX = Math.floor(TOTAL_SLIDES / 2);
-const PRELOAD_THRESHOLD = 3;
-
+const DEFAULT_WEEK_OFFSET = -Math.floor(TOTAL_WEEKS / 2);
 export function WeekdaySlider({
   startDate,
   currentDate,
@@ -21,9 +20,8 @@ export function WeekdaySlider({
   currentDate: Date;
   setDate: (date: Date) => void;
 }) {
-  const [weekOffset, setWeekOffset] = useState(-Math.floor(TOTAL_WEEKS / 2));
+  const [weekOffset, setWeekOffset] = useState(DEFAULT_WEEK_OFFSET);
   const lastRebuildRef = useRef(0);
-  const baseStartDateRef = useRef(startDate);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     startIndex: CENTER_INDEX,
@@ -34,7 +32,7 @@ export function WeekdaySlider({
     () => {
       const weekSlides = Array.from({ length: TOTAL_WEEKS }, (_, weekIndex) =>
         [...Array(7)].map((_, dayIndex) => {
-          const date = timezonedDayJS(baseStartDateRef.current)
+          const date = timezonedDayJS(startDate)
             .add(weekOffset + weekIndex, "week")
             .add(dayIndex, "day");
           return { name: date.format("dd"), day: date.date(), date };
@@ -46,7 +44,15 @@ export function WeekdaySlider({
     },
     [weekOffset] // Only depend on weekOffset
   );
-
+  useEffect(() => {
+    setWeekOffset(DEFAULT_WEEK_OFFSET);
+    setTimeout(() => {
+      if (emblaApi) {
+        emblaApi.reInit();
+        emblaApi.scrollTo(CENTER_INDEX, false);
+      }
+    }, 0);
+  }, [startDate]);
   const handlePreload = useCallback(
     (selectedIndex: number) => {
       const now = Date.now();
@@ -54,29 +60,11 @@ export function WeekdaySlider({
       // Prevent rapid rebuilds (debounce by 300ms)
       if (now - lastRebuildRef.current < 300) return;
 
-      let shouldRebuild = false;
-      let newWeekOffset = weekOffset;
-      let newStartIndex = selectedIndex;
+      const changeAmount = selectedIndex - CENTER_INDEX;
 
-      // Check if user is on loading slides or close to them
-      if (selectedIndex === 0 || selectedIndex <= PRELOAD_THRESHOLD + 1) {
-        // User is on first loading slide or close to beginning, extend backward
-        const shiftAmount = Math.floor(TOTAL_WEEKS / 2);
-        newWeekOffset = weekOffset - shiftAmount;
-        newStartIndex = selectedIndex + shiftAmount;
-        shouldRebuild = true;
-      } else if (
-        selectedIndex === TOTAL_SLIDES - 1 ||
-        selectedIndex >= TOTAL_SLIDES - PRELOAD_THRESHOLD - 2
-      ) {
-        // User is on last loading slide or close to end, extend forward
-        const shiftAmount = Math.floor(TOTAL_WEEKS / 2);
-        newWeekOffset = weekOffset + shiftAmount;
-        newStartIndex = selectedIndex - shiftAmount;
-        shouldRebuild = true;
-      }
+      const newWeekOffset = weekOffset + changeAmount;
 
-      if (shouldRebuild && emblaApi) {
+      if (newWeekOffset !== weekOffset && emblaApi) {
         lastRebuildRef.current = now;
         setWeekOffset(newWeekOffset);
 
@@ -84,7 +72,7 @@ export function WeekdaySlider({
         setTimeout(() => {
           if (emblaApi) {
             emblaApi.reInit();
-            emblaApi.scrollTo(newStartIndex, false);
+            emblaApi.scrollTo(CENTER_INDEX, false);
           }
         }, 0);
       }

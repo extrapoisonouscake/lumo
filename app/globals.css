@@ -1,27 +1,135 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --animate-accordion-down: accordion-down 300ms ease-in-out,
+    accordion-down-padding 300ms ease-in-out;
+  --animate-accordion-up: accordion-up 300ms ease-in-out,
+    accordion-up-padding 300ms ease-in-out;
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-down-padding {
+    from {
+      paddingbottom: 0;
+    }
+    to {
+      paddingbottom: 0.5rem;
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes accordion-up-padding {
+    from {
+      paddingbottom: 0.5rem;
+    }
+    to {
+      paddingbottom: 0;
+    }
+  }
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border-color));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --color-brand: hsl(var(--brand));
+
+  --rounded-lg: var(--radius);
+  --rounded-md: calc(var(--radius) - 2px);
+  --rounded-xs: calc(var(--radius) - 4px);
+
+  --ease-accordion: cubic-bezier(0.87, 0, 0.13, 1);
+
+  --shadow-table-row-border: 0 -1px 0 #000, 0 1px 0 #000;
 }
 
-*:not(:focus-visible) {
-  outline: none !important;
-  outline-width: 0 !important;
-  box-shadow: none;
-  -moz-box-shadow: none;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
-menu,
-ol,
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+
+@utility root-container {
+  @apply flex-1 p-4 flex flex-col gap-4;
+}
+@utility clickable {
+  @apply cursor-pointer hover:bg-muted/50 transition-[color,background-color,transform,scale] active:scale-[98%];
+}
+
+@layer utilities {
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+  }
+
+  *:not(:focus-visible) {
+    outline: none !important;
+    outline-width: 0 !important;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  menu,
+  ol,
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
 }
 @layer base {
   :root {
@@ -116,10 +224,5 @@ ul {
   }
   body {
     @apply bg-background text-foreground;
-  }
-}
-@layer components {
-  .root-container {
-    @apply flex-1 p-4 flex flex-col gap-4;
   }
 }
