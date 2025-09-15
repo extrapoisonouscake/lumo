@@ -6,7 +6,7 @@ import {
   MYED_HTML_TOKEN_INPUT_NAME,
 } from "@/constants/myed";
 import { AuthCookies } from "@/helpers/getAuthCookies";
-import { fetchMyEd } from "@/instances/fetchMyEd";
+import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { FlatRouteStep } from "./routes";
 
 const USER_AGENT_FALLBACK =
@@ -48,7 +48,7 @@ export async function sendMyEdRequest<
     "User-Agent": userAgent,
   };
 
-  const argumentsArray: [string, RequestInit][] = [];
+  const argumentsArray: [string, RequestInit, MyEdBaseURLs?][] = [];
   const isMultipleSteps = Array.isArray(stepOrSteps);
   const stepsArray: FlatRouteStep[] = isMultipleSteps
     ? stepOrSteps
@@ -88,7 +88,11 @@ export async function sendMyEdRequest<
         params.body = formData;
       }
     }
-    const args: [string, RequestInit] = [step.path, params];
+    const args: [string, RequestInit, MyEdBaseURLs?] = [step.path, params];
+    if (step.expect === "json") {
+      //for json requests, we need to use the root base url
+      args.push(MyEdBaseURLs.CUSTOM);
+    }
     argumentsArray.push(args);
   }
 

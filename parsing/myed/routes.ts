@@ -291,12 +291,6 @@ export const myEdParsingRoutes = {
         return today !== day;
       }
     ),
-  currentWeekday: new Route().step({
-    method: "GET",
-    path: "/studentScheduleContextList.do?navkey=myInfo.sch.list",
-    expect: "html",
-  }),
-
   personalDetails: new Route()
     .step({
       method: "GET",
@@ -511,7 +505,7 @@ export type MyEdRestEndpointURL = keyof paths;
 const subjectTermToGradeLabelsMap: Record<
   SubjectTerm,
   Array<
-    OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]
+    OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]
   >
 > = {
   [SubjectTerm.FirstSemester]: ["Q1", "Q2"],
@@ -536,7 +530,7 @@ const generateSubjectsListStepParams = (
   if (termId) customParams.push(`selectedTerm|${termId}`);
   return {
     method: "GET" as const,
-    path: `/rest/lists/academics.classes.list`,
+    path: `/aspen/rest/lists/academics.classes.list`,
     body: {
       selectedStudent: studentId,
       fieldSetOid: "fsnX2Cls",
@@ -547,7 +541,7 @@ const generateSubjectsListStepParams = (
 };
 const findSubjectIdByName = (subjects: RouteResponse, name: string) => {
   return (
-    subjects as OpenAPI200JSONResponse<"/lists/academics.classes.list">
+    subjects as OpenAPI200JSONResponse<"/aspen/rest/lists/academics.classes.list">
   ).find((subject) => subject.relSscMstOid_mstDescription === name)?.oid;
 };
 
@@ -559,14 +553,14 @@ const subjectAssignmentsRoute = new Route<
   .step(({ params: { id } }) => {
     return {
       method: "GET",
-      path: `/rest/studentSchedule/${id}/gradeTerms`,
+      path: `/aspen/rest/studentSchedule/${id}/gradeTerms`,
       expect: "json",
     };
   })
   .multiple(({ responses, params: { id, ...rest } }) => {
     const termsResponse = responses.at(
       -1
-    ) as OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">;
+    ) as OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/gradeTerms">;
     let termIdsToSearch;
 
     //runtime check, TODO: change to type check
@@ -599,7 +593,7 @@ const subjectAssignmentsRoute = new Route<
     return termIdsToSearch.flatMap((termId) => [
       {
         method: "GET",
-        path: `/rest/studentSchedule/${id}/categoryDetails/pastDue`,
+        path: `/aspen/rest/studentSchedule/${id}/categoryDetails/pastDue`,
         body: {
           gradeTermOid: termId,
         },
@@ -607,7 +601,7 @@ const subjectAssignmentsRoute = new Route<
       },
       {
         method: "GET",
-        path: `/rest/studentSchedule/${id}/categoryDetails/upcoming`,
+        path: `/aspen/rest/studentSchedule/${id}/categoryDetails/upcoming`,
         body: {
           gradeTermOid: termId,
         },
@@ -623,7 +617,7 @@ export const myEdRestEndpoints = {
   }>()
     .step(({ params: { isPreviousYear, termId } }) => ({
       method: "GET",
-      path: `/rest/lists/academics.classes.list/studentGradeTerms`,
+      path: `/aspen/rest/lists/academics.classes.list/studentGradeTerms`,
       body: {
         year: isPreviousYear ? "previous" : "current",
         term: termId || MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -642,7 +636,7 @@ export const myEdRestEndpoints = {
     year: SubjectYear;
   }>().step(({ params: { id } }) => ({
     method: "GET",
-    path: `/rest/studentSchedule/${id}/academics`,
+    path: `/aspen/rest/studentSchedule/${id}/academics`,
     body: {
       properties:
         "relSscMstOid.mstDescription,relSscMstOid.mstCourseView,sscTermView",
@@ -694,7 +688,7 @@ export const myEdRestEndpoints = {
     assignmentId: string;
   }>().step(({ studentId, params: { assignmentId } }) => ({
     method: "GET",
-    path: `/rest/students/${studentId}/assignments/${assignmentId}`,
+    path: `/aspen/rest/students/${studentId}/assignments/${assignmentId}`,
     expect: "json",
   })),
 };

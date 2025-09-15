@@ -51,7 +51,7 @@ function separateTeacherAdvisoryFromSubjects(subject: Subject[]) {
   };
 }
 type SubjectResponse = DeepWithRequired<
-  OpenAPI200JSONResponse<"/lists/academics.classes.list">[number],
+  OpenAPI200JSONResponse<"/aspen/rest/lists/academics.classes.list">[number],
   | "relSscMstOid_mstDescription"
   | "relSscMstOid_mstStaffView"
   | "cfTermAverage"
@@ -87,7 +87,7 @@ export function parseSubjects({
 }: ParserFunctionArguments<
   "subjects",
   [
-    OpenAPI200JSONResponse<"/lists/academics.classes.list/studentGradeTerms">,
+    OpenAPI200JSONResponse<"/aspen/rest/lists/academics.classes.list/studentGradeTerms">,
     SubjectResponse[]
   ]
 >): {
@@ -109,7 +109,7 @@ export function parseSubjects({
 }
 
 type SubjectSummaryResponse = DeepWithRequired<
-  OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/academics">,
+  OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/academics">,
   "section.sscTermView"
 >;
 const convertAttendanceSummary = (
@@ -273,7 +273,7 @@ export function parseSubjectIdByName({
   metadata: { subjectId },
 }: ParserFunctionArguments<
   "subjectIdByName",
-  [OpenAPI200JSONResponse<"/lists/academics.classes.list">]
+  [OpenAPI200JSONResponse<"/aspen/rest/lists/academics.classes.list">]
 >): string {
   return subjectId;
 }

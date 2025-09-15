@@ -24,15 +24,13 @@ import {
 } from "./public";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
-import {
-  USER_CACHE_COOKIE_PREFIX,
-  USER_SETTINGS_COOKIE_PREFIX,
-} from "@/constants/core";
+import { CACHE_COOKIE_PREFIX } from "@/constants/core";
 import { users } from "@/db/schema";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
+import { getUserSettings } from "../../core/settings";
 import { fetchAuthCookiesAndStudentId } from "./helpers";
 
 const registrationFieldsByType: Record<
@@ -218,8 +216,10 @@ export const authRouter = router({
 
   logOut: authenticatedProcedure.mutation(async ({ ctx: { cookieStore } }) => {
     await deleteSession();
-    cookieStore.delete(USER_CACHE_COOKIE_PREFIX);
-    cookieStore.delete(USER_SETTINGS_COOKIE_PREFIX);
+    cookieStore
+      .getAll()
+      .filter((cookie) => cookie.name.startsWith(CACHE_COOKIE_PREFIX))
+      .forEach((cookie) => cookieStore.delete(cookie.name));
   }),
 
   sendPasswordResetEmail,
@@ -241,8 +241,31 @@ export const authRouter = router({
           maxAge: 60 * 60,
         }
       );
-      after(() => {
-        db.update(users)
+      after(async () => {
+        const [user, userSettings] = await Promise.all([
+          db.query.users.findFirst({
+            where: eq(users.id, ctx.studentHashedId),
+          }),
+          getUserSettings(ctx),
+        ]);
+        if (user && userSettings?.notificationsEnabled) {
+          if (
+            ctx.credentials.username !== user.username ||
+            ctx.credentials.password !== user.password
+          ) {
+            await db
+              .update(users)
+              .set({
+                username: ctx.credentials.username,
+                password: ctx.credentials.password,
+              })
+              .where(eq(users.id, ctx.studentHashedId));
+          }
+        }
+      });
+      after(async () => {
+        await db
+          .update(users)
           .set({ lastLoggedInAt: new Date() })
           .where(eq(users.id, ctx.studentHashedId));
       });

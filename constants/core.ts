@@ -3,14 +3,18 @@ import { UserSettings } from "@/types/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "./myed";
 
 export const INTERNAL_DATE_FORMAT = "YYYY-MM-DD";
-export const USER_SETTINGS_COOKIE_PREFIX = "settings";
-export const USER_CACHE_COOKIE_PREFIX = "user-cache";
+export const CACHE_COOKIE_PREFIX = "cache";
+const getCacheCookiePrefix = (key: string) => {
+  return `${CACHE_COOKIE_PREFIX}:${key}`;
+};
+export const USER_SETTINGS_COOKIE_PREFIX = getCacheCookiePrefix("settings");
+export const USER_CACHE_COOKIE_PREFIX = getCacheCookiePrefix("user-cache");
 export const getSubjectsCacheCookiePrefix = (
   params: RouterInput["myed"]["subjects"]["getSubjects"]
 ) => {
-  return `subjects-cache-${params?.isPreviousYear ? "previous" : "current"}-${
-    params?.termId ?? MYED_ALL_GRADE_TERMS_SELECTOR
-  }`;
+  return `${getCacheCookiePrefix("subjects")}-${
+    params?.isPreviousYear ? "previous" : "current"
+  }-${params?.termId ?? MYED_ALL_GRADE_TERMS_SELECTOR}`;
 };
 export enum Widgets {
   ANNOUNCEMENTS = "announcements",

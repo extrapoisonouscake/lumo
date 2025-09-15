@@ -241,12 +241,16 @@ export async function fetchAuthCookiesAndStudentId(
 }
 export async function fetchStudentId(cookies: AuthCookies) {
   const studentsData = await fetchMyEd<
-    OpenAPI200JSONResponse<"/users/students">
-  >("/rest/users/students", {
-    headers: { Cookie: convertObjectToCookieString(cookies) },
-  }).then((response) => response.json());
+    OpenAPI200JSONResponse<"/app/rest/students">
+  >(
+    "/students",
+    {
+      headers: { Cookie: convertObjectToCookieString(cookies) },
+    },
+    MyEdBaseURLs.NEW
+  ).then((response) => response.json());
 
-  const studentId = studentsData[0]?.studentOid;
+  const studentId = studentsData[0]!.studentOid;
   if (!studentId) throw new LoginError(LoginErrors.invalidAuth);
   return studentId;
 }

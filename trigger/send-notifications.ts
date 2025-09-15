@@ -6,6 +6,7 @@ import {
   tracked_school_data,
   TrackedSchoolDataSelectModel,
   TrackedSubject,
+  users,
 } from "@/db/schema";
 import { hashString } from "@/helpers/hashString";
 import { INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
@@ -65,10 +66,25 @@ const sendNotificationsToUser = async (
   subscriptions: NotificationsSubscriptionSelectModel[],
   trackedSchoolData: TrackedSchoolDataSelectModel | null
 ) => {
-  const { tokens, studentId } = await fetchAuthCookiesAndStudentId(
-    encryption.decrypt(credentials.username),
-    encryption.decrypt(credentials.password)
-  );
+  let tokens, studentId;
+  try {
+    ({ tokens, studentId } = await fetchAuthCookiesAndStudentId(
+      encryption.decrypt(credentials.username),
+      encryption.decrypt(credentials.password)
+    ));
+  } catch (e) {
+    logger.error("error", {
+      e,
+    });
+    await db
+      .update(users)
+      .set({
+        username: null,
+        password: null,
+      })
+      .where(eq(users.id, hashString(credentials.username)));
+    return;
+  }
   const getMyEdWithParameters = getMyEd({
     authCookies: tokens,
     studentId,

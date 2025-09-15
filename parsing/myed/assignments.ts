@@ -79,10 +79,10 @@ export function parseSubjectAssignments({
   currentTermIndex: number | null;
 } | null {
   const [termsData, assignmentsSegments] = responses.slice(-2) as [
-    OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/gradeTerms">,
+    OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/gradeTerms">,
     Array<
-      | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/pastDue">
-      | OpenAPI200JSONResponse<"/studentSchedule/{subjectOid}/categoryDetails/upcoming">
+      | OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/categoryDetails/pastDue">
+      | OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/categoryDetails/upcoming">
     >
   ];
 
@@ -109,7 +109,7 @@ export function parseSubjectAssignment({
   responses,
 }: ParserFunctionArguments<"subjectAssignment">): Assignment | null {
   const assignment =
-    responses[0] as OpenAPI200JSONResponse<"/students/{studentOid}/assignments/{assignmentOid}">;
+    responses[0] as OpenAPI200JSONResponse<"/aspen/rest/students/{studentOid}/assignments/{assignmentOid}">;
   return convertAssignment(assignment);
 }
 export function parseAssignmentFileSubmissionState({

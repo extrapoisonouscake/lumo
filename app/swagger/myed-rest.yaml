@@ -5,7 +5,7 @@ info:
 servers:
   - url: http://localhost:3000/swagger/proxy
 paths:
-  /users/currentUser:
+  /aspen/rest/users/currentUser:
     get:
       summary: Get the current user
       operationId: getCurrentUser
@@ -18,7 +18,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-  /users/students:
+  /aspen/rest/users/students:
     get:
       summary: Get all students associated with the current user
       operationId: getStudents
@@ -33,7 +33,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Student"
-  /users/currentUserPreferences:
+  /aspen/rest/users/currentUserPreferences:
     get:
       summary: Get the current user preferences
       operationId: getCurrentUserPreferences
@@ -119,7 +119,7 @@ paths:
                     type: array
                     items:
                       type: string
-  /workflows/enabled:
+  /aspen/rest/workflows/enabled:
     get:
       summary: Determine if the workflows are enabled
       operationId: getAreWorkflowsEnabled
@@ -132,7 +132,7 @@ paths:
             text/plain:
               schema:
                 type: boolean
-  /pages/homepage:
+  /aspen/rest/pages/homepage:
     get:
       summary: Get the homepage data
       operationId: getHomepage
@@ -145,7 +145,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Page"
-  /resources:
+  /aspen/rest/resources:
     get:
       summary: Get the data of the "Group Resources" section on the homepage
       operationId: getGroupResourcesData
@@ -173,7 +173,7 @@ paths:
                       type: string
                       enum:
                         - "cttWebLink    "
-  /students/{studentOid}/tasks:
+  /aspen/rest/students/{studentOid}/tasks:
     get:
       summary: Get the tasks for a student
       operationId: getStudentTasks
@@ -219,7 +219,7 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/StudentAssignment"
-  /students/{studentOid}/assignments/{assignmentOid}:
+  /aspen/rest/students/{studentOid}/assignments/{assignmentOid}:
     get:
       summary: Get the assignment for a student
       operationId: getStudentAssignment
@@ -243,7 +243,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/StudentAssignment"
-  /lists/academics.classes.list:
+  /aspen/rest/lists/academics.classes.list:
     get:
       summary: Get the list of classes for a student
       operationId: getStudentClasses
@@ -302,7 +302,7 @@ paths:
                         sscTermView:
                           type: string
                           description: Term
-  /lists/academics.classes.list/fieldSets:
+  /aspen/rest/lists/academics.classes.list/fieldSets:
     get:
       summary: Get the list of classes table field sets
       operationId: getStudentClassesFieldSets
@@ -325,7 +325,7 @@ paths:
                       type: string
                     name:
                       type: string
-  /lists/academics.classes.list/studentGradeTerms:
+  /aspen/rest/lists/academics.classes.list/studentGradeTerms:
     get:
       summary: Get the grade terms for a student
       operationId: getStudentGradeTerms
@@ -362,7 +362,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/GradeTerm"
-  /studentSchedule/{subjectOid}/academics:
+  /aspen/rest/studentSchedule/{subjectOid}/academics:
     get:
       summary: Get the student academics
       operationId: getStudentAcademics
@@ -491,7 +491,7 @@ paths:
                     type: boolean
                   hideFromAttendance:
                     type: boolean
-  /studentSchedule/{subjectOid}/gradeTerms:
+  /aspen/rest/studentSchedule/{subjectOid}/gradeTerms:
     get:
       summary: Get the grade terms for a subject
       operationId: getSubjectGradeTerms
@@ -531,7 +531,7 @@ paths:
                       $ref: "#/components/schemas/GradeTerm"
                   currentTermIndex:
                     type: integer
-  /studentSchedule/{subjectOid}/categoryDetails/pastDue:
+  /aspen/rest/studentSchedule/{subjectOid}/categoryDetails/pastDue:
     get:
       summary: Get the past due assignments for a subject
       operationId: getPastDueAssignments
@@ -568,7 +568,7 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/StudentAssignment"
-  /studentSchedule/{subjectOid}/categoryDetails/upcoming:
+  /aspen/rest/studentSchedule/{subjectOid}/categoryDetails/upcoming:
     get:
       summary: Get the upcoming assignments for a subject
       operationId: getUpcomingAssignments
@@ -606,6 +606,130 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/StudentAssignment"
+  /app/rest/studentSchedule:
+    get:
+      summary: Get the student schedule
+      operationId: getStudentSchedule
+      tags:
+        - students
+      parameters:
+        - name: studentOid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: schoolOid
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: number
+            format: int64
+            example: 1714732800
+      responses:
+        200:
+          description: The student schedule
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - yesterdayModels
+                  - todayModel
+                  - tomorrowModel
+                properties:
+                  yesterdayModel:
+                    $ref: "#/components/schemas/WeekDay"
+                  todayModel:
+                    $ref: "#/components/schemas/WeekDay"
+                  tomorrowModel:
+                    $ref: "#/components/schemas/WeekDay"
+  /app/rest/schools/forStudent:
+    get:
+      summary: Get the schools for a student
+      operationId: getSchoolsForStudent
+      tags:
+        - schools
+      parameters:
+        - name: studentOid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: districtContext
+          in: query
+          required: true
+          schema:
+            enum:
+              - "current"
+              - "previous"
+      responses:
+        200:
+          description: The schools for a student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - oid
+                    - name
+                  properties:
+                    oid:
+                      type: string
+                    name:
+                      type: string
+  /app/rest/users/current:
+    get:
+      summary: Get the current user
+      operationId: getCurrentUser
+      tags:
+        - users
+      responses:
+        200:
+          description: The current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /app/rest/students:
+    get:
+      summary: Get the current list of students
+      operationId: getCurrentStudentsList
+      tags:
+        - students
+      responses:
+        200:
+          description: The current student
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+  /app/rest/students/studentByPersonOid:
+    get:
+      summary: Get the student by person oid
+      operationId: getStudentByPersonOid
+      tags:
+        - students
+      parameters:
+        - name: personOid
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The student by person oid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+              #faulty endpoint, not to trust
 components:
   schemas:
     AnyValue: {}
@@ -698,6 +822,53 @@ components:
           $ref: "#/components/schemas/NumberAsString"
         userType:
           $ref: "#/components/schemas/UserType"
+    NewUser:
+      type: object
+      required:
+        - dateFormat
+        - districtName
+        - firstName
+        - localId
+        - locale
+        - nameView
+        - notificationsEnabled
+        - personOid
+        - photoPath
+        - timeoutInSeconds
+        - userOid
+        - userType
+      properties:
+        dateFormat:
+          type: string
+        districtName:
+          type: string
+        firstName:
+          type: string
+        localId:
+          type: string
+        locale:
+          type: string
+        nameView:
+          type: string
+        notificationsEnabled:
+          type: boolean
+        personOid:
+          type: string
+        photoPath:
+          type: string
+        staffOid:
+          type: string
+        timeoutInSeconds:
+          type: number
+        userOid:
+          type: string
+        userType:
+          type: string
+          enum:
+            - STUDENT
+            - STAFF
+            - FAMILY
+            - CON_ED
     Locale:
       type: string
       enum:
@@ -714,7 +885,7 @@ components:
       required:
         - name
         - studentOid
-        - userOid
+        - schoolOid
         - currentWeekAttendance
       properties:
         name:
@@ -723,10 +894,10 @@ components:
           type: string
         studentOid:
           type: string
+        schoolOid:
+          type: string
         userOid:
           type: string
-          enum:
-            - ""
         currentWeekAttendance:
           type: array
           items:
@@ -1051,6 +1222,49 @@ components:
         gradeTermId:
           type: string
         oid:
+          type: string
+    ScheduleDay:
+      type: object
+      required:
+        - oid
+        - schoolOid
+        - name
+        - teacherName
+        - mostRecentPostedGrade
+        - mostRecentPostedGradeTerm
+        - currentGradeTerm
+        - currentGradeTermPerformance
+        - cumulativeTermPerformance
+        - finalGrade
+        - room
+        - period
+        - meetingTime
+      properties:
+        oid:
+          type: string
+        schoolOid:
+          type: string
+        name:
+          type: string
+        teacherName:
+          type: string
+        mostRecentPostedGrade:
+          type: string
+        mostRecentPostedGradeTerm:
+          type: string
+        currentGradeTerm:
+          type: string
+        currentGradeTermPerformance:
+          type: string
+        cumulativeTermPerformance:
+          type: string
+        finalGrade:
+          type: string
+        room:
+          type: string
+        period:
+          type: string
+        meetingTime:
           type: string
   responses:
     NotAuthorized:

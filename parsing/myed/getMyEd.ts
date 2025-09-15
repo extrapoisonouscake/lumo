@@ -17,7 +17,7 @@ import {
 } from "./assignments";
 import { parsePersonalDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
-import { parseCurrentWeekday, parseSchedule } from "./schedule";
+import { parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import {
   parseSubjectAttendance,
@@ -35,7 +35,6 @@ const voidFunction = () => {};
 const endpointToParsingFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
-  currentWeekday: parseCurrentWeekday,
   subjectAssignments: parseSubjectAssignments,
   personalDetails: parsePersonalDetails,
   registrationFields: parseRegistrationFields,

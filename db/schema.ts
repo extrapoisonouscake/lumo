@@ -23,6 +23,8 @@ export const users = table(
 export const usersRelations = relations(users, ({ many, one }) => ({
   notifications_subscriptions: many(notifications_subscriptions),
   tracked_school_data: one(tracked_school_data),
+  user_settings: one(user_settings),
+  notifications_settings: one(notifications_settings),
 }));
 export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
