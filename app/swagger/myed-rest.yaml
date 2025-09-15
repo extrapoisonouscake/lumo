@@ -685,7 +685,7 @@ paths:
   /app/rest/users/current:
     get:
       summary: Get the current user
-      operationId: getCurrentUser
+      operationId: getNewCurrentUser
       tags:
         - users
       responses:
