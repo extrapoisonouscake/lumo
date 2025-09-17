@@ -18,9 +18,7 @@ const announcementsPluralForms = {
 };
 const pluralizeAnnouncements = pluralize(announcementsPluralForms);
 
-export default function AnnouncementsWidgetComponent(
-  widget: WidgetComponentProps
-) {
+export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
   const announcements = useAnnouncements({
     enabled: !widget.isEditing,
   });
@@ -147,3 +145,4 @@ function ContentSkeleton() {
     </div>
   );
 }
+export default { component: AnnouncementsWidgetComponent };

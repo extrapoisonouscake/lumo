@@ -16,7 +16,7 @@ import {
 } from "../../classes/[subjectId]/(assignments)/helpers";
 import { WidgetComponentProps } from "./index";
 
-export default function DynamicAssignmentsWidget({
+export function DynamicAssignmentsWidget({
   size,
   isEditing,
 }: WidgetComponentProps) {
@@ -112,3 +112,4 @@ export default function DynamicAssignmentsWidget({
     </div>
   );
 }
+export default { component: DynamicAssignmentsWidget };

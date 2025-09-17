@@ -52,10 +52,11 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
   const lastPart = pathParts[pathParts.length - 1]!;
   const [routeGroup, ...restRoute] = lastPart.split(".");
   // skipping the queueing if no call is made to the original API
-  if (routeGroup !== "myed") {
+  const restRouteString = restRoute.join(".");
+  if (routeGroup !== "myed" || restRouteString === "auth.logOut") {
     return fetch(input, init);
   }
-  const isSecondary = SECONDARY_ROUTES.includes(restRoute.join("."));
+  const isSecondary = SECONDARY_ROUTES.includes(restRouteString);
 
   return queue.enqueue(
     async () => {

@@ -28,19 +28,16 @@ export type WidgetComponentProps<T extends Widgets = Widgets> =
 export type WidgetWithCustomization<T extends Widgets> = {
   component: SimpleWidget;
   getCustomizationContent: WidgetCustomizationContentRenderer<T>;
-  shouldShow?: (props: WidgetComponentProps) => boolean; // Optional function to determine if widget should be shown
 };
 export type WidgetCustomizationContentRenderer<T extends Widgets> = (
   initialValues: WidgetCustomProps[T],
   onSave: (values: WidgetCustomProps[T]) => void
 ) => ReactNode;
 // For simple widgets
-export type SimpleWidget = React.ComponentType<WidgetComponentProps> & {
-  shouldShow?: (props: WidgetComponentProps) => boolean; // Optional function to determine if widget should be shown
-};
+export type SimpleWidget = React.ComponentType<WidgetComponentProps>;
 
 // Union type for all widget exports
-export type WidgetExport = WidgetWithCustomization<any> | SimpleWidget;
+export type WidgetExport = WidgetWithCustomization<any>;
 
 // Type guard to check if widget supports customization
 export function isCustomizableWidget(
@@ -51,16 +48,6 @@ export function isCustomizableWidget(
     "component" in widget &&
     "getCustomizationContent" in widget
   );
-}
-
-// Helper to get shouldShow function from any widget type
-export function getWidgetShouldShow(
-  widget: WidgetExport
-): ((props: WidgetComponentProps) => boolean) | undefined {
-  if (isCustomizableWidget(widget)) {
-    return widget.shouldShow;
-  }
-  return widget.shouldShow;
 }
 
 // Import widgets dynamically to avoid import errors during development

@@ -16,7 +16,7 @@ import {
 } from "../../classes/[subjectId]/(assignments)/helpers";
 import { WidgetComponentProps } from "./index";
 
-export default function NewAssignmentsWidget({
+export function NewAssignmentsWidget({
   size,
   isEditing,
 }: WidgetComponentProps) {
@@ -112,3 +112,4 @@ export default function NewAssignmentsWidget({
     </div>
   );
 }
+export default { component: NewAssignmentsWidget };

@@ -30,14 +30,15 @@ import { ScheduleRow } from "../../schedule/[[...slug]]/loadable-section/types";
 import { useTTNextSubject } from "../../schedule/[[...slug]]/loadable-section/use-tt-next-subject";
 import { WidgetComponentProps } from "./index";
 import { Widget, WidgetErrorCard } from "./widget";
-
-export default function ScheduleTodayWidget(widget: WidgetComponentProps) {
-  const today = useMemo(() => timezonedDayJS().format(MYED_DATE_FORMAT), []);
-  const todaySchedule = useQuery(
-    trpc.myed.schedule.getSchedule.queryOptions({
-      day: today,
-    })
-  );
+const getQueryKey = () => {
+  const today = timezonedDayJS().format(MYED_DATE_FORMAT);
+  return trpc.myed.schedule.getSchedule.queryOptions({
+    day: today,
+  });
+};
+function ScheduleTodayWidget(widget: WidgetComponentProps) {
+  const queryKey = useMemo(getQueryKey, []);
+  const todaySchedule = useQuery(queryKey);
   const subjectsDataQuery = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -347,3 +348,4 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
     />
   );
 }
+export default { component: ScheduleTodayWidget, getQueryKey };

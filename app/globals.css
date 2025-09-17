@@ -230,6 +230,9 @@
     --mobile-menu-height: calc(
       4.25rem + var(--adjusted-safe-area-inset-bottom)
     );
+    @variant sm {
+      --mobile-menu-height: 0;
+    }
   }
   .dark {
     --background: 240 10% 3.9%;

@@ -527,10 +527,7 @@ function renderWidget({
 }) {
   const widgetExport = WIDGET_COMPONENTS[entry.type];
 
-  const isCustomizable = isCustomizableWidget(widgetExport);
-  const WidgetComponent = isCustomizable
-    ? widgetExport.component
-    : widgetExport;
+  const WidgetComponent = widgetExport.component;
 
   return (
     <WidgetComponent

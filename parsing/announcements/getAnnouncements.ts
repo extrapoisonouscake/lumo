@@ -41,6 +41,7 @@ const PDF_PARSING_PROMPT =
 type AIOutputItem =
   | { type: "list"; content: string[] }
   | { type: "table"; content: string[][] };
+const DOUBLE_QUOTATION_MARK_ELEMENT_ID = "[DQM]";
 export async function parseAnnouncements(
   fileUrl: string,
   school: KnownSchools,
@@ -75,8 +76,13 @@ export async function parseAnnouncements(
     console.error("failed to parse pdf", chatResponse);
     return;
   }
-  logger.log("elements", { elements: extractBrackets(elements) });
-  const data = JSON.parse(extractBrackets(elements)) as AIOutputItem[];
+  logger.log("elements", { elements: elements });
+  const preparedElements = prepareStringForJSON(elements);
+  if (!preparedElements) {
+    console.error("failed to prepare elements", elements);
+    return;
+  }
+  const data = JSON.parse(preparedElements) as AIOutputItem[];
   if (data.length === 0) throw new Error("Something went wrong");
 
   const previousDayDataKey = getAnnouncementsRedisKey(
@@ -87,7 +93,7 @@ export async function parseAnnouncements(
     | AnnouncementSectionData[]
     | null;
 
-  let preparedData;
+  let preparedData: AnnouncementSectionData[];
   const transformData = ({
     section,
     getIsNew,
@@ -104,13 +110,18 @@ export async function parseAnnouncements(
       })),
     };
   };
+
+  const transformDataWithoutIsNewField = (
+    section: AIOutputItem
+  ): AnnouncementSectionData =>
+    transformData({ section, getIsNew: () => undefined });
   logger.log("previousDayDataKey", { previousDayDataKey, previousDayData });
   if (previousDayData) {
     preparedData = data.map((section, i) => {
       const previousDaySection = previousDayData[i];
       logger.log("section", { section, previousDaySection });
       if (!previousDaySection || previousDaySection.type !== "list") {
-        return section;
+        return transformDataWithoutIsNewField(section);
       }
       return transformData({
         section,
@@ -121,9 +132,7 @@ export async function parseAnnouncements(
       });
     });
   } else {
-    preparedData = data.map((section) =>
-      transformData({ section, getIsNew: () => undefined })
-    );
+    preparedData = data.map(transformDataWithoutIsNewField);
   }
 
   await Promise.all([
@@ -132,16 +141,17 @@ export async function parseAnnouncements(
   ]);
   return preparedData;
 }
-function extractBrackets(string: string) {
+function prepareStringForJSON(string: string) {
   const start = string.indexOf("[");
   const end = string.lastIndexOf("]");
 
   if (start === -1 || end === -1 || end < start) {
-    return "";
+    return undefined;
   }
   logger.log("extracting brackets", { string });
-  return string
+  const cleanedString = string
     .slice(start, end + 1)
     .replaceAll("```json", "")
     .replaceAll("```", "");
+  return cleanedString.replaceAll('"', DOUBLE_QUOTATION_MARK_ELEMENT_ID);
 }

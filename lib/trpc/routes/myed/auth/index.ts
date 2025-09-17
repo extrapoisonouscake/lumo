@@ -167,6 +167,7 @@ export const authRouter = router({
       const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
         ? e.message
         : LoginErrors.unexpectedError;
+      console.log("login error", e, safeErrorMessage);
       throw new TRPCError({ code: "BAD_GATEWAY", message: safeErrorMessage });
     }
   }),

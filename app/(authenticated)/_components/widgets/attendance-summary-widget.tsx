@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { WidgetSize } from "@/constants/core";
 import { WidgetComponentProps } from "./index";
 
-export default function AttendanceSummaryWidget({
+export function AttendanceSummaryWidget({
   id,
   size,
   isEditing,
@@ -38,3 +38,4 @@ function AttendanceSummarySkeleton({ size }: { size: WidgetSize }) {
     </div>
   );
 }
+export default { component: AttendanceSummaryWidget };
