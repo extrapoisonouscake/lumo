@@ -82,9 +82,18 @@ export async function parseAnnouncements(
     console.error("failed to prepare elements", elements);
     return;
   }
-  const data = JSON.parse(preparedElements) as AIOutputItem[];
-  if (data.length === 0) throw new Error("Something went wrong");
-
+  const transformedData = JSON.parse(preparedElements) as AIOutputItem[];
+  if (transformedData.length === 0) throw new Error("Something went wrong");
+  const data = transformedData.map((section) =>
+    section.type === "list"
+      ? {
+          ...section,
+          content: section.content.map((item) =>
+            item.replaceAll(DOUBLE_QUOTATION_MARK_ELEMENT_ID, '"')
+          ),
+        }
+      : section
+  );
   const previousDayDataKey = getAnnouncementsRedisKey(
     school,
     timezonedDayJS(date).subtract(1, "day").toDate()
