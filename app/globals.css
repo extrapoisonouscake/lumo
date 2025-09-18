@@ -64,6 +64,15 @@
     accordion-down-padding 300ms ease-in-out;
   --animate-accordion-up: accordion-up 300ms ease-in-out,
     accordion-up-padding 300ms ease-in-out;
+  --animate-skeleton-pulse: skeleton-pulse 300ms ease-in-out;
+  @keyframes skeleton-pulse {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.5;
+    }
+  }
   @keyframes accordion-down {
     from {
       height: 0;
