@@ -10,12 +10,7 @@ import {
   parseAnnouncements,
 } from "@/parsing/announcements/getAnnouncements";
 import { zodEnum } from "@/types/utils";
-import {
-  AbortTaskRunError,
-  runs,
-  schedules,
-  schemaTask,
-} from "@trigger.dev/sdk/v3";
+import { runs, schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import * as cheerio from "cheerio";
 import fs from "fs";
 import { z } from "zod";
@@ -121,19 +116,8 @@ export const checkSchoolAnnouncementsTask = schemaTask({
       needToSetPDFURL = true;
     }
 
-    try {
-      await parseAnnouncements(directUrl, school, date);
-    } catch (e) {
-      const now = timezonedDayJS();
-      if (
-        now.day() !== timezonedDayJS(ctx.run.createdAt).day() ||
-        now.hour() > 15
-      ) {
-        throw new AbortTaskRunError("New day");
-      } else {
-        throw e;
-      }
-    }
+    await parseAnnouncements(directUrl, school, date);
+
     await Promise.all([
       cancelTaskRuns({
         tag: getTriggerSchoolTag(school),
