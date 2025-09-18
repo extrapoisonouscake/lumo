@@ -1073,7 +1073,9 @@ components:
               specialCode:
                 type: boolean
               score:
-                type: string
+                oneOf:
+                  - type: string
+                  - type: number
               scoreLabel:
                 type: string
               gradebookColumnDefinitionOid:

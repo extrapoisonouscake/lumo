@@ -1,8 +1,11 @@
 "use client";
 
 import { trpc } from "@/app/trpc";
+import { AppleEmoji } from "@/components/misc/apple-emoji";
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { ErrorCardProps } from "@/components/misc/error-card";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -17,9 +20,9 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight } from "lucide-react";
+import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { scheduleVisualizableErrors } from "../../schedule/[[...slug]]/loadable-section";
 import {
   addBreaksToSchedule,
@@ -75,11 +78,7 @@ function ScheduleTodayWidget(widget: WidgetComponentProps) {
   }
 
   return (
-    <Widget
-      {...widget}
-      contentClassName={!richError ? "pb-0" : undefined}
-      richError={richError}
-    >
+    <Widget {...widget} richError={richError}>
       {content}
     </Widget>
   );
@@ -96,12 +95,7 @@ const NO_MORE_CLASSES_RICH_ERROR: ErrorCardProps = {
   emoji: "🌄",
   message: "No more classes today!",
 };
-const getClassesNotYetStartedRichError: (
-  countdownPart: string
-) => ErrorCardProps = (countdownPart) => ({
-  emoji: "🕒",
-  message: `Classes start ${countdownPart}.`,
-});
+
 function Content({
   subjects,
   nameToIdMap,
@@ -109,9 +103,6 @@ function Content({
   subjects: ScheduleSubject[];
   nameToIdMap: Record<string, string> | undefined;
 }) {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const previousRowIndexRef = useRef<number | null>(null);
   const rows = useMemo(
     () =>
       addBreaksToSchedule(
@@ -125,36 +116,14 @@ function Content({
   const subjectsWithoutTA = subjects.filter(
     (subject) => subject.name !== TEACHER_ADVISORY_ABBREVIATION
   );
-  const { currentRowIndex } = useTTNextSubject(rows);
+  const currentRowIndex = null;
 
-  const [actualRowIndex, setActualRowIndex] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (previousRowIndexRef.current === null) {
-      setActualRowIndex(currentRowIndex);
-    } else {
-      if (previousRowIndexRef.current !== currentRowIndex) {
-        // Trigger animation when currentRowIndex changes
-        setIsAnimating(true);
-
-        const timer = setTimeout(() => {
-          setIsAnimating(false);
-          setActualRowIndex(currentRowIndex);
-        }, 500); // Match CSS transition duration
-
-        return () => clearTimeout(timer);
-      }
-    }
-    previousRowIndexRef.current = currentRowIndex;
-  }, [currentRowIndex]);
   let mainContent;
   const hasNoMoreClasses = timezonedDayJS().isAfter(rows.at(-1)!.endsAt);
-  if (actualRowIndex === null) {
+  if (currentRowIndex === null) {
     const now = timezonedDayJS();
     if (hasNoMoreClasses) {
-      mainContent = (
-        <WidgetErrorCard className="pb-4" {...NO_MORE_CLASSES_RICH_ERROR} />
-      );
+      mainContent = <WidgetErrorCard {...NO_MORE_CLASSES_RICH_ERROR} />;
     } else if (now.isBefore(rows[0]!.startsAt)) {
       mainContent = <ClassesNotYetStartedCard subjects={rows} />;
     } else {
@@ -162,50 +131,22 @@ function Content({
       mainContent = <ScheduleCardsSkeleton />;
     }
   } else {
-    const currentSubject = rows[actualRowIndex]!;
-    const nextSubject = rows[actualRowIndex + 1];
-    const thirdSubject = rows[actualRowIndex + 2];
+    const currentSubject = rows[currentRowIndex]!;
+    const nextSubject = rows
+      .slice(currentRowIndex + 1)
+      .find((row) => row.type === "subject");
     mainContent = (
-      <div
-        className="overflow-hidden pb-4"
-        style={{
-          height:
-            MAIN_CARD_HEIGHT + GAP + SECONDARY_CARD_HEIGHT + BOTTOM_PADDING,
-        }}
-      >
-        <div
-          className={cn("flex flex-col gap-2", {
-            "transition-transform duration-500": isAnimating,
-          })}
-          style={{
-            transform: `translateY(${
-              isAnimating ? -(MAIN_CARD_HEIGHT + GAP) : 0
-            }px)`,
-          }}
-        >
-          <ScheduleElementCard element={currentSubject} />
+      <div className="flex flex-col gap-2 flex-1 justify-between">
+        <ScheduleElementCard element={currentSubject} />
 
-          {nextSubject && (
-            <ScheduleElementCard
-              className={cn(
-                "scale-[0.85] opacity-65 hover:opacity-100 transition-all origin-top",
-                {
-                  "duration-500 scale-1 opacity-100": isAnimating,
-                }
-              )}
-              element={nextSubject}
-            />
-          )}
-
-          {thirdSubject && (
-            <ScheduleElementCard
-              className={cn("scale-[0.85] opacity-65 origin-top", {
-                "duration-500 transition-all": isAnimating,
-              })}
-              element={thirdSubject}
-            />
-          )}
-        </div>
+        {nextSubject && (
+          <p className="text-sm text-muted-foreground">
+            Next class:{" "}
+            <span className="font-medium text-foreground">
+              {nextSubject.name}
+            </span>
+          </p>
+        )}
       </div>
     );
   }
@@ -263,7 +204,7 @@ function ScheduleCardsSkeleton() {
   const subjects = mockScheduleSubjects(2);
   return (
     <div
-      className="overflow-hidden pb-4"
+      className="overflow-hidden"
       style={{
         height: MAIN_CARD_HEIGHT + GAP + SECONDARY_CARD_HEIGHT + BOTTOM_PADDING,
       }}
@@ -280,18 +221,17 @@ function ScheduleCardsSkeleton() {
     </div>
   );
 }
-function ScheduleElementCard({
-  element,
-  className,
-  style,
-}: {
-  element: ScheduleRow;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
+function ScheduleElementCard({ element }: { element: ScheduleRow }) {
   const isSubject = element.type === "subject";
   const content = (
-    <>
+    <Card
+      className={cn(
+        "gap-1 p-3 justify-between flex-row bg-muted/25 items-center",
+        {
+          clickable: isSubject,
+        }
+      )}
+    >
       <div className="flex flex-col flex-1 min-w-0">
         <div className="font-medium truncate">
           {isSubject ? element.name : <ScheduleBreak type={element.type} />}
@@ -304,14 +244,7 @@ function ScheduleElementCard({
       {isSubject && (
         <ChevronRight className="size-5 text-muted-foreground group-hover/card:text-foreground transition-colors" />
       )}
-    </>
-  );
-  const baseClassName = cn(
-    "group/card flex gap-1 items-center justify-between bg-muted/25 rounded-xl border p-3",
-    {
-      "hover:bg-muted/40 transition-colors duration-300": isSubject,
-    },
-    className
+    </Card>
   );
 
   if (isSubject) {
@@ -321,31 +254,56 @@ function ScheduleElementCard({
           id: element.id!,
           name: element.name,
         })}
-        className={baseClassName}
-        style={style}
       >
         {content}
       </Link>
     );
   }
 
-  return (
-    <div className={baseClassName} style={style}>
-      {content}
-    </div>
-  );
+  return content;
 }
 function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
   const { timeToNextSubject } = useTTNextSubject(subjects);
+  const firstSubject = useMemo(
+    () => subjects.find((subject) => subject.type === "subject"),
+    [subjects]
+  );
   if (timeToNextSubject === null) return null;
   const countdown = formatCountdown(timeToNextSubject);
+  const isSoon = timeToNextSubject >= 1000 * 60 * 15;
   return (
-    <WidgetErrorCard
-      className="pb-4"
-      {...getClassesNotYetStartedRichError(
-        timeToNextSubject >= 1000 * 60 * 15 ? "soon" : `in ${countdown}`
-      )}
-    />
+    <div className="flex flex-col flex-1 justify-between gap-3">
+      <div className="flex gap-2.5 items-center">
+        <div className="flex justify-center items-center rounded-full border size-11">
+          <AppleEmoji
+            value="⏰"
+            textClassName="text-2xl"
+            imageClassName="size-6"
+          />
+        </div>
+        <div className="flex flex-col">
+          <p className="font-medium">
+            Classes start {isSoon ? `in ${countdown}` : `soon`}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            First class:{" "}
+            <span className="font-medium text-foreground">
+              {firstSubject!.name}
+            </span>
+          </p>
+        </div>
+      </div>
+      <Link href="/schedule" className="-mb-3">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full hover:bg-transparent text-muted-foreground"
+          rightIcon={<ArrowUpRightIcon className="size-4" />}
+        >
+          View all
+        </Button>
+      </Link>
+    </div>
   );
 }
 export default { component: ScheduleTodayWidget, getQueryKey };

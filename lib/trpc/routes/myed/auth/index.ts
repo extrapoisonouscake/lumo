@@ -30,7 +30,6 @@ import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
-import { getUserSettings } from "../../core/settings";
 import { fetchAuthCookiesAndStudentId } from "./helpers";
 
 const registrationFieldsByType: Record<
@@ -167,7 +166,6 @@ export const authRouter = router({
       const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
         ? e.message
         : LoginErrors.unexpectedError;
-      console.log("login error", e, safeErrorMessage);
       throw new TRPCError({ code: "BAD_GATEWAY", message: safeErrorMessage });
     }
   }),
@@ -225,54 +223,41 @@ export const authRouter = router({
 
   sendPasswordResetEmail,
   //* if the name is changed, change in trpc client initialization as well
-  ensureValidSession: authenticatedProcedure.mutation(async ({ ctx }) => {
-    if (ctx.tokens) {
-      return; // Session is valid, no need to refresh
-    }
-    try {
-      const { tokens } = await fetchAuthCookiesAndStudentId(
-        ctx.credentials.username,
-        ctx.credentials.password
-      );
+  ensureValidSession: authenticatedProcedure
+    .input(
+      z
+        .object({
+          shouldForceRefresh: z.boolean().optional(),
+        })
+        .optional()
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.tokens && !input?.shouldForceRefresh) {
+        return; // Session is valid, no need to refresh
+      }
+      try {
+        const { tokens } = await fetchAuthCookiesAndStudentId(
+          ctx.credentials.username,
+          ctx.credentials.password
+        );
 
-      ctx.authCookieStore.set(
-        AUTH_COOKIES_NAMES.tokens,
-        convertObjectToCookieString(tokens, false),
-        {
-          maxAge: 60 * 60,
-        }
-      );
-      after(async () => {
-        const [user, userSettings] = await Promise.all([
-          db.query.users.findFirst({
-            where: eq(users.id, ctx.studentHashedId),
-          }),
-          getUserSettings(ctx),
-        ]);
-        if (user && userSettings?.notificationsEnabled) {
-          if (
-            ctx.credentials.username !== user.username ||
-            ctx.credentials.password !== user.password
-          ) {
-            await db
-              .update(users)
-              .set({
-                username: ctx.credentials.username,
-                password: ctx.credentials.password,
-              })
-              .where(eq(users.id, ctx.studentHashedId));
+        ctx.authCookieStore.set(
+          AUTH_COOKIES_NAMES.tokens,
+          convertObjectToCookieString(tokens, false),
+          {
+            maxAge: 60 * 60,
           }
-        }
-      });
-      after(async () => {
-        await db
-          .update(users)
-          .set({ lastLoggedInAt: new Date() })
-          .where(eq(users.id, ctx.studentHashedId));
-      });
-    } catch {
-      await deleteSession();
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-  }),
+        );
+
+        after(async () => {
+          await db
+            .update(users)
+            .set({ lastLoggedInAt: new Date() })
+            .where(eq(users.id, ctx.studentHashedId));
+        });
+      } catch {
+        await deleteSession();
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+    }),
 });

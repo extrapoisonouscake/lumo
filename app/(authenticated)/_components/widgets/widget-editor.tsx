@@ -404,7 +404,7 @@ export function WidgetEditor({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="rounded-lg sm:rounded-xl border-0 h-7 px-2 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
+                    className="rounded-lg sm:rounded-xl border-0 h-7 px-3 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
                     onClick={handleCancel}
                     leftIcon={<XIcon className="size-4 sm:hidden" />}
                   >
@@ -675,14 +675,18 @@ function AddWidgetButton({
     <Button
       key={type}
       ref={setNodeRef}
-      {...attributes}
-      {...listeners}
       variant="outline"
       size="sm"
       onClick={onClick}
-      className="flex items-center gap-2 cursor-grab"
+      className="flex items-center pl-0 h-fit gap-0"
     >
-      <MoveIcon className="size-4" />
+      <div
+        className="pl-3 pr-2 py-2 cursor-grab"
+        {...attributes}
+        {...listeners}
+      >
+        <MoveIcon className="size-4" />
+      </div>
       {WIDGET_NAMES[type]}
     </Button>
   );

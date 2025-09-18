@@ -3,6 +3,7 @@
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -142,47 +143,48 @@ function RecentGradedAssignmentCard({
   })!;
 
   return (
-    <Link
-      href={getAssignmentURL(assignment, assignment.subject)}
-      className={cn(
-        "clickable flex flex-col bg-muted/25 hover:bg-muted/40 rounded-xl border",
-        isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <p className="font-semibold text-lg leading-none">
-          {assignment.score} / {assignment.maxScore}
-          {shouldShowPercentages && (
-            <span className="text-xs font-medium">
-              &nbsp;
-              {getPercentageString(assignment.score!, assignment.maxScore)}
-            </span>
-          )}
-        </p>
+    <Link href={getAssignmentURL(assignment, assignment.subject)}>
+      <Card
+        className={cn(
+          "clickable bg-muted/25",
+          isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <p className="font-semibold text-lg leading-none">
+            {assignment.score} / {assignment.maxScore}
+            {shouldShowPercentages && (
+              <span className="text-xs font-medium">
+                &nbsp;
+                {getPercentageString(assignment.score!, assignment.maxScore)}
+              </span>
+            )}
+          </p>
 
-        <CircularProgress
-          value={percentage}
-          letter={gradeInfo?.letter}
-          fillColor={gradeInfo?.color}
-          size="normal"
-        />
-      </div>
-      {isSmallWidget ? (
-        <p className="text-xs text-muted-foreground font-medium truncate">
-          {assignment.name}
-        </p>
-      ) : (
-        <>
-          <div className="flex flex-col gap-1">
-            <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
-              {assignment.name}
-            </p>
-            <p className="flex items-center justify-between text-xs text-muted-foreground">
-              {assignment.subject.name}
-            </p>
-          </div>
-        </>
-      )}
+          <CircularProgress
+            value={percentage}
+            letter={gradeInfo?.letter}
+            fillColor={gradeInfo?.color}
+            size="normal"
+          />
+        </div>
+        {isSmallWidget ? (
+          <p className="text-xs text-muted-foreground font-medium truncate">
+            {assignment.name}
+          </p>
+        ) : (
+          <>
+            <div className="flex flex-col gap-1">
+              <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
+                {assignment.name}
+              </p>
+              <p className="flex items-center justify-between text-xs text-muted-foreground">
+                {assignment.subject.name}
+              </p>
+            </div>
+          </>
+        )}
+      </Card>
     </Link>
   );
 }

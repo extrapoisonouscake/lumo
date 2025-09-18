@@ -1,7 +1,5 @@
 import { createTRPCContext } from "@/lib/trpc/context";
 
-// 2. create a caller using your `Context`
-
 export async function POST(request: Request) {
   const formData = await request.formData();
   const assignmentId = formData.get("assignmentId") as string;

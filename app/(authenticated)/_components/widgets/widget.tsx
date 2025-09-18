@@ -90,27 +90,29 @@ export function Widget({
       }}
     >
       {isEditing && (
-        <div className="absolute top-2 right-2 z-10 flex items-center gap-1">
-          {isCustomizable && (
+        <div className="absolute top-2 right-2 z-10 flex items-center gap-1 justify-between">
+          <div className="flex items-center gap-1">
+            {isCustomizable && (
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={() => handleCustomizeWidget(data)}
+                className="size-6 rounded-sm bg-background backdrop-blur-xs"
+              >
+                <Settings2Icon className="size-[14px]!" />
+              </Button>
+            )}
             <Button
               size="icon"
               variant="outline"
-              onClick={() => handleCustomizeWidget(data)}
-              className="size-6 rounded-sm bg-background backdrop-blur-xs"
+              onClick={() => {
+                handleRemoveWidget(data.id);
+              }}
+              className="size-6 rounded-sm bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
             >
-              <Settings2Icon className="size-[14px]!" />
+              <TrashIcon className="size-[14px]!" />
             </Button>
-          )}
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => {
-              handleRemoveWidget(data.id);
-            }}
-            className="size-6 rounded-sm bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
-          >
-            <TrashIcon className="size-[14px]!" />
-          </Button>
+          </div>
           <Button
             size="icon"
             variant="outline"
@@ -124,15 +126,9 @@ export function Widget({
       )}
       <Card
         data-widget-index={index}
-        {...attributes}
-        {...listeners}
         className={cn(
           "flex-1 w-full sm:min-h-[200px] cursor-auto relative",
           { "shadow-sm!": isBeingResized },
-
-          {
-            "cursor-move": isEditing,
-          },
           className
         )}
         style={{

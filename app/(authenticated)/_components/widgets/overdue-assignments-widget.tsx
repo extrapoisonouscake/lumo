@@ -2,6 +2,7 @@
 
 import { ErrorCardProps } from "@/components/misc/error-card";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Widgets, WidgetSize } from "@/constants/core";
@@ -91,39 +92,43 @@ function OverdueAssignmentsWidget(
     >
       {overdueAssignments.map((assignment) => {
         return (
-          <Link
-            href={getAssignmentURL(assignment, assignment.subject)}
-            className={cn(
-              "clickable flex flex-col bg-muted/25 hover:bg-muted/40 rounded-xl border",
-              isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
-            )}
-          >
-            <p className="font-semibold text-lg leading-none">
-              {assignment.score} / {assignment.maxScore}
-              {settings.shouldShowPercentages && (
-                <span className="text-xs font-medium">
-                  &nbsp;
-                  {getPercentageString(assignment.score!, assignment.maxScore)}
-                </span>
+          <Link href={getAssignmentURL(assignment, assignment.subject)}>
+            <Card
+              className={cn(
+                "clickable bg-muted/25",
+                isSmallWidget ? "gap-1 p-2.5" : "gap-1.5 p-3.5"
               )}
-            </p>
-
-            {isSmallWidget ? (
-              <p className="text-xs text-muted-foreground font-medium truncate">
-                {assignment.name}
+            >
+              <p className="font-semibold text-lg leading-none">
+                {assignment.score} / {assignment.maxScore}
+                {settings.shouldShowPercentages && (
+                  <span className="text-xs font-medium">
+                    &nbsp;
+                    {getPercentageString(
+                      assignment.score!,
+                      assignment.maxScore
+                    )}
+                  </span>
+                )}
               </p>
-            ) : (
-              <>
-                <div className="flex flex-col gap-1">
-                  <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
-                    {assignment.name}
-                  </p>
-                  <p className="flex items-center justify-between text-xs text-muted-foreground">
-                    {assignment.subject.name}
-                  </p>
-                </div>
-              </>
-            )}
+
+              {isSmallWidget ? (
+                <p className="text-xs text-muted-foreground font-medium truncate">
+                  {assignment.name}
+                </p>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
+                      {assignment.name}
+                    </p>
+                    <p className="flex items-center justify-between text-xs text-muted-foreground">
+                      {assignment.subject.name}
+                    </p>
+                  </div>
+                </>
+              )}
+            </Card>
           </Link>
         );
       })}

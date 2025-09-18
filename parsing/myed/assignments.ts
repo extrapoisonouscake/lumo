@@ -25,7 +25,6 @@ function convertAssignment({
   scoreElements,
   remark,
   categoryOid,
-  submission,
 }: components["schemas"]["StudentAssignment"]): Assignment {
   const scoreElement = scoreElements[0];
 
@@ -40,9 +39,9 @@ function convertAssignment({
     maxScore: totalPoints,
   };
   if (scoreElement) {
-    const { scoreLabel, score, pointMax } = scoreElement;
+    const { scoreLabel, score } = scoreElement;
 
-    if (score && score !== "NaN") {
+    if (typeof score === "number" || (score && score !== "NaN")) {
       return {
         ...baseAssignment,
         status: AssignmentStatus.Graded,

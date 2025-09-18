@@ -5,7 +5,6 @@ import {
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
   notificationSubscriptionSchema,
-  users,
 } from "@/db/schema";
 
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
@@ -19,7 +18,6 @@ import { user_settings } from "@/db/schema";
 import { cookieDefaultOptions } from "@/helpers/MyEdCookieStore";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
 import { sha256 } from "@/helpers/sha256";
-import { encryption } from "@/lib/encryption";
 import { router } from "@/lib/trpc/base";
 import { authenticatedProcedure } from "@/lib/trpc/procedures";
 import { PartialUserSettings } from "@/types/core";
@@ -87,33 +85,22 @@ export const settingsRouter = router({
     )
     .mutation(
       async ({
-        ctx: { cookieStore, studentHashedId, credentials },
+        ctx: { cookieStore, studentHashedId },
         input: { endpointUrl, publicKey, authKey },
       }) => {
         const deviceId = await sha256(endpointUrl);
-        const encryptedCredentials = {
-          username: encryption.encrypt(credentials.username),
-          password: encryption.encrypt(credentials.password),
-        };
-        await Promise.all([
-          db
-            .insert(notifications_subscriptions)
-            .values({
-              userId: studentHashedId,
-              endpointUrl,
-              deviceId,
-              publicKey,
-              authKey,
-            })
-            .onConflictDoNothing(),
-          db
-            .update(users)
-            .set({
-              username: encryptedCredentials.username,
-              password: encryptedCredentials.password,
-            })
-            .where(eq(users.id, studentHashedId)),
-        ]);
+
+        await db
+          .insert(notifications_subscriptions)
+          .values({
+            userId: studentHashedId,
+            endpointUrl,
+            deviceId,
+            publicKey,
+            authKey,
+          })
+          .onConflictDoNothing();
+
         cookieStore.set(DEVICE_ID_COOKIE_NAME, deviceId, settingsCookieOptions);
       }
     ),

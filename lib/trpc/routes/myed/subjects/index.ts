@@ -1,7 +1,8 @@
 import { getSubjectsCacheCookiePrefix } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cookieDefaultOptions } from "@/helpers/MyEdCookieStore";
-import { prepareAssignmentForDBStorage } from "@/trigger/send-notifications";
+
+import { prepareAssignmentForDBStorage } from "@/app/api/notifications/check/route";
 import { SubjectTerm, SubjectYear } from "@/types/school";
 import { after } from "next/server";
 import { z } from "zod";

@@ -23,7 +23,7 @@ export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
     enabled: !widget.isEditing,
   });
 
-  let content: React.ReactNode;
+  let content: React.ReactNode | undefined;
   let richError: ErrorCardProps | undefined;
   let contentClassName;
   if (!announcements.data) {

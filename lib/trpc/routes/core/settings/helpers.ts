@@ -3,7 +3,6 @@ import {
   notifications_subscriptions,
   tracked_school_data,
   TrackedSubject,
-  users,
 } from "@/db/schema";
 import { and, eq, sql } from "drizzle-orm";
 
@@ -68,17 +67,8 @@ export const runNotificationUnsubscriptionDBCalls = async (
       ),
     });
   if (!existingSubscription) {
-    await Promise.all([
-      db
-        .delete(tracked_school_data)
-        .where(eq(tracked_school_data.userId, studentHashedId)),
-      db
-        .update(users)
-        .set({
-          username: null,
-          password: null,
-        })
-        .where(eq(users.id, studentHashedId)),
-    ]);
+    await db
+      .delete(tracked_school_data)
+      .where(eq(tracked_school_data.userId, studentHashedId));
   }
 };

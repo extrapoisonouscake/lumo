@@ -1,25 +1,12 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { InferSelectModel, relations, sql } from "drizzle-orm";
+import { InferSelectModel, relations } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
-export const users = table(
-  "users",
-  {
-    id: t.text("id").primaryKey(), //user student id
-    username: t.text().unique(), //encrypted
-    password: t.text(), //encrypted
-    lastLoggedInAt: t.timestamp("last_logged_in_at").defaultNow().notNull(),
-  },
-  (table) => {
-    return [
-      t.check(
-        "username_password_check",
-        sql`(${table.username} IS NULL AND ${table.password} IS NULL) OR (${table.username} IS NOT NULL AND ${table.password} IS NOT NULL)`
-      ),
-    ];
-  }
-);
+export const users = table("users", {
+  id: t.text("id").primaryKey(), //user student id
+  lastLoggedInAt: t.timestamp("last_logged_in_at").defaultNow().notNull(),
+});
 export const usersRelations = relations(users, ({ many, one }) => ({
   notifications_subscriptions: many(notifications_subscriptions),
   tracked_school_data: one(tracked_school_data),

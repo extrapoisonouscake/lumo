@@ -12,7 +12,6 @@ import { Link } from "@/components/ui/link";
 import { useAnnouncements } from "@/hooks/trpc/use-announcements";
 import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-specific/public";
 import { ArrowUpRightIcon } from "lucide-react";
-import { AnnouncementsAccordions } from "./accordions";
 function AnnouncementsHeading() {
   return <h3 className="font-medium">Announcements</h3>;
 }
@@ -26,7 +25,7 @@ export function Announcements() {
       content = <AnnouncementsSkeleton />;
     }
   } else {
-    content = <AnnouncementsAccordions {...announcements.data} />;
+    content = <AnnouncementsSkeleton />;
   }
   return (
     <div className="flex flex-col gap-2">
@@ -49,7 +48,7 @@ export function AnnouncementsSkeleton() {
     <Accordion type="multiple" key={i}>
       <AccordionItem value={`${i}`} className="pointer-events-none">
         <AccordionTrigger>
-          <Skeleton>wowowowo</Skeleton>
+          <Skeleton shouldShrink={false}>wowowowo</Skeleton>
         </AccordionTrigger>
       </AccordionItem>
     </Accordion>

@@ -21,7 +21,7 @@ export const Skeleton = ({
       <div
         className={cn(
           "pointer-events-none absolute inset-0 w-full h-full bg-accent rounded-xl r opacity-0 transition-opacity",
-          { "opacity-1 animate-pulse": isLoading }
+          { "opacity-100 animate-pulse": isLoading }
         )}
       ></div>
 

@@ -79,7 +79,9 @@ const convertSubject = ({
   actualName: relSscMstOid_mstDescription,
   name: prettifyEducationalName(relSscMstOid_mstDescription),
   teachers: relSscMstOid_mstStaffView.map((item) => item.name),
-  room: relSscMstOid_mstRoomView ?? null,
+  room: relSscMstOid_mstRoomView
+    ? prettifyEducationalName(relSscMstOid_mstRoomView)
+    : null,
   term: sscTermView ? termRawValueToNormalized[sscTermView] : undefined,
 });
 export function parseSubjects({

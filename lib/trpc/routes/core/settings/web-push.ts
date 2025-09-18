@@ -14,17 +14,18 @@ webpush.setVapidDetails(
   NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY
 );
+export type NotificationData =
+  | { title: string; body: string }
+  | { checkNotifications: true };
 export const sendNotification = async (
   subscription: webpush.PushSubscription,
-  title: string,
-  body: string
+  data: NotificationData
 ) => {
-  await webpush.sendNotification(subscription, JSON.stringify({ title, body }));
+  await webpush.sendNotification(subscription, JSON.stringify(data));
 };
 export const broadcastNotification = async (
   userIdOrSubscriptions: string | NotificationsSubscriptionSelectModel[],
-  title: string,
-  body: string
+  data: NotificationData
 ) => {
   const subscriptions =
     typeof userIdOrSubscriptions === "string"
@@ -35,15 +36,10 @@ export const broadcastNotification = async (
   let erroredSubscriptionsIds: string[] = [];
   await Promise.all(
     subscriptions.map(async (subscription) => {
-      const preparedSubscription = {
-        endpoint: subscription.endpointUrl,
-        keys: {
-          auth: subscription.authKey,
-          p256dh: subscription.publicKey,
-        },
-      };
+      const preparedSubscription =
+        convertSubscriptionModelToWebPushSubscription(subscription);
       try {
-        await sendNotification(preparedSubscription, title, body);
+        await sendNotification(preparedSubscription, data);
       } catch (error) {
         console.error(error);
         erroredSubscriptionsIds.push(subscription.id);
@@ -56,3 +52,14 @@ export const broadcastNotification = async (
       .where(inArray(notifications_subscriptions.id, erroredSubscriptionsIds));
   }
 };
+export function convertSubscriptionModelToWebPushSubscription(
+  subscription: NotificationsSubscriptionSelectModel
+): webpush.PushSubscription {
+  return {
+    endpoint: subscription.endpointUrl,
+    keys: {
+      auth: subscription.authKey,
+      p256dh: subscription.publicKey,
+    },
+  };
+}

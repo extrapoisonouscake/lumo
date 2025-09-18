@@ -5,6 +5,7 @@ import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-s
 import { RouterOutput } from "@/lib/trpc/types";
 import { AnnouncementEntry, AnnouncementSection } from "@/types/school";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { useStudentDetails } from "./use-student-details";
 import { useUserSettings } from "./use-user-settings";
 const gradeRegex =
@@ -47,29 +48,34 @@ export function useAnnouncements({
   enabled = true,
 }: { enabled?: boolean } = {}) {
   const settings = useUserSettings();
-  let shouldFetch = !!settings;
-  let error: AnnouncementsNotAvailableReason | undefined;
-  if (settings) {
-    const { schoolId } = settings;
-    const date = timezonedDayJS();
-    if (!schoolId) {
-      error = AnnouncementsNotAvailableReason.SchoolNotSelected;
-    } else if (!isKnownSchool(schoolId)) {
-      error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
-    } else if ([0, 6].includes(date.day())) {
-      error = AnnouncementsNotAvailableReason.NotAWeekday;
+  const { shouldFetch, error } = useMemo(() => {
+    let shouldFetch = !!settings;
+    let error: AnnouncementsNotAvailableReason | undefined;
+    if (settings) {
+      const { schoolId } = settings;
+      const date = timezonedDayJS();
+      if (!schoolId) {
+        error = AnnouncementsNotAvailableReason.SchoolNotSelected;
+      } else if (!isKnownSchool(schoolId)) {
+        error = AnnouncementsNotAvailableReason.SchoolNotAvailable;
+      } else if ([0, 6].includes(date.day())) {
+        error = AnnouncementsNotAvailableReason.NotAWeekday;
+      }
+      if (error !== undefined) {
+        shouldFetch = false;
+      }
     }
-    if (error !== undefined) {
-      shouldFetch = false;
-    }
-  }
+    return { shouldFetch, error };
+  }, [settings]);
 
   const personalDetailsQuery = useStudentDetails({
     enabled: shouldFetch,
   });
+  const [gcTime, setGcTime] = useState<number | undefined>(0);
+
   const query = useQuery({
     ...trpc.core.schoolSpecific.getAnnouncements.queryOptions(),
-    gcTime: 0,
+    gcTime,
     enabled: shouldFetch && enabled,
     select: (data) => {
       const { sections } = data;
@@ -115,9 +121,15 @@ export function useAnnouncements({
       } else {
         result = { ...data, personalSection: [], newAnnouncementsCount: 0 };
       }
+
       return result;
     },
   });
+
+  useEffect(() => {
+    setGcTime(query.data ? undefined : 0);
+  }, [query.data]);
+
   return {
     ...query,
     error:
