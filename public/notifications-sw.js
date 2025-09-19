@@ -7,26 +7,30 @@ self.addEventListener("push", (event) => {
   if (notification?.title === "check_notifications") {
     event.waitUntil(
       (async () => {
-        await self.registration.showNotification(
-          "Checking for new assignments...",
-          {
-            body: data.body || "",
-            tag: "hourly-check",
-            silent: true,
-            requireInteraction: false,
-            renotify: false,
-            navigate: data.navigate,
-            data: { navigate: data.navigate },
-          }
+        const isAppleDevice = /(Mac|iPhone|iPod|iPad)/i.test(
+          navigator.userAgent
         );
+        if (isAppleDevice) {
+          await self.registration.showNotification(
+            "Checking for new assignments...",
+            {
+              body: data.body || "",
+              tag: "hourly-check",
+              silent: true,
+              requireInteraction: false,
+              renotify: false,
+              navigate: data.navigate,
+              data: { navigate: data.navigate },
+            }
+          );
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const notifications = await self.registration.getNotifications({
-          tag: "hourly-check",
-        });
-        notifications.forEach((n) => n.close());
-
+          const notifications = await self.registration.getNotifications({
+            tag: "hourly-check",
+          });
+          notifications.forEach((n) => n.close());
+        }
         await handleNotificationsHourlyCheck();
       })()
     );
