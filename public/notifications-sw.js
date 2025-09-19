@@ -1,29 +1,48 @@
 self.addEventListener("push", (event) => {
   const data = event.data?.json();
+  if (!data) return;
 
-  if (data.title && data.body) {
+  const { notification } = data;
+
+  if (notification?.title === "check_notifications") {
     event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
+      (async () => {
+        await self.registration.showNotification(
+          "Checking for new assignments...",
+          {
+            body: data.body || "",
+            tag: "hourly-check",
+            silent: true,
+            requireInteraction: false,
+            renotify: false,
+            navigate: data.navigate,
+            data: { navigate: data.navigate },
+          }
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const notifications = await self.registration.getNotifications({
+          tag: "hourly-check",
+        });
+        notifications.forEach((n) => n.close());
+
+        await handleNotificationsHourlyCheck();
+      })()
+    );
+  } else {
+    event.waitUntil(
+      self.registration.showNotification(notification.title, {
+        body: notification.body,
+        navigate: notification.navigate,
       })
     );
-    return;
-  }
-  if (data.checkNotifications) {
-    event.waitUntil(handleNotificationsHourlyCheck());
-    return;
   }
 });
+
 async function handleNotificationsHourlyCheck() {
   await fetch("/api/notifications/check", { method: "POST" });
 }
-
-// self.addEventListener("notificationclick", (event) => {
-//   event.notification.close();
-//   event.waitUntil(
-//     clients.openWindow("/notif")
-//   );
-// });
 
 self.addEventListener("install", (event) => {
   event.waitUntil(self.skipWaiting());

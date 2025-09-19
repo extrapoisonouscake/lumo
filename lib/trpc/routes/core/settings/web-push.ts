@@ -14,14 +14,36 @@ webpush.setVapidDetails(
   NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY
 );
-export type NotificationData =
-  | { title: string; body: string }
-  | { checkNotifications: true };
+export type NotificationData = {
+  title: string;
+  body?: string;
+  navigate: string;
+};
+export type DeclarativeWebPushPayload = {
+  web_push: 8030;
+  notification: {
+    title: string;
+    lang?: string;
+    dir?: "ltr" | "rtl";
+    body?: string;
+    navigate: string;
+    silent?: boolean;
+    app_badge?: string;
+  };
+};
 export const sendNotification = async (
   subscription: webpush.PushSubscription,
   data: NotificationData
 ) => {
-  await webpush.sendNotification(subscription, JSON.stringify(data));
+  const payload = {
+    web_push: 8030,
+    notification: {
+      title: data.title,
+      body: data.body,
+      navigate: data.navigate,
+    },
+  };
+  await webpush.sendNotification(subscription, JSON.stringify(payload));
 };
 export const broadcastNotification = async (
   userIdOrSubscriptions: string | NotificationsSubscriptionSelectModel[],

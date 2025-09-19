@@ -47,7 +47,7 @@ function pingSubscriptions(
     subscriptions.map(async (subscription) => {
       await sendNotification(
         convertSubscriptionModelToWebPushSubscription(subscription),
-        { checkNotifications: true }
+        { title: "check_notifications", navigate: "/" }
       );
     })
   );

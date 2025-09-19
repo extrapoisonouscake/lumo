@@ -1,3 +1,4 @@
+import { getAssignmentURL } from "@/app/(authenticated)/classes/[subjectId]/(assignments)/helpers";
 import { PrioritizedRequestQueue } from "@/app/requests-queue";
 import { db } from "@/db";
 import {
@@ -9,7 +10,10 @@ import {
 import { hashString } from "@/helpers/hashString";
 import { createCaller } from "@/lib/trpc";
 import { createTRPCContext } from "@/lib/trpc/context";
-import { broadcastNotification } from "@/lib/trpc/routes/core/settings/web-push";
+import {
+  broadcastNotification,
+  NotificationData,
+} from "@/lib/trpc/routes/core/settings/web-push";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
 import { eq, sql } from "drizzle-orm";
@@ -157,22 +161,25 @@ enum NotificationType {
 }
 const generators: Record<
   NotificationType,
-  (notification: { subject: Subject; assignment: Assignment }) => {
-    title: string;
-    body: string;
-  }
+  (notification: {
+    subject: Subject;
+    assignment: Assignment;
+  }) => NotificationData
 > = {
   [NotificationType.NewAssignment]: ({ subject, assignment }) => ({
     title: `📝 New assignment for ${subject.name}`,
     body: `A new assignment '${assignment.name}' has been posted.`,
+    navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.NewGrade]: ({ subject, assignment }) => ({
     title: `⭐ Grade posted for ${assignment.name}`,
     body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
+    navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.GradeUpdated]: ({ subject, assignment }) => ({
     title: `✍️ Grade updated for ${assignment.name}`,
     body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
+    navigate: getAssignmentURL(assignment, subject),
   }),
 };
 const broadcastNotificationToSubscriptions =
@@ -186,8 +193,8 @@ const broadcastNotificationToSubscriptions =
     subject: Subject;
     assignment: Assignment;
   }) => {
-    const { title, body } = generators[type]({ subject, assignment });
-    await broadcastNotification(subscriptions, { title, body });
+    const data = generators[type]({ subject, assignment });
+    await broadcastNotification(subscriptions, data);
   };
 export const prepareAssignmentForDBStorage = (assignment: Assignment) => ({
   id: assignment.id,

@@ -45,7 +45,7 @@ import {
 } from "@dnd-kit/sortable";
 import {
   CheckIcon,
-  MoveIcon,
+  GripIcon,
   PencilRulerIcon,
   PlusIcon,
   Settings2Icon,
@@ -447,7 +447,7 @@ export function WidgetEditor({
                   <div className="flex flex-col gap-1">
                     <h3 className="font-medium">Widgets</h3>
                     <p className="text-sm text-muted-foreground">
-                      Start dragging to add new widgets.
+                      Click or start dragging to add new widgets.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -685,7 +685,7 @@ function AddWidgetButton({
         {...attributes}
         {...listeners}
       >
-        <MoveIcon className="size-4" />
+        <GripIcon className="size-4 text-muted-foreground" />
       </div>
       {WIDGET_NAMES[type]}
     </Button>

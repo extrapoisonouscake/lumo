@@ -97,7 +97,7 @@ export function Widget({
                 size="icon"
                 variant="outline"
                 onClick={() => handleCustomizeWidget(data)}
-                className="size-6 rounded-sm bg-background backdrop-blur-xs"
+                className="size-7 rounded-lg bg-background backdrop-blur-xs"
               >
                 <Settings2Icon className="size-[14px]!" />
               </Button>
@@ -108,7 +108,7 @@ export function Widget({
               onClick={() => {
                 handleRemoveWidget(data.id);
               }}
-              className="size-6 rounded-sm bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
+              className="size-7 rounded-lg bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
             >
               <TrashIcon className="size-[14px]!" />
             </Button>
@@ -116,11 +116,11 @@ export function Widget({
           <Button
             size="icon"
             variant="outline"
-            className="cursor-move size-6 rounded-sm bg-background backdrop-blur-xs"
+            className="cursor-move size-7 rounded-lg bg-background backdrop-blur-xs"
             {...attributes}
             {...listeners}
           >
-            <GripVerticalIcon className="size-3 text-muted-foreground" />
+            <GripVerticalIcon className="size-4 text-muted-foreground" />
           </Button>
         </div>
       )}

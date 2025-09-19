@@ -116,7 +116,7 @@ function Content({
   const subjectsWithoutTA = subjects.filter(
     (subject) => subject.name !== TEACHER_ADVISORY_ABBREVIATION
   );
-  const currentRowIndex = null;
+  const { currentRowIndex } = useTTNextSubject(rows);
 
   let mainContent;
   const hasNoMoreClasses = timezonedDayJS().isAfter(rows.at(-1)!.endsAt);

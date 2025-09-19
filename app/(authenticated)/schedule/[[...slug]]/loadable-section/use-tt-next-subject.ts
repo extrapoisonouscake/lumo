@@ -30,7 +30,7 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
         setTimeToNextSubject(null);
         setCurrentRowIndex(null);
       };
-      const now = timezonedDayJS().subtract(3, "hour");
+      const now = timezonedDayJS();
       if (data.length === 0) {
         setNullValues();
         return;
