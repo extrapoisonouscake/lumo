@@ -63,7 +63,7 @@ export function NotificationsControlsComponent({
       (!isIOSWebView &&
         (!("serviceWorker" in navigator) || !("PushManager" in window)))
     ) {
-      toast.error("Push notifications are not supported on this browser");
+      toast.error("Push notifications are not supported in this browser");
       throw new Error("Unsupported browser");
     }
 
@@ -102,7 +102,7 @@ export function NotificationsControlsComponent({
       const subscription = await getWebPushSubscription(registration);
       const { endpoint, keys } = subscription.toJSON();
       if (!endpoint || !keys) {
-        toast.error("Push notifications are not supported on this browser.");
+        toast.error("Push notifications are not supported in this browser.");
         throw new Error("Unsupported browser");
       }
       await subscribeToNotificationsMutation.mutateAsync({
@@ -128,7 +128,7 @@ export function NotificationsControlsComponent({
             if (notificationsPermissionDenied) {
               return;
             }
-            if (!areNotificationsImplicitlySupported) {
+            if (!areNotificationsSupported) {
               if (isIOS && !isIOSWebView) {
                 setDrawerOpen(true);
               }
