@@ -26,6 +26,11 @@ interface StaticWebsitePage extends WebsitePage {
   items?: { title: string; href: string }[];
 }
 export const unauthenticatedPathnames = ["/login", "/register"];
+export const publicPathnames = [
+  "/maintenance",
+  "/legal/privacy-policy",
+  "/support",
+];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/": { breadcrumb: [{ name: "Home" }], icon: Home, showOnMobile: true },
   "/classes": {

@@ -71,6 +71,7 @@ export async function parseAnnouncements(
   const elements = chatResponse.choices?.find(
     (choice) => choice.finishReason === FinishReason.Stop
   )?.message.content as string | undefined;
+
   console.log(elements);
   if (!elements) {
     console.error("failed to parse pdf", chatResponse);
@@ -82,18 +83,9 @@ export async function parseAnnouncements(
     console.error("failed to prepare elements", elements);
     return;
   }
-  const transformedData = JSON.parse(preparedElements) as AIOutputItem[];
-  if (transformedData.length === 0) throw new Error("Something went wrong");
-  const data = transformedData.map((section) =>
-    section.type === "list"
-      ? {
-          ...section,
-          content: section.content.map((item) =>
-            item.replaceAll(DOUBLE_QUOTATION_MARK_ELEMENT_ID, '"')
-          ),
-        }
-      : section
-  );
+  const data = JSON.parse(preparedElements) as AIOutputItem[];
+  if (data.length === 0) throw new Error("Something went wrong");
+
   const previousDayDataKey = getAnnouncementsRedisKey(
     school,
     timezonedDayJS(date).subtract(1, "day").toDate()
@@ -161,6 +153,7 @@ function prepareStringForJSON(string: string) {
   const cleanedString = string
     .slice(start, end + 1)
     .replaceAll("```json", "")
-    .replaceAll("```", "");
-  return cleanedString.replaceAll('"', DOUBLE_QUOTATION_MARK_ELEMENT_ID);
+    .replaceAll("```", "")
+    .replaceAll('\\"', '\\\\"');
+  return cleanedString;
 }

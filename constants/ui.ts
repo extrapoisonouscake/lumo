@@ -7,3 +7,9 @@ export const UI_ANIMATION_TRANSITION: Transition<any> = {
   stiffness: 200,
   damping: 20,
 };
+const { userAgent } = navigator;
+export const isIOS =
+  /iphone|ipad|ipod/i.test(userAgent) ||
+  (userAgent.includes("Mac") && "ontouchend" in document);
+
+export const isIOSWebView = isIOS && !!window.webkit;

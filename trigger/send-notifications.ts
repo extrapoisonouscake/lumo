@@ -5,9 +5,11 @@ import {
 } from "@/db/schema";
 import { INSTANTIATED_TIMEZONE } from "@/instances/dayjs";
 import {
-  convertSubscriptionModelToWebPushSubscription,
-  sendNotification,
+  convertWebPushSubscriptionModelToBrowserEquivalent,
+  sendApplePushNotification,
+  sendWebPushNotification,
 } from "@/lib/trpc/routes/core/settings/web-push";
+
 import { schedules } from "@trigger.dev/sdk/v3";
 import { and, eq, exists } from "drizzle-orm";
 
@@ -45,10 +47,21 @@ function pingSubscriptions(
 ) {
   return Promise.all(
     subscriptions.map(async (subscription) => {
-      await sendNotification(
-        convertSubscriptionModelToWebPushSubscription(subscription),
-        { title: "check_notifications", navigate: "/" }
-      );
+      if (subscription.apnsDeviceToken) {
+        await sendApplePushNotification(
+          subscription.apnsDeviceToken,
+          {
+            contentAvailable: true,
+          },
+          subscription.id
+        );
+      } else {
+        await sendWebPushNotification(
+          convertWebPushSubscriptionModelToBrowserEquivalent(subscription),
+          { title: "check_notifications", navigate: "/", body: "" },
+          subscription.id
+        );
+      }
     })
   );
 }

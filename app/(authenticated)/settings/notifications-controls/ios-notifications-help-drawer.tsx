@@ -41,10 +41,9 @@ export function IOSNotificationsHelpDrawer({
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Add to Home Screen</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Install our app</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
-            Your iPhone requires you to add this website to your home screen to
-            receive notifications.
+            To protect your privacy, we recommend installing our app.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <Steps />

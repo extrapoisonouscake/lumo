@@ -1,21 +1,15 @@
 import { trpc } from "@/app/trpc";
+import { isIOS, isIOSWebView } from "@/constants/ui";
+import { callNative, IOSActionBinaryResult } from "@/helpers/ios-bridge";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AsyncSwitchField } from "../async-switch-field";
 import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
-const { userAgent } = navigator;
-const isIOS =
-  /iphone|ipad|ipod/i.test(userAgent) ||
-  (userAgent.includes("Mac") && "ontouchend" in document);
-const isPWA =
-  window.matchMedia("(display-mode: standalone)").matches ||
-  (window.navigator as any).standalone === true;
+
 //assuming notifications are supported if iOS and not in PWA
-const areNotificationsSupported = (isIOS && !isPWA) || "Notification" in window;
-const areNotificationsAvailable =
-  areNotificationsSupported && (!isIOS || isPWA);
+const areNotificationsSupported = "Notification" in window || isIOSWebView;
 
 export function NotificationsControlsComponent({
   initialValue,
@@ -29,13 +23,45 @@ export function NotificationsControlsComponent({
     trpc.core.settings.unsubscribeFromNotifications.mutationOptions()
   );
   const [checked, setChecked] = useState(initialValue);
+  const [iosNotificationPermission, setIOSNotificationPermission] = useState<
+    "granted" | "denied" | "notDetermined"
+  >("notDetermined");
+  useEffect(() => {
+    if (isIOSWebView) {
+      callNative("checkNotificationPermission").then((result) => {
+        setIOSNotificationPermission(
+          result as "granted" | "denied" | "notDetermined"
+        );
+      });
+    }
+  }, [isIOSWebView]);
   const notificationsPermissionDenied =
-    areNotificationsAvailable && window.Notification.permission === "denied";
+    areNotificationsSupported &&
+    (isIOSWebView
+      ? iosNotificationPermission
+      : window.Notification.permission) === "denied";
+
+  const requestNotificationPermission = async () => {
+    if (isIOSWebView) {
+      if (iosNotificationPermission === "granted") {
+        return true;
+      }
+      const result = await callNative("requestNotificationPermission");
+
+      return result === "granted";
+    } else {
+      if (Notification.permission === "granted") {
+        return true;
+      }
+      const permission = await Notification.requestPermission();
+      return permission === "granted";
+    }
+  };
   const initPush = async () => {
     if (
       !areNotificationsSupported ||
-      !("serviceWorker" in navigator) ||
-      !("PushManager" in window)
+      (!isIOSWebView &&
+        (!("serviceWorker" in navigator) || !("PushManager" in window)))
     ) {
       toast.error("Push notifications are not supported on this browser");
       throw new Error("Unsupported browser");
@@ -43,25 +69,51 @@ export function NotificationsControlsComponent({
 
     const permissionGranted = await requestNotificationPermission();
     if (!permissionGranted) {
-      toast.error("Please allow push notifications in your browser settings.");
+      toast.error(
+        `Please allow push notifications in your ${
+          isIOSWebView ? "iOS" : "browser"
+        }settings.
+        }`
+      );
       throw new Error("Permission denied");
     }
 
-    const registration = await waitForServiceWorker();
-    const subscription = await subscribeToPush(registration);
-    const { endpoint, keys } = subscription.toJSON();
-    if (!endpoint || !keys) {
-      toast.error("Push notifications are not supported on this browser.");
-      throw new Error("Unsupported browser");
+    if (isIOSWebView) {
+      const apnsToken = await callNative<string | "pending">(
+        "registerForNotifications"
+      );
+
+      if (apnsToken === "pending") {
+        toast.error("Please try again later.");
+        throw new Error("APNS token not available");
+      }
+
+      const result = await callNative<IOSActionBinaryResult>("activateCron");
+      if (result === "error") {
+        toast.error("Failed to enable notifications. Try again later.");
+        throw new Error("Failed to activate cron");
+      }
+      await subscribeToNotificationsMutation.mutateAsync({
+        apnsDeviceToken: apnsToken,
+      });
+    } else {
+      const registration = await waitForServiceWorker();
+
+      const subscription = await getWebPushSubscription(registration);
+      const { endpoint, keys } = subscription.toJSON();
+      if (!endpoint || !keys) {
+        toast.error("Push notifications are not supported on this browser.");
+        throw new Error("Unsupported browser");
+      }
+      await subscribeToNotificationsMutation.mutateAsync({
+        endpointUrl: endpoint,
+        publicKey: keys.p256dh!,
+        authKey: keys.auth!,
+      });
     }
-    await subscribeToNotificationsMutation.mutateAsync({
-      endpointUrl: endpoint,
-      publicKey: keys.p256dh!,
-      authKey: keys.auth!,
-    });
   };
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const shouldShowHelpDrawer = isIOS && !isPWA;
+
   return (
     <>
       <div className="flex flex-col gap-2">
@@ -70,17 +122,40 @@ export function NotificationsControlsComponent({
           disabled={!areNotificationsSupported || notificationsPermissionDenied}
           checked={checked}
           onChange={async (newValue) => {
-            if (newValue === true && shouldShowHelpDrawer) {
-              setDrawerOpen(true);
+            if (notificationsPermissionDenied) {
               return;
             }
+            if (!areNotificationsSupported) {
+              if (isIOS && !isIOSWebView) {
+                setDrawerOpen(true);
+              }
+              return;
+            }
+
             setChecked(newValue);
             updateUserSettingState("notificationsEnabled", newValue);
             try {
               if (newValue) {
                 await initPush();
               } else {
-                await unsubscribeFromNotificationsMutation.mutateAsync();
+                const promises = [];
+                promises.push(
+                  unsubscribeFromNotificationsMutation.mutateAsync()
+                );
+                if (isIOSWebView) {
+                  promises.push(
+                    new Promise(async (resolve, reject) => {
+                      try {
+                        await callNative("unregisterFromNotifications");
+                        await callNative("deactivateCron");
+                        resolve(true);
+                      } catch (e) {
+                        reject(e);
+                      }
+                    })
+                  );
+                }
+                await Promise.all(promises);
               }
             } catch (e) {
               console.error(e);
@@ -119,14 +194,9 @@ const waitForServiceWorker = async () => {
   await navigator.serviceWorker.ready;
   return registration;
 };
-const requestNotificationPermission = async () => {
-  if (Notification.permission === "granted") {
-    return true;
-  }
-  const permission = await Notification.requestPermission();
-  return permission === "granted";
-};
-const subscribeToPush = async (registration: ServiceWorkerRegistration) => {
+const getWebPushSubscription = async (
+  registration: ServiceWorkerRegistration
+) => {
   let subscription = await registration.pushManager.getSubscription();
 
   if (!subscription) {

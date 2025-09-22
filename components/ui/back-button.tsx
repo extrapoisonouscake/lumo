@@ -18,7 +18,7 @@ export function BackButton({ className }: { className?: string }) {
         return false;
       }}
       className={cn(
-        "flex items-center gap-1.5 w-fit text-sm hover:opacity-70 transition-opacity",
+        "flex items-center gap-1.5 w-fit text-sm hover:opacity-70 transition-[opacity,scale] active:scale-95",
         className
       )}
     >

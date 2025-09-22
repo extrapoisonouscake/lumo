@@ -1,5 +1,5 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { InferSelectModel, relations } from "drizzle-orm";
+import { InferSelectModel, relations, sql } from "drizzle-orm";
 import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
@@ -64,13 +64,27 @@ export const notifications_subscriptions = table(
       .text("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    endpointUrl: t.text("endpoint_url").unique().notNull(),
+
+    // Web Push fields
+    endpointUrl: t.text("endpoint_url").unique(), // optional for APNs
     deviceId: t.text("device_id").unique().notNull(),
-    publicKey: t.text("public_key").notNull(),
-    authKey: t.text("auth_key").notNull(),
+    publicKey: t.text("public_key"),
+    authKey: t.text("auth_key"),
+
+    // iOS APNs field
+    apnsDeviceToken: t.text("apns_device_token").unique(),
+
     createdAt: t.timestamp("created_at").defaultNow().notNull(),
     lastSeenAt: t.timestamp("last_seen_at").defaultNow().notNull(),
-  }
+  },
+  () => ({
+    // SQL CHECK constraint
+    validSubscription: sql`CHECK (
+      (apns_device_token IS NOT NULL)
+      OR
+      (endpoint_url IS NOT NULL AND public_key IS NOT NULL AND auth_key IS NOT NULL)
+    )`,
+  })
 );
 export const notifications_subscriptionsRelations = relations(
   notifications_subscriptions,

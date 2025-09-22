@@ -42,7 +42,7 @@ export function LoginPageContent() {
           hideDialog={() => setRegistrationResult(null)}
         />
       )}
-      <div className="flex flex-col items-center justify-center w-full max-w-[500px] mt-[clamp(2rem,10vh,5rem)] mx-auto gap-5">
+      <div className="flex flex-col items-center justify-center w-full max-w-[500px] h-[calc(100%-56px)] min-h-[500px] mx-auto gap-5">
         <div className="flex flex-col items-center gap-6 w-full">
           <div className="flex flex-col gap-2 items-center">
             <div className="flex items-center">

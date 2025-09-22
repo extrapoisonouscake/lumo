@@ -680,6 +680,7 @@ function AddWidgetButton({
       onClick={onClick}
       className="flex items-center pl-0 h-fit gap-0"
     >
+      {WIDGET_NAMES[type]}{" "}
       <div
         className="pl-3 pr-2 py-2 cursor-grab"
         {...attributes}
@@ -687,7 +688,6 @@ function AddWidgetButton({
       >
         <GripIcon className="size-4 text-muted-foreground" />
       </div>
-      {WIDGET_NAMES[type]}
     </Button>
   );
 }

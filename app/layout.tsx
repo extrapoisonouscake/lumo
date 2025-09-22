@@ -78,7 +78,7 @@ export default async function RootLayout({
         </head>
         <body className={GeistSans.className}>
           <div
-            className="flex justify-center min-h-full"
+            className="flex justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
             vaul-drawer-wrapper="true"
           >
             <Providers>

@@ -50,11 +50,11 @@ function Item({
   return (
     <li
       key={href}
-      className="py-3 first:pt-0 last:pb-0 border-b last:border-b-0"
+      className="py-3 first:pt-0 last:pb-0 border-b last:border-b-0 group"
     >
       <Link
         href={href}
-        className="flex justify-between items-center gap-4 group"
+        className="flex justify-between items-center gap-4 group group-active:scale-[98%] transition-transform"
       >
         <div className="flex items-center gap-2">
           {Icon && <Icon className="size-4" />}

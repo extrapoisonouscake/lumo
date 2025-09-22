@@ -4,7 +4,6 @@ import {
   notifications_settings,
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
-  notificationSubscriptionSchema,
 } from "@/db/schema";
 
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
@@ -23,6 +22,7 @@ import { authenticatedProcedure } from "@/lib/trpc/procedures";
 import { PartialUserSettings } from "@/types/core";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
+import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { z } from "zod";
 import { runNotificationUnsubscriptionDBCalls } from "./helpers";
 import { updateUserSettingSchema } from "./public";
@@ -31,14 +31,20 @@ const settingsCookieOptions = {
   maxAge: COOKIE_MAX_AGE,
   httpOnly: false,
 };
+const setSettingsCache = (
+  store: ReadonlyRequestCookies,
+  data: PartialUserSettings
+) => {
+  store.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(data), {
+    ...cookieDefaultOptions,
+    httpOnly: false,
+  });
+};
 export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
     const results = await getUserSettings(ctx);
     const cookieStore = ctx.cookieStore;
-    cookieStore.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(results), {
-      ...cookieDefaultOptions,
-      httpOnly: false,
-    });
+    setSettingsCache(cookieStore, results);
     return results;
   }),
 
@@ -52,6 +58,14 @@ export const settingsRouter = router({
             [key]: value,
           })
           .where(eq(user_settings.userId, ctx.studentHashedId));
+        const currentCache = cookieStore.get(
+          USER_SETTINGS_COOKIE_PREFIX
+        )?.value;
+        if (currentCache) {
+          const parsedCache = JSON.parse(currentCache);
+          parsedCache[key] = value;
+          setSettingsCache(cookieStore, parsedCache);
+        }
       }
     ),
   saveWidgetsConfiguration: authenticatedProcedure
@@ -77,33 +91,36 @@ export const settingsRouter = router({
     }),
   subscribeToNotifications: authenticatedProcedure
     .input(
-      notificationSubscriptionSchema.pick({
-        endpointUrl: true,
-        publicKey: true,
-        authKey: true,
-      })
+      z.union([
+        z.object({
+          endpointUrl: z.string(),
+          publicKey: z.string(),
+          authKey: z.string(),
+        }),
+        z.object({
+          apnsDeviceToken: z.string(),
+        }),
+      ])
     )
-    .mutation(
-      async ({
-        ctx: { cookieStore, studentHashedId },
-        input: { endpointUrl, publicKey, authKey },
-      }) => {
-        const deviceId = await sha256(endpointUrl);
 
-        await db
-          .insert(notifications_subscriptions)
-          .values({
-            userId: studentHashedId,
-            endpointUrl,
-            deviceId,
-            publicKey,
-            authKey,
-          })
-          .onConflictDoNothing();
+    .mutation(async ({ ctx: { cookieStore, studentHashedId }, input }) => {
+      let targetValue =
+        "endpointUrl" in input ? input.endpointUrl : input.apnsDeviceToken;
 
-        cookieStore.set(DEVICE_ID_COOKIE_NAME, deviceId, settingsCookieOptions);
-      }
-    ),
+      const deviceId = await sha256(targetValue);
+
+      cookieStore.set(DEVICE_ID_COOKIE_NAME, deviceId, settingsCookieOptions);
+
+      await db
+        .insert(notifications_subscriptions)
+        .values({
+          userId: studentHashedId,
+
+          deviceId,
+          ...input,
+        })
+        .onConflictDoNothing();
+    }),
   unsubscribeFromNotifications: authenticatedProcedure.mutation(
     async ({ ctx: { studentHashedId, cookieStore } }) => {
       const deviceId = cookieStore.get(DEVICE_ID_COOKIE_NAME)?.value;
@@ -158,6 +175,7 @@ export const getUserSettings = async (ctx: TRPCContext) => {
     Awaited<ReturnType<typeof getGenericUserSettings>>,
     NotificationsSubscriptionSelectModel | undefined
   ];
+
   return {
     ...genericSettings,
     notificationsEnabled: !!notificationsSubscription,

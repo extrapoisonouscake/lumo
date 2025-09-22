@@ -3,7 +3,10 @@ import {
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
 } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { apnProvider } from "@/instances/apn";
+import apn from "@parse/node-apn";
+import { waitUntil } from "@trigger.dev/sdk";
+import { eq } from "drizzle-orm";
 import webpush from "web-push";
 const { NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY } = process.env;
 if (!NEXT_PUBLIC_VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
@@ -16,7 +19,7 @@ webpush.setVapidDetails(
 );
 export type NotificationData = {
   title: string;
-  body?: string;
+  body: string;
   navigate: string;
 };
 export type DeclarativeWebPushPayload = {
@@ -31,9 +34,15 @@ export type DeclarativeWebPushPayload = {
     app_badge?: string;
   };
 };
-export const sendNotification = async (
+const deleteSubscription = async (subscriptionId: string) => {
+  await db
+    .delete(notifications_subscriptions)
+    .where(eq(notifications_subscriptions.id, subscriptionId));
+};
+export const sendWebPushNotification = async (
   subscription: webpush.PushSubscription,
-  data: NotificationData
+  data: NotificationData,
+  subscriptionId: string
 ) => {
   const payload = {
     web_push: 8030,
@@ -43,7 +52,37 @@ export const sendNotification = async (
       navigate: data.navigate,
     },
   };
-  await webpush.sendNotification(subscription, JSON.stringify(payload));
+  try {
+    await webpush.sendNotification(subscription, JSON.stringify(payload));
+  } catch (e) {
+    waitUntil(deleteSubscription(subscriptionId));
+  }
+};
+export const sendApplePushNotification = async (
+  deviceToken: string,
+  data: NotificationData | { contentAvailable: true },
+  subscriptionId: string
+) => {
+  const notification = new apn.Notification();
+
+  if ("contentAvailable" in data) {
+    notification.contentAvailable = true;
+    notification.pushType = "background";
+  } else {
+    notification.alert = {
+      title: data.title,
+      body: data.body,
+    };
+    notification.pushType = "alert";
+    notification.payload.url = data.navigate;
+  }
+  notification.topic = process.env.IOS_APP_BUNDLE_ID!;
+
+  const result = await apnProvider.send(notification, deviceToken);
+
+  if (result.failed.length > 0) {
+    waitUntil(deleteSubscription(subscriptionId));
+  }
 };
 export const broadcastNotification = async (
   userIdOrSubscriptions: string | NotificationsSubscriptionSelectModel[],
@@ -55,33 +94,35 @@ export const broadcastNotification = async (
           where: eq(notifications_subscriptions.userId, userIdOrSubscriptions),
         })
       : userIdOrSubscriptions;
-  let erroredSubscriptionsIds: string[] = [];
+
   await Promise.all(
     subscriptions.map(async (subscription) => {
-      const preparedSubscription =
-        convertSubscriptionModelToWebPushSubscription(subscription);
-      try {
-        await sendNotification(preparedSubscription, data);
-      } catch (error) {
-        console.error(error);
-        erroredSubscriptionsIds.push(subscription.id);
+      if (subscription.apnsDeviceToken) {
+        await sendApplePushNotification(
+          subscription.apnsDeviceToken,
+          data,
+          subscription.id
+        );
+      } else {
+        const preparedSubscription =
+          convertWebPushSubscriptionModelToBrowserEquivalent(subscription);
+        await sendWebPushNotification(
+          preparedSubscription,
+          data,
+          subscription.id
+        );
       }
     })
   );
-  if (erroredSubscriptionsIds.length > 0) {
-    await db
-      .delete(notifications_subscriptions)
-      .where(inArray(notifications_subscriptions.id, erroredSubscriptionsIds));
-  }
 };
-export function convertSubscriptionModelToWebPushSubscription(
+export function convertWebPushSubscriptionModelToBrowserEquivalent(
   subscription: NotificationsSubscriptionSelectModel
 ): webpush.PushSubscription {
   return {
-    endpoint: subscription.endpointUrl,
+    endpoint: subscription.endpointUrl!,
     keys: {
-      auth: subscription.authKey,
-      p256dh: subscription.publicKey,
+      auth: subscription.authKey!,
+      p256dh: subscription.publicKey!,
     },
   };
 }

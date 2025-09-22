@@ -53,7 +53,7 @@ export class MyEdCookieStore {
     return this.store.has(getFullCookieName(name));
   };
   set: PlainCookieStore["set"] = (...props) => {
-    if (typeof props[0] === "object") {
+    if (typeof props[0] === "object" && props[0] !== null) {
       const options = props[0];
 
       props[0] = {

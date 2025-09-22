@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { unauthenticatedPathnames } from "./constants/website";
+import { publicPathnames, unauthenticatedPathnames } from "./constants/website";
 import { serverAuthChecks } from "./helpers/server-auth-checks";
 import { deleteSession } from "./lib/trpc/routes/myed/auth/helpers";
 import {
@@ -41,12 +41,16 @@ export default async function middleware(request: NextRequest) {
   const isOnUnauthenticatedPage = unauthenticatedPathnames.some((path) =>
     pathname.startsWith(path)
   );
+  const isOnPublicPage = publicPathnames.includes(pathname);
+  if (isOnPublicPage) {
+    return response;
+  }
   if (isAllowedGeneralAccess) {
     if (isOnUnauthenticatedPage) {
       return Response.redirect(new URL("/", request.url));
     }
   } else {
-    if (!isOnUnauthenticatedPage && pathname !== "/maintenance") {
+    if (!isOnUnauthenticatedPage && !publicPathnames.includes(pathname)) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
   }

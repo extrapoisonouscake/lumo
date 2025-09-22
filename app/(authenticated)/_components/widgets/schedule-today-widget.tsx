@@ -270,11 +270,11 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
   );
   if (timeToNextSubject === null) return null;
   const countdown = formatCountdown(timeToNextSubject);
-  const isSoon = timeToNextSubject >= 1000 * 60 * 15;
+  const isSoon = timeToNextSubject < 1000 * 60 * 15;
   return (
     <div className="flex flex-col flex-1 justify-between gap-3">
       <div className="flex gap-2.5 items-center">
-        <div className="flex justify-center items-center rounded-full border size-11">
+        <div className="flex justify-center items-center rounded-full border size-11 min-w-11">
           <AppleEmoji
             value="⏰"
             textClassName="text-2xl"
