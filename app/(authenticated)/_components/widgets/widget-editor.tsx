@@ -678,11 +678,11 @@ function AddWidgetButton({
       variant="outline"
       size="sm"
       onClick={onClick}
-      className="flex items-center pl-0 h-fit gap-0"
+      className="flex items-center pr-0 h-fit gap-0"
     >
       {WIDGET_NAMES[type]}{" "}
       <div
-        className="pl-3 pr-2 py-2 cursor-grab"
+        className="pr-3 pl-2 py-2 cursor-grab"
         {...attributes}
         {...listeners}
       >

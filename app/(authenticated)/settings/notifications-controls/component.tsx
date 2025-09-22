@@ -10,7 +10,7 @@ import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
 
 //assuming notifications are supported if iOS and not in PWA
 const areNotificationsSupported = "Notification" in window || isIOSWebView;
-
+const areNotificationsImplicitlySupported = isIOS || areNotificationsSupported;
 export function NotificationsControlsComponent({
   initialValue,
 }: {
@@ -119,13 +119,16 @@ export function NotificationsControlsComponent({
       <div className="flex flex-col gap-2">
         <AsyncSwitchField
           label="Receive notifications"
-          disabled={!areNotificationsSupported || notificationsPermissionDenied}
+          disabled={
+            !areNotificationsImplicitlySupported ||
+            notificationsPermissionDenied
+          }
           checked={checked}
           onChange={async (newValue) => {
             if (notificationsPermissionDenied) {
               return;
             }
-            if (!areNotificationsSupported) {
+            if (!areNotificationsImplicitlySupported) {
               if (isIOS && !isIOSWebView) {
                 setDrawerOpen(true);
               }
@@ -172,9 +175,9 @@ export function NotificationsControlsComponent({
             grant it in the browser settings.
           </p>
         )}
-        {!areNotificationsSupported && (
+        {!areNotificationsImplicitlySupported && (
           <p className="text-sm text-muted-foreground">
-            Notifications are not supported on this browser.
+            Notifications are not supported in this browser.
           </p>
         )}
       </div>

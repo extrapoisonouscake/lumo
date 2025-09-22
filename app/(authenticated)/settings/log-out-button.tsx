@@ -14,7 +14,7 @@ export function LogOutButton() {
   return (
     <Button
       disabled={logOutMutation.isPending}
-      variant="outline"
+      variant="secondary"
       onClick={() => logOutMutation.mutateAsync()}
       rightIcon={<LogOutIcon />}
       shouldShowChildrenOnLoading

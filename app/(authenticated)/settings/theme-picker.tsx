@@ -71,7 +71,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
   return (
     <div className="flex flex-col gap-2">
       <Label className="text-sm font-normal">Theme colour</Label>
-      <Card className="p-3 overflow-x-auto w-full max-w-full">
+      <Card className="p-3 overflow-x-auto w-fit max-w-full">
         <div className="flex flex-row gap-2">
           {AVAILABLE_THEMES.map((color) => (
             <div
