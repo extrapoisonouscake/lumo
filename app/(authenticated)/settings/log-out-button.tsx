@@ -9,12 +9,12 @@ export function LogOutButton() {
   const router = useRouter();
 
   const logOutMutation = useLogOut(router.push);
-  const isMobile = useIsMobile();
-  if (!isMobile) return null;
+  
   return (
     <Button
       disabled={logOutMutation.isPending}
-      variant="secondary"
+      variant="outline"
+className="hidden sm:flex"
       onClick={() => logOutMutation.mutateAsync()}
       rightIcon={<LogOutIcon />}
       shouldShowChildrenOnLoading
