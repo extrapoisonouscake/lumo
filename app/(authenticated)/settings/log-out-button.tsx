@@ -14,7 +14,7 @@ export function LogOutButton() {
     <Button
       disabled={logOutMutation.isPending}
       variant="outline"
-className="hidden sm:flex"
+className="sm:hidden"
       onClick={() => logOutMutation.mutateAsync()}
       rightIcon={<LogOutIcon />}
       shouldShowChildrenOnLoading
