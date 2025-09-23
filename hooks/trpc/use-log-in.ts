@@ -9,7 +9,7 @@ export function useLogIn() {
     ...options,
     onSuccess: (...args) => {
       options.onSuccess?.(...args);
-      alert("log in success");
+
       if (isIOSWebView) {
         callNative("saveAuthData");
       }
