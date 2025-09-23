@@ -81,6 +81,7 @@ export const sendApplePushNotification = async (
   const result = await apnProvider.send(notification, deviceToken);
 
   if (result.failed.length > 0) {
+    console.log("failed apple", result.failed, subscriptionId);
     waitUntil(deleteSubscription(subscriptionId));
   }
 };

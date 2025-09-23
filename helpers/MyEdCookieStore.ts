@@ -30,7 +30,10 @@ export class MyEdCookieStore {
   }
 
   static async create(plainStore?: PlainCookieStore): Promise<MyEdCookieStore> {
-    const store = plainStore || (await cookies());
+    const store =
+      plainStore && !(plainStore instanceof MyEdCookieStore)
+        ? plainStore
+        : await cookies();
     return new MyEdCookieStore(store);
   }
 

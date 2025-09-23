@@ -24,8 +24,8 @@ import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { scheduleVisualizableErrors } from "../../schedule/[[...slug]]/loadable-section";
+import { addBreaksToSchedule } from "../../schedule/[[...slug]]/loadable-section/helpers";
 import {
-  addBreaksToSchedule,
   mockScheduleSubjects,
   ScheduleBreak,
 } from "../../schedule/[[...slug]]/loadable-section/table";

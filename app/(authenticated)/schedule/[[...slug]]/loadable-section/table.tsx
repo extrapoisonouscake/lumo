@@ -24,7 +24,6 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
-import { prepareTableDataForSorting } from "@/helpers/prepareTableDataForSorting";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
@@ -36,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "nextjs-toploader/app";
 import { useMemo } from "react";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
+import { addBreaksToSchedule } from "./helpers";
 import {
   ExtendedScheduleSubject,
   ScheduleBreakRowType,
@@ -44,7 +44,7 @@ import {
 } from "./types";
 import { useTTNextSubject } from "./use-tt-next-subject";
 
-export const ScheduleLoadableSectionreakRowVisualData: Record<
+export const scheduleCustomRowVisualData: Record<
   ScheduleBreakRowType,
   { emoji: string; label: string }
 > = {
@@ -145,49 +145,6 @@ export const mockScheduleSubjects = (length: number) => {
   return rows;
 };
 const getSubjectPageURLWithDefinedYear = getSubjectPageURL("current");
-export const addBreaksToSchedule = (data: ScheduleSubject[]): ScheduleRow[] => {
-  const preparedData = prepareTableDataForSorting(data);
-  const filledIntervals: ScheduleRow[] = [];
-  let wasLunchFound = false;
-  for (let i = 0; i < preparedData.length; i++) {
-    const currentElement = preparedData[i]!;
-    filledIntervals.push({ type: "subject", ...currentElement });
-
-    if (i < preparedData.length - 1) {
-      const currentEnd = currentElement.endsAt;
-      const nextStart = preparedData[i + 1]!.startsAt;
-
-      if (currentEnd < nextStart) {
-        let type: ScheduleBreakRowType;
-        const minutesDiff = timezonedDayJS(nextStart).diff(
-          currentEnd,
-          "minutes"
-        );
-        if (minutesDiff >= 10) {
-          if (minutesDiff >= 20) {
-            if (wasLunchFound) {
-              type = "long-break";
-            } else {
-              type = "lunch";
-              wasLunchFound = true;
-            }
-          } else {
-            type = "long-break";
-          }
-        } else {
-          type = "short-break";
-        }
-
-        filledIntervals.push({
-          type,
-          startsAt: currentEnd,
-          endsAt: nextStart,
-        });
-      }
-    }
-  }
-  return filledIntervals;
-};
 
 export const isRowScheduleSubject = (
   row: ScheduleRow
@@ -348,7 +305,7 @@ export function ScheduleBreak({
   type: ScheduleBreakRowType;
   className?: string;
 }) {
-  const visualData = ScheduleLoadableSectionreakRowVisualData[type];
+  const visualData = scheduleCustomRowVisualData[type];
   return (
     <div className={cn("flex items-center gap-[6px]", className)}>
       {visualData.label}{" "}

@@ -34,6 +34,7 @@ import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { FlatRouteStep } from "@/parsing/myed/routes";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
+import dayjs from "dayjs";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { after } from "next/server";
@@ -106,7 +107,26 @@ export async function performLogin(
     store,
   });
 }
-
+export async function setUpSessionTokens({
+  tokens,
+  store: externalStore,
+}: {
+  tokens: AuthCookies;
+  store: PlainCookieStore;
+}) {
+  const store = await MyEdCookieStore.create(externalStore);
+  store.set(
+    AUTH_COOKIES_NAMES.tokens,
+    convertObjectToCookieString(tokens, false),
+    {
+      maxAge: SESSION_TTL_IN_SECONDS,
+    }
+  );
+  store.set(
+    AUTH_COOKIES_NAMES.tokensExpireAt,
+    dayjs().add(SESSION_TTL_IN_SECONDS, "second").toISOString()
+  );
+}
 export async function setUpLogin({
   tokens,
   studentId,
@@ -120,10 +140,8 @@ export async function setUpLogin({
 }) {
   const store = externalStore ?? (await cookies());
   const cookieStore = await MyEdCookieStore.create(store);
-  const tokensString = convertObjectToCookieString(tokens, false);
-  cookieStore.set(AUTH_COOKIES_NAMES.tokens, tokensString, {
-    maxAge: SESSION_TTL_IN_SECONDS,
-  });
+
+  setUpSessionTokens({ tokens, store });
 
   cookieStore.set(AUTH_COOKIES_NAMES.studentId, studentId);
   if (credentials) {

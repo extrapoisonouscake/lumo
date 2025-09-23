@@ -11,6 +11,7 @@ import {
   getFreshAuthCookies,
   performLogin,
   setUpLogin,
+  setUpSessionTokens,
 } from "./helpers";
 import {
   authCookiesSchema,
@@ -28,6 +29,7 @@ import { CACHE_COOKIE_PREFIX } from "@/constants/core";
 import { users } from "@/db/schema";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
+import dayjs from "dayjs";
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
 import { fetchAuthCookiesAndStudentId } from "./helpers";
@@ -224,16 +226,15 @@ export const authRouter = router({
   sendPasswordResetEmail,
   //* if the name is changed, change in trpc client initialization as well
   ensureValidSession: authenticatedProcedure
-    .input(
-      z
-        .object({
-          shouldForceRefresh: z.boolean().optional(),
-        })
-        .optional()
-    )
+    .input(z.object({ force: z.boolean().optional() }))
     .mutation(async ({ ctx, input }) => {
-      if (ctx.tokens && !input?.shouldForceRefresh) {
-        return; // Session is valid, no need to refresh
+      if (ctx.tokens && !input.force) {
+        const expiresAt = ctx.authCookieStore.get(
+          AUTH_COOKIES_NAMES.tokensExpireAt
+        )?.value;
+        if (expiresAt && dayjs(expiresAt).diff(new Date(), "minute") > 5) {
+          return;
+        }
       }
       try {
         const { tokens } = await fetchAuthCookiesAndStudentId(
@@ -241,20 +242,16 @@ export const authRouter = router({
           ctx.credentials.password
         );
 
-        ctx.authCookieStore.set(
-          AUTH_COOKIES_NAMES.tokens,
-          convertObjectToCookieString(tokens, false),
-          {
-            maxAge: 60 * 60,
-          }
-        );
+        setUpSessionTokens({ tokens, store: ctx.authCookieStore });
 
-        after(async () => {
-          await db
-            .update(users)
-            .set({ lastLoggedInAt: new Date() })
-            .where(eq(users.id, ctx.studentHashedId));
-        });
+        if (!input.force) {
+          after(async () => {
+            await db
+              .update(users)
+              .set({ lastLoggedInAt: new Date() })
+              .where(eq(users.id, ctx.studentHashedId));
+          });
+        }
       } catch {
         await deleteSession();
         throw new TRPCError({ code: "UNAUTHORIZED" });

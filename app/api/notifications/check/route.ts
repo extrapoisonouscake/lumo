@@ -22,7 +22,7 @@ import { after } from "next/server";
 export async function POST() {
   const context = await createTRPCContext();
   const caller = createCaller(context);
-  await caller.myed.auth.ensureValidSession({ shouldForceRefresh: true });
+  await caller.myed.auth.ensureValidSession();
   //cookies are updated
   const newContext = await createTRPCContext();
   after(async () => {

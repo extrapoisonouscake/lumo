@@ -12,10 +12,9 @@ import {
   LoginErrors,
   LoginSchema,
 } from "@/lib/trpc/routes/myed/auth/public";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { trpc } from "@/app/trpc";
+import { useLogIn } from "@/hooks/trpc/use-log-in";
 import { isTRPCError } from "@/lib/trpc/helpers";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(
@@ -58,7 +57,7 @@ export function LoginForm({
         ? getFullErrorMessage(initialErrorCode, openResetPasswordModal)
         : null
     );
-  const loginMutation = useMutation(trpc.myed.auth.login.mutationOptions());
+  const loginMutation = useLogIn();
   const router = useRouter();
 
   async function onSubmit(data: LoginSchema) {

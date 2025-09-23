@@ -7,5 +7,6 @@ export const AUTH_COOKIES_NAMES = {
   credentials: "credentials",
   studentId: "studentId",
   tokens: "tokens",
+  tokensExpireAt: "tokensExpireAt",
 } as const;
 export const IS_LOGGED_IN_COOKIE_NAME = "isLoggedIn";

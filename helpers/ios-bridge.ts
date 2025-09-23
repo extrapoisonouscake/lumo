@@ -9,6 +9,7 @@ type IOSAction =
   | "getAppTheme"
   | "setAppTheme"
   | "storeEncryptedCookies"
+  | "saveAuthData"
   | "logoutWipe"
   | "activateCron"
   | "deactivateCron"
