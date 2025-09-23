@@ -77,7 +77,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
             <div
               key={color}
               className={cn(
-                "size-8 min-w-8 rounded-full cursor-pointer transition-transform flex justify-center items-center hover:scale-110",
+                "size-9 min-w-9 rounded-full cursor-pointer transition-transform flex justify-center items-center hover:scale-110",
                 {
                   "ring-2 ring-white ring-offset-2 scale-110 shadow-md":
                     currentTheme === color,

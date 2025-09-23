@@ -33,9 +33,14 @@ export function callNative<T>(action: IOSAction, payload: any = {}) {
 }
 
 // Called by iOS
-window.__nativeCallback = function (callbackName: string, result: any) {
+function nativeCallback(callbackName: string, result: any) {
   if (callbacks[callbackName]) {
     callbacks[callbackName](result);
     delete callbacks[callbackName];
   }
-};
+}
+
+// Defer assignment until window is available
+if (typeof window !== "undefined") {
+  window.__nativeCallback = nativeCallback;
+}
