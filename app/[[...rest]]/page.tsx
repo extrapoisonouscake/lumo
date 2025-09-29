@@ -2,7 +2,7 @@
 import { Logo } from "@/components/misc/logo";
 import dynamic from "next/dynamic";
 
-export const Root = dynamic(() => import("../../views/root"), {
+const Root = dynamic(() => import("../../views/root"), {
   ssr: false,
   loading: () => <FullscreenLoader />,
 });
