@@ -19,10 +19,11 @@ import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { ChevronRight, LogOutIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 import { Spinner } from "../ui/button";
 import {
   Collapsible,
@@ -80,7 +81,7 @@ function PagesMenu() {
   const pages = Object.entries(websitePagesWithStaticPaths).filter(
     ([_, page]) =>
       !page.isHiddenInSidebar &&
-      (isMobile ? page.showOnMobile : page.showOnDesktop ?? true)
+      (isMobile ? page.showOnMobile : (page.showOnDesktop ?? true))
   );
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
@@ -119,7 +120,7 @@ function PagesMenu() {
                       <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                     </div>
                   ) : (
-                    <Link prefetch href={url} className="py-2 gap-2">
+                    <Link to={url} className="py-2 gap-2" viewTransition>
                       {mainItemContent}
                     </Link>
                   )}
@@ -141,7 +142,7 @@ function PagesMenu() {
                             }
                           >
                             <Link
-                              href={fullUrl}
+                              to={fullUrl}
                               className="whitespace-nowrap flex items-center gap-2"
                             >
                               {item.title}
@@ -161,8 +162,8 @@ function PagesMenu() {
   );
 }
 function LogOutButton() {
-  const router = useRouter();
-  const logOutMutation = useLogOut(router.push);
+  const navigate = useNavigate();
+  const logOutMutation = useLogOut(navigate);
   return (
     <SidebarMenuButton
       shouldCloseSidebarOnMobile={false}

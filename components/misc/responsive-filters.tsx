@@ -1,7 +1,7 @@
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Table } from "@tanstack/table-core";
-import { Settings2Icon } from "lucide-react";
+import { CheckIcon, Settings2Icon } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import {
@@ -65,7 +65,9 @@ export function ResponsiveFilters<T>({
 
           <div className="flex flex-col gap-2">
             <ResponsiveDialogClose asChild>
-              <Button className="w-full">Apply</Button>
+              <Button className="w-full" leftIcon={<CheckIcon />}>
+                Apply
+              </Button>
             </ResponsiveDialogClose>
             <ResponsiveDialogClose asChild>
               <Button

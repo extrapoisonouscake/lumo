@@ -1,5 +1,5 @@
-import { trpc } from "@/app/trpc";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import { trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 
 export function useThemeColor(initialThemeColor?: string) {

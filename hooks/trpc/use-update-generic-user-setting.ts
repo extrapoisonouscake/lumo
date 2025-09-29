@@ -1,4 +1,4 @@
-import { trpc } from "@/app/trpc";
+import { trpc } from "@/views/trpc";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 

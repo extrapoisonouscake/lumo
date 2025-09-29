@@ -1,11 +1,5 @@
-import { trpc } from "@/app/trpc";
-import { getSubjectsCacheCookiePrefix } from "@/constants/core";
-import {
-  getCachedClientResponse,
-  getReactQueryMockSuccessResponse,
-} from "@/helpers/get-cached-client-response";
-import { RouterOutput } from "@/lib/trpc/types";
-import { useQuery } from "@tanstack/react-query";
+import { trpc } from "@/views/trpc";
+import { useCachedQuery } from "../use-cached-query";
 export function useSubjectsData(
   {
     isPreviousYear,
@@ -15,19 +9,16 @@ export function useSubjectsData(
     termId?: string;
   } = { isPreviousYear: false, termId: undefined }
 ) {
-  const query = useQuery(
-    trpc.myed.subjects.getSubjects.queryOptions({
-      isPreviousYear,
-      termId,
-    })
+  const params = {
+    isPreviousYear,
+    termId,
+  };
+  const query = useCachedQuery(
+    trpc.myed.subjects.getSubjects.queryOptions(params),
+    {
+      params,
+    }
   );
-
-  const cachedResponse = getCachedClientResponse<
-    RouterOutput["myed"]["subjects"]["getSubjects"]
-  >(getSubjectsCacheCookiePrefix({ isPreviousYear, termId }));
-
-  if (query.isPending && cachedResponse)
-    return getReactQueryMockSuccessResponse(query, cachedResponse);
 
   return query;
 }

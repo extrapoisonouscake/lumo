@@ -25,7 +25,6 @@ import {
 } from "./public";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
-import { CACHE_COOKIE_PREFIX } from "@/constants/core";
 import { users } from "@/db/schema";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
@@ -217,10 +216,6 @@ export const authRouter = router({
 
   logOut: authenticatedProcedure.mutation(async ({ ctx: { cookieStore } }) => {
     await deleteSession();
-    cookieStore
-      .getAll()
-      .filter((cookie) => cookie.name.startsWith(CACHE_COOKIE_PREFIX))
-      .forEach((cookie) => cookieStore.delete(cookie.name));
   }),
 
   sendPasswordResetEmail,

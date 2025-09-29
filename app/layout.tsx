@@ -1,61 +1,27 @@
-import { Toaster } from "@/components/ui/sonner";
-import { GoogleAnalytics } from "@next/third-parties/google";
-
-import { GeistSans } from "geist/font/sans";
-import { Metadata, Viewport } from "next";
-import { ReactNode } from "react";
-import { Providers } from "../components/providers";
-import "./globals.css";
-
+import { IS_LOGGED_IN_COOKIE_NAME } from "@/constants/auth";
 import {
-  USER_SETTINGS_COOKIE_PREFIX,
   USER_SETTINGS_DEFAULT_VALUES,
+  USER_THEME_COLOR_COOKIE_PREFIX,
 } from "@/constants/core";
-import { WEBSITE_TITLE } from "@/constants/website";
-import { serverAuthChecks } from "@/helpers/server-auth-checks";
+import "@/views/globals.css";
+import { GeistSans } from "geist/font/sans";
 import { cookies } from "next/headers";
-
-export const viewport: Viewport = {
-  maximumScale: 1,
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-  themeColor: [
-    {
-      color: "black",
-      media: "(prefers-color-scheme: dark)",
-    },
-  ],
-};
-export const metadata: Metadata = {
-  manifest: "/manifest.json",
-  title: {
-    default: WEBSITE_TITLE,
-    template: `%s | ${WEBSITE_TITLE}`,
-  },
-  icons: [{ url: "/favicons/icon.svg", type: "image/svg+xml" }],
-  appleWebApp: {
-    capable: true,
-  },
-};
 
 export default async function RootLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   const store = await cookies();
-  const isLoggedIn = serverAuthChecks.isLoggedIn(store);
+  const isLoggedIn = store.get(IS_LOGGED_IN_COOKIE_NAME)?.value === "true";
   let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
   if (isLoggedIn) {
-    const cachedThemeColor = JSON.parse(
-      store.get(`${USER_SETTINGS_COOKIE_PREFIX}`)?.value ?? "{}"
-    ).themeColor;
+    const cachedThemeColor = store.get(USER_THEME_COLOR_COOKIE_PREFIX);
+
     if (cachedThemeColor) {
-      themeColor = cachedThemeColor;
+      themeColor = cachedThemeColor.value;
     }
   }
-
   return (
     <>
       <html lang="en" suppressHydrationWarning>
@@ -70,27 +36,13 @@ export default async function RootLayout({
               `,
             }}
           />
-          <meta
-            name="theme-color"
-            content="white"
-            media="(prefers-color-scheme: light)"
-          />
         </head>
         <body className={GeistSans.className}>
           <div
-            className="flex justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
+            className="flex items-center justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
             vaul-drawer-wrapper="true"
           >
-            <Providers>
-              <Toaster />
-
-              {children}
-            </Providers>
-            {process.env.NODE_ENV === "production" && (
-              <GoogleAnalytics
-                gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}
-              />
-            )}
+            {children}
           </div>
         </body>
       </html>

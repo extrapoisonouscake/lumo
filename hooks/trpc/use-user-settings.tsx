@@ -1,19 +1,13 @@
-import { UserSettingsWithDerivedFields } from "@/app/(authenticated)/settings/types";
-import { trpc } from "@/app/trpc";
-import {
-  USER_SETTINGS_COOKIE_PREFIX,
-  USER_SETTINGS_DEFAULT_VALUES,
-} from "@/constants/core";
-import { getCachedClientResponse } from "@/helpers/get-cached-client-response";
-import { useQuery } from "@tanstack/react-query";
+import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
+import { RouterOutput } from "@/lib/trpc/types";
+import { trpc } from "@/views/trpc";
+import { useCachedQuery } from "../use-cached-query";
 
 export function useUserSettings() {
-  const query = useQuery(trpc.core.settings.getSettings.queryOptions());
+  const query = useCachedQuery(trpc.core.settings.getSettings.queryOptions());
+
   return (
     query.data ??
-    getCachedClientResponse<UserSettingsWithDerivedFields>(
-      USER_SETTINGS_COOKIE_PREFIX,
-      USER_SETTINGS_DEFAULT_VALUES
-    )
+    (USER_SETTINGS_DEFAULT_VALUES as RouterOutput["core"]["settings"]["getSettings"])
   );
 }

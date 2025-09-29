@@ -1,6 +1,6 @@
 import { SubjectGrade } from "@/types/school";
 
-const GRADES_VISUAL_CONFIG: Record<
+export const GRADES_VISUAL_CONFIG: Record<
   string,
   { threshold: number; color: string }
 > = {

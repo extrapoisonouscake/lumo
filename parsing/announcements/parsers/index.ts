@@ -10,8 +10,8 @@ export const dailyAnnouncementsRichTitlesData: Record<
       emoji: "✨",
     },
     {
-      title: "Meetings & Practices",
-      emoji: "🧩",
+      title: "Sports",
+      emoji: "🏆",
     },
     {
       title: "Re-runs",

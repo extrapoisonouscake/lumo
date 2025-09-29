@@ -1,6 +1,6 @@
-import { trpc } from "@/app/trpc";
 import { isIOSWebView } from "@/constants/ui";
 import { callNative } from "@/helpers/ios-bridge";
+import { trpc } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
 
 export function useLogIn() {

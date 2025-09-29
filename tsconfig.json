@@ -29,7 +29,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "trigger.config.ts",
-    "types/custom.d.ts"
+    "types/custom.d.ts",
+    "public/notifications-sw.js"
   ],
   "exclude": ["node_modules"]
 }

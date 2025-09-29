@@ -8,8 +8,8 @@ import {
 
 import { COOKIE_MAX_AGE, shouldSecureCookies } from "@/constants/auth";
 import {
-  USER_SETTINGS_COOKIE_PREFIX,
   USER_SETTINGS_DEFAULT_VALUES,
+  USER_THEME_COLOR_COOKIE_PREFIX,
   WidgetsConfiguration,
 } from "@/constants/core";
 import { db } from "@/db";
@@ -31,11 +31,8 @@ const settingsCookieOptions = {
   maxAge: COOKIE_MAX_AGE,
   httpOnly: false,
 };
-const setSettingsCache = (
-  store: ReadonlyRequestCookies,
-  data: PartialUserSettings
-) => {
-  store.set(USER_SETTINGS_COOKIE_PREFIX, JSON.stringify(data), {
+const setThemeColorCache = (store: ReadonlyRequestCookies, color: string) => {
+  store.set(USER_THEME_COLOR_COOKIE_PREFIX, color, {
     ...cookieDefaultOptions,
     httpOnly: false,
   });
@@ -44,7 +41,7 @@ export const settingsRouter = router({
   getSettings: authenticatedProcedure.query(async ({ ctx }) => {
     const results = await getUserSettings(ctx);
     const cookieStore = ctx.cookieStore;
-    setSettingsCache(cookieStore, results);
+    setThemeColorCache(cookieStore, results.themeColor);
     return results;
   }),
 
@@ -58,14 +55,8 @@ export const settingsRouter = router({
             [key]: value,
           })
           .where(eq(user_settings.userId, ctx.studentHashedId));
-        const currentCache = cookieStore.get(
-          USER_SETTINGS_COOKIE_PREFIX
-        )?.value;
-        if (currentCache) {
-          const parsedCache = JSON.parse(currentCache);
-          parsedCache[key] = value;
-          setSettingsCache(cookieStore, parsedCache);
-        }
+
+        if (key === "themeColor") setThemeColorCache(cookieStore, value);
       }
     ),
   saveWidgetsConfiguration: authenticatedProcedure
@@ -173,7 +164,7 @@ export const getUserSettings = async (ctx: TRPCContext) => {
     promises
   )) as [
     Awaited<ReturnType<typeof getGenericUserSettings>>,
-    NotificationsSubscriptionSelectModel | undefined
+    NotificationsSubscriptionSelectModel | undefined,
   ];
 
   return {

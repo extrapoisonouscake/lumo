@@ -1,6 +1,4 @@
-import { getSubjectsCacheCookiePrefix } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
-import { cookieDefaultOptions } from "@/helpers/MyEdCookieStore";
 
 import { prepareAssignmentForDBStorage } from "@/app/api/notifications/check/route";
 import { SubjectTerm, SubjectYear } from "@/types/school";
@@ -26,15 +24,6 @@ export const subjectsRouter = router({
     )
     .query(async ({ input, ctx: { getMyEd, cookieStore } }) => {
       const response = await getMyEd("subjects", input);
-
-      cookieStore.set(
-        getSubjectsCacheCookiePrefix(input),
-        JSON.stringify(response),
-        {
-          ...cookieDefaultOptions,
-          httpOnly: false,
-        }
-      );
 
       if (response.subjects.main.length === 0) {
         const allTermsResponse = await getMyEd("subjects", {

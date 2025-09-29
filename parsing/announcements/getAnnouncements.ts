@@ -118,6 +118,9 @@ export async function parseAnnouncements(
     transformData({ section, getIsNew: () => undefined });
   logger.log("previousDayDataKey", { previousDayDataKey, previousDayData });
   if (previousDayData) {
+    const allPreviousDayAnnouncements = previousDayData
+      .filter((section) => section.type === "list")
+      .flatMap((section) => section.content.map((entry) => entry.text));
     preparedData = data.map((section, i) => {
       const previousDaySection = previousDayData[i];
       logger.log("section", { section, previousDaySection });
@@ -127,8 +130,8 @@ export async function parseAnnouncements(
       return transformData({
         section,
         getIsNew: (text) =>
-          !previousDaySection.content.some(
-            (previousDayEntry) => previousDayEntry.text === text
+          !allPreviousDayAnnouncements.some(
+            (previousDayText) => previousDayText === text
           ),
       });
     });

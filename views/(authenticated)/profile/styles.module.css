@@ -1,0 +1,23 @@
+@reference "../../../views/globals.css";
+.sectionCards {
+  @apply grid grid-cols-1 gap-4;
+  grid-template-areas:
+    "a"
+    "b"
+    "c";
+  @variant lg {
+    @apply grid-cols-2;
+    grid-template-areas:
+      "a b"
+      "a c";
+  }
+}
+
+.sectionCardsNoParking {
+  grid-template-areas:
+    "a"
+    "b";
+  @variant lg {
+    grid-template-areas: "a b";
+  }
+}

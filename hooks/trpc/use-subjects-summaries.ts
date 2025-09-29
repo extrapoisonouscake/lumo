@@ -1,5 +1,5 @@
-import { trpc } from "@/app/trpc";
 import { Subject, SubjectSummary } from "@/types/school";
+import { trpc } from "@/views/trpc";
 import { useQueries } from "@tanstack/react-query";
 import { SubjectYear } from "../../types/school";
 

@@ -1,20 +1,19 @@
 import { cn } from "@/helpers/cn";
 import { ChevronLeft } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router";
 
 export function BackButton({ className }: { className?: string }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [referrer, setReferrer] = useState<string>();
   useEffect(() => {
     setReferrer(document.referrer);
   }, []);
   return (
     <Link
-      href={referrer ?? "/"}
+      to={referrer ?? "/"}
       onClick={() => {
-        router.back();
+        navigate(-1);
         return false;
       }}
       className={cn(

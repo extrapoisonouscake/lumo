@@ -1,7 +1,7 @@
 import { cn } from "@/helpers/cn";
 import { cva, VariantProps } from "class-variance-authority";
-import NextLink from "next/link";
 import { ComponentProps } from "react";
+import { Link as RouterLink } from "react-router";
 
 const linkVariants = cva(undefined, {
   variants: {
@@ -14,12 +14,12 @@ const linkVariants = cva(undefined, {
     variant: "default",
   },
 });
-export type LinkProps = ComponentProps<typeof NextLink> &
+export type LinkProps = ComponentProps<typeof RouterLink> &
   VariantProps<typeof linkVariants>;
 export const Link = ({ className, variant, ...props }: LinkProps) => {
   return (
     <>
-      <NextLink
+      <RouterLink
         className={cn(linkVariants({ variant }), className)}
         {...props}
       />

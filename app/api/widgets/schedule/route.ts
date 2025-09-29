@@ -1,8 +1,8 @@
-import { addBreaksToSchedule } from "@/app/(authenticated)/schedule/[[...slug]]/loadable-section/helpers";
 import { MYED_DATE_FORMAT } from "@/constants/myed";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { createCaller } from "@/lib/trpc";
 import { createTRPCContext } from "@/lib/trpc/context";
+import { addBreaksToSchedule } from "@/views/(authenticated)/schedule/[[...slug]]/loadable-section/helpers";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

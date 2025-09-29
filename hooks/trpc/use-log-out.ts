@@ -1,10 +1,10 @@
-import { trpcClient } from "@/app/trpc";
 import { isIOSWebView } from "@/constants/ui";
 import { callNative } from "@/helpers/ios-bridge";
+import { trpcClient } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
-import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+import { useNavigate } from "react-router";
 
-export function useLogOut(push: AppRouterInstance["push"]) {
+export function useLogOut(navigate: ReturnType<typeof useNavigate>) {
   return useMutation({
     mutationFn: async () => {
       const promises = [];
@@ -15,7 +15,7 @@ export function useLogOut(push: AppRouterInstance["push"]) {
       await Promise.all(promises);
     },
     onSuccess: () => {
-      push("/login");
+      navigate("/login");
     },
   });
 }

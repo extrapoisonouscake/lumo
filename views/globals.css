@@ -1,0 +1,331 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@source inline("fill-red-500");
+@source inline("fill-green-500");
+@source inline("fill-yellow-400");
+@source inline("fill-orange-500");
+@source inline("fill-red-600");
+@source inline("text-red-500");
+@source inline("text-green-500");
+@source inline("text-yellow-400");
+@source inline("text-orange-500");
+@source inline("text-zinc-200");
+@source inline("text-blue-600");
+@source inline("text-green-600");
+@source inline("text-purple-600");
+@source inline("bg-blue-100");
+@source inline("bg-green-100");
+@source inline("bg-purple-100");
+@source inline("bg-blue-600/20");
+@source inline("bg-green-500/20");
+@source inline("bg-purple-600/20");
+@source inline("bg-orange-500/20");
+@source inline("bg-yellow-400/20");
+@source inline("bg-cyan-600/20");
+@source inline("bg-pink-600/20");
+@source inline("text-green-500");
+@source inline("text-orange-500");
+@source inline("text-yellow-400");
+@source inline("text-cyan-600");
+@source inline("text-pink-600");
+@source inline("fill-red-500");
+@source inline("fill-green-500");
+@source inline("fill-yellow-400");
+@source inline("fill-orange-500");
+@source inline("fill-red-600");
+@source inline("text-red-500");
+@source inline("text-green-500");
+@source inline("text-yellow-400");
+@source inline("text-orange-500");
+@source inline("text-zinc-200");
+@source inline("text-blue-600");
+@source inline("text-green-600");
+@source inline("text-purple-600");
+@source inline("bg-blue-100");
+@source inline("bg-green-100");
+@source inline("bg-purple-100");
+@source inline("bg-blue-600/20");
+@source inline("bg-green-500/20");
+@source inline("bg-purple-600/20");
+@source inline("bg-orange-500/20");
+@source inline("bg-yellow-400/20");
+@source inline("bg-cyan-600/20");
+@source inline("bg-pink-600/20");
+@source inline("text-green-500");
+@source inline("text-orange-500");
+@source inline("text-yellow-400");
+@source inline("text-cyan-600");
+@source inline("text-pink-600");
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  --animate-accordion-down:
+    accordion-down 300ms ease-in-out, accordion-down-padding 300ms ease-in-out;
+  --animate-accordion-up:
+    accordion-up 300ms ease-in-out, accordion-up-padding 300ms ease-in-out;
+  --animate-skeleton-pulse: skeleton-pulse 300ms ease-in-out;
+
+  --animate-shimmer: shimmer 2s infinite;
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes skeleton-pulse {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.5;
+    }
+  }
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-down-padding {
+    from {
+      paddingbottom: 0;
+    }
+    to {
+      paddingbottom: 0.5rem;
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+
+  @keyframes accordion-up-padding {
+    from {
+      paddingbottom: 0.5rem;
+    }
+    to {
+      paddingbottom: 0;
+    }
+  }
+
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border-color));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-sidebar: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+  --color-brand: hsl(var(--brand));
+
+  --rounded-lg: var(--radius);
+  --rounded-md: calc(var(--radius) - 2px);
+  --rounded-xs: calc(var(--radius) - 4px);
+
+  --ease-accordion: cubic-bezier(0.87, 0, 0.13, 1);
+
+  --shadow-table-row-border: 0 -1px 0 #000, 0 1px 0 #000;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@utility root-container {
+  @apply flex-1 p-4 flex flex-col gap-4;
+}
+@utility clickable {
+  @apply cursor-pointer hover:bg-muted/50 transition-[color,background-color,transform,scale] active:scale-[98%];
+}
+
+@layer utilities {
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+  }
+
+  *:not(:focus-visible) {
+    outline: none !important;
+    outline-width: 0 !important;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+  menu,
+  ol,
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+}
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    /* not named border due to a compilation error converting hsl values to a full border style definition*/
+    --border-color: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 10% 3.9%;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --adjusted-safe-area-inset-bottom: calc(env(safe-area-inset-bottom, 0) / 2);
+
+    --mobile-menu-height: calc(
+      4.25rem + var(--adjusted-safe-area-inset-bottom)
+    );
+    @variant sm {
+      --mobile-menu-height: 0;
+    }
+  }
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0, 57.48%, 45.08%;
+    --destructive-foreground: 0 0% 98%;
+    --border-color: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html,
+  body {
+    @apply h-full;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+::view-transition-old(root) {
+  animation: fade-out 0.3s ease-in-out forwards;
+}
+
+::view-transition-new(root) {
+  animation: fade-in 0.3s ease-in-out forwards;
+}

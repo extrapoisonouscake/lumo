@@ -1,5 +1,5 @@
-import { UserSettingsWithDerivedFields } from "@/app/(authenticated)/settings/types";
-import { queryClient, trpc } from "@/app/trpc";
+import { UserSettingsWithDerivedFields } from "@/views/(authenticated)/settings/types";
+import { queryClient, trpc } from "@/views/trpc";
 import set from "lodash/set";
 export function updateUserSettingState(key: string, value: any) {
   const queryKey = trpc.core.settings.getSettings.queryKey();

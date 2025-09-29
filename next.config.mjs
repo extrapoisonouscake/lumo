@@ -3,6 +3,7 @@ export default {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  reactStrictMode: false,
   webpack(config) {
     // Configure SVG imports as React components
     config.module.rules.push({

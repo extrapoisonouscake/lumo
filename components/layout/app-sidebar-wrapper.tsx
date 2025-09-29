@@ -23,20 +23,25 @@ const Inset = ({
 export function AppSidebarWrapper({
   children,
   initialIsExpanded,
+  renderInset,
 }: {
   children: ReactNode;
   initialIsExpanded: boolean;
+  renderInset?: (children: ReactNode) => ReactNode;
 }) {
+  const insetSlot = (
+    <Inset
+      topLoader={<TopLoader />}
+      className="pb-(--mobile-menu-height) sm:pb-0"
+    >
+      {children}
+    </Inset>
+  );
   return (
     <SidebarProvider defaultOpen={initialIsExpanded}>
       <AppSidebar />
 
-      <Inset
-        topLoader={<TopLoader />}
-        className="pb-(--mobile-menu-height) sm:pb-0"
-      >
-        {children}
-      </Inset>
+      {renderInset ? renderInset(insetSlot) : insetSlot}
     </SidebarProvider>
   );
 }

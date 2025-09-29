@@ -1,5 +1,3 @@
-import { getAssignmentURL } from "@/app/(authenticated)/classes/[subjectId]/(assignments)/helpers";
-import { PrioritizedRequestQueue } from "@/app/requests-queue";
 import { db } from "@/db";
 import {
   notifications_subscriptions,
@@ -16,6 +14,8 @@ import {
 } from "@/lib/trpc/routes/core/settings/web-push";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
+import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectId]/(assignments)/helpers";
+import { PrioritizedRequestQueue } from "@/views/requests-queue";
 import { eq, sql } from "drizzle-orm";
 import { after } from "next/server";
 

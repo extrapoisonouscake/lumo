@@ -5,8 +5,8 @@ import {
   WebsitePage,
   websitePagesWithStaticPaths,
 } from "@/constants/website";
-import { useParams, usePathname } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router";
 
 import { cn } from "@/helpers/cn";
 import { BackButton } from "../ui/back-button";
@@ -21,7 +21,7 @@ const PageDataContext = createContext<{
   setPageData: () => {},
 });
 export function PageDataProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const params = useParams();
   const [pageData, setPageData] = useState<WebsitePage | null>(null);
   useEffect(() => {
@@ -86,9 +86,9 @@ export function PageHeading({
   );
 }
 function DefaultLeftContent() {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   return (
-    <div className="flex items-center gap-2.5 h-full">
+    <div className="flex items-center gap-2.5 h-fit">
       <SidebarTrigger className="hidden sm:flex" />
       {!websitePagesWithStaticPaths[pathname] && (
         <BackButton className="h-full" />

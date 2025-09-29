@@ -1,14 +1,17 @@
-import { trpc } from "@/app/trpc";
 import { Subject } from "@/types/school";
+import { trpc } from "@/views/trpc";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 export function useRecentAssignments(subjects?: Subject[]) {
   const subjectsMap = useMemo(() => {
-    return subjects?.reduce((acc, subject) => {
-      acc[subject.id] = subject;
-      return acc;
-    }, {} as Record<string, Subject>);
+    return subjects?.reduce(
+      (acc, subject) => {
+        acc[subject.id] = subject;
+        return acc;
+      },
+      {} as Record<string, Subject>
+    );
   }, [subjects]);
   const query = useQueries({
     queries: subjects

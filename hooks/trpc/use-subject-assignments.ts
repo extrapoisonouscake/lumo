@@ -1,4 +1,4 @@
-import { trpc } from "@/app/trpc";
+import { trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { Subject, SubjectTerm } from "../../types/school";
 export function useSubjectAssignments(props: {

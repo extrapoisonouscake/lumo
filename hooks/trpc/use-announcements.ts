@@ -1,9 +1,9 @@
-import { trpc } from "@/app/trpc";
 import { isKnownSchool } from "@/constants/schools";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-specific/public";
 import { RouterOutput } from "@/lib/trpc/types";
 import { AnnouncementEntry, AnnouncementSection } from "@/types/school";
+import { trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useStudentDetails } from "./use-student-details";
@@ -100,7 +100,7 @@ export function useAnnouncements({
           for (const item of content) {
             const hasOneRelevant = hasRelevantGrade(item.text);
 
-            if (hasOneRelevant) {
+            if (hasOneRelevant && item.isNew) {
               personalItems.push(item);
             } else {
               listItems.push(item);

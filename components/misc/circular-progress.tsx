@@ -6,18 +6,20 @@ export function CircularProgress({
   fillColor,
   size,
   thickness,
+  className,
 }: {
   value: number;
   letter?: string;
   fillColor: string;
   size: "small" | "normal";
   thickness?: number;
+  className?: string;
 }) {
   const circumference = Math.PI * 20;
   const strokeDashoffset = circumference - (value / 100) * circumference;
 
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <svg
         className={cn("size-6 rotate-90", {
           "size-4": size === "small",

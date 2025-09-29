@@ -1,7 +1,7 @@
 import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Link } from "react-router";
 import { formatUserFullName, UserAvatar } from "../misc/user";
 import { QueryWrapper } from "../ui/query-wrapper";
 import { SidebarMenuButton } from "../ui/sidebar";
@@ -19,7 +19,7 @@ export function UserHeader({ className }: { className?: string }) {
         const { firstName, middleName, lastName, grade, photoURL } = data;
 
         return (
-          <Link href="/profile" className={className}>
+          <Link to="/profile" className={className}>
             <UserButton>
               <UserAvatar
                 firstName={firstName}
