@@ -112,6 +112,7 @@ export const USER_SETTINGS_KEYS = [
   "shouldShowPercentages",
   "shouldHighlightMissingAssignments",
   "shouldShowLetterGrade",
+  "shouldHighlightAveragesWithColour",
   "themeColor",
   "widgetsConfiguration",
 ] as const satisfies Array<keyof UserSettings>;
@@ -120,6 +121,7 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldShowNextSubjectTimer: true,
   shouldShowPercentages: true,
   shouldHighlightMissingAssignments: true,
+  shouldHighlightAveragesWithColour: false,
   shouldShowLetterGrade: false,
   themeColor: "162 23.3% 45.7%",
   widgetsConfiguration: [

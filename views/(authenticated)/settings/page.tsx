@@ -32,6 +32,10 @@ const fields: Array<
     key: "shouldHighlightMissingAssignments",
   },
   {
+    label: "Highlight averages with colour",
+    key: "shouldHighlightAveragesWithColour",
+  },
+  {
     custom: NotificationsControls,
     key: "notificationsEnabled",
   },

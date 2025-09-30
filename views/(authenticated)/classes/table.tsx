@@ -27,7 +27,9 @@ import {
   renderTableCell,
   sortColumnWithNullablesLast,
 } from "@/helpers/tables";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { useTable } from "@/hooks/use-table";
+import { UserSettings } from "@/types/core";
 import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router";
@@ -53,7 +55,9 @@ const getAverageColor = (average: SubjectGrade | null | undefined) => {
 
   return baseColor === "green-500" ? "green-600" : baseColor;
 };
-const columns = [
+const getColumns = (
+  shouldHighlightAveragesWithColour: UserSettings["shouldHighlightAveragesWithColour"]
+) => [
   columnHelper.accessor("name", {
     header: "Name",
     cell: ({ cell }) => (
@@ -73,7 +77,11 @@ const columns = [
       if (average === null) return NULL_VALUE_DISPLAY_FALLBACK;
       const color = getAverageColor(average);
       return (
-        <span className={color ? `text-${color}` : undefined}>
+        <span
+          className={cn({
+            [`text-${color}`]: color && shouldHighlightAveragesWithColour,
+          })}
+        >
           {formatAverage(average)}
         </span>
       );
@@ -107,7 +115,7 @@ const columns = [
     },
   }),
 ];
-const columnsSkeletons = makeTableColumnsSkeletons(columns, {
+const columnsSkeletons = makeTableColumnsSkeletons(getColumns(true), {
   average: 6,
   name: 12,
   teachers: 12,
@@ -143,6 +151,11 @@ export function SubjectsTable({
         : (externalData as NonNullable<typeof externalData>),
 
     [isLoading, externalData]
+  );
+  const settings = useUserSettings();
+  const columns = useMemo(
+    () => getColumns(settings.shouldHighlightAveragesWithColour),
+    [settings.shouldHighlightAveragesWithColour]
   );
   const columnVisibility = shownColumns
     ? Object.fromEntries(
@@ -205,14 +218,30 @@ export function SubjectsTable({
       rowRendererFactory={getRowRenderer}
       table={table}
       columns={columns}
-      renderMobileRow={(row) => <SubjectCard {...row.original} year={year} />}
+      renderMobileRow={(row) => (
+        <SubjectCard
+          subject={row.original}
+          year={year}
+          shouldHighlightAveragesWithColour={
+            settings.shouldHighlightAveragesWithColour
+          }
+        />
+      )}
     />
   );
 }
-function SubjectCard(subject: SubjectWithAverage & { year: SubjectYear }) {
+function SubjectCard({
+  subject,
+  year,
+  shouldHighlightAveragesWithColour,
+}: {
+  subject: SubjectWithAverage;
+  year: SubjectYear;
+  shouldHighlightAveragesWithColour: UserSettings["shouldHighlightAveragesWithColour"];
+}) {
   const color = getAverageColor(subject.average);
   return (
-    <Link to={getSubjectPageURL(subject.year)(subject)}>
+    <Link to={getSubjectPageURL(year)(subject)}>
       <ContentCard
         className="clickable"
         shouldShowArrow={true}
@@ -227,9 +256,10 @@ function SubjectCard(subject: SubjectWithAverage & { year: SubjectYear }) {
               ) : (
                 formatAverage(subject.average)
               ),
-            className: color
-              ? `text-${color === "green-500" ? "green-600" : color}`
-              : undefined,
+            className:
+              color && shouldHighlightAveragesWithColour
+                ? `text-${color === "green-500" ? "green-600" : color}`
+                : undefined,
           },
           {
             label: "Room",

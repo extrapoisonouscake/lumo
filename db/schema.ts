@@ -34,6 +34,10 @@ export const user_settings = table("user_settings", {
     .boolean("should_highlight_missing_assignments")
     .notNull()
     .default(USER_SETTINGS_DEFAULT_VALUES.shouldHighlightMissingAssignments),
+  shouldHighlightAveragesWithColour: t
+    .boolean("should_highlight_averages_with_colour")
+    .notNull()
+    .default(USER_SETTINGS_DEFAULT_VALUES.shouldHighlightAveragesWithColour),
   shouldShowLetterGrade: t
     .boolean("should_show_letter_grade")
     .notNull()
