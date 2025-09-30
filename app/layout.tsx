@@ -6,8 +6,11 @@ import {
 import "@/views/globals.css";
 import { THEME_STORAGE_KEY_NAME } from "@/views/theme-provider/constants";
 import { GeistSans } from "geist/font/sans";
-import { Metadata } from "next";
+import { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
+export const viewport: Viewport = {
+  userScalable: false,
+};
 export const metadata: Metadata = {
   appleWebApp: { capable: true },
 };
