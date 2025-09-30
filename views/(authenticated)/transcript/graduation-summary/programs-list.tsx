@@ -23,6 +23,7 @@ import { cn } from "@/helpers/cn";
 import { ProgramEntry, TranscriptEducationPlan } from "@/types/school";
 import {
   CheckCircle,
+  CircleSlash,
   GraduationCap,
   ListCollapse,
   XCircle,
@@ -258,10 +259,17 @@ function ProgramCard({
           disabled={!program.requirements || program.requirements.length === 0}
           className="w-full text-xs h-fit hover:bg-transparent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pb-4"
         >
-          <ListCollapse className="size-3" />
-          {program.requirements && program.requirements.length > 0
-            ? "View Requirements"
-            : "No Requirements"}
+          {program.requirements && program.requirements.length > 0 ? (
+            <>
+              <ListCollapse className="size-3" />
+              View Requirements
+            </>
+          ) : (
+            <>
+              <CircleSlash className="size-3" />
+              No Requirements
+            </>
+          )}
         </Button>
       </div>
     </Card>
