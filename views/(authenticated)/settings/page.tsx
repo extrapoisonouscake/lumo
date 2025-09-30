@@ -1,5 +1,6 @@
 "use client";
 import { PageHeading } from "@/components/layout/page-heading";
+import { TitleManager } from "@/components/misc/title-manager";
 import { Spinner } from "@/components/ui/button";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { UserSetting } from "@/types/core";
@@ -40,6 +41,7 @@ export default function SettingsPage() {
 
   return (
     <>
+      <TitleManager>Settings</TitleManager>
       <PageHeading />
 
       <div className="flex flex-col gap-4">

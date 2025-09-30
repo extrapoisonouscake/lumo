@@ -17,3 +17,9 @@ export type PartialUserSettings = {
     ? UserSettings[K]
     : UserSettings[K] | undefined;
 };
+export interface Changelog {
+  version: string;
+  date: string;
+  changes: string[];
+  action?: { url: string; label: string };
+}

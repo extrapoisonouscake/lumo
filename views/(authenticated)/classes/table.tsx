@@ -1,12 +1,5 @@
 "use client";
-import {
-  createColumnHelper,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { createColumnHelper } from "@tanstack/react-table";
 
 import { SortableColumn } from "@/components/ui/sortable-column";
 import {
@@ -27,19 +20,39 @@ import {
   makeTableColumnsSkeletons,
 } from "@/helpers/makeTableColumnsSkeletons";
 
+import { ContentCard } from "@/components/misc/content-card";
 import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
 import {
   displayTableCellWithFallback,
   renderTableCell,
   sortColumnWithNullablesLast,
 } from "@/helpers/tables";
+import { useTable } from "@/hooks/use-table";
 import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useMemo } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { getGradeInfo } from "../../../helpers/grades";
 
 type SubjectWithAverage = Subject & { average?: SubjectGrade | null };
 const columnHelper = createColumnHelper<SubjectWithAverage>();
+const formatAverage = (average: SubjectGrade) => {
+  const letter = average.letter ?? getGradeInfo(average)?.letter;
+  return `${fractionFormatter.format(average.mark)}${
+    letter ? ` ${letter}` : ""
+  }`;
+};
+const formatTeachers = (teachers: string[]) => {
+  return teachers.join("; ");
+};
+function AverageCellSkeleton({ className }: { className?: string }) {
+  return <CellSkeleton length={5} className={className} />;
+}
+const getAverageColor = (average: SubjectGrade | null | undefined) => {
+  if (!average) return undefined;
+  const baseColor = getGradeInfo(average)?.color;
+
+  return baseColor === "green-500" ? "green-600" : baseColor;
+};
 const columns = [
   columnHelper.accessor("name", {
     header: "Name",
@@ -56,12 +69,14 @@ const columns = [
     ),
     cell: ({ cell }) => {
       const average = cell.getValue();
-      if (average === undefined) return <CellSkeleton length={5} />;
+      if (average === undefined) return <AverageCellSkeleton />;
       if (average === null) return NULL_VALUE_DISPLAY_FALLBACK;
-      const letter = average.letter ?? getGradeInfo(average)?.letter;
-      return `${fractionFormatter.format(average.mark)}${
-        letter ? ` ${letter}` : ""
-      }`;
+      const color = getAverageColor(average);
+      return (
+        <span className={color ? `text-${color}` : undefined}>
+          {formatAverage(average)}
+        </span>
+      );
     },
     sortUndefined: "last",
   }),
@@ -88,7 +103,7 @@ const columns = [
       return "Teacher";
     },
     cell: ({ cell }) => {
-      return cell.getValue().join("; ");
+      return formatTeachers(cell.getValue());
     },
   }),
 ];
@@ -148,12 +163,7 @@ export function SubjectsTable({
           key={row.id}
           onClick={
             !isTeacherAdvisory
-              ? () =>
-                  navigate(
-                    getSubjectPageURL(year)({
-                      ...row.original,
-                    })
-                  )
+              ? () => navigate(getSubjectPageURL(year)(row.original))
               : undefined
           }
           data-state={row.getIsSelected() && "selected"}
@@ -177,19 +187,14 @@ export function SubjectsTable({
       );
     };
 
-  const table = useReactTable<SubjectWithAverage>({
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    enableSortingRemoval: false,
+  const table = useTable(data, isLoading ? columnsSkeletons : columns, {
     state: {
       columnVisibility,
     },
-    data,
+    initialState: {
+      sorting: [{ id: "average", desc: true }],
+    },
     sortDescFirst: false,
-    manualPagination: true,
-    columns: isLoading ? columnsSkeletons : columns,
   });
   return (
     <TableRenderer
@@ -200,6 +205,44 @@ export function SubjectsTable({
       rowRendererFactory={getRowRenderer}
       table={table}
       columns={columns}
+      renderMobileRow={(row) => <SubjectCard {...row.original} year={year} />}
     />
+  );
+}
+function SubjectCard(subject: SubjectWithAverage & { year: SubjectYear }) {
+  const color = getAverageColor(subject.average);
+  return (
+    <Link to={getSubjectPageURL(subject.year)(subject)}>
+      <ContentCard
+        className="clickable"
+        shouldShowArrow={true}
+        items={[
+          {
+            label: "Average",
+            value:
+              subject.average === undefined ? (
+                <AverageCellSkeleton className="h-5" />
+              ) : subject.average === null ? (
+                NULL_VALUE_DISPLAY_FALLBACK
+              ) : (
+                formatAverage(subject.average)
+              ),
+            className: color
+              ? `text-${color === "green-500" ? "green-600" : color}`
+              : undefined,
+          },
+          {
+            label: "Room",
+            value: subject.room,
+          },
+          {
+            label: "Teachers",
+            className: "col-span-2",
+            value: formatTeachers(subject.teachers),
+          },
+        ]}
+        header={<h3 className="font-medium text-base">{subject.name}</h3>}
+      />
+    </Link>
   );
 }

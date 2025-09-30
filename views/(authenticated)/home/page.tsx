@@ -2,6 +2,7 @@
 
 import { PageHeading } from "@/components/layout/page-heading";
 import { ErrorCard } from "@/components/misc/error-card";
+import { TitleManager } from "@/components/misc/title-manager";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -23,16 +24,15 @@ import {
 import { cn } from "@/helpers/cn";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { trpc } from "@/views/trpc";
 import {
   DndContext,
   DragOverlay,
-  DropAnimation,
   KeyboardSensor,
   MouseSensor,
   ScreenReaderInstructions,
   TouchSensor,
   UniqueIdentifier,
-  defaultDropAnimationSideEffects,
   pointerWithin,
   useDraggable,
   useDroppable,
@@ -44,6 +44,7 @@ import {
   arrayMove,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useQuery } from "@tanstack/react-query";
 import {
   CheckIcon,
   GripIcon,
@@ -60,6 +61,7 @@ import React, {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
+import { ChangelogCard } from "./changelog-card";
 import {
   WIDGET_COMPONENTS,
   WIDGET_NAMES,
@@ -124,18 +126,15 @@ const getNewWidgetConfiguration = (type: Widgets) => {
   };
   return newWidget;
 };
-const dropAnimationConfig: DropAnimation = {
-  sideEffects: defaultDropAnimationSideEffects({
-    styles: {
-      active: {
-        opacity: "0.5",
-      },
-    },
-  }),
-};
+
 export default function HomePage() {
   const settings = useUserSettings();
-  return <WidgetEditor configuration={settings.widgetsConfiguration} />;
+  return (
+    <>
+      <TitleManager />
+      <WidgetEditor configuration={settings.widgetsConfiguration} />
+    </>
+  );
 }
 function WidgetEditor({
   configuration: initialConfiguration,
@@ -351,7 +350,7 @@ function WidgetEditor({
     },
     [configuration, updateWidgetInConfiguration]
   );
-
+  const changelog = useQuery(trpc.core.updates.getChangelog.queryOptions());
   return (
     <DndContext
       accessibility={{
@@ -499,6 +498,7 @@ function WidgetEditor({
               strategy={rectSortingStrategy}
             >
               <WidgetsGrid gridColumns={gridColumns}>
+                {changelog.data && <ChangelogCard {...changelog.data} />}
                 {responsiveWidgets.map((entry, index) =>
                   renderWidget({ entry, index, isEditing })
                 )}

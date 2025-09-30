@@ -72,12 +72,20 @@ export function parseGraduationSummary({
 } {
   const $ = responses.at(-1)!;
   const breakdown = parseCourseBreakdown($);
+
   const programs = parsePrograms($);
+
   const programsWithNames = programs.map((program) => ({
     ...program,
     requirements: program.requirements?.map((requirement) => ({
       ...requirement,
       name: breakdown.find((course) => course.code === requirement.code)?.name,
+      pendingUnits: breakdown
+        .find((course) => course.code === requirement.code)
+        ?.entries.filter(
+          (entry) => entry.status === ProgramRequirementEntryStatus.Pending
+        )
+        .reduce((acc, entry) => acc + entry.completedUnits, 0),
     })),
   }));
   const allMinifiedRequirements = programs
@@ -96,8 +104,25 @@ export function parseGraduationSummary({
       )?.requiredUnits,
     })),
   }));
+  const allEntries = breakdownWithRequiredUnits.flatMap(
+    (requirement) => requirement.entries
+  );
+  const preparedBreakdown = breakdownWithRequiredUnits.map((requirement) => ({
+    ...requirement,
+    entries: requirement.entries.map((entry) => ({
+      ...entry,
+      alternativeEntry:
+        entry.status === ProgramRequirementEntryStatus.AlreadyCounted
+          ? allEntries.find(
+              (item) =>
+                item.code === entry.code &&
+                item.status !== ProgramRequirementEntryStatus.AlreadyCounted
+            )
+          : undefined,
+    })),
+  }));
   return {
-    breakdown: breakdownWithRequiredUnits,
+    breakdown: preparedBreakdown,
     programs: programsWithNames,
     educationPlans: plans,
   };
@@ -115,6 +140,17 @@ function parseEducationPlans($: cheerio.CheerioAPI): TranscriptEducationPlan[] {
     .toArray();
   return plans;
 }
+const parseEducationPlanCompletedUnits = (string: string) => {
+  const match = string.match(/^(\d+(?:\.\d+)?)(?:\s*\((\d+(?:\.\d+)?)\))?$/);
+
+  if (!match)
+    throw new Error(`Invalid education plan completed units: ${string}`);
+  const [, completedUnits, excessUnits = "0"] = match;
+  return {
+    completedUnits: +completedUnits!,
+    excessUnits: +excessUnits,
+  };
+};
 function parsePrograms($: cheerio.CheerioAPI): ProgramEntry[] {
   const $table = $(".listGridFixed:first table");
   const headerMap = getHeaderMap($table);
@@ -173,11 +209,23 @@ function parsePrograms($: cheerio.CheerioAPI): ProgramEntry[] {
 
       const creditsWaivedString =
         cellsValues[headerMap["Credits waived"]!]!.trim();
+      const { completedUnits, excessUnits } = parseEducationPlanCompletedUnits(
+        cellsValues[headerMap["Unit completed"]!]!.trim()
+      );
       result.push({
         name: $cells.eq(headerMap["Description"]!).find("a").text().trim(), //rest of the content are the minified requirements
         code: cellsValues[headerMap["Code"]!]!,
         requiredUnits: +cellsValues[headerMap["Required unit"]!]!.trim(),
-        completedUnits: +cellsValues[headerMap["Unit completed"]!]!.trim(),
+        completedUnits,
+        pendingUnits: requirements
+          ?.flatMap((requirement) => [
+            requirement.pendingUnits,
+            ...(requirement.requirements?.map(
+              (requirement) => requirement.pendingUnits
+            ) ?? []),
+          ])
+          .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0),
+        excessUnits,
         creditsWaived:
           creditsWaivedString.length > 0 ? +creditsWaivedString : undefined,
         requirements,
@@ -190,19 +238,26 @@ function getMinifiedRequirements($tr: cheerio.Cheerio<Element>) {
   const text = $tr.text().trim();
   if (!text || !text.includes("Code")) return; //filtering out unnecessary text and totals
 
-  const [code, requiredUnits, creditsWaived, completedUnits] = text
+  const [code, requiredUnits, creditsWaived, completedUnitsObject] = text
     .split("\n")
-    .map((section) => {
+    .map((section, i) => {
       const [label, value] = section.split(": ");
       const trimmedValue = value?.trim();
       if (!trimmedValue) return undefined;
+      //last section is the completed units with possible excess units
+      if (i === 3) {
+        return parseEducationPlanCompletedUnits(trimmedValue);
+      }
       return isNaN(+trimmedValue) ? trimmedValue : +trimmedValue;
     });
+  const { completedUnits, excessUnits } = completedUnitsObject as ReturnType<
+    typeof parseEducationPlanCompletedUnits
+  >;
   return {
     code: code as string,
-
     requiredUnits: Math.max(requiredUnits as number, completedUnits as number), //sometimes required units is set to zero
-    completedUnits: completedUnits as number,
+    completedUnits,
+    excessUnits,
     creditsWaived: creditsWaived as number,
   };
 }
@@ -213,7 +268,7 @@ function parseCourseBreakdown($: cheerio.CheerioAPI): ProgramRequirement[] {
   const headerMap = getHeaderMap($table);
   const requirementColumnIndex = headerMap["Requirement"]!;
   const result: ProgramRequirement[] = [];
-  let currentRequirement: ProgramRequirement;
+  let currentRequirement: ProgramRequirement | undefined;
   let entriesLeftInRequirement = 0,
     lastRequirementIndex: number;
 
@@ -286,7 +341,7 @@ function parseCourseBreakdown($: cheerio.CheerioAPI): ProgramRequirement[] {
         //looking for the checkmark icon)
         status = ProgramRequirementEntryStatus.Included;
       }
-      currentRequirement.entries.push({
+      currentRequirement!.entries.push({
         years: cellsValues[headerMap["School year"]!]!.split("-").map(
           (year) => +year
         ) as [number, number],
@@ -297,9 +352,15 @@ function parseCourseBreakdown($: cheerio.CheerioAPI): ProgramRequirement[] {
           cellsValues[headerMap["Equivalent content code"]!] || undefined,
         status,
         completedUnits: +creditAmountString.trim(),
+        requirement: {
+          name: currentRequirement!.name,
+          code: currentRequirement!.code,
+          totalEntries: currentRequirement!.entries.length,
+        },
       });
       entriesLeftInRequirement--;
     });
+  if (currentRequirement) result.push(currentRequirement);
   return result;
 }
 function getHeaderMap(

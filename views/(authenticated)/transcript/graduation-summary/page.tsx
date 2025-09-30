@@ -33,10 +33,12 @@ import {
   CheckCircle,
   CircleDashed,
   Clock,
+  InfoIcon,
   XCircle,
 } from "lucide-react";
 
 import { PageHeading } from "@/components/layout/page-heading";
+import { TitleManager } from "@/components/misc/title-manager";
 import { ConditionalTooltip } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useState } from "react";
 import { GraduationSummaryProgramsList } from "./programs-list";
@@ -55,18 +57,12 @@ const checkIsFirstRowForRequirement = (
       .code !== row.original.requirement.code
   );
 };
-type PreparedProgramRequirementEntry = Omit<
-  ProgramRequirementEntry,
-  "years"
-> & {
-  years: string;
-  requirement: {
-    name: string;
-    code: string;
-    totalEntries: number;
-  };
-
+type PreparedProgramRequirementEntry = ProgramRequirementEntry & {
+  yearsString: string;
   "name-code": string;
+};
+const getEntryPageId = (entry: ProgramRequirementEntry) => {
+  return `entry-${entry.requirement.code}-${entry.code}`;
 };
 const formatProgress = (entry: PreparedProgramRequirementEntry) => {
   const completedUnits = entry.completedUnits;
@@ -76,6 +72,7 @@ const formatProgress = (entry: PreparedProgramRequirementEntry) => {
   }`;
 };
 const columnHelper = createColumnHelper<PreparedProgramRequirementEntry>();
+
 const baseColumns = [
   columnHelper.display({
     header: "Requirement",
@@ -102,7 +99,7 @@ const baseColumns = [
     },
   }),
 
-  columnHelper.accessor("years", {
+  columnHelper.accessor("yearsString", {
     header: "Years",
     filterFn: "equalsString",
   }),
@@ -119,23 +116,13 @@ const baseColumns = [
     id: "status",
     header: "Status",
     filterFn: "equalsString",
-    cell: ({ cell, table }) => {
+    cell: ({ cell, row }) => {
       const status = cell.getValue();
-      let alternativeRequirementEntry;
-      if (status === ProgramRequirementEntryStatus.AlreadyCounted) {
-        alternativeRequirementEntry = table
-          .getRowModel()
-          .rows.find(
-            (row) =>
-              row.original.code === cell.row.original.code &&
-              row.original.status !==
-                ProgramRequirementEntryStatus.AlreadyCounted
-          )?.original;
-      }
+
       return (
         <EntryStatusBadge
           status={status}
-          alternativeRequirementEntry={alternativeRequirementEntry}
+          alternativeEntry={row.original.alternativeEntry}
         />
       );
     },
@@ -162,40 +149,38 @@ export default function GraduationSummaryPage() {
     }
   }, [query.data?.educationPlans]);
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeading />
-      <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
-        {({ breakdown, programs, educationPlans }) => (
-          <div className="flex flex-col gap-6">
-            <GraduationSummaryProgramsList
-              programs={programs}
-              educationPlans={educationPlans}
-              currentEducationPlanId={currentEducationPlanId}
-              setCurrentEducationPlanId={setCurrentEducationPlanId}
-            />
-            <CoursesBreakdown data={breakdown} />
-          </div>
-        )}
-      </QueryWrapper>
-    </div>
+    <>
+      <TitleManager>Graduation Summary</TitleManager>
+      <div className="flex flex-col gap-4">
+        <PageHeading />
+        <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
+          {({ breakdown, programs, educationPlans }) => (
+            <div className="flex flex-col gap-6">
+              <GraduationSummaryProgramsList
+                programs={programs}
+                educationPlans={educationPlans}
+                currentEducationPlanId={currentEducationPlanId}
+                setCurrentEducationPlanId={setCurrentEducationPlanId}
+              />
+              <CoursesBreakdown data={breakdown} />
+            </div>
+          )}
+        </QueryWrapper>
+      </div>
+    </>
   );
 }
+
 function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const preparedData = useMemo(() => {
     return data
-      .map((subject) =>
-        subject.entries.map((entry) => ({
+      .map((requirement) =>
+        requirement.entries.map((entry) => ({
           ...entry,
-          years: formatYears(entry.years),
-
+          yearsString: formatYears(entry.years),
           "name-code": `${entry.name} ${entry.code}`,
-          requirement: {
-            name: subject.name,
-            code: subject.code,
-            totalEntries: subject.entries.length,
-          },
         }))
       )
       .flat();
@@ -246,6 +231,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
 
       return (
         <TableRow
+          id={getEntryPageId(row.original)}
           key={row.id}
           data-requirement-code={row.original.requirement.code}
           className="border-t group-last:first:rounded-bl-md group-last:last:rounded-br-md transition-colors"
@@ -295,7 +281,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               <TableCell
                 key={cell.id}
                 rowSpan={rowSpan}
-                className={cn("whitespace-nowrap", {
+                className={cn("whitespace-nowrap transition-colors", {
                   "border-r": isRequirementNameCell,
                 })}
               >
@@ -309,8 +295,8 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   const yearsSelect = (
     <TableFilterSelect
       id="years-filter"
-      column={table.getColumn("years")!}
-      options={Array.from(new Set(preparedData.map((item) => item.years)))
+      column={table.getColumn("yearsString")!}
+      options={Array.from(new Set(preparedData.map((item) => item.yearsString)))
         .reverse()
         .map((years) => ({
           label: years,
@@ -419,6 +405,8 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
 function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
   return (
     <ContentCard
+      className="transition-colors"
+      id={getEntryPageId(entry)}
       header={
         <div className="flex items-start justify-between">
           <h3 className="font-medium text-base text-foreground">
@@ -434,11 +422,16 @@ function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
           label: "Progress",
           value: formatProgress(entry),
         },
-        { label: "Years", value: entry.years },
+        { label: "Years", value: entry.yearsString },
         {
           label: "Status",
           className: "space-y-0.5",
-          value: <EntryStatusBadge status={entry.status} />,
+          value: (
+            <EntryStatusBadge
+              status={entry.status}
+              alternativeEntry={entry.alternativeEntry}
+            />
+          ),
         },
       ]}
     />
@@ -472,36 +465,66 @@ const entryStatusBadgeVisualData: Record<
 };
 function EntryStatusBadge({
   status,
-  alternativeRequirementEntry,
+  alternativeEntry,
 }: {
   status: ProgramRequirementEntryStatus;
-  alternativeRequirementEntry?: PreparedProgramRequirementEntry;
+  alternativeEntry?: ProgramRequirementEntry;
 }) {
   const { icon: Icon, className, text } = entryStatusBadgeVisualData[status];
-
+  const onAlreadyCountedBadgeClick = () => {
+    if (!alternativeEntry) return;
+    const id = getEntryPageId(alternativeEntry);
+    const rowOrCard = document.getElementById(id);
+    if (rowOrCard) {
+      const classNames = ["bg-brand/10!", "text-brand", "[&_*]:text-brand!"];
+      const DELAY = 2000;
+      rowOrCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (rowOrCard.tagName === "TR") {
+        const cells = rowOrCard.querySelectorAll(`td:not([rowspan])`);
+        cells.forEach((cell) => {
+          cell.classList.add(...classNames);
+        });
+        setTimeout(() => {
+          cells.forEach((cell) => {
+            cell.classList.remove(...classNames);
+          });
+        }, DELAY);
+      } else {
+        rowOrCard.classList.add(...classNames);
+        setTimeout(() => {
+          rowOrCard.classList.remove(...classNames);
+        }, DELAY);
+      }
+    }
+  };
   return (
     <ConditionalTooltip
       content={
-        alternativeRequirementEntry ? (
+        alternativeEntry ? (
           <p>
             This requirement is already counted in{" "}
-            <span className="font-medium">
-              {alternativeRequirementEntry.requirement.name} (
-              {alternativeRequirementEntry.years})
+            <span
+              onClick={onAlreadyCountedBadgeClick}
+              className="cursor-pointer font-medium"
+            >
+              {alternativeEntry.requirement.name} (
+              {formatYears(alternativeEntry.years)})
             </span>
             .
           </p>
         ) : null
       }
-      isEnabled={!!alternativeRequirementEntry}
+      isEnabled={!!alternativeEntry}
     >
       <div
+        onClick={onAlreadyCountedBadgeClick}
         className={cn("flex items-center gap-1.5", className, {
-          "cursor-help": !!alternativeRequirementEntry,
+          "mt-1 cursor-pointer": !!alternativeEntry,
         })}
       >
         <Icon className="size-4" />
         <span className="text-sm">{text}</span>
+        {alternativeEntry && <InfoIcon className="size-3.5 sm:hidden" />}
       </div>
     </ConditionalTooltip>
   );

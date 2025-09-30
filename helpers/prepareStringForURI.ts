@@ -1,1 +1,2 @@
-export const prepareStringForURI = (string: string) => string.replaceAll(" ", "_")
+export const prepareStringForURI = (string: string) =>
+  string.replaceAll(/[\s\/]/g, "_");

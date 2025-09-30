@@ -1,5 +1,6 @@
 "use client";
 import { PageHeading } from "@/components/layout/page-heading";
+import { TitleManager } from "@/components/misc/title-manager";
 import { formatUserFullName, UserAvatar } from "@/components/misc/user";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,112 +35,115 @@ import styles from "./styles.module.css";
 export default function ProfilePage() {
   const query = useStudentDetails();
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeading />
-      <QueryWrapper query={query} skeleton={<ProfileContentSkeleton />}>
-        {(data) => {
-          const {
-            studentNumber,
-            personalEducationNumber,
-            taRoom,
-            locker,
-            schoolName,
-            nextSchoolName,
-            graduationYear,
-            parkingSpaceNumber,
-            licensePlateNumber,
-            addresses,
-          } = data;
-          const shouldShowParking = !!(
-            parkingSpaceNumber || licensePlateNumber
-          );
-          return (
-            <>
-              <ProfileCard {...data} />
-              <Sections shouldShowParking={shouldShowParking}>
-                <SectionCard
-                  title="Personal Details"
-                  icon={UserIcon}
-                  className="[grid-area:a]"
-                >
-                  <UserProperty
-                    label="Student Number"
-                    value={studentNumber}
-                    icon={HashIcon}
-                    isCopyable
-                  />
-                  <UserProperty
-                    label="PEN (Personal Education Number)"
-                    value={personalEducationNumber}
-                    icon={HashIcon}
-                    isCopyable
-                  />
-
-                  <AddressList {...addresses} />
-                </SectionCard>
-                <SectionCard
-                  title="School"
-                  icon={SchoolIcon}
-                  className="[grid-area:b]"
-                >
-                  <UserProperty
-                    label="Name"
-                    value={schoolName}
-                    icon={SchoolIcon}
-                  />
-                  {nextSchoolName && nextSchoolName !== schoolName && (
+    <>
+      <TitleManager>Profile</TitleManager>
+      <div className="flex flex-col gap-4">
+        <PageHeading />
+        <QueryWrapper query={query} skeleton={<ProfileContentSkeleton />}>
+          {(data) => {
+            const {
+              studentNumber,
+              personalEducationNumber,
+              taRoom,
+              locker,
+              schoolName,
+              nextSchoolName,
+              graduationYear,
+              parkingSpaceNumber,
+              licensePlateNumber,
+              addresses,
+            } = data;
+            const shouldShowParking = !!(
+              parkingSpaceNumber || licensePlateNumber
+            );
+            return (
+              <>
+                <ProfileCard {...data} />
+                <Sections shouldShowParking={shouldShowParking}>
+                  <SectionCard
+                    title="Personal Details"
+                    icon={UserIcon}
+                    className="[grid-area:a]"
+                  >
                     <UserProperty
-                      label="Next School Name"
-                      value={nextSchoolName}
+                      label="Student Number"
+                      value={studentNumber}
+                      icon={HashIcon}
+                      isCopyable
+                    />
+                    <UserProperty
+                      label="PEN (Personal Education Number)"
+                      value={personalEducationNumber}
+                      icon={HashIcon}
+                      isCopyable
+                    />
+
+                    <AddressList {...addresses} />
+                  </SectionCard>
+                  <SectionCard
+                    title="School"
+                    icon={SchoolIcon}
+                    className="[grid-area:b]"
+                  >
+                    <UserProperty
+                      label="Name"
+                      value={schoolName}
                       icon={SchoolIcon}
                     />
-                  )}
-                  <UserProperty
-                    label="Graduation Year"
-                    value={graduationYear}
-                    icon={GraduationCapIcon}
-                  />
-                  {taRoom && (
+                    {nextSchoolName && nextSchoolName !== schoolName && (
+                      <UserProperty
+                        label="Next School Name"
+                        value={nextSchoolName}
+                        icon={SchoolIcon}
+                      />
+                    )}
                     <UserProperty
-                      label="TA Room"
-                      value={taRoom}
-                      icon={DoorClosedIcon}
+                      label="Graduation Year"
+                      value={graduationYear}
+                      icon={GraduationCapIcon}
                     />
-                  )}
-                  <UserProperty
-                    label="Locker"
-                    value={locker}
-                    icon={LockKeyholeIcon}
-                  />
-                </SectionCard>
-                {shouldShowParking && (
-                  <SectionCard
-                    title="Parking"
-                    icon={SquareParkingIcon}
-                    className="[grid-area:c]"
-                  >
-                    {parkingSpaceNumber && (
+                    {taRoom && (
                       <UserProperty
-                        label="Parking Space Number"
-                        value={parkingSpaceNumber}
-                        icon={SquareParkingIcon}
+                        label="TA Room"
+                        value={taRoom}
+                        icon={DoorClosedIcon}
                       />
                     )}
-                    {licensePlateNumber && (
-                      <UserProperty
-                        label="License Plate Number"
-                        value={licensePlateNumber}
-                        icon={CarIcon}
-                      />
-                    )}
+                    <UserProperty
+                      label="Locker"
+                      value={locker}
+                      icon={LockKeyholeIcon}
+                    />
                   </SectionCard>
-                )}
-              </Sections>
-            </>
-          );
-        }}
-      </QueryWrapper>
-    </div>
+                  {shouldShowParking && (
+                    <SectionCard
+                      title="Parking"
+                      icon={SquareParkingIcon}
+                      className="[grid-area:c]"
+                    >
+                      {parkingSpaceNumber && (
+                        <UserProperty
+                          label="Parking Space Number"
+                          value={parkingSpaceNumber}
+                          icon={SquareParkingIcon}
+                        />
+                      )}
+                      {licensePlateNumber && (
+                        <UserProperty
+                          label="License Plate Number"
+                          value={licensePlateNumber}
+                          icon={CarIcon}
+                        />
+                      )}
+                    </SectionCard>
+                  )}
+                </Sections>
+              </>
+            );
+          }}
+        </QueryWrapper>
+      </div>
+    </>
   );
 }
 function ProfileCard(data: PersonalDetails) {

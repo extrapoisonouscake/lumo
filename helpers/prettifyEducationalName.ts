@@ -9,6 +9,8 @@ const educationAbbreviations = new Set([
   "MSc",
   "UN",
   "AP",
+  "2D",
+  "3D",
 ]);
 export const TEACHER_ADVISORY_ABBREVIATION = "TA";
 const directReplacements: Record<string, string> = {

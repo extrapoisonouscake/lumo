@@ -49,6 +49,9 @@ export default function AssignmentPage() {
   const { data: subject } = useSubjectSummary(subjectId, "current");
   return (
     <>
+      <TitleManager>
+        {subject ? `${subject.name} - ${subject.name}` : "Loading..."}
+      </TitleManager>
       <QueryWrapper query={assignment} skeleton={<ContentSkeleton />}>
         {(data) => {
           const {
@@ -250,7 +253,7 @@ function AssignmentHeader({
     className = BADGE_CLASSNAMES_BY_STATUS[transformedStatus];
   }
   return (
-    <Card className="p-4 flex-row gap-3 flex-wrap">
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap">
       <CardTitle className="text-xl">{name}</CardTitle>
       <div className="flex items-center gap-2">
         <Badge
@@ -268,7 +271,7 @@ function AssignmentHeader({
 }
 function AssignmentHeaderSkeleton() {
   return (
-    <Card className="p-4 flex-row gap-3 flex-wrap">
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap">
       <Skeleton shouldShrink={false}>
         <CardTitle className="text-xl">NameNameName</CardTitle>
       </Skeleton>

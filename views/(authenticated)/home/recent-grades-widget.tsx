@@ -165,9 +165,8 @@ function RecentGradedAssignmentCard({
             className={cn({
               [`text-${GRADES_VISUAL_CONFIG["F"]?.color}`]: percentage === 0,
             })}
-            value={percentage}
+            values={[{ value: percentage, fillColor: gradeInfo?.color }]}
             letter={gradeInfo?.letter}
-            fillColor={gradeInfo?.color}
             size="normal"
           />
         </div>
@@ -196,10 +195,9 @@ function ContentSkeleton({ progress }: { progress: number }) {
   return (
     <div className="flex flex-1 flex-col gap-1.5 items-center justify-center min-h-[50px]">
       <CircularProgress
-        value={progress}
+        values={[{ value: progress, fillColor: "brand" }]}
         thickness={2}
         size="normal"
-        fillColor="brand"
       />
       <p className="text-sm">Loading grades...</p>
     </div>

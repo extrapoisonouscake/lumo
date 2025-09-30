@@ -1,5 +1,6 @@
 "use client";
 import { PageHeading } from "@/components/layout/page-heading";
+import { TitleManager } from "@/components/misc/title-manager";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { useSearchParams } from "next/navigation";
@@ -32,23 +33,28 @@ export default function SchedulePage() {
     );
   };
   const isMobile = useIsMobile();
+  const dayPicker = <ScheduleDayPicker date={date} setDate={dateSetHandler} />;
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-3">
-        <PageHeading
-          leftContent={
-            <ScheduleDayPicker date={date} setDate={dateSetHandler} />
-          }
-        />
-        {isMobile && (
-          <WeekdaySlider
-            setDate={dateSetHandler}
-            startDate={timezonedDayJS(date).startOf("week").toDate()}
-            currentDate={date}
+    <>
+      <TitleManager>
+        {timezonedDayJS(date).format("MM/DD/YYYY")} - Schedule
+      </TitleManager>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
+          <PageHeading
+            rightContent={isMobile ? undefined : dayPicker}
+            leftContent={isMobile ? dayPicker : undefined}
           />
-        )}
+          {isMobile && (
+            <WeekdaySlider
+              setDate={dateSetHandler}
+              startDate={timezonedDayJS(date).startOf("week").toDate()}
+              currentDate={date}
+            />
+          )}
+        </div>
+        <ScheduleLoadableSection setDate={dateSetHandler} date={date} />
       </div>
-      <ScheduleLoadableSection setDate={dateSetHandler} date={date} />
-    </div>
+    </>
   );
 }

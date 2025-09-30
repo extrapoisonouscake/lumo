@@ -5,8 +5,11 @@ import {
 } from "@/constants/core";
 import "@/views/globals.css";
 import { GeistSans } from "geist/font/sans";
+import { Metadata } from "next";
 import { cookies } from "next/headers";
-
+export const metadata: Metadata = {
+  appleWebApp: { capable: true },
+};
 export default async function RootLayout({
   children,
 }: {

@@ -11,7 +11,7 @@ import { Link } from "react-router";
 const items = [
   {
     title: "Graduation Summary",
-    href: "/transcript/graduation-summary",
+    href: "/transcript/graduation",
     icon: GraduationCap,
   },
   {
@@ -21,7 +21,7 @@ const items = [
   },
   {
     title: "Credit Summary",
-    href: "/transcript/credit-summary",
+    href: "/transcript/credit",
     icon: Shapes,
   },
   { title: "Settings", href: "/settings", icon: Settings },

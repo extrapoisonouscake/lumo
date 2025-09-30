@@ -33,6 +33,7 @@
 @source inline("fill-yellow-400");
 @source inline("fill-orange-500");
 @source inline("fill-red-600");
+@source inline("fill-green-600");
 @source inline("text-red-500");
 @source inline("text-green-500");
 @source inline("text-yellow-400");
@@ -52,11 +53,15 @@
 @source inline("bg-cyan-600/20");
 @source inline("bg-pink-600/20");
 @source inline("text-green-500");
+@source inline("text-green-600");
+@source inline("text-green-600/20");
 @source inline("text-orange-500");
 @source inline("text-yellow-400");
 @source inline("text-cyan-600");
 @source inline("text-pink-600");
+@source inline("bg-brand/10!");
 
+@source inline("[&_*]:text-brand!");
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -152,7 +157,7 @@
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-ring: hsl(var(--sidebar-ring));
   --color-brand: hsl(var(--brand));
-
+  --color-yellow-400: #ffdc5e;
   --rounded-lg: var(--radius);
   --rounded-md: calc(var(--radius) - 2px);
   --rounded-xs: calc(var(--radius) - 4px);
@@ -302,30 +307,7 @@
   body {
     @apply h-full;
   }
-}
-
-@keyframes fade-out {
-  from {
-    opacity: 1;
+  html {
+    @apply scroll-smooth;
   }
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-::view-transition-old(root) {
-  animation: fade-out 0.3s ease-in-out forwards;
-}
-
-::view-transition-new(root) {
-  animation: fade-in 0.3s ease-in-out forwards;
 }

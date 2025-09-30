@@ -87,12 +87,15 @@ export function PageHeading({
 }
 function DefaultLeftContent() {
   const { pathname } = useLocation();
+  const hasBackButton = !websitePagesWithStaticPaths[pathname];
   return (
-    <div className="flex items-center gap-2.5 h-fit">
-      <SidebarTrigger className="hidden sm:flex" />
-      {!websitePagesWithStaticPaths[pathname] && (
-        <BackButton className="h-full" />
-      )}
+    <div
+      className={cn("flex items-center gap-2.5 h-fit", {
+        "h-full": hasBackButton,
+      })}
+    >
+      <SidebarTrigger />
+      {hasBackButton && <BackButton className="h-full" />}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { PageHeading } from "@/components/layout/page-heading";
 import { ContentCard } from "@/components/misc/content-card";
+import { TitleManager } from "@/components/misc/title-manager";
 import { MiniTableHeader } from "@/components/ui/mini-table-header";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { SortableColumn } from "@/components/ui/sortable-column";
@@ -60,12 +61,15 @@ export default function CreditSummaryPage() {
   const query = useQuery(trpc.myed.transcript.getCreditSummary.queryOptions());
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeading />
-      <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
-        {(data) => <Content data={data} />}
-      </QueryWrapper>
-    </div>
+    <>
+      <TitleManager>Credit Summary</TitleManager>
+      <div className="flex flex-col gap-4">
+        <PageHeading />
+        <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
+          {(data) => <Content data={data} />}
+        </QueryWrapper>
+      </div>
+    </>
   );
 }
 

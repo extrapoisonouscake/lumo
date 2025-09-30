@@ -179,16 +179,19 @@ function Content({
           {pluralize(classesPluralForms)(subjectsWithoutTA.length)}
         </p>
         <CircularProgress
-          value={
-            ((typeof currentRowIndex === "number"
-              ? subjectsPassed
-              : hasNoMoreClasses
-                ? subjectsWithoutTA.length
-                : 0) /
-              subjectsWithoutTA.length) *
-            100
-          }
-          fillColor="brand"
+          values={[
+            {
+              value:
+                ((typeof currentRowIndex === "number"
+                  ? subjectsPassed
+                  : hasNoMoreClasses
+                    ? subjectsWithoutTA.length
+                    : 0) /
+                  subjectsWithoutTA.length) *
+                100,
+              fillColor: "brand",
+            },
+          ]}
           size="small"
         />
       </div>
@@ -204,7 +207,10 @@ function ContentSkeleton() {
         <Skeleton className="text-xs font-medium text-muted-foreground">
           4/4 classes
         </Skeleton>
-        <CircularProgress value={0} fillColor="muted" size="small" />
+        <CircularProgress
+          values={[{ value: 0, fillColor: "muted" }]}
+          size="small"
+        />
       </div>
       <ScheduleCardsSkeleton />
     </div>

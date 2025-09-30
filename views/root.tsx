@@ -61,14 +61,11 @@ export default function Root() {
                 <Route path="other" element={<OtherPage />} />
                 <Route path="transcript">
                   <Route
-                    path="graduation-summary"
+                    path="graduation"
                     element={<GraduationSummaryPage />}
                   />
                   <Route path="entries" element={<TranscriptEntriesPage />} />
-                  <Route
-                    path="credit-summary"
-                    element={<CreditSummaryPage />}
-                  />
+                  <Route path="credit" element={<CreditSummaryPage />} />
                 </Route>
               </Route>
               <Route element={<UnauthenticatedLayout />}>

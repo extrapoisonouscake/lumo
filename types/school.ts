@@ -173,8 +173,13 @@ export interface ProgramRequirementEntry {
   grade: number;
   years: [number, number];
   equivalentContentCode?: string;
-
+  requirement: {
+    name: string;
+    code: string;
+    totalEntries: number;
+  };
   status: ProgramRequirementEntryStatus;
+  alternativeEntry?: Omit<ProgramRequirementEntry, "alternativeEntry">;
   completedUnits: number;
   requiredUnits?: number;
 }
@@ -184,6 +189,8 @@ export interface ProgramEntry {
   code: string;
   requiredUnits: number;
   completedUnits: number;
+  pendingUnits?: number;
+  excessUnits?: number;
   creditsWaived?: number;
   isIncluded: boolean;
   requirements?: Array<
@@ -195,6 +202,8 @@ export interface ProgramMinifiedRequirement {
   name?: string;
   requiredUnits: number;
   completedUnits: number;
+  pendingUnits?: number;
+  excessUnits?: number;
   creditsWaived: number;
 }
 export interface TranscriptEducationPlan {

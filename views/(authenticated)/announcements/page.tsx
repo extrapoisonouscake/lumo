@@ -8,6 +8,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { PageHeading } from "@/components/layout/page-heading";
+import { TitleManager } from "@/components/misc/title-manager";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { useAnnouncements } from "@/hooks/trpc/use-announcements";
@@ -20,6 +21,7 @@ function AnnouncementsHeading() {
 export default function AnnouncementsPage() {
   return (
     <>
+      <TitleManager>Announcements</TitleManager>
       <PageHeading />
       <Announcements />
     </>

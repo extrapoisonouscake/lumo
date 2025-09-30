@@ -57,7 +57,7 @@ type RouteResolver<
   T extends
     | Omit<FlatRouteStep, "htmlToken">
     | Omit<FlatRouteStep, "htmlToken">[],
-  Params extends RouteParams
+  Params extends RouteParams,
 > = (props: RouteResolverParams<Params>) => T;
 type SingularRouteStep<Params extends RouteParams> =
   | Omit<FlatRouteStep, "htmlToken">
@@ -174,7 +174,7 @@ type RouteStepPredicate<Params extends RouteParams> = (args: {
   metadata: Record<string, any>;
 }) => boolean;
 export class Route<
-  Params extends RouteParams = Record<string, never>
+  Params extends RouteParams = Record<string, never>,
 > extends CallableInstance<
   Params extends Record<string, never> ? [] : [Params],
   ResolvedRoute<Params>
@@ -422,7 +422,7 @@ export const myEdParsingRoutes = {
       () => {
         return {
           method: "POST",
-          path: "/preferenceUpdate.do",
+          path: "/aspen/preferenceUpdate.do",
           contentType: "application/x-www-form-urlencoded",
           body: {
             preference: "sys.graduation.course.separate.excessive",

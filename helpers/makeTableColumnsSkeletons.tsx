@@ -4,6 +4,7 @@ import {
   DisplayColumnDef,
   RowData,
 } from "@tanstack/react-table";
+import { cn } from "./cn";
 
 export function makeTableColumnsSkeletons<T extends RowData>(
   columns: Array<AccessorKeyColumnDef<T, any> | DisplayColumnDef<T, any>>, //!inference not working
@@ -23,12 +24,14 @@ export function makeTableColumnsSkeletons<T extends RowData>(
 export function CellSkeleton({
   length,
   shouldShrink,
+  className,
 }: {
   length: number;
   shouldShrink?: boolean;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center">
+    <div className={cn("flex items-center", className)}>
       <Skeleton shouldShrink={shouldShrink}>
         <p>{"1".repeat(length)}</p>
       </Skeleton>

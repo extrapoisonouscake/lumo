@@ -21,7 +21,12 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/helpers/cn";
 import { ProgramEntry, TranscriptEducationPlan } from "@/types/school";
-import { GraduationCap, Info, XCircle } from "lucide-react";
+import {
+  CheckCircle,
+  GraduationCap,
+  ListCollapse,
+  XCircle,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 export function GraduationSummaryProgramsList({
@@ -118,7 +123,8 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
   const totalCompletedUnits = useMemo(
     () =>
       includedPrograms.reduce(
-        (acc, program) => acc + program.completedUnits,
+        (acc, program) =>
+          acc + Math.min(program.completedUnits, program.requiredUnits),
         0
       ),
     [includedPrograms]
@@ -128,18 +134,30 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
       includedPrograms.reduce((acc, program) => acc + program.requiredUnits, 0),
     [includedPrograms]
   );
+  const progressPercentage = (totalCompletedUnits / totalRequiredUnits) * 100;
   return (
     <Card className="px-4 py-3 flex-row flex-wrap justify-between gap-2">
       <p className="text-sm text-muted-foreground">Total</p>
       <div className="flex items-center gap-1.5">
         <p className="text-sm font-medium">
-          {totalCompletedUnits} / {totalRequiredUnits} units
+          {totalCompletedUnits} / {totalRequiredUnits} units{" "}
+          <span className="text-muted-foreground">
+            ({progressPercentage.toFixed(1)}%)
+          </span>
         </p>
-        <CircularProgress
-          value={(totalCompletedUnits / totalRequiredUnits) * 100}
-          fillColor="brand"
-          size="small"
-        />
+        {progressPercentage >= 100 ? (
+          <CheckCircle strokeWidth={2.3} className="size-4 text-brand" />
+        ) : (
+          <CircularProgress
+            values={[
+              {
+                value: progressPercentage,
+                fillColor: "brand",
+              },
+            ]}
+            size="small"
+          />
+        )}
       </div>
     </Card>
   );
@@ -151,10 +169,18 @@ function ProgramCard({
   program: ProgramEntry;
   onViewRequirements: () => void;
 }) {
-  const progressPercentage =
-    program.requiredUnits > 0
-      ? Math.min((program.completedUnits / program.requiredUnits) * 100, 100)
-      : 0;
+  let percentages: { completed: number; pending?: number } | undefined;
+  if (program.requiredUnits > 0) {
+    percentages = {
+      completed: Math.min(
+        (program.completedUnits / program.requiredUnits) * 100,
+        100
+      ),
+      pending: program.pendingUnits
+        ? (program.pendingUnits / program.requiredUnits) * 100
+        : undefined,
+    };
+  }
 
   const displayName = program.name || program.code;
   const isExcluded = !program.isIncluded;
@@ -184,14 +210,32 @@ function ProgramCard({
       <div className="flex flex-col gap-2">
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>Progress</span>
-          <span className="font-medium">
+          <span className="font-medium text-primary">
             {program.completedUnits.toFixed(1)} /{" "}
-            {program.requiredUnits.toFixed(1)} units
+            {program.requiredUnits.toFixed(1)} units{" "}
+            {!!program.pendingUnits && (
+              <>
+                {" "}
+                <span className="text-muted-foreground font-normal text-xs">
+                  ({program.pendingUnits.toFixed(1)} in progress)
+                </span>
+              </>
+            )}
           </span>
         </div>
 
         <Progress
-          value={progressPercentage}
+          segments={
+            percentages
+              ? [
+                  { value: percentages?.completed },
+                  {
+                    value: percentages?.pending ?? 0,
+                    color: "bg-yellow-400",
+                  },
+                ]
+              : []
+          }
           className="h-2"
           indicatorClassName={cn(isExcluded && "bg-muted-foreground/30")}
         />
@@ -203,7 +247,7 @@ function ProgramCard({
               isExcluded ? "text-muted-foreground" : "text-brand"
             )}
           >
-            {progressPercentage.toFixed(1)}%
+            {percentages?.completed.toFixed(1)}%
           </span>
         </div>
 
@@ -214,7 +258,7 @@ function ProgramCard({
           disabled={!program.requirements || program.requirements.length === 0}
           className="w-full text-xs h-fit hover:bg-transparent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pb-4"
         >
-          <Info className="h-3 w-3" />
+          <ListCollapse className="size-3" />
           {program.requirements && program.requirements.length > 0
             ? "View Requirements"
             : "No Requirements"}
@@ -229,13 +273,15 @@ function RequirementCard({
 }: {
   requirement: NonNullable<ProgramEntry["requirements"]>[0];
 }) {
-  const progressPercentage =
-    requirement.requiredUnits > 0
-      ? Math.min(
-          (requirement.completedUnits / requirement.requiredUnits) * 100,
-          100
-        )
-      : 0;
+  let percentages: { completed: number; pending?: number } | undefined;
+  if (requirement.requiredUnits > 0) {
+    percentages = {
+      completed: (requirement.completedUnits / requirement.requiredUnits) * 100,
+      pending: requirement.pendingUnits
+        ? (requirement.pendingUnits / requirement.requiredUnits) * 100
+        : undefined,
+    };
+  }
 
   const displayName = requirement.name || requirement.code;
 
@@ -253,15 +299,27 @@ function RequirementCard({
             <p className="text-xs text-muted-foreground">
               {requirement.completedUnits.toFixed(1)} /{" "}
               {requirement.requiredUnits.toFixed(1)} units
+              {!!requirement.pendingUnits && (
+                <>
+                  {" "}
+                  <span className="text-xs text-yellow-500">
+                    ({requirement.pendingUnits.toFixed(1)} in progress)
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>
 
-        <CircularProgress
-          value={progressPercentage}
-          fillColor="brand"
-          size="normal"
-        />
+        {percentages && (
+          <CircularProgress
+            values={[
+              { value: percentages.completed, fillColor: "brand" },
+              { value: percentages.pending ?? 0, fillColor: "yellow-400" },
+            ]}
+            size="normal"
+          />
+        )}
       </div>
     </Card>
   );

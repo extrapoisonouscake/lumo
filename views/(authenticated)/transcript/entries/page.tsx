@@ -2,6 +2,7 @@
 import { PageHeading } from "@/components/layout/page-heading";
 import { ContentCard } from "@/components/misc/content-card";
 import { ResponsiveFilters } from "@/components/misc/responsive-filters";
+import { TitleManager } from "@/components/misc/title-manager";
 import { Label } from "@/components/ui/label";
 import { MiniTableHeader } from "@/components/ui/mini-table-header";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
@@ -60,12 +61,15 @@ export default function TranscriptPage() {
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <PageHeading />
-      <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
-        {(data) => <Content data={data} />}
-      </QueryWrapper>
-    </div>
+    <>
+      <TitleManager>Transcript Entries</TitleManager>
+      <div className="flex flex-col gap-4">
+        <PageHeading />
+        <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
+          {(data) => <Content data={data} />}
+        </QueryWrapper>
+      </div>
+    </>
   );
 }
 

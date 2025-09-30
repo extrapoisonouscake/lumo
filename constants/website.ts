@@ -49,7 +49,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     items: [
       {
         title: "Graduation Summary",
-        href: "/graduation-summary",
+        href: "/graduation",
       },
       {
         title: "Entries",
@@ -57,7 +57,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
       },
       {
         title: "Credit Summary",
-        href: "/credit-summary",
+        href: "/credit",
       },
       // {
       //   title: "GPA",

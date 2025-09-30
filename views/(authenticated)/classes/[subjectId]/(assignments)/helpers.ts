@@ -1,4 +1,5 @@
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { prepareStringForURI } from "@/helpers/prepareStringForURI";
 import { UserSettings } from "@/types/core";
 import { Assignment, AssignmentStatus, Subject } from "@/types/school";
 
@@ -63,5 +64,5 @@ export function getAssignmentURL(
   assignment: Assignment,
   subject: Pick<Subject, "id" | "name">
 ): string {
-  return `/classes/${subject.id}/${subject.name}/assignments/${assignment.id}`;
+  return `/classes/${subject.id}/${prepareStringForURI(subject.name)}/assignments/${assignment.id}`;
 }

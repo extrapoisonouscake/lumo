@@ -69,7 +69,7 @@ function UserButton({
       size="lg"
       isActive={!isLoading && pathname === "/profile"}
       className={cn(
-        "p-0 h-fit sm:h-12 rounded-full sm:rounded-xl sm:p-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
+        "p-0 h-fit sm:h-12 rounded-full sm:rounded-xl group-data-[state=collapsed]:rounded-lg sm:p-2 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
         className
       )}
       {...props}

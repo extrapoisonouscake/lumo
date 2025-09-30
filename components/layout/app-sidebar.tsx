@@ -14,6 +14,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
@@ -83,6 +84,7 @@ function PagesMenu() {
       !page.isHiddenInSidebar &&
       (isMobile ? page.showOnMobile : (page.showOnDesktop ?? true))
   );
+  const { toggleSidebar, open } = useSidebar();
   return (
     <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
       {pages.map(([url, page]) => {
@@ -115,7 +117,14 @@ function PagesMenu() {
                   })}
                 >
                   {page.items && !isMobile ? (
-                    <div className="flex items-center gap-2 cursor-pointer">
+                    <div
+                      className="flex items-center gap-2 cursor-pointer"
+                      onClick={(e) => {
+                        if (!open) {
+                          toggleSidebar();
+                        }
+                      }}
+                    >
                       {mainItemContent}
                       <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
                     </div>
