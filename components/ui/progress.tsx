@@ -25,23 +25,25 @@ const Progress = React.forwardRef<
       )}
       {...props}
     >
-      {segments.map((segment, index) => (
-        <ProgressPrimitive.Indicator
-          key={index}
-          className={cn(
-            "h-full transition-all absolute rounded-full flex-1 not-last:[--additional-width:0.375rem]",
-            indicatorClassName,
-            segment.color ? segment.color : "bg-brand"
-          )}
-          style={{
-            width: `calc(${segment.value}% + var(--additional-width, 0px))`,
-            zIndex: segments.length - index,
-            left: `${segments
-              .slice(0, index)
-              .reduce((acc, segment) => acc + segment.value, 0)}%`,
-          }}
-        />
-      ))}
+      {segments
+        .filter((segment) => segment.value > 0)
+        .map((segment, index) => (
+          <ProgressPrimitive.Indicator
+            key={index}
+            className={cn(
+              "h-full transition-all absolute rounded-full flex-1 not-last:[--additional-width:0.375rem]",
+              segment.color ? segment.color : "bg-brand",
+              indicatorClassName
+            )}
+            style={{
+              width: `calc(${segment.value}% + var(--additional-width, 0px))`,
+              zIndex: segments.length - index,
+              left: `${segments
+                .slice(0, index)
+                .reduce((acc, segment) => acc + segment.value, 0)}%`,
+            }}
+          />
+        ))}
     </ProgressPrimitive.Root>
   );
 });
