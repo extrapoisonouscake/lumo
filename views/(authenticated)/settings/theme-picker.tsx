@@ -6,7 +6,10 @@ import { isIOSWebView } from "@/constants/ui";
 
 import { cn } from "@/helpers/cn";
 import { callNative } from "@/helpers/ios-bridge";
-import { prepareThemeColor } from "@/helpers/prepare-theme-color";
+import {
+  prepareThemeColor,
+  setThemeColorCSSVariable,
+} from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { Check } from "lucide-react";
@@ -39,10 +42,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
   const updateUserSettingMutation = useUpdateGenericUserSetting();
   const updateThemeLocally = (theme: string) => {
     setCurrentTheme(theme);
-    (document.querySelector(":root") as HTMLElement).style.setProperty(
-      "--brand",
-      theme
-    );
+    setThemeColorCSSVariable(theme);
     updateUserSettingState("themeColor", theme);
   };
   const onChangeHandler = async (theme: string) => {

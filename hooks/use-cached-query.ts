@@ -30,6 +30,7 @@ export function useCachedQuery<
   if (cacheDetails.params) {
     cacheKey += `-${JSON.stringify(cacheDetails.params)}`;
   }
+
   useEffect(() => {
     if (query.data) {
       saveClientResponseToCache(cacheKey, query.data, cacheDetails.ttlKey);

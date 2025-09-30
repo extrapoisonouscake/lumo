@@ -14,8 +14,11 @@ import {
 } from "@/lib/trpc/routes/myed/auth/public";
 import { useSearchParams } from "next/navigation";
 
+import { saveClientResponseToCache } from "@/helpers/cache";
+import { setThemeColorCSSVariable } from "@/helpers/prepare-theme-color";
 import { useLogIn } from "@/hooks/trpc/use-log-in";
 import { isTRPCError } from "@/lib/trpc/helpers";
+import { trpc, trpcClient } from "@/views/trpc";
 import { useNavigate } from "react-router";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(
@@ -67,7 +70,13 @@ export function LoginForm({
     }
     try {
       await loginMutation.mutateAsync(data);
+      const settings = await trpcClient.core.settings.getSettings.query();
 
+      saveClientResponseToCache(
+        trpc.core.settings.getSettings.queryKey()[0].join(","),
+        settings
+      );
+      setThemeColorCSSVariable(settings.themeColor);
       initClientLogin(navigate);
     } catch (e) {
       if (isTRPCError(e)) {
