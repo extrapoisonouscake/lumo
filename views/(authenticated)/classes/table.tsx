@@ -69,7 +69,7 @@ const getColumns = (
       return <SortableColumn {...column}>Average</SortableColumn>;
     },
     sortingFn: sortColumnWithNullablesLast<"average", SubjectWithAverage>(
-      (a, b) => b!.mark - a!.mark
+      (a, b) => a!.mark - b!.mark
     ),
     cell: ({ cell }) => {
       const average = cell.getValue();
