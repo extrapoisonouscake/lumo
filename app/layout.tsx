@@ -4,6 +4,7 @@ import {
   USER_THEME_COLOR_COOKIE_PREFIX,
 } from "@/constants/core";
 import "@/views/globals.css";
+import { THEME_STORAGE_KEY_NAME } from "@/views/theme-provider/constants";
 import { GeistSans } from "geist/font/sans";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -25,9 +26,10 @@ export default async function RootLayout({
       themeColor = cachedThemeColor.value;
     }
   }
+  const theme = store.get(THEME_STORAGE_KEY_NAME)?.value;
   return (
     <>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning className={theme}>
         <head>
           <style
             id="theme-color-style"

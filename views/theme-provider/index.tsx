@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { THEME_STORAGE_KEY_NAME } from "./constants";
 
 type Theme = "dark" | "light" | "system";
 
@@ -23,7 +24,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "ui-theme",
+  storageKey = THEME_STORAGE_KEY_NAME,
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
@@ -52,6 +53,7 @@ export function ThemeProvider({
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
+      document.cookie = `${storageKey}=${theme}; path=/`;
       setTheme(theme);
     },
   };
