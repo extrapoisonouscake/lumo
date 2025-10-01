@@ -7,15 +7,13 @@ import AssignmentPage from "./(authenticated)/classes/[subjectId]/[subjectName]/
 import SubjectPage from "./(authenticated)/classes/[subjectId]/[subjectName]/page";
 import SubjectsLayout from "./(authenticated)/classes/layout";
 import SubjectsPage from "./(authenticated)/classes/page";
+import GraduationSummaryPage from "./(authenticated)/graduation-summary/page";
 import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
 import OtherPage from "./(authenticated)/other/page";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
 import SettingsPage from "./(authenticated)/settings/page";
-import CreditSummaryPage from "./(authenticated)/transcript/credit-summary/page";
-import TranscriptEntriesPage from "./(authenticated)/transcript/entries/page";
-import GraduationSummaryPage from "./(authenticated)/transcript/graduation-summary/page";
 import UnauthenticatedLayout from "./(unauthenticated)/layout";
 import PrivacyPolicyPage from "./(unauthenticated)/legal/privacy-policy/page";
 import LoginPage from "./(unauthenticated)/login/page";
@@ -59,14 +57,8 @@ export default function Root() {
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="other" element={<OtherPage />} />
-                <Route path="transcript">
-                  <Route
-                    path="graduation"
-                    element={<GraduationSummaryPage />}
-                  />
-                  <Route path="entries" element={<TranscriptEntriesPage />} />
-                  <Route path="credit" element={<CreditSummaryPage />} />
-                </Route>
+
+                <Route path="graduation" element={<GraduationSummaryPage />} />
               </Route>
               <Route element={<UnauthenticatedLayout />}>
                 <Route path="login" element={<LoginPage />} />

@@ -18,6 +18,7 @@ import {
   ProgramRequirement,
   ProgramRequirementEntry,
   ProgramRequirementEntryStatus,
+  TranscriptEducationPlan,
 } from "@/types/school";
 import { trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
@@ -39,6 +40,13 @@ import {
 
 import { PageHeading } from "@/components/layout/page-heading";
 import { TitleManager } from "@/components/misc/title-manager";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ConditionalTooltip } from "@/components/ui/tooltip";
 import { useEffect, useMemo, useState } from "react";
 import { GraduationSummaryProgramsList } from "./programs-list";
@@ -64,13 +72,7 @@ type PreparedProgramRequirementEntry = ProgramRequirementEntry & {
 const getEntryPageId = (entry: ProgramRequirementEntry) => {
   return `entry-${entry.requirement.code}-${entry.code}`;
 };
-const formatProgress = (entry: PreparedProgramRequirementEntry) => {
-  const completedUnits = entry.completedUnits;
-  const requiredUnits = entry.requiredUnits;
-  return `${completedUnits.toFixed(1)}${
-    requiredUnits ? `/${requiredUnits.toFixed(1)}` : ""
-  }`;
-};
+
 const columnHelper = createColumnHelper<PreparedProgramRequirementEntry>();
 
 const baseColumns = [
@@ -110,7 +112,7 @@ const baseColumns = [
   columnHelper.accessor("completedUnits", {
     header: "Credits",
 
-    cell: ({ cell }) => formatProgress(cell.row.original),
+    cell: ({ cell }) => cell.row.original.completedUnits.toFixed(1),
   }),
   columnHelper.accessor("status", {
     id: "status",
@@ -148,20 +150,24 @@ export default function GraduationSummaryPage() {
       setCurrentEducationPlanId(initialPlan?.id ?? null);
     }
   }, [query.data?.educationPlans]);
+
   return (
     <>
       <TitleManager>Graduation Summary</TitleManager>
       <div className="flex flex-col gap-4">
-        <PageHeading />
+        <PageHeading
+          dynamicContent={
+            <ProgramSelect
+              currentId={currentEducationPlanId}
+              plans={query.data?.educationPlans}
+              onValueChange={setCurrentEducationPlanId}
+            />
+          }
+        />
         <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
           {({ breakdown, programs, educationPlans }) => (
             <div className="flex flex-col gap-6">
-              <GraduationSummaryProgramsList
-                programs={programs}
-                educationPlans={educationPlans}
-                currentEducationPlanId={currentEducationPlanId}
-                setCurrentEducationPlanId={setCurrentEducationPlanId}
-              />
+              <GraduationSummaryProgramsList programs={programs} />
               <CoursesBreakdown data={breakdown} />
             </div>
           )}
@@ -368,7 +374,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               <ResponsiveFilters
                 triggerClassName="h-full"
                 table={table}
-                filterKeys={["years", "status"]}
+                filterKeys={["yearsString", "status"]}
               >
                 {yearsSelect}
                 {statusSelect}
@@ -419,8 +425,8 @@ function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
       }
       items={[
         {
-          label: "Progress",
-          value: formatProgress(entry),
+          label: "Credits",
+          value: entry.completedUnits.toFixed(1),
         },
         { label: "Years", value: entry.yearsString },
         {
@@ -527,5 +533,30 @@ function EntryStatusBadge({
         {alternativeEntry && <InfoIcon className="size-3.5 sm:hidden" />}
       </div>
     </ConditionalTooltip>
+  );
+}
+function ProgramSelect({
+  currentId,
+  plans,
+  onValueChange,
+}: {
+  currentId: string | null;
+  plans?: TranscriptEducationPlan[];
+  onValueChange: (value: string | null) => void;
+}) {
+  if (!plans) return <div />;
+  return (
+    <Select value={currentId ?? undefined} onValueChange={onValueChange}>
+      <SelectTrigger className="w-fit">
+        <SelectValue placeholder="Select an education plan" />
+      </SelectTrigger>
+      <SelectContent>
+        {plans.map((plan) => (
+          <SelectItem key={plan.id} value={plan.id}>
+            {plan.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

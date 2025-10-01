@@ -181,7 +181,7 @@ export interface ProgramRequirementEntry {
   status: ProgramRequirementEntryStatus;
   alternativeEntry?: Omit<ProgramRequirementEntry, "alternativeEntry">;
   completedUnits: number;
-  requiredUnits?: number;
+  
 }
 
 export interface ProgramEntry {

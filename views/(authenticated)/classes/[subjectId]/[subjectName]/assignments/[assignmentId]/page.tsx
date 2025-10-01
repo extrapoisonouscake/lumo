@@ -17,7 +17,8 @@ import { useSubjectAssignment } from "@/hooks/trpc/use-subject-assignment";
 import { useSubjectSummary } from "@/hooks/trpc/use-subject-summary";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { AssignmentStatus, SubjectSummary } from "@/types/school";
+import { UserSettings } from "@/types/core";
+import { Assignment, AssignmentStatus, SubjectSummary } from "@/types/school";
 import {
   Award,
   Calendar,
@@ -25,6 +26,7 @@ import {
   CircleSlash,
   Clock,
   HelpCircle,
+  InfoIcon,
   LucideIcon,
   MessageSquare,
   MinusCircle,
@@ -67,22 +69,6 @@ export default function AssignmentPage() {
             categoryId,
           } = data;
 
-          const getScoreComparisonIcon = () => {
-            if (
-              status !== AssignmentStatus.Graded ||
-              !classAverage ||
-              typeof score !== "number"
-            ) {
-              return null;
-            }
-            if (score > classAverage) {
-              return <TrendingUp className="h-4 w-4 text-green-500" />;
-            } else if (score < classAverage) {
-              return <TrendingDown className="h-4 w-4 text-red-500" />;
-            }
-            return null;
-          };
-
           return (
             <>
               <TitleManager>
@@ -95,39 +81,9 @@ export default function AssignmentPage() {
                 <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
                   {/* Score Information */}
                   <AssignmentSectionCard title="Score" icon={Award}>
-                    <AssignmentPropertyRow
-                      label="Score"
-                      value={
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            {formatScore(settings?.shouldShowPercentages)(
-                              data,
-                              "score"
-                            )}
-                          </span>
-                          {classAverage && getScoreComparisonIcon() ? (
-                            <TooltipProvider>
-                              <Tooltip delayDuration={0}>
-                                <TooltipTrigger asChild>
-                                  <div className="cursor-help hover:opacity-80 transition-opacity">
-                                    {getScoreComparisonIcon()}
-                                  </div>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>
-                                    Class Average:{" "}
-                                    {formatScore(
-                                      settings?.shouldShowPercentages
-                                    )(data, "classAverage")}
-                                  </p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          ) : (
-                            getScoreComparisonIcon()
-                          )}
-                        </div>
-                      }
+                    <GradeRow
+                      assignment={data}
+                      shouldShowPercentages={settings?.shouldShowPercentages}
                     />
 
                     {weight && (
@@ -398,4 +354,69 @@ function CategoryRow({
   if (!category)
     return <PropertyRowSkeleton labelLength={12} valueLength={12} />;
   return <AssignmentPropertyRow label="Category" value={category.name} />;
+}
+function GradeRow({
+  assignment,
+  shouldShowPercentages,
+}: {
+  assignment: Assignment;
+  shouldShowPercentages: UserSettings["shouldShowPercentages"];
+}) {
+  const getScoreComparisonIcon = () => {
+    if (
+      assignment.status !== AssignmentStatus.Graded ||
+      !assignment.classAverage ||
+      typeof assignment.score !== "number"
+    ) {
+      return null;
+    }
+    if (assignment.score > assignment.classAverage) {
+      return <TrendingUp className="h-4 w-4 text-green-500" />;
+    } else if (assignment.score < assignment.classAverage) {
+      return <TrendingDown className="h-4 w-4 text-red-500" />;
+    }
+    return null;
+  };
+  const mainContent = (
+    <span className="font-medium">
+      {formatScore(shouldShowPercentages)(assignment, "score")}
+    </span>
+  );
+  const iconContent = getScoreComparisonIcon();
+  return (
+    <AssignmentPropertyRow
+      label="Score"
+      value={
+        iconContent ? (
+          <TooltipProvider>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 cursor-help group">
+                  {mainContent}
+                  <div className="group-hover:opacity-80 transition-opacity">
+                    {getScoreComparisonIcon()}
+                  </div>
+                  <InfoIcon
+                    className="size-3 text-muted-foreground"
+                    strokeWidth={2.5}
+                  />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  Class Average:{" "}
+                  {formatScore(shouldShowPercentages)(
+                    assignment,
+                    "classAverage"
+                  )}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          mainContent
+        )
+      }
+    />
+  );
 }

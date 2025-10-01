@@ -43,31 +43,10 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     icon: Calendar,
     showOnMobile: true,
   },
-  "/transcript": {
-    breadcrumb: [{ name: "Transcript" }],
+  "/graduation": {
+    breadcrumb: [{ name: "Graduation Summary" }],
     icon: ScrollText,
-    items: [
-      {
-        title: "Graduation Summary",
-        href: "/graduation",
-      },
-      {
-        title: "Entries",
-        href: "/entries",
-      },
-      {
-        title: "Credit Summary",
-        href: "/credit",
-      },
-      // {
-      //   title: "GPA",
-      //   href: "/gpa",
-      // },
-      // {
-      //   title: "Programs of Study",
-      //   href: "/programs-of-study",
-      // },
-    ],
+    showOnMobile: false,
   },
   "/other": {
     breadcrumb: [{ name: "Menu" }],

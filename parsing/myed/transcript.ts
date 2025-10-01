@@ -75,39 +75,47 @@ export function parseGraduationSummary({
 
   const programs = parsePrograms($);
 
-  const programsWithNames = programs.map((program) => ({
-    ...program,
-    requirements: program.requirements?.map((requirement) => ({
-      ...requirement,
-      name: breakdown.find((course) => course.code === requirement.code)?.name,
-      pendingUnits: breakdown
+  const programsWithNames = programs.map((program) => {
+    const getPendingUnits = (requirement: ProgramMinifiedRequirement) => {
+      const units = breakdown
         .find((course) => course.code === requirement.code)
         ?.entries.filter(
           (entry) => entry.status === ProgramRequirementEntryStatus.Pending
         )
-        .reduce((acc, entry) => acc + entry.completedUnits, 0),
-    })),
-  }));
-  const allMinifiedRequirements = programs
-    .flatMap((program) => program.requirements)
-    .filter(
-      (requirement): requirement is ProgramMinifiedRequirement =>
-        requirement !== undefined
+        .reduce((acc, entry) => acc + (entry.completedUnits ?? 0), 0);
+
+      return units;
+    };
+    const requirementsWithPendingUnits = program.requirements?.map(
+      (requirement) => ({
+        ...requirement,
+        name: breakdown.find((course) => course.code === requirement.code)
+          ?.name,
+        pendingUnits: getPendingUnits(requirement),
+        requirements: requirement.requirements?.map((nestedRequirement) => ({
+          ...nestedRequirement,
+          pendingUnits: getPendingUnits(nestedRequirement),
+        })),
+      })
     );
+    return {
+      ...program,
+      requirements: requirementsWithPendingUnits,
+      pendingUnits: requirementsWithPendingUnits
+        ?.flatMap((requirement) => [
+          requirement.pendingUnits,
+          ...(requirement.requirements?.map(
+            (requirement) => requirement.pendingUnits
+          ) ?? []),
+        ])
+        .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0),
+    };
+  });
+
   const plans = parseEducationPlans($);
-  const breakdownWithRequiredUnits = breakdown.map((requirement) => ({
-    ...requirement,
-    entries: requirement.entries.map((entry) => ({
-      ...entry,
-      requiredUnits: allMinifiedRequirements.find(
-        (requirement) => requirement.code === entry.code
-      )?.requiredUnits,
-    })),
-  }));
-  const allEntries = breakdownWithRequiredUnits.flatMap(
-    (requirement) => requirement.entries
-  );
-  const preparedBreakdown = breakdownWithRequiredUnits.map((requirement) => ({
+
+  const allEntries = breakdown.flatMap((requirement) => requirement.entries);
+  const preparedBreakdown = breakdown.map((requirement) => ({
     ...requirement,
     entries: requirement.entries.map((entry) => ({
       ...entry,
@@ -217,14 +225,7 @@ function parsePrograms($: cheerio.CheerioAPI): ProgramEntry[] {
         code: cellsValues[headerMap["Code"]!]!,
         requiredUnits: +cellsValues[headerMap["Required unit"]!]!.trim(),
         completedUnits,
-        pendingUnits: requirements
-          ?.flatMap((requirement) => [
-            requirement.pendingUnits,
-            ...(requirement.requirements?.map(
-              (requirement) => requirement.pendingUnits
-            ) ?? []),
-          ])
-          .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0),
+
         excessUnits,
         creditsWaived:
           creditsWaivedString.length > 0 ? +creditsWaivedString : undefined,

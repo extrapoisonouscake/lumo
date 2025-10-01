@@ -12,15 +12,8 @@ import {
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
 import { ScrollShadow } from "@/components/ui/scroll-shadow";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/helpers/cn";
-import { ProgramEntry, TranscriptEducationPlan } from "@/types/school";
+import { ProgramEntry } from "@/types/school";
 import {
   CheckCircle,
   CircleSlash,
@@ -29,17 +22,12 @@ import {
   XCircle,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import { GPAOverview } from "./gpa-overview";
 
 export function GraduationSummaryProgramsList({
   programs,
-  educationPlans,
-  currentEducationPlanId,
-  setCurrentEducationPlanId,
 }: {
   programs: ProgramEntry[];
-  educationPlans: TranscriptEducationPlan[];
-  currentEducationPlanId: string | null;
-  setCurrentEducationPlanId: (id: string | null) => void;
 }) {
   const [currentProgramIndex, setCurrentProgramIndex] = useState<number | null>(
     null
@@ -83,26 +71,12 @@ export function GraduationSummaryProgramsList({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-between flex-wrap sm:items-center gap-2">
+      <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
           <GraduationCap className="h-5 w-5 text-brand" />
           <h2 className="text-lg font-semibold">Programs</h2>
         </div>
-        <Select
-          value={currentEducationPlanId ?? undefined}
-          onValueChange={(value) => setCurrentEducationPlanId(value)}
-        >
-          <SelectTrigger className="w-fit">
-            <SelectValue placeholder="Select an education plan" />
-          </SelectTrigger>
-          <SelectContent>
-            {educationPlans.map((plan) => (
-              <SelectItem key={plan.id} value={plan.id}>
-                {plan.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <GPAOverview />
       </div>
       {content}
       <RequirementDialog
@@ -135,7 +109,18 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
       includedPrograms.reduce((acc, program) => acc + program.requiredUnits, 0),
     [includedPrograms]
   );
-  const progressPercentage = (totalCompletedUnits / totalRequiredUnits) * 100;
+  const totalPendingUnits = useMemo(
+    () =>
+      includedPrograms.reduce(
+        (acc, program) => acc + (program.pendingUnits ?? 0),
+        0
+      ),
+    [includedPrograms]
+  );
+  const percentages = {
+    completed: (totalCompletedUnits / totalRequiredUnits) * 100,
+    pending: (totalPendingUnits / totalRequiredUnits) * 100,
+  };
   return (
     <Card className="px-4 py-3 flex-row flex-wrap justify-between gap-2">
       <p className="text-sm text-muted-foreground">Total</p>
@@ -143,17 +128,21 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
         <p className="text-sm font-medium">
           {totalCompletedUnits} / {totalRequiredUnits} units{" "}
           <span className="text-muted-foreground">
-            ({progressPercentage.toFixed(1)}%)
+            ({percentages.completed.toFixed(1)}%)
           </span>
         </p>
-        {progressPercentage >= 100 ? (
-          <CheckCircle strokeWidth={2.3} className="size-4 text-brand" />
+        {percentages.completed >= 100 ? (
+          <CheckCircle strokeWidth={2.3} className="size-4 text-green-500" />
         ) : (
           <CircularProgress
             values={[
               {
-                value: progressPercentage,
-                fillColor: "brand",
+                value: percentages.completed,
+                fillColor: "green-500",
+              },
+              {
+                value: percentages.pending,
+                fillColor: "yellow-400",
               },
             ]}
             size="small"
@@ -229,7 +218,7 @@ function ProgramCard({
           segments={
             percentages
               ? [
-                  { value: percentages?.completed },
+                  { value: percentages?.completed, color: "bg-green-500" },
                   {
                     value: percentages?.pending ?? 0,
                     color: "bg-yellow-400",
@@ -245,7 +234,7 @@ function ProgramCard({
           <span
             className={cn(
               "font-medium",
-              isExcluded ? "text-muted-foreground" : "text-brand"
+              isExcluded ? "text-muted-foreground" : "text-green-500"
             )}
           >
             {percentages?.completed.toFixed(1)}%
@@ -322,7 +311,7 @@ function RequirementCard({
         {percentages && (
           <CircularProgress
             values={[
-              { value: percentages.completed, fillColor: "brand" },
+              { value: percentages.completed, fillColor: "green-500" },
               { value: percentages.pending ?? 0, fillColor: "yellow-400" },
             ]}
             size="normal"

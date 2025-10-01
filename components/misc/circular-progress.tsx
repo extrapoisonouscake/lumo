@@ -1,10 +1,27 @@
 import { cn } from "@/helpers/cn";
+import { useMemo } from "react";
 
 interface ProgressValue {
   value: number;
   fillColor: string;
 }
-
+const limitValues = (values: ProgressValue[]) => {
+  let cumulativeValue = 0;
+  const limitedValues: ProgressValue[] = [];
+  for (const value of values) {
+    const newCumulativeValue = cumulativeValue + value.value;
+    if (newCumulativeValue > 100) {
+      limitedValues.push({
+        ...value,
+        value: 100 - cumulativeValue,
+      });
+      break;
+    }
+    cumulativeValue = newCumulativeValue;
+    limitedValues.push(value);
+  }
+  return limitedValues;
+};
 export function CircularProgress({
   values,
   letter,
@@ -21,11 +38,7 @@ export function CircularProgress({
   const circumference = Math.PI * 20;
   const strokeWidth = thickness ?? (size === "small" ? "2.5" : "1.5");
 
-  // Build stroke-dasharray pattern for all segments
-  const dashArray = values
-    .map((progressValue) => (progressValue.value / 100) * circumference)
-    .join(" ");
-
+  const limitedValues = useMemo(() => limitValues(values), [values]);
   return (
     <div className={cn("relative", className)}>
       <svg
@@ -46,7 +59,7 @@ export function CircularProgress({
         />
 
         {/* Single progress circle with multiple colored segments */}
-        {values.map((progressValue, index) => {
+        {limitedValues.map((progressValue, index) => {
           if (progressValue.value === 0) return null;
 
           // Calculate where this segment starts

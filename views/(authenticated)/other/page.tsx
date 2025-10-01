@@ -2,27 +2,15 @@ import { PageHeading } from "@/components/layout/page-heading";
 import {
   ChevronRight,
   GraduationCap,
-  List,
   LucideIcon,
   Settings,
-  Shapes,
 } from "lucide-react";
 import { Link } from "react-router";
 const items = [
   {
     title: "Graduation Summary",
-    href: "/transcript/graduation",
+    href: "/graduation",
     icon: GraduationCap,
-  },
-  {
-    title: "Credit Entries",
-    href: "/transcript/entries",
-    icon: List,
-  },
-  {
-    title: "Credit Summary",
-    href: "/transcript/credit",
-    icon: Shapes,
   },
   { title: "Settings", href: "/settings", icon: Settings },
 ];
