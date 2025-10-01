@@ -8,6 +8,7 @@ import {
   ResponsiveDialogTitle,
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { TranscriptEntry } from "@/types/school";
 import { trpc } from "@/views/trpc";
@@ -20,7 +21,7 @@ export function GPAOverview() {
     trpc.myed.transcript.getTranscriptEntries.queryOptions()
   );
   return (
-    <QueryWrapper query={transcriptEntries}>
+    <QueryWrapper query={transcriptEntries} skeleton={<GPAOverviewSkeleton />}>
       {(data) => <Content data={data} />}
     </QueryWrapper>
   );
@@ -122,4 +123,7 @@ function TranscriptEntryCard(entry: TranscriptEntry) {
       ]}
     />
   );
+}
+function GPAOverviewSkeleton() {
+  return <Skeleton className="text-sm">GPA: 4.0</Skeleton>;
 }
