@@ -50,7 +50,10 @@ const sendNotificationsToUser = async ({
       where: eq(tracked_school_data.userId, hashedId),
     }),
   ]);
-
+  console.log("trackedData");
+  console.log(trackedData?.subjects);
+  console.log("subscriptions");
+  console.log(subscriptions);
   const subjectsSavedAssignments = trackedData
     ? Object.fromEntries(
         Object.entries(
@@ -77,7 +80,8 @@ const sendNotificationsToUser = async ({
     );
     subjectsWithAssignments.push({ ...subject, assignments });
   }
-
+  console.log("subjectsWithAssignments");
+  console.log(subjectsWithAssignments);
   const notifications: Array<{
     type: NotificationType;
     subject: Subject;
@@ -119,7 +123,8 @@ const sendNotificationsToUser = async ({
       }
     }
   }
-
+  console.log("notifications");
+  console.log(notifications);
   const broadcastNotificationWithSubscriptions =
     broadcastNotificationToSubscriptions(subscriptions);
 

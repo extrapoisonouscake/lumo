@@ -54,7 +54,7 @@ export const settingsRouter = router({
           .set({
             [key]: value,
           })
-          .where(eq(user_settings.userId, ctx.studentHashedId));
+          .where(eq(user_settings.userId, ctx.studentDatabaseId));
 
         if (key === "themeColor") setThemeColorCache(cookieStore, value);
       }
@@ -78,7 +78,7 @@ export const settingsRouter = router({
         .set({
           widgetsConfiguration: widgetsConfiguration as WidgetsConfiguration,
         })
-        .where(eq(user_settings.userId, ctx.studentHashedId));
+        .where(eq(user_settings.userId, ctx.studentDatabaseId));
     }),
   subscribeToNotifications: authenticatedProcedure
     .input(
@@ -94,7 +94,7 @@ export const settingsRouter = router({
       ])
     )
 
-    .mutation(async ({ ctx: { cookieStore, studentHashedId }, input }) => {
+    .mutation(async ({ ctx: { cookieStore, studentDatabaseId }, input }) => {
       let targetValue =
         "endpointUrl" in input ? input.endpointUrl : input.apnsDeviceToken;
 
@@ -105,7 +105,7 @@ export const settingsRouter = router({
       await db
         .insert(notifications_subscriptions)
         .values({
-          userId: studentHashedId,
+          userId: studentDatabaseId,
 
           deviceId,
           ...input,
@@ -113,7 +113,7 @@ export const settingsRouter = router({
         .onConflictDoNothing();
     }),
   unsubscribeFromNotifications: authenticatedProcedure.mutation(
-    async ({ ctx: { studentHashedId, cookieStore } }) => {
+    async ({ ctx: { studentDatabaseId, cookieStore } }) => {
       const deviceId = cookieStore.get(DEVICE_ID_COOKIE_NAME)?.value;
       if (!deviceId) {
         throw new TRPCError({
@@ -121,7 +121,7 @@ export const settingsRouter = router({
           message: "Device ID not found",
         });
       }
-      await runNotificationUnsubscriptionDBCalls(studentHashedId, deviceId);
+      await runNotificationUnsubscriptionDBCalls(studentDatabaseId, deviceId);
       cookieStore.delete(DEVICE_ID_COOKIE_NAME);
     }
   ),
@@ -131,13 +131,13 @@ const getNotificationsSubscriptionByDeviceId = async (deviceId: string) => {
     where: eq(notifications_subscriptions.deviceId, deviceId),
   });
 };
-const getGenericUserSettings = async (studentHashedId: string) => {
+const getGenericUserSettings = async (studentDatabaseId: string) => {
   const [settings, notificationsSettings] = await Promise.all([
     db.query.user_settings.findFirst({
-      where: eq(user_settings.userId, studentHashedId),
+      where: eq(user_settings.userId, studentDatabaseId),
     }),
     db.query.notifications_settings.findFirst({
-      where: eq(notifications_settings.userId, studentHashedId),
+      where: eq(notifications_settings.userId, studentDatabaseId),
     }),
   ]);
   let settingsToReturn;
@@ -154,7 +154,7 @@ const getGenericUserSettings = async (studentHashedId: string) => {
 };
 export const getUserSettings = async (ctx: TRPCContext) => {
   const promises: Promise<any>[] = [
-    getGenericUserSettings(ctx.studentHashedId),
+    getGenericUserSettings(ctx.studentDatabaseId),
   ];
   const deviceId = ctx.cookieStore.get(DEVICE_ID_COOKIE_NAME)?.value;
   if (deviceId) {

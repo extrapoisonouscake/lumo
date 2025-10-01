@@ -48,27 +48,27 @@ export const updateSubjectLastAssignments = async (
 };
 
 export const runNotificationUnsubscriptionDBCalls = async (
-  studentHashedId: string,
+  studentDatabaseId: string,
   deviceId: string
 ) => {
   await db
     .delete(notifications_subscriptions)
     .where(
       and(
-        eq(notifications_subscriptions.userId, studentHashedId),
+        eq(notifications_subscriptions.userId, studentDatabaseId),
         eq(notifications_subscriptions.deviceId, deviceId)
       )
     );
   const existingSubscription =
     await db.query.notifications_subscriptions.findFirst({
       where: and(
-        eq(notifications_subscriptions.userId, studentHashedId),
+        eq(notifications_subscriptions.userId, studentDatabaseId),
         eq(notifications_subscriptions.deviceId, deviceId)
       ),
     });
   if (!existingSubscription) {
     await db
       .delete(tracked_school_data)
-      .where(eq(tracked_school_data.userId, studentHashedId));
+      .where(eq(tracked_school_data.userId, studentDatabaseId));
   }
 };

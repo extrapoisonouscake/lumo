@@ -244,7 +244,7 @@ export const authRouter = router({
             await db
               .update(users)
               .set({ lastLoggedInAt: new Date() })
-              .where(eq(users.id, ctx.studentHashedId));
+              .where(eq(users.id, ctx.studentDatabaseId));
           });
         }
       } catch {

@@ -64,7 +64,7 @@ export const subjectsRouter = router({
     .query(
       async ({
         input: { id, termId, term },
-        ctx: { getMyEd, studentHashedId },
+        ctx: { getMyEd, studentDatabaseId },
       }) => {
         const response = await getMyEd("subjectAssignments", {
           id,
@@ -78,7 +78,7 @@ export const subjectsRouter = router({
         ) {
           after(
             updateSubjectLastAssignments(
-              studentHashedId,
+              studentDatabaseId,
               id,
               response.assignments.map(prepareAssignmentForDBStorage)
             )

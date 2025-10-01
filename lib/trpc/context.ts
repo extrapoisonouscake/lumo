@@ -6,18 +6,18 @@ import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adap
 import { cookies, headers } from "next/headers";
 type AuthenticatedTRPCContext = {
   studentId: string;
-  studentHashedId: string;
+  studentDatabaseId: string;
   credentials: { username: string; password: string };
   tokens?: string;
 };
 export const createTRPCContext = async () => {
   const store = await cookies();
   const cookieStore = await MyEdCookieStore.create(store);
-  let studentHashedId, username, password, tokens, studentId;
+  let studentDatabaseId, username, password, tokens, studentId;
   try {
     studentId = cookieStore.get("studentId")?.value;
     if (studentId) {
-      studentHashedId = hashString(studentId);
+      studentDatabaseId = hashString(studentId);
     }
     const credentials = cookieStore.get("credentials")?.value;
     [username, password] =
@@ -37,7 +37,7 @@ export const createTRPCContext = async () => {
   );
   return {
     studentId,
-    studentHashedId,
+    studentDatabaseId,
     credentials: { username, password },
     tokens,
     ip,

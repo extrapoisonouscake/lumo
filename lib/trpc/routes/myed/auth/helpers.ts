@@ -312,9 +312,9 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
     const deviceId = cookiePlainStore.get(DEVICE_ID_COOKIE_NAME)?.value;
     const studentId = cookieStore.get(AUTH_COOKIES_NAMES.studentId)?.value;
     if (deviceId && studentId) {
-      const studentHashedId = hashString(studentId);
+      const studentDatabaseId = hashString(studentId);
       after(() =>
-        runNotificationUnsubscriptionDBCalls(studentHashedId, deviceId)
+        runNotificationUnsubscriptionDBCalls(studentDatabaseId, deviceId)
       );
       cookiePlainStore.delete(DEVICE_ID_COOKIE_NAME);
     }
