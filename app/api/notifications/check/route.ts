@@ -50,10 +50,6 @@ const sendNotificationsToUser = async ({
       where: eq(tracked_school_data.userId, hashedId),
     }),
   ]);
-  console.log("trackedData");
-  console.log(JSON.stringify(trackedData?.subjects));
-  console.log("subscriptions");
-  console.log(JSON.stringify(subscriptions));
   const subjectsSavedAssignments = trackedData
     ? Object.fromEntries(
         Object.entries(
@@ -80,8 +76,6 @@ const sendNotificationsToUser = async ({
     );
     subjectsWithAssignments.push({ ...subject, assignments });
   }
-  console.log("subjectsWithAssignments");
-  console.log(JSON.stringify(subjectsWithAssignments));
   const notifications: Array<{
     type: NotificationType;
     subject: Subject;
@@ -125,8 +119,6 @@ const sendNotificationsToUser = async ({
       }
     }
   }
-  console.log("notifications");
-  console.log(notifications);
   const broadcastNotificationWithSubscriptions =
     broadcastNotificationToSubscriptions(subscriptions);
 
@@ -174,17 +166,17 @@ const generators: Record<
   }) => NotificationData
 > = {
   [NotificationType.NewAssignment]: ({ subject, assignment }) => ({
-    title: `📝 New assignment for ${subject.name}`,
+    title: `New assignment for ${subject.name}`,
     body: `A new assignment '${assignment.name}' has been posted.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.NewGrade]: ({ subject, assignment }) => ({
-    title: `⭐ Grade posted for ${assignment.name}`,
+    title: `Grade posted for ${assignment.name}`,
     body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.GradeUpdated]: ({ subject, assignment }) => ({
-    title: `✍️ Grade updated for ${assignment.name}`,
+    title: `Grade updated for ${assignment.name}`,
     body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
