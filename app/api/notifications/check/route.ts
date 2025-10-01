@@ -51,9 +51,9 @@ const sendNotificationsToUser = async ({
     }),
   ]);
   console.log("trackedData");
-  console.log(trackedData?.subjects);
+  console.log(JSON.stringify(trackedData?.subjects));
   console.log("subscriptions");
-  console.log(subscriptions);
+  console.log(JSON.stringify(subscriptions));
   const subjectsSavedAssignments = trackedData
     ? Object.fromEntries(
         Object.entries(
@@ -81,7 +81,7 @@ const sendNotificationsToUser = async ({
     subjectsWithAssignments.push({ ...subject, assignments });
   }
   console.log("subjectsWithAssignments");
-  console.log(subjectsWithAssignments);
+  console.log(JSON.stringify(subjectsWithAssignments));
   const notifications: Array<{
     type: NotificationType;
     subject: Subject;
