@@ -221,9 +221,9 @@ export const authRouter = router({
   sendPasswordResetEmail,
   //* if the name is changed, change in trpc client initialization as well
   ensureValidSession: authenticatedProcedure
-    .input(z.object({ force: z.boolean().optional() }).optional())
+    .input(z.object({ isInBackground: z.boolean().optional() }).optional())
     .mutation(async ({ ctx, input }) => {
-      if (ctx.tokens && !input?.force) {
+      if (ctx.tokens) {
         const expiresAt = ctx.authCookieStore.get(
           AUTH_COOKIES_NAMES.tokensExpireAt
         )?.value;
@@ -239,7 +239,7 @@ export const authRouter = router({
 
         setUpSessionTokens({ tokens, store: ctx.authCookieStore });
 
-        if (!input?.force) {
+        if (!input?.isInBackground) {
           after(async () => {
             await db
               .update(users)

@@ -22,7 +22,7 @@ import { after } from "next/server";
 export async function POST() {
   const context = await createTRPCContext();
   const caller = createCaller(context);
-  await caller.myed.auth.ensureValidSession();
+  await caller.myed.auth.ensureValidSession({ isInBackground: true });
   //cookies are updated
   const newContext = await createTRPCContext();
   after(async () => {
@@ -95,13 +95,15 @@ const sendNotificationsToUser = async ({
         for (const assignment of subject.assignments) {
           const savedAssignment = savedAssignments[assignment.id];
           if (savedAssignment) {
-            const isScoreUpdated =
-              typeof savedAssignment.score === "number" &&
+            const isScoreDifferent =
               typeof assignment.score === "number" &&
               savedAssignment.score !== assignment.score;
-            if (isScoreUpdated) {
+            if (isScoreDifferent) {
               notifications.push({
-                type: NotificationType.GradeUpdated,
+                type:
+                  typeof savedAssignment.score === "number"
+                    ? NotificationType.GradeUpdated
+                    : NotificationType.NewGrade,
                 subject,
                 assignment,
               });
