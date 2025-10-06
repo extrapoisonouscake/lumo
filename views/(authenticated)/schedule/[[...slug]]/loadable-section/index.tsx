@@ -432,6 +432,7 @@ function useWaitForScrollEnd(ref: MutableRefObject<HTMLDivElement | null>) {
   const isScrollingRef = useRef(false);
   const scrollEndPromiseRef = useRef<Promise<void> | null>(null);
   const scrollEndResolveRef = useRef<(() => void) | null>(null);
+  const scrollEndTimerRef = useRef<number | null>(null);
   const handleScrollStart = useCallback(() => {
     isScrollingRef.current = true;
 
@@ -454,6 +455,17 @@ function useWaitForScrollEnd(ref: MutableRefObject<HTMLDivElement | null>) {
     }
   }, []);
 
+  // Debounced scroll handler to synthesize a reliable scrollend on iOS/Safari
+  const onScroll = useCallback(() => {
+    handleScrollStart();
+    if (scrollEndTimerRef.current !== null) {
+      window.clearTimeout(scrollEndTimerRef.current);
+    }
+    scrollEndTimerRef.current = window.setTimeout(() => {
+      handleScrollEnd();
+    }, 120);
+  }, [handleScrollStart, handleScrollEnd]);
+
   const waitForScrollEnd = useCallback(async () => {
     if (!isScrollingRef.current) {
       return;
@@ -468,31 +480,62 @@ function useWaitForScrollEnd(ref: MutableRefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
-
+    const controller = new AbortController();
     // Desktop scroll events
-    container.addEventListener("scroll", handleScrollStart, { passive: true });
-    container.addEventListener("scrollend", handleScrollEnd, { passive: true });
+    container.addEventListener("scroll", onScroll, {
+      passive: true,
+      signal: controller.signal,
+    });
+    container.addEventListener("scrollend", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
 
     // Touch events for mobile devices
     container.addEventListener("touchstart", handleScrollStart, {
       passive: true,
+      signal: controller.signal,
     });
-    container.addEventListener("touchend", handleScrollEnd, { passive: true });
+    container.addEventListener("touchend", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
+    container.addEventListener("touchcancel", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
 
     // Mouse events for desktop
     container.addEventListener("mousedown", handleScrollStart, {
       passive: true,
+      signal: controller.signal,
     });
-    container.addEventListener("mouseup", handleScrollEnd, { passive: true });
+    container.addEventListener("mouseup", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
+
+    // Pointer events (unified across mouse/touch/pen); improves iOS behavior
+    container.addEventListener("pointerdown", handleScrollStart, {
+      passive: true,
+      signal: controller.signal,
+    });
+    container.addEventListener("pointerup", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
+    container.addEventListener("pointercancel", handleScrollEnd, {
+      passive: true,
+      signal: controller.signal,
+    });
 
     return () => {
-      container.removeEventListener("scroll", handleScrollStart);
-      container.removeEventListener("scrollend", handleScrollEnd);
-      container.removeEventListener("touchstart", handleScrollStart);
-      container.removeEventListener("touchend", handleScrollEnd);
-      container.removeEventListener("mousedown", handleScrollStart);
-      container.removeEventListener("mouseup", handleScrollEnd);
+      if (scrollEndTimerRef.current !== null) {
+        window.clearTimeout(scrollEndTimerRef.current);
+        scrollEndTimerRef.current = null;
+      }
+      controller.abort();
     };
-  }, [handleScrollStart, handleScrollEnd]);
+  }, [handleScrollStart, handleScrollEnd, onScroll]);
   return waitForScrollEnd;
 }

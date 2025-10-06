@@ -24,7 +24,7 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory} from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
@@ -185,9 +185,9 @@ export function ScheduleTable({
       timeCell = cells.find((cell) => cell.column.id === "time");
       nameCell = cells.find((cell) => cell.column.id === "name");
     }
-    const isTeacherAdvisory =
-      isSubject && rowOriginal.name === TEACHER_ADVISORY_ABBREVIATION;
-    const shouldRedirect = isSubject && !isTeacherAdvisory && rowOriginal.id;
+    const isTeacherAdvisoryRow =
+      isSubject && isTeacherAdvisory(rowOriginal.name);
+    const shouldRedirect = isSubject && !isTeacherAdvisoryRow && rowOriginal.id;
     return (
       <TableRow
         onClick={
@@ -236,7 +236,7 @@ export function ScheduleTable({
     () => (row: Row<ScheduleRow>) => {
       const isSubjectRow =
         row.original.type === "subject" &&
-        !(row.original.name === TEACHER_ADVISORY_ABBREVIATION);
+        !isTeacherAdvisory(row.original.name);
       const shouldBeClickable = !isLoading && isSubjectRow;
       return cn({
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-(--mobile-menu-height) bg-background shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
@@ -275,7 +275,7 @@ export function ScheduleTable({
               !!(
                 typeof currentRowIndex === "number" &&
                 (data[currentRowIndex]!.type !== "subject" ||
-                  data[currentRowIndex]!.name === TEACHER_ADVISORY_ABBREVIATION)
+                  isTeacherAdvisory(data[currentRowIndex]!.name))
               )
             }
           />
@@ -317,8 +317,8 @@ export function ScheduleBreak({
 }
 function ScheduleMobileRow(row: ScheduleRow) {
   const isSubject = row.type === "subject";
-  const isTeacherAdvisory =
-    isSubject && row.name === TEACHER_ADVISORY_ABBREVIATION;
+  const isTeacherAdvisoryRow =
+    isSubject && isTeacherAdvisory(row.name);
   const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
   const content = (
     <Card
@@ -331,7 +331,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
           "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] shadow-[0_0_45px_hsl(var(--background))]!":
             isCurrent && isSubject,
           "border-none py-2.5 rounded-md items-center": !isSubject,
-          clickable: isSubject && !isTeacherAdvisory,
+          clickable: isSubject && !isTeacherAdvisoryRow,
         }
       )}
     >
@@ -365,7 +365,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
           <p>{row.room}</p>
         </div>
       )}
-      {isSubject && !isTeacherAdvisory && (
+      {isSubject && !isTeacherAdvisoryRow && (
         <ChevronRight className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
       )}
     </Card>
@@ -380,7 +380,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
     ),
   };
 
-  if (isSubject && !isTeacherAdvisory) {
+  if (isSubject && !isTeacherAdvisoryRow) {
     return (
       <Link
         to={getSubjectPageURLWithDefinedYear({

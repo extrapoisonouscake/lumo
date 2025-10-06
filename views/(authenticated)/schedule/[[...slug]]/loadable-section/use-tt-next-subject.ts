@@ -1,4 +1,4 @@
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { timezonedDayJS } from "@/instances/dayjs";
 import {} from "@/types/school";
 import { useEffect, useState } from "react";
@@ -68,12 +68,12 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
           let rowsToSkip;
           if (
             isRowScheduleSubject(nextRow) &&
-            nextRow.name === TEACHER_ADVISORY_ABBREVIATION
+            isTeacherAdvisory(nextRow.name)
           ) {
             rowsToSkip = 3;
           } else if (
             isRowScheduleSubject(currentRow) &&
-            currentRow.name === TEACHER_ADVISORY_ABBREVIATION
+            isTeacherAdvisory(currentRow.name)
           ) {
             rowsToSkip = 2;
           } else {

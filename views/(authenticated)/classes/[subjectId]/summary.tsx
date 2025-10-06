@@ -44,7 +44,7 @@ const termToLabel: Record<SubjectTerm, string> = {
 export function SubjectSummary(
   summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
 ) {
-  const { id, term, name, academics, year, shouldShowLetterGrade } = summary;
+  const { id, term, name, academics, year, shouldShowLetterGrade,attendance } = summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted
@@ -60,7 +60,7 @@ export function SubjectSummary(
     <Card className="flex flex-col gap-3 relative items-center">
       <div className="block p-2 md:absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
-          <SubjectAttendance id={id} year={year} />
+          <SubjectAttendance id={id} year={year} tardyCount={attendance.tardy} />
 
           <LetterGradeSwitch
             value={isLetterGradeShown}

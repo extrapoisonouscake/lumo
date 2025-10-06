@@ -77,7 +77,7 @@ function ScoreIcon({
     return null;
   }
   if (score > classAverage) {
-    return <TrendingUpIcon className="size-4 text-green-500" />;
+    return <TrendingUpIcon className="size-4 text-green-600" />;
   }
   return <TrendingDownIcon className="size-4 text-red-500" />;
 }

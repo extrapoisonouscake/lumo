@@ -21,7 +21,7 @@ import {
 } from "@/helpers/makeTableColumnsSkeletons";
 
 import { ContentCard } from "@/components/misc/content-card";
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory} from "@/helpers/prettifyEducationalName";
 import {
   displayTableCellWithFallback,
   renderTableCell,
@@ -169,25 +169,25 @@ export function SubjectsTable({
   const getRowRenderer: RowRendererFactory<SubjectWithAverage> =
     (table) => (row) => {
       const cells = row.getVisibleCells();
-      const isTeacherAdvisory =
-        row.original.name === TEACHER_ADVISORY_ABBREVIATION;
+      const isTeacherAdvisoryRow =
+        isTeacherAdvisory(row.original.name);
       return (
         <TableRow
           key={row.id}
           onClick={
-            !isTeacherAdvisory
+            !isTeacherAdvisoryRow
               ? () => navigate(getSubjectPageURL(year)(row.original))
               : undefined
           }
           data-state={row.getIsSelected() && "selected"}
           style={table.options.meta?.getRowStyles?.(row)}
           className={cn(table.options.meta?.getRowClassName?.(row), {
-            "cursor-pointer": !isTeacherAdvisory,
+            "cursor-pointer": !isTeacherAdvisoryRow,
           })}
         >
           {cells.map((cell, i) => {
             const content = renderTableCell(cell);
-            const showArrow = i === cells.length - 1 && !isTeacherAdvisory;
+            const showArrow = i === cells.length - 1 && !isTeacherAdvisoryRow;
             return showArrow ? (
               <TableCellWithRedirectIcon key={cell.id}>
                 {content}
@@ -203,9 +203,6 @@ export function SubjectsTable({
   const table = useTable(data, isLoading ? columnsSkeletons : columns, {
     state: {
       columnVisibility,
-    },
-    initialState: {
-      sorting: [{ id: "average", desc: true }],
     },
     sortDescFirst: false,
   });

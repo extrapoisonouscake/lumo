@@ -132,13 +132,13 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
           </span>
         </p>
         {percentages.completed >= 100 ? (
-          <CheckCircle strokeWidth={2.3} className="size-4 text-green-500" />
+          <CheckCircle strokeWidth={2.3} className="size-4 text-green-600" />
         ) : (
           <CircularProgress
             values={[
               {
                 value: percentages.completed,
-                fillColor: "green-500",
+                fillColor: "green-600",
               },
               {
                 value: percentages.pending,

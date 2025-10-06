@@ -14,21 +14,41 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
+import { cn } from "@/helpers/cn";
 import { rgbToHsl } from "@/helpers/stringToColor";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
 import { queryClient, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, Clock, ListX } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ClockAlert,
+  DoorClosed,
+  DoorClosedIcon,
+  ListX,
+  UserRoundX,
+} from "lucide-react";
 import { useEffect } from "react";
 const UPPERCASE_REGEX = /(?=[A-Z])/;
-
+enum AbsenceType {
+  Excused,
+  Unexcused,
+  Unknown,
+}
+type SubjectAbsencesWithReasonType = Array<
+  RichSubjectAttendance[number] & {
+    type: AbsenceType;
+  }
+>;
 export function SubjectAttendance({
   id,
   year,
+  tardyCount,
 }: {
   id: Subject["id"];
   year: SubjectSummary["year"];
+  tardyCount: number;
 }) {
   useEffect(() => {
     queryClient.prefetchQuery(
@@ -55,27 +75,102 @@ export function SubjectAttendance({
           <ResponsiveDialogHeader>
             <ResponsiveDialogTitle>Absences</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>
-          <ResponsiveDialogBody className="pb-0">
-            <Content id={id} year={year} />
+          <ResponsiveDialogBody className="pb-0 flex flex-col gap-3">
+            <Content id={id} year={year} tardyCount={tardyCount} />
           </ResponsiveDialogBody>
         </ResponsiveDialogContent>
       </ResponsiveDialog>
     </>
   );
 }
+function SummaryBadges({
+  tardyCount,
+  absences,
+}: {
+  tardyCount: number;
+  absences: SubjectAbsencesWithReasonType;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <SummaryBadge
+        value={
+          absences.filter((absence) => absence.type === AbsenceType.Unexcused)
+            .length
+        }
+        label="Unexcused"
+        icon={<UserRoundX className="size-4" />}
+        className="bg-destructive/10 text-destructive"
+      />
+      <SummaryBadge
+        value={tardyCount}
+        label="Tardy"
+        icon={<ClockAlert className="size-4" />}
+        className="bg-yellow-400/20 text-yellow-600"
+      />
+      <SummaryBadge
+        value={
+          absences.filter((absence) => absence.type === AbsenceType.Excused)
+            .length
+        }
+        label="Dismissed"
+        icon={<DoorClosed className="size-4" />}
+        className="bg-green-600/10 text-green-600"
+      />
+    </div>
+  );
+}
+function SummaryBadge({
+  value,
+  label,
+  className,
+  icon,
+}: {
+  value: number;
+  label: string;
+  className?: string;
+  icon?: React.ReactNode;
+}) {
+  if (value === 0) return null;
+  return (
+    <Badge variant="secondary" className={cn("gap-1.5", className)}>
+      {icon}
+      {label}: {value}
+    </Badge>
+  );
+}
 function Content({
   id,
   year,
+  tardyCount,
 }: {
   id: SubjectSummary["id"];
   year: SubjectSummary["year"];
+  tardyCount: number;
 }) {
-  const query = useQuery(
-    trpc.myed.subjects.getSubjectAttendance.queryOptions({
+  const query = useQuery({
+    ...trpc.myed.subjects.getSubjectAttendance.queryOptions({
       subjectId: id,
       year,
-    })
-  );
+    }),
+    select: (data) => {
+      return data.map((absence) => {
+        let type = AbsenceType.Unknown;
+        const reason = absence.reason?.toLowerCase();
+        if (EXCUSED_KEYWORDS.some((keyword) => reason?.includes(keyword))) {
+          type = AbsenceType.Excused;
+        } else if (
+         !reason
+         || UNEXCUSED_KEYWORDS.some((keyword) => reason?.includes(keyword))
+        ) {
+          type = AbsenceType.Unexcused;
+        }
+        return {
+          ...absence,
+          type,
+        };
+      });
+    },
+  });
 
   return (
     <QueryWrapper
@@ -83,19 +178,22 @@ function Content({
       onError={<ErrorCard className="mb-6" />}
       skeleton={<ContentSkeleton />}
     >
-      {(data) =>
-        data.length > 0 ? (
-          <div className="flex flex-col gap-3 overflow-y-auto rounded-t-lg pb-6">
-            {data.map((absence, index) => (
-              <AbsenceCard key={index} {...absence} />
-            ))}
-          </div>
-        ) : (
-          <ErrorCard className="mb-6" variant="ghost" emoji="✨">
-            You haven't missed any classes.
-          </ErrorCard>
-        )
-      }
+      {(data) => (
+        <>
+          <SummaryBadges tardyCount={tardyCount} absences={data} />
+          {data.length > 0 ? (
+            <div className="flex flex-col gap-3 overflow-y-auto rounded-t-lg pb-6">
+              {data.map((absence, index) => (
+                <AbsenceCard key={index} {...absence} />
+              ))}
+            </div>
+          ) : (
+            <ErrorCard className="mb-6" variant="ghost" emoji="✨">
+              You haven't missed any classes.
+            </ErrorCard>
+          )}
+        </>
+      )}
     </QueryWrapper>
   );
 }
@@ -107,7 +205,7 @@ function ContentSkeleton() {
     </div>
   );
 }
-const excusedKeywords = [
+const EXCUSED_KEYWORDS = [
   "illness",
   "trip",
   "auth",
@@ -118,61 +216,17 @@ const excusedKeywords = [
   "parent",
   "guardian",
 ];
-const unexcusedKeywords = ["unexcused", "truant", "skip", "miss"];
-function generateReasonColor(reason: string) {
-  const lowerReason = reason.toLowerCase();
+const UNEXCUSED_KEYWORDS = ["unexcused", "truant", "skip", "miss"];
 
-  // Known keywords that should override generated colors
 
-  // Check for excused keywords (green)
-  if (excusedKeywords.some((keyword) => lowerReason.includes(keyword))) {
-    return "142, 75%, 36%"; // Green
-  }
-
-  // Check for unexcused keywords (red)
-  if (unexcusedKeywords.some((keyword) => lowerReason.includes(keyword))) {
-    return "var(--destructive)"; // Red
-  }
-
-  // Fall back to generated color for unknown keywords
-  let hash = 0;
-  for (let i = 0; i < reason.length; i++) {
-    hash = reason.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  // Generate RGB values
-  const r = (hash >> 16) & 0xff;
-  const g = (hash >> 8) & 0xff;
-  const b = hash & 0xff;
-
-  // Convert to HSL
-  const [h, s, l] = rgbToHsl(r, g, b);
-
-  // Adjust hue to avoid red (0-30, 330-360), green (90-150), and yellow (45-75)
-  let adjustedH = h;
-  if ((h >= 0 && h <= 30) || (h >= 330 && h <= 360)) {
-    // Red zone - shift to blue-purple
-    adjustedH = 240 + (h % 30);
-  } else if (h >= 90 && h <= 150) {
-    // Green zone - shift to blue
-    adjustedH = 200 + (h % 30);
-  } else if (h >= 45 && h <= 75) {
-    // Yellow zone - shift to orange
-    adjustedH = 25 + (h % 15);
-  }
-
-  const resultHsl = `${adjustedH}, ${Math.min(s + 20, 100)}%, ${Math.min(
-    l + 20,
-    70
-  )}%`;
-
-  return resultHsl;
-}
-
-function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
-  const color = reason ? generateReasonColor(reason) : null;
+function AbsenceCard({
+  date,
+  reason,
+  code,
+  type,
+}: RichSubjectAttendance[number] & { type: AbsenceType }) {
   return (
-    <Card className="p-4 transition-colors hover:bg-muted/50">
+    <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -193,21 +247,16 @@ function AbsenceCard({ date, reason, code }: RichSubjectAttendance[number]) {
           </div>
         </div>
 
-        {reason ? (
-          <Badge
-            className="shrink-0 border-0"
-            style={{
-              backgroundColor: `hsla(${color}, 0.15)`,
-              color: `hsl(${color})`,
-            }}
-          >
-            {reason.split(UPPERCASE_REGEX).join(" ")}
-          </Badge>
-        ) : (
-          <Badge className="shrink-0 bg-red-500/15 text-red-500">
-            Unexcused
-          </Badge>
-        )}
+        <Badge
+          className={cn("shrink-0", {
+            "bg-destructive/10 text-destructive":
+              type === AbsenceType.Unexcused,
+            "bg-green-600/10 text-green-600": type === AbsenceType.Excused,
+            "bg-gray-100 text-gray-600": type === AbsenceType.Unknown,
+          })}
+        >
+          {reason ? reason.split(UPPERCASE_REGEX).join(" ") : "Unexcused"}
+        </Badge>
       </div>
     </Card>
   );
@@ -241,7 +290,7 @@ function AbsenceCardSkeleton() {
         <Skeleton>
           <Badge
             variant="secondary"
-            className="shrink-0 bg-destructive/15 text-destructive"
+            className="shrink-0 bg-destructive/10 text-destructive"
           >
             Reason
           </Badge>

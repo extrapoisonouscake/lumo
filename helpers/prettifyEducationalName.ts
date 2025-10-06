@@ -12,9 +12,9 @@ const educationAbbreviations = new Set([
   "2D",
   "3D",
 ]);
-export const TEACHER_ADVISORY_ABBREVIATION = "TA";
+const TEACHER_ADVISORY_ABBREVIATIONS = ["ta", "teacher advisory"];
+export const isTeacherAdvisory = (name: string) => TEACHER_ADVISORY_ABBREVIATIONS.includes(name.toLowerCase());
 const directReplacements: Record<string, string> = {
-  "teacher advisory": TEACHER_ADVISORY_ABBREVIATION,
 };
 const smallWords = new Set([
   "a",

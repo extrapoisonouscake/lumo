@@ -20,6 +20,7 @@ import LoginPage from "./(unauthenticated)/login/page";
 import RegisterPage from "./(unauthenticated)/register/page";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
+import { IOSAppAdvertisement} from "@/components/layout/ios-app-advertisement";
 export default function Root() {
   return (
     <>
@@ -34,7 +35,7 @@ export default function Root() {
       >
         <Providers>
           <Toaster />
-
+          <IOSAppAdvertisement />
           <BrowserRouter>
             <Routes>
               <Route element={<AuthenticatedLayout />}>

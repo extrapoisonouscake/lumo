@@ -450,7 +450,7 @@ const entryStatusBadgeVisualData: Record<
 > = {
   [ProgramRequirementEntryStatus.Included]: {
     icon: CheckCircle,
-    className: "text-green-500",
+    className: "text-green-600",
     text: "Included",
   },
   [ProgramRequirementEntryStatus.Pending]: {
@@ -530,7 +530,7 @@ function EntryStatusBadge({
       >
         <Icon className="size-4" />
         <span className="text-sm">{text}</span>
-        {alternativeEntry && <InfoIcon className="size-3.5 sm:hidden" />}
+        {alternativeEntry && <InfoIcon className="size-3.5" />}
       </div>
     </ConditionalTooltip>
   );

@@ -40,28 +40,28 @@ function Content({ data }: { data: TranscriptEntry[] }) {
     [data]
   );
   return (
-    <div className="flex items-center gap-1.5">
-      <p className="text-sm">
-        GPA: <span className="font-medium">{gpa}</span>
-      </p>
-      <ResponsiveDialog>
-        <ResponsiveDialogTrigger asChild>
+    <ResponsiveDialog>
+      <ResponsiveDialogTrigger asChild>
+        <div className="flex items-center gap-1.5">
+          <p className="text-sm">
+            GPA: <span className="font-medium">{gpa}</span>
+          </p>
           <InfoIcon className="size-4 text-muted-foreground cursor-pointer hover:text-foreground clickable" />
-        </ResponsiveDialogTrigger>
-        <ResponsiveDialogContent>
-          <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>Courses</ResponsiveDialogTitle>
-          </ResponsiveDialogHeader>
-          <ResponsiveDialogBody>
-            <div className="flex flex-col gap-3">
-              {data.map((entry, index) => (
-                <TranscriptEntryCard key={index} {...entry} />
-              ))}
-            </div>
-          </ResponsiveDialogBody>
-        </ResponsiveDialogContent>
-      </ResponsiveDialog>
-    </div>
+        </div>
+      </ResponsiveDialogTrigger>
+      <ResponsiveDialogContent>
+        <ResponsiveDialogHeader>
+          <ResponsiveDialogTitle>Courses</ResponsiveDialogTitle>
+        </ResponsiveDialogHeader>
+        <ResponsiveDialogBody>
+          <div className="flex flex-col gap-3">
+            {data.map((entry, index) => (
+              <TranscriptEntryCard key={index} {...entry} />
+            ))}
+          </div>
+        </ResponsiveDialogBody>
+      </ResponsiveDialogContent>
+    </ResponsiveDialog>
   );
 }
 const GRADING_SCALE = {

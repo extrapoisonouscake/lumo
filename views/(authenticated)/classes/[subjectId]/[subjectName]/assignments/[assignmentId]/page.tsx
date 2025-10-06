@@ -371,7 +371,7 @@ function GradeRow({
       return null;
     }
     if (assignment.score > assignment.classAverage) {
-      return <TrendingUp className="h-4 w-4 text-green-500" />;
+      return <TrendingUp className="h-4 w-4 text-green-600" />;
     } else if (assignment.score < assignment.classAverage) {
       return <TrendingDown className="h-4 w-4 text-red-500" />;
     }

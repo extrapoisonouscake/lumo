@@ -498,7 +498,7 @@ function WidgetEditor({
               strategy={rectSortingStrategy}
             >
               <WidgetsGrid gridColumns={gridColumns}>
-                {changelog.data && <ChangelogCard {...changelog.data} />}
+                {changelog.data && !isEditing && <ChangelogCard {...changelog.data} />}
                 {responsiveWidgets.map((entry, index) =>
                   renderWidget({ entry, index, isEditing })
                 )}

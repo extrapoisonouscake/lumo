@@ -10,7 +10,6 @@ export const scheduleRouter = router({
       })
     )
     .query(async ({ input, ctx: { studentDatabaseId, getMyEd } }) => {
-      console.log(studentDatabaseId);
       const response = await getMyEd("schedule", input);
       return response;
     }),

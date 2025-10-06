@@ -1,7 +1,7 @@
 import { getGradeLetter } from "@/helpers/grades";
 import {
   prettifyEducationalName,
-  TEACHER_ADVISORY_ABBREVIATION,
+  isTeacherAdvisory,
 } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import {
@@ -38,7 +38,7 @@ function separateTeacherAdvisoryFromSubjects(subject: Subject[]) {
   let removedItem;
 
   subject.forEach((item) => {
-    if (item.name === TEACHER_ADVISORY_ABBREVIATION) {
+    if (isTeacherAdvisory(item.name)) {
       removedItem = item;
     } else {
       resultArray.push(item);

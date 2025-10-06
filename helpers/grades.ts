@@ -4,8 +4,8 @@ export const GRADES_VISUAL_CONFIG: Record<
   string,
   { threshold: number; color: string }
 > = {
-  A: { threshold: 80, color: "green-500" },
-  B: { threshold: 70, color: "green-500" },
+  A: { threshold: 80, color: "green-600" },
+  B: { threshold: 70, color: "green-600" },
   C: { threshold: 60, color: "yellow-400" },
   D: { threshold: 50, color: "orange-500" },
   F: { threshold: 0, color: "red-600" },

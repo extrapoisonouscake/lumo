@@ -31,7 +31,7 @@ const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
 const TRPC_URL = `${
   NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000"
+    : "http://10.16.97.80:3000"
 }/api/trpc`;
 const SECONDARY_ROUTES = [
   "user.getStudentDetails",

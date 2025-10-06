@@ -13,7 +13,7 @@ import {
 import { cn } from "@/helpers/cn";
 import { formatCountdown } from "@/helpers/format-countdown";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
-import { TEACHER_ADVISORY_ABBREVIATION } from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
@@ -29,7 +29,10 @@ import {
   mockScheduleSubjects,
   ScheduleBreak,
 } from "../schedule/[[...slug]]/loadable-section/table";
-import { ScheduleRow } from "../schedule/[[...slug]]/loadable-section/types";
+import {
+  ScheduleRow,
+  ScheduleRowSubject,
+} from "../schedule/[[...slug]]/loadable-section/types";
 import { useTTNextSubject } from "../schedule/[[...slug]]/loadable-section/use-tt-next-subject";
 import { WidgetComponentProps } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
@@ -117,7 +120,7 @@ function Content({
     [subjects, nameToIdMap]
   );
   const subjectsWithoutTA = subjects.filter(
-    (subject) => subject.name !== TEACHER_ADVISORY_ABBREVIATION
+    (subject) => !isTeacherAdvisory(subject.name.toLowerCase())
   );
   const { currentRowIndex } = useTTNextSubject(rows);
 
@@ -142,20 +145,7 @@ function Content({
       <div className="flex flex-col gap-2 flex-1 justify-between">
         <ScheduleElementCard element={currentSubject} />
 
-        {nextSubject && (
-          <p className="text-sm text-muted-foreground">
-            Next class:{" "}
-            <Link
-              to={getSubjectPageURL("current")({
-                id: nextSubject.id!,
-                name: nextSubject.name,
-              })}
-              className="font-medium text-foreground clickable"
-            >
-              {nextSubject.name}
-            </Link>
-          </p>
-        )}
+        {nextSubject && <NextSubjectPreview {...nextSubject} />}
       </div>
     );
   }
@@ -166,9 +156,7 @@ function Content({
       : rows
           .slice(0, currentRowIndex + 1)
           .filter(
-            (row) =>
-              row.type === "subject" &&
-              row.name !== TEACHER_ADVISORY_ABBREVIATION
+            (row) => row.type === "subject" && !isTeacherAdvisory(row.name)
           ).length;
   return (
     <div className="flex flex-col gap-3 flex-1">
@@ -198,6 +186,28 @@ function Content({
 
       {mainContent}
     </div>
+  );
+}
+function NextSubjectPreview({ id, name }: ScheduleRowSubject) {
+  const span = (
+    <span className="font-medium text-foreground clickable">{name}</span>
+  );
+  return (
+    <p className="text-sm text-muted-foreground">
+      Next class:{" "}
+      {isTeacherAdvisory(name) ? (
+        span
+      ) : (
+        <Link
+          to={getSubjectPageURL("current")({
+            id: id!,
+            name: name,
+          })}
+        >
+          {span}
+        </Link>
+      )}
+    </p>
   );
 }
 function ContentSkeleton() {
