@@ -80,7 +80,7 @@ export default function AssignmentPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
                   {/* Score Information */}
-                  <AssignmentSectionCard title="Score" icon={Award}>
+                  <AssignmentSectionCard title="Details" icon={Award}>
                     <GradeRow
                       assignment={data}
                       shouldShowPercentages={settings?.shouldShowPercentages}
@@ -298,7 +298,7 @@ export function AssignmentPropertyRow({
       <span className={cn("text-muted-foreground", labelClassName)}>
         {label}
       </span>
-      <span className="font-medium">{value}</span>
+      <span className="font-medium text-right">{value}</span>
     </div>
   );
 }
