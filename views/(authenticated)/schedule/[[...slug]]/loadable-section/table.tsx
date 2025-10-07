@@ -30,6 +30,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
 import { ChevronRight, DoorOpen } from "lucide-react";
 
+import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { Link } from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemo } from "react";
@@ -74,16 +75,7 @@ const columns = [
       return value ? (
         <p>
           <span dangerouslySetInnerHTML={{ __html: value.prettified }} />
-          {value.emoji && (
-            <>
-              &nbsp;&nbsp;
-              <AppleEmoji
-                className="inline"
-                imageClassName="size-4"
-                value={value.emoji}
-              />
-            </>
-          )}
+          {value.emoji && <InlineSubjectEmoji emoji={value.emoji} />}
         </p>
       ) : (
         NULL_VALUE_DISPLAY_FALLBACK
@@ -359,16 +351,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
         {isSubject ? (
           <p className="font-medium">
             {row.name.prettified}
-            {row.name.emoji && (
-              <>
-                &nbsp;&nbsp;
-                <AppleEmoji
-                  className="inline"
-                  imageClassName="size-4.5"
-                  value={row.name.emoji}
-                />
-              </>
-            )}
+            {row.name.emoji && <InlineSubjectEmoji emoji={row.name.emoji} />}
           </p>
         ) : (
           <ScheduleBreak

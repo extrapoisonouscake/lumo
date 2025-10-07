@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { ErrorCardProps } from "@/components/misc/error-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -124,6 +125,11 @@ function OverdueAssignmentsWidget(
                     </p>
                     <p className="flex items-center justify-between text-xs text-muted-foreground">
                       {assignment.subject.name.prettified}
+                      {assignment.subject.name.emoji && (
+                        <InlineSubjectEmoji
+                          emoji={assignment.subject.name.emoji}
+                        />
+                      )}
                     </p>
                   </div>
                 </>

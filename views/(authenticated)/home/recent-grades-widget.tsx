@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,9 @@ function RecentGradesWidget(
         {customSubject && (
           <Badge variant="outline" className="text-brand">
             {customSubject.name.prettified}
+            {customSubject.name.emoji && (
+              <InlineSubjectEmoji emoji={customSubject.name.emoji} />
+            )}
           </Badge>
         )}
         {content}
@@ -182,6 +186,9 @@ function RecentGradedAssignmentCard({
               </p>
               <p className="flex items-center justify-between text-xs text-muted-foreground">
                 {assignment.subject.name.prettified}
+                {assignment.subject.name.emoji && (
+                  <InlineSubjectEmoji emoji={assignment.subject.name.emoji} />
+                )}
               </p>
             </div>
           </>
@@ -283,6 +290,9 @@ const getCustomizationContent: WidgetCustomizationContentRenderer<
             {mainSubjects?.map((subject) => (
               <SelectItem key={subject.id} value={subject.id}>
                 {subject.name.prettified}
+                {subject.name.emoji && (
+                  <InlineSubjectEmoji emoji={subject.name.emoji} />
+                )}
               </SelectItem>
             ))}
           </SelectContent>

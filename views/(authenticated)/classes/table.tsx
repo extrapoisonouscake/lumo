@@ -1,7 +1,7 @@
 "use client";
 import { createColumnHelper } from "@tanstack/react-table";
 
-import { AppleEmoji } from "@/components/misc/apple-emoji";
+import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { ContentCard } from "@/components/misc/content-card";
 import { SortableColumn } from "@/components/ui/sortable-column";
 import {
@@ -66,16 +66,7 @@ const getColumns = (
       return (
         <p>
           <span dangerouslySetInnerHTML={{ __html: nameObject.prettified }} />
-          {nameObject.emoji && (
-            <>
-              &nbsp;&nbsp;
-              <AppleEmoji
-                imageClassName="size-4"
-                className="inline"
-                value={nameObject.emoji}
-              />
-            </>
-          )}
+          {nameObject.emoji && <InlineSubjectEmoji emoji={nameObject.emoji} />}
         </p>
       );
     },
@@ -291,14 +282,7 @@ function SubjectCard({
             {subject.name.prettified}
 
             {subject.name.emoji && (
-              <>
-                &nbsp;&nbsp;
-                <AppleEmoji
-                  imageClassName="size-4.5"
-                  className="inline"
-                  value={subject.name.emoji}
-                />
-              </>
+              <InlineSubjectEmoji emoji={subject.name.emoji} />
             )}
           </h3>
         }

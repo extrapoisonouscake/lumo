@@ -7,5 +7,5 @@ export function getSubjectEmoji(name: string) {
   ];
 }
 export function prepareSubjectNameForEmojiRetrieval(name: string) {
-  return name.replace(/\s+\d+$/, "").toLowerCase();
+  return name.replace(/\s+\d+(?:\/\d+)*$/, "").toLowerCase();
 }

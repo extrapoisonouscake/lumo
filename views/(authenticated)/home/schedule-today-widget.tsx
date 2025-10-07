@@ -1,6 +1,7 @@
 "use client";
 
 import { AppleEmoji } from "@/components/misc/apple-emoji";
+import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { ErrorCardProps } from "@/components/misc/error-card";
 import { Button } from "@/components/ui/button";
@@ -193,6 +194,7 @@ function NextSubjectPreview({ id, name }: ScheduleRowSubject) {
   const span = (
     <span className="font-medium text-foreground clickable">
       {name.prettified}
+      {name.emoji && <InlineSubjectEmoji emoji={name.emoji} />}
     </span>
   );
   return (
@@ -322,6 +324,9 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
             First class:{" "}
             <span className="font-medium text-foreground">
               {firstSubject!.name.prettified}
+              {firstSubject!.name.emoji && (
+                <InlineSubjectEmoji emoji={firstSubject!.name.emoji} />
+              )}
             </span>
           </p>
         </div>
