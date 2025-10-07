@@ -119,7 +119,7 @@ function RecentGradesWidget(
       <div className="flex flex-col gap-4 flex-1">
         {customSubject && (
           <Badge variant="outline" className="text-brand">
-            {customSubject.name}
+            {customSubject.name.prettified}
           </Badge>
         )}
         {content}
@@ -181,7 +181,7 @@ function RecentGradedAssignmentCard({
                 {assignment.name}
               </p>
               <p className="flex items-center justify-between text-xs text-muted-foreground">
-                {assignment.subject.name}
+                {assignment.subject.name.prettified}
               </p>
             </div>
           </>
@@ -282,7 +282,7 @@ const getCustomizationContent: WidgetCustomizationContentRenderer<
             <SelectItem value="all">All</SelectItem>
             {mainSubjects?.map((subject) => (
               <SelectItem key={subject.id} value={subject.id}>
-                {subject.name}
+                {subject.name.prettified}
               </SelectItem>
             ))}
           </SelectContent>

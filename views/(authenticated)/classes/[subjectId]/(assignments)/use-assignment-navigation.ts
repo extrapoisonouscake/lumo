@@ -10,7 +10,7 @@ export function useAssignmentNavigation() {
     navigate(
       getAssignmentURL(assignment, {
         id: subjectId as string,
-        name: subjectName as string,
+        name: { prettified: subjectName as string },
       })
     );
   };

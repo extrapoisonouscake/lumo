@@ -7,6 +7,7 @@ import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from "@tanstack/react-query";
+import { DefaultErrorShape } from "@trpc/server/unstable-core-do-not-import";
 import {
   createTRPCOptionsProxy,
   DecorateQueryProcedure,
@@ -146,13 +147,18 @@ export function refreshSessionExpiresAt() {
     `${Date.now() + 1000 * 60 * 60}`
   );
 }
-export function getTRPCQueryOptions<Input, Output, ErrorShape>(
+export function getTRPCQueryOptions<
+  Input,
+  Output,
+  ErrorShape = DefaultErrorShape,
+>(
   procedure: DecorateQueryProcedure<{
     input: Input;
     output: Output;
     transformer: true;
     errorShape: ErrorShape;
-  }>
+  }> &
+    Record<string, never>
 ) {
   return (input: Input) =>
     procedure.queryOptions(input, {

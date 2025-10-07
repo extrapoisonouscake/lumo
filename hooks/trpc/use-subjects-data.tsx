@@ -1,3 +1,4 @@
+import { RouterInput } from "@/lib/trpc/types";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useCachedQuery } from "../use-cached-query";
 export function useSubjectsData(
@@ -9,11 +10,13 @@ export function useSubjectsData(
     termId?: string;
   } = { isPreviousYear: false, termId: undefined }
 ) {
-  const params = {
+  const params: RouterInput["myed"]["subjects"]["getSubjects"] = {
     isPreviousYear,
     termId,
   };
+
   const query = useCachedQuery(
+    //@ts-expect-error fix later
     getTRPCQueryOptions(trpc.myed.subjects.getSubjects)(params),
     {
       params,

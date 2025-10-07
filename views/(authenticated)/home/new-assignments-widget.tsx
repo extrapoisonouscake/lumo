@@ -101,7 +101,7 @@ export function NewAssignmentsWidget({
                     {assignment.name}
                   </p>
                   <p className="flex items-center justify-between text-xs text-muted-foreground">
-                    {assignment.subject.name}
+                    {assignment.subject.name.prettified}
                   </p>
                 </div>
               </>
