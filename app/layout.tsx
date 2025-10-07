@@ -10,6 +10,7 @@ import { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 export const viewport: Viewport = {
   userScalable: false,
+viewportFit:"cover"
 };
 export const metadata: Metadata = {
   appleWebApp: { capable: true },
