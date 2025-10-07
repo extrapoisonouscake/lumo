@@ -157,8 +157,7 @@ export function getTRPCQueryOptions<
     output: Output;
     transformer: true;
     errorShape: ErrorShape;
-  }> &
-    Record<string, never>
+  }>
 ) {
   return (input: Input) =>
     procedure.queryOptions(input, {
