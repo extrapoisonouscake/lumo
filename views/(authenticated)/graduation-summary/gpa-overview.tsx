@@ -31,13 +31,14 @@ export function GPAOverview() {
 function Content({ data }: { data: TranscriptEntry[] }) {
   const gpaData = useMemo(
     () =>
-      data
-        .filter((entry) => entry.finalGrade !== null)
+      {
+const maxGrade = Math.max(...data.map(entry=>entry.grade))
+return data
+        .filter((entry) => entry.finalGrade !== null&&entry.grade>=maxGrade-1)
         .map((entry) => ({
           percentage: entry.finalGrade!,
           credits: entry.creditAmount,
-        })),
-
+        }))},
     [data]
   );
   return (
