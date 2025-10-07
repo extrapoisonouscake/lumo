@@ -32,7 +32,7 @@ function Content({ data }: { data: TranscriptEntry[] }) {
   const gpaData = useMemo(
     () =>
       {
-const maxGrade = Math.max(...data.map(entry=>entry.grade))
+const maxGrade = Math.max(...data.map(entry=>+entry.grade))
 return data
         .filter((entry) => entry.finalGrade !== null&&entry.grade>=maxGrade-1)
         .map((entry) => ({
