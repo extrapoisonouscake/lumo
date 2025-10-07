@@ -1,7 +1,7 @@
 import { getGradeLetter } from "@/helpers/grades";
 import {
-  prettifyEducationalName,
   isTeacherAdvisory,
+  prettifyEducationalName,
 } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/types/school";
 import { DeepWithRequired } from "@/types/utils";
 
+import { getSubjectEmoji } from "@/helpers/getSubjectEmoji";
 import { $getGenericContentTableBody, $getTableValues } from "./helpers";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";
 
@@ -38,7 +39,7 @@ function separateTeacherAdvisoryFromSubjects(subject: Subject[]) {
   let removedItem;
 
   subject.forEach((item) => {
-    if (isTeacherAdvisory(item.name)) {
+    if (isTeacherAdvisory(item.name.actual)) {
       removedItem = item;
     } else {
       resultArray.push(item);
@@ -76,8 +77,12 @@ const convertSubject = ({
   sscTermView,
 }: SubjectResponse) => ({
   id: oid,
-  actualName: relSscMstOid_mstDescription,
-  name: prettifyEducationalName(relSscMstOid_mstDescription),
+
+  name: {
+    prettified: prettifyEducationalName(relSscMstOid_mstDescription),
+    actual: relSscMstOid_mstDescription,
+    emoji: getSubjectEmoji(relSscMstOid_mstDescription),
+  },
   teachers: relSscMstOid_mstStaffView.map((item) => item.name),
   room: relSscMstOid_mstRoomView
     ? prettifyEducationalName(relSscMstOid_mstRoomView)
@@ -90,7 +95,7 @@ export function parseSubjects({
   "subjects",
   [
     OpenAPI200JSONResponse<"/aspen/rest/lists/academics.classes.list/studentGradeTerms">,
-    SubjectResponse[]
+    SubjectResponse[],
   ]
 >): {
   terms: TermEntry[];
@@ -193,7 +198,7 @@ function getSubjectAverages(
     ([key, value]) =>
       [key, convertStringToGradeObject(value)] as [
         string,
-        ReturnType<typeof convertStringToGradeObject>
+        ReturnType<typeof convertStringToGradeObject>,
       ]
   );
 
@@ -213,9 +218,14 @@ export function parseSubjectSummary({
     postedSummary,
     currentGradeTermIndex,
   } = data;
+  const name = section.relSscMstOid_mstDescription;
   const result: SubjectSummary = {
     id: section.oid,
-    name: prettifyEducationalName(section.relSscMstOid_mstDescription),
+    name: {
+      prettified: prettifyEducationalName(name),
+      actual: name,
+      emoji: getSubjectEmoji(name),
+    },
     term: termRawValueToNormalized[section.sscTermView]!,
     academics: {
       running: { overall: null },

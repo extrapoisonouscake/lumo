@@ -8,7 +8,7 @@ import {
 import { Link } from "react-router";
 const items = [
   {
-    title: "Graduation Summary",
+    title: "Graduation",
     href: "/graduation",
     icon: GraduationCap,
   },

@@ -1,3 +1,4 @@
+import { CircularProgress } from "@/components/misc/circular-progress";
 import { ContentCard } from "@/components/misc/content-card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import {
@@ -10,15 +11,16 @@ import {
 } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { getGradeInfo } from "@/helpers/grades";
 import { TranscriptEntry } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon } from "lucide-react";
 import { useMemo } from "react";
 
 export function GPAOverview() {
   const transcriptEntries = useQuery(
-    trpc.myed.transcript.getTranscriptEntries.queryOptions()
+    getTRPCQueryOptions(trpc.myed.transcript.getTranscriptEntries)()
   );
   return (
     <QueryWrapper query={transcriptEntries} skeleton={<GPAOverviewSkeleton />}>
@@ -27,26 +29,28 @@ export function GPAOverview() {
   );
 }
 function Content({ data }: { data: TranscriptEntry[] }) {
-  const gpa = useMemo(
+  const gpaData = useMemo(
     () =>
-      getGPA(
-        data
-          .filter((entry) => entry.finalGrade !== null)
-          .map((entry) => ({
-            percentage: entry.finalGrade!,
-            credits: entry.creditAmount,
-          }))
-      ),
+      data
+        .filter((entry) => entry.finalGrade !== null)
+        .map((entry) => ({
+          percentage: entry.finalGrade!,
+          credits: entry.creditAmount,
+        })),
+
     [data]
   );
   return (
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 cursor-pointer group">
           <p className="text-sm">
-            GPA: <span className="font-medium">{gpa}</span>
+            GPA:{" "}
+            <span className="font-medium">
+              {getPercentageStyleGPA(gpaData)}% ({getUSStyleGPA(gpaData)})
+            </span>
           </p>
-          <InfoIcon className="size-4 text-muted-foreground cursor-pointer hover:text-foreground clickable" />
+          <InfoIcon className="size-4 text-muted-foreground group-hover:text-foreground clickable" />
         </div>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
@@ -83,7 +87,25 @@ function getQualityPoints(percentage: number, credits: number): number {
   return 0; // Default to 0 for invalid percentages
 }
 
-function getGPA(values: { percentage: number; credits: number }[]): number {
+function getPercentageStyleGPA(
+  values: { percentage: number; credits: number }[]
+): number {
+  if (values.length === 0) return 0;
+
+  // Calculate weighted average using credits as weights
+  const totalWeightedPercentage = values.reduce(
+    (acc, value) => acc + value.percentage * value.credits,
+    0
+  );
+  const totalCredits = values.reduce((acc, value) => acc + value.credits, 0);
+
+  if (totalCredits === 0) return 0;
+
+  return +(totalWeightedPercentage / totalCredits).toFixed(1);
+}
+function getUSStyleGPA(
+  values: { percentage: number; credits: number }[]
+): number {
   const qualityPoints = values.reduce(
     (acc, value) => acc + getQualityPoints(value.percentage, value.credits),
     0
@@ -96,30 +118,40 @@ function TranscriptEntryCard(entry: TranscriptEntry) {
   return (
     <ContentCard
       header={
-        <div className="flex items-start justify-between">
+        <div className="flex items-center gap-2 justify-between">
           <h3 className="font-medium text-base text-foreground">
             {entry.subjectName}
           </h3>
-          <p className="flex items-center gap-2 text-muted-foreground whitespace-nowrap">
-            Grade {entry.grade}
-          </p>
-        </div>
-      }
-      items={[
-        { label: "Year", value: entry.year },
-        { label: "Credits", value: entry.creditAmount },
-        {
-          label: "Final",
-          value:
-            entry.finalGrade !== null ? (
-              entry.finalGrade
+          <div className="flex items-center gap-1.5">
+            {entry.finalGrade !== null ? (
+              <>
+                <p className="font-medium whitespace-nowrap">
+                  {entry.finalGrade} / 100
+                </p>
+                <CircularProgress
+                  values={[
+                    {
+                      value: entry.finalGrade,
+                      fillColor: getGradeInfo(entry.finalGrade)!.color,
+                    },
+                  ]}
+                  size="small"
+                />
+              </>
             ) : (
               <span className="text-muted-foreground">
                 {NULL_VALUE_DISPLAY_FALLBACK}
               </span>
-            ),
-          valueClassName: "text-lg",
+            )}
+          </div>
+        </div>
+      }
+      items={[
+        {
+          label: "Grade",
+          value: entry.grade,
         },
+        { label: "Credits", value: entry.creditAmount },
       ]}
     />
   );

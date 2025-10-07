@@ -72,7 +72,7 @@ export default function AssignmentPage() {
           return (
             <>
               <TitleManager>
-                {name} - {subject ? subject.name : "Loading..."}
+                {name} - {subject ? subject.name.prettified : "Loading..."}
               </TitleManager>
               <div className="flex flex-col gap-4">
                 {/* Header Card */}

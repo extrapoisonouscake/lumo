@@ -11,7 +11,7 @@ import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
 //assuming notifications are supported if iOS and not in PWA
 const areNotificationsSupported = "Notification" in window || isIOSWebView;
 const areNotificationsImplicitlySupported = isIOS || areNotificationsSupported;
-export function NotificationsControlsComponent({
+export function NotificationsControls({
   initialValue,
 }: {
   initialValue: boolean;

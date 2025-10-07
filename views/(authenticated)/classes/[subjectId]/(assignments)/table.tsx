@@ -228,7 +228,7 @@ export function SubjectAssignmentsTable({
           navigate(
             getAssignmentURL(row.original, {
               id: subjectId,
-              name: subjectName,
+              name: { prettified: subjectName },
             })
           )
         }
@@ -362,7 +362,7 @@ export function SubjectAssignmentsTable({
           <Link
             to={getAssignmentURL(row, {
               id: subjectId as string,
-              name: subjectName as string,
+              name: { prettified: subjectName },
             })}
           >
             <AssignmentCard

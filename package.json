@@ -25,6 +25,7 @@
     "@langchain/mistralai": "^0.2.1",
     "@mistralai/mistralai": "^1.10.0",
     "@next/third-parties": "^15.3.2",
+    "@notionhq/client": "^5.1.0",
     "@parse/node-apn": "^6.5.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-avatar": "^1.1.1",

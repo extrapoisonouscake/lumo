@@ -7,7 +7,10 @@ import {
   defaultShouldDehydrateQuery,
   QueryClient,
 } from "@tanstack/react-query";
-import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
+import {
+  createTRPCOptionsProxy,
+  DecorateQueryProcedure,
+} from "@trpc/tanstack-react-query";
 import superjson from "superjson";
 
 export const queryClient = new QueryClient({
@@ -31,7 +34,7 @@ const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
 const TRPC_URL = `${
   NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://10.16.97.80:3000"
+    : "http://localhost:3000"
 }/api/trpc`;
 const SECONDARY_ROUTES = [
   "user.getStudentDetails",
@@ -61,6 +64,7 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
 
   return queue.enqueue(
     async () => {
+      console.log("fetching", input, init);
       const response = await fetch(input, init);
       if (response.status === 503) {
         window.location.href = "/maintenance";
@@ -141,4 +145,17 @@ export function refreshSessionExpiresAt() {
     TOKEN_EXPIRY_LOCAL_STORAGE_KEY,
     `${Date.now() + 1000 * 60 * 60}`
   );
+}
+export function getTRPCQueryOptions<Input, Output, ErrorShape>(
+  procedure: DecorateQueryProcedure<{
+    input: Input;
+    output: Output;
+    transformer: true;
+    errorShape: ErrorShape;
+  }>
+) {
+  return (input: Input) =>
+    procedure.queryOptions(input, {
+      trpc: { abortOnUnmount: true },
+    });
 }

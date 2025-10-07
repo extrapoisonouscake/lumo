@@ -12,7 +12,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RouterOutput } from "@/lib/trpc/types";
 import { Subject } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQueryClient } from "@tanstack/react-query";
 import { Dayjs } from "dayjs";
 import {
@@ -191,12 +191,9 @@ function MobileLoader({
   const waitForScrollEnd = useWaitForScrollEnd(ref);
   const prefetchDates = (baseDate: Date) => {
     const getOptions = (date: Date) =>
-      trpc.myed.schedule.getSchedule.queryOptions(
-        {
-          day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
-        },
-        { trpc: { abortOnUnmount: true } }
-      );
+      getTRPCQueryOptions(trpc.myed.schedule.getSchedule)({
+        day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
+      });
 
     const dateObject = timezonedDayJS(baseDate);
     queryClient.prefetchQuery(getOptions(baseDate));
@@ -403,7 +400,8 @@ function DayRenderer({
           isWeekdayShown={shouldShowWeekday}
           data={data.subjects.map((subject) => ({
             ...subject,
-            id: subjects?.find((s) => s.actualName === subject.actualName)?.id,
+            id: subjects?.find((s) => s.name.actual === subject.name.actual)
+              ?.id,
           }))}
         />
       </div>
@@ -419,9 +417,7 @@ function useScheduleQuery(date: Date) {
     day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
   };
   return useCachedQuery(
-    trpc.myed.schedule.getSchedule.queryOptions(params, {
-      trpc: { abortOnUnmount: true },
-    }),
+    getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),
     {
       params,
       ttlKey: "schedule",

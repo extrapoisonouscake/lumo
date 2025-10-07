@@ -4,7 +4,7 @@ import { cn } from "@/helpers/cn";
 import { ImgHTMLAttributes } from "react";
 
 const emojiSrcs = emojiSrcsSource as Record<string, string>;
-export function AppleEmojiComponent({
+export function AppleEmoji({
   value,
   className: commonClassName,
   textClassName,

@@ -9,10 +9,10 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "../../ui/select";
-import { SidebarMenuButton, SidebarMenuItem } from "../../ui/sidebar";
+} from "../ui/select";
+import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 
-export function ThemeToggleComponent({
+export function ThemeToggle({
   isInSidebar,
   shouldShowText = true,
 }: {

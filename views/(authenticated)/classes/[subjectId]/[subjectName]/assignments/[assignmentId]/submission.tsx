@@ -5,7 +5,7 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { VISIBLE_DATE_FORMAT, VISIBLE_TIME_FORMAT } from "@/constants/website";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { AssignmentSubmissionState } from "@/types/school";
-import { queryClient, trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { DownloadIcon, FileText, TrashIcon, UploadIcon } from "lucide-react";
 import { useState } from "react";
@@ -15,7 +15,7 @@ function getSubmissionDownloadLink(id: string) {
 }
 export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
   const query = useQuery(
-    trpc.myed.subjects.getAssignmentSubmissionState.queryOptions({
+    getTRPCQueryOptions(trpc.myed.subjects.getAssignmentSubmissionState)({
       assignmentId,
     })
   );
@@ -121,7 +121,7 @@ function UploadSubmission({ assignmentId }: { assignmentId: string }) {
     },
     onSuccess: () => {
       queryClient.refetchQueries(
-        trpc.myed.subjects.getAssignmentSubmissionState.queryOptions({
+        getTRPCQueryOptions(trpc.myed.subjects.getAssignmentSubmissionState)({
           assignmentId,
         })
       );

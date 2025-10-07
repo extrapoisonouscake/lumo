@@ -15,17 +15,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
-import { rgbToHsl } from "@/helpers/stringToColor";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
-import { queryClient, trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import {
   Calendar,
   Clock,
   ClockAlert,
   DoorClosed,
-  DoorClosedIcon,
   ListX,
   UserRoundX,
 } from "lucide-react";
@@ -52,7 +50,7 @@ export function SubjectAttendance({
 }) {
   useEffect(() => {
     queryClient.prefetchQuery(
-      trpc.myed.subjects.getSubjectAttendance.queryOptions({
+      getTRPCQueryOptions(trpc.myed.subjects.getSubjectAttendance)({
         subjectId: id,
         year,
       })
@@ -148,7 +146,7 @@ function Content({
   tardyCount: number;
 }) {
   const query = useQuery({
-    ...trpc.myed.subjects.getSubjectAttendance.queryOptions({
+    ...getTRPCQueryOptions(trpc.myed.subjects.getSubjectAttendance)({
       subjectId: id,
       year,
     }),
@@ -159,8 +157,8 @@ function Content({
         if (EXCUSED_KEYWORDS.some((keyword) => reason?.includes(keyword))) {
           type = AbsenceType.Excused;
         } else if (
-         !reason
-         || UNEXCUSED_KEYWORDS.some((keyword) => reason?.includes(keyword))
+          !reason ||
+          UNEXCUSED_KEYWORDS.some((keyword) => reason?.includes(keyword))
         ) {
           type = AbsenceType.Unexcused;
         }
@@ -215,9 +213,9 @@ const EXCUSED_KEYWORDS = [
   "sick",
   "parent",
   "guardian",
+  "activity",
 ];
 const UNEXCUSED_KEYWORDS = ["unexcused", "truant", "skip", "miss"];
-
 
 function AbsenceCard({
   date,

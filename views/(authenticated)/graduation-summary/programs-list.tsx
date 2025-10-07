@@ -138,7 +138,7 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
             values={[
               {
                 value: percentages.completed,
-                fillColor: "green-600",
+                fillColor: "green-500",
               },
               {
                 value: percentages.pending,

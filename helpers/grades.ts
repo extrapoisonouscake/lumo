@@ -4,8 +4,8 @@ export const GRADES_VISUAL_CONFIG: Record<
   string,
   { threshold: number; color: string }
 > = {
-  A: { threshold: 80, color: "green-600" },
-  B: { threshold: 70, color: "green-600" },
+  A: { threshold: 80, color: "green-500" },
+  B: { threshold: 70, color: "green-500" },
   C: { threshold: 60, color: "yellow-400" },
   D: { threshold: 50, color: "orange-500" },
   F: { threshold: 0, color: "red-600" },
@@ -21,11 +21,12 @@ export const getGradeLetter = (mark: number) => {
   const closestMatch = getGradeInfoByMark(mark);
   return closestMatch?.letter ?? null;
 };
-export function getGradeInfo(value: SubjectGrade) {
-  if (value.letter) {
+export function getGradeInfo(value: number | SubjectGrade) {
+  const isObject = typeof value === "object";
+  if (isObject && value.letter) {
     const exactMatch = GRADES_VISUAL_CONFIG[value.letter];
     if (exactMatch) return { ...exactMatch, letter: value.letter };
   }
-  const closestMatch = getGradeInfoByMark(value.mark);
+  const closestMatch = getGradeInfoByMark(isObject ? value.mark : value);
   return closestMatch;
 }

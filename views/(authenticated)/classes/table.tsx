@@ -1,6 +1,8 @@
 "use client";
 import { createColumnHelper } from "@tanstack/react-table";
 
+import { AppleEmoji } from "@/components/misc/apple-emoji";
+import { ContentCard } from "@/components/misc/content-card";
 import { SortableColumn } from "@/components/ui/sortable-column";
 import {
   TableCell,
@@ -19,9 +21,7 @@ import {
   CellSkeleton,
   makeTableColumnsSkeletons,
 } from "@/helpers/makeTableColumnsSkeletons";
-
-import { ContentCard } from "@/components/misc/content-card";
-import { isTeacherAdvisory} from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import {
   displayTableCellWithFallback,
   renderTableCell,
@@ -60,9 +60,25 @@ const getColumns = (
 ) => [
   columnHelper.accessor("name", {
     header: "Name",
-    cell: ({ cell }) => (
-      <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
-    ),
+    cell: ({ cell }) => {
+      const nameObject = cell.getValue();
+
+      return (
+        <p>
+          <span dangerouslySetInnerHTML={{ __html: nameObject.prettified }} />
+          {nameObject.emoji && (
+            <>
+              &nbsp;&nbsp;
+              <AppleEmoji
+                imageClassName="size-4"
+                className="inline"
+                value={nameObject.emoji}
+              />
+            </>
+          )}
+        </p>
+      );
+    },
   }),
   columnHelper.accessor("average", {
     header: ({ column }) => {
@@ -126,11 +142,14 @@ const mockSubjects = (length: number) =>
       ({
         average: { mark: 0, letter: "" },
         teachers: [],
-        name: "",
+        name: {
+          prettified: "",
+          actual: "",
+          emoji: null,
+        },
         term: undefined,
         room: "",
         id: "",
-        actualName: "",
       }) satisfies SubjectWithAverage
   );
 export function SubjectsTable({
@@ -169,8 +188,7 @@ export function SubjectsTable({
   const getRowRenderer: RowRendererFactory<SubjectWithAverage> =
     (table) => (row) => {
       const cells = row.getVisibleCells();
-      const isTeacherAdvisoryRow =
-        isTeacherAdvisory(row.original.name);
+      const isTeacherAdvisoryRow = isTeacherAdvisory(row.original.name.actual);
       return (
         <TableRow
           key={row.id}
@@ -268,7 +286,22 @@ function SubjectCard({
             value: formatTeachers(subject.teachers),
           },
         ]}
-        header={<h3 className="font-medium text-base">{subject.name}</h3>}
+        header={
+          <h3 className="font-medium text-base">
+            {subject.name.prettified}
+
+            {subject.name.emoji && (
+              <>
+                &nbsp;&nbsp;
+                <AppleEmoji
+                  imageClassName="size-4.5"
+                  className="inline"
+                  value={subject.name.emoji}
+                />
+              </>
+            )}
+          </h3>
+        }
       />
     </Link>
   );

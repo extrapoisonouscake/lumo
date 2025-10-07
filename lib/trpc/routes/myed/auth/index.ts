@@ -164,6 +164,7 @@ export const authRouter = router({
     try {
       await performLogin(input);
     } catch (e: any) {
+      console.log(e);
       const safeErrorMessage: LoginErrors = isKnownLoginError(e.message)
         ? e.message
         : LoginErrors.unexpectedError;

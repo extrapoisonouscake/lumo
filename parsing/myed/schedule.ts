@@ -1,4 +1,5 @@
 import { decodeHtmlEntities } from "@/helpers/decodeHtmlEntities";
+import { getSubjectEmoji } from "@/helpers/getSubjectEmoji";
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import { locallyTimezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
@@ -60,8 +61,11 @@ export function parseSchedule({
       const subject = {
         startsAt: getDateFromSubjectTimeStringWithDay(startsAt!),
         endsAt: getDateFromSubjectTimeStringWithDay(endsAt!),
-        name: prettifyEducationalName(decodedName!),
-        actualName: decodedName,
+        name: {
+          prettified: prettifyEducationalName(decodedName!),
+          actual: decodedName,
+          emoji: getSubjectEmoji(decodedName!),
+        },
         teachers: teachersString!.split("; "),
         room: room ? prettifyEducationalName(room) : null,
       };

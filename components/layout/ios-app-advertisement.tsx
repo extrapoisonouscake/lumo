@@ -12,10 +12,9 @@ const features = [
 ];
 export function IOSAppAdvertisement() {
   const [isDismissed, setIsDismissed] = useState(
-    localStorage.getItem(IS_DISMISSED_KEY) === "true"|| !isIOS || isIOSWebView
+    localStorage.getItem(IS_DISMISSED_KEY) === "true" || !isIOS || isIOSWebView
   );
   useEffect(() => {
-    console.log("isDismissed", isDismissed);
     document.body.style.overflow = isDismissed ? "auto" : "hidden";
   }, [isDismissed]);
   if (isDismissed) return null;
@@ -33,24 +32,26 @@ export function IOSAppAdvertisement() {
           <X className="size-6 text-muted-foreground" />
         </div>
         <div className="flex flex-col gap-6 items-center justify-center">
-          <div className="flex flex-col gap-4 items-center"><img
-            src="/app-store-app-icon.png"
-            alt="Lumo App Icon"
-            className="size-16"
-          />
-          <h1 className="text-2xl font-semibold">Download our app</h1>
+          <div className="flex flex-col gap-4 items-center">
+            <img
+              src="/app-store-app-icon.png"
+              alt="Lumo App Icon"
+              className="size-16"
+            />
+            <h1 className="text-2xl font-semibold">Download our app</h1>
 
-          <ul className="flex flex-col gap-2">
-            {features.map((feature, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <Check className="size-5 text-brand" />
-                <p>{feature}</p>
-              </li>
-            ))}
-          </ul>
-          <a rel="noopener noreferrer" target="_blank" href={LINK}>
-            <AppStoreBadge className="h-13" />
-          </a></div>
+            <ul className="flex flex-col gap-2">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-2">
+                  <Check className="size-5 text-brand" />
+                  <p>{feature}</p>
+                </li>
+              ))}
+            </ul>
+            <a rel="noopener noreferrer" target="_blank" href={LINK}>
+              <AppStoreBadge className="h-13" />
+            </a>
+          </div>
           <div
             onClick={onDismiss}
             className="flex gap-1 items-center clickable"

@@ -1,5 +1,5 @@
 import { Subject } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -16,7 +16,7 @@ export function useRecentAssignments(subjects?: Subject[]) {
   const query = useQueries({
     queries: subjects
       ? subjects.map((subject) =>
-          trpc.myed.subjects.getSubjectAssignments.queryOptions({
+          getTRPCQueryOptions(trpc.myed.subjects.getSubjectAssignments)({
             id: subject.id,
             term: subject.term,
           })

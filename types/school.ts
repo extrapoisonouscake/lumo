@@ -1,9 +1,14 @@
+type RichName = {
+  prettified: string;
+  actual: string;
+  emoji: string | null;
+};
 export interface Subject {
   id: string;
-  name: string;
+  name: RichName;
   teachers: string[];
   room: string | null;
-  actualName: string;
+
   term?: SubjectTerm;
 }
 //? name?
@@ -33,7 +38,7 @@ export type GradeObject = {
 export type SubjectYear = "current" | "previous";
 export interface SubjectSummary {
   id: string;
-  name: string;
+  name: RichName;
   term: SubjectTerm;
   //this is the only way to get the current term
   currentTermIndex: number | null;
@@ -181,7 +186,6 @@ export interface ProgramRequirementEntry {
   status: ProgramRequirementEntryStatus;
   alternativeEntry?: Omit<ProgramRequirementEntry, "alternativeEntry">;
   completedUnits: number;
-  
 }
 
 export interface ProgramEntry {

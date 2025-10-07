@@ -1,10 +1,10 @@
 import {
   BookOpenText,
   Calendar,
+  GraduationCap,
   Home,
   LucideIcon,
   Menu,
-  ScrollText,
   Settings,
 } from "lucide-react";
 import { Params } from "next/dist/server/request/params";
@@ -44,8 +44,8 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     showOnMobile: true,
   },
   "/graduation": {
-    breadcrumb: [{ name: "Graduation Summary" }],
-    icon: ScrollText,
+    breadcrumb: [{ name: "Graduation" }],
+    icon: GraduationCap,
     showOnMobile: false,
   },
   "/other": {

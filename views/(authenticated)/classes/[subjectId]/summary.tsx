@@ -1,4 +1,5 @@
 "use client";
+import { AppleEmoji } from "@/components/misc/apple-emoji";
 import { HalfDonutTextChart } from "@/components/misc/half-donut-text-chart";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +45,8 @@ const termToLabel: Record<SubjectTerm, string> = {
 export function SubjectSummary(
   summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
 ) {
-  const { id, term, name, academics, year, shouldShowLetterGrade,attendance } = summary;
+  const { id, term, name, academics, year, shouldShowLetterGrade, attendance } =
+    summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted
@@ -58,9 +60,13 @@ export function SubjectSummary(
 
   return (
     <Card className="flex flex-col gap-3 relative items-center">
-      <div className="block p-2 md:absolute top-0 left-0 w-full">
+      <div className="p-2 absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
-          <SubjectAttendance id={id} year={year} tardyCount={attendance.tardy} />
+          <SubjectAttendance
+            id={id}
+            year={year}
+            tardyCount={attendance.tardy}
+          />
 
           <LetterGradeSwitch
             value={isLetterGradeShown}
@@ -68,9 +74,18 @@ export function SubjectSummary(
           />
         </div>
       </div>
-      <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px]">
-        <CardTitle className="text-center">{name}</CardTitle>
-        {term && <CardDescription>{termToLabel[term]}</CardDescription>}
+      <CardHeader className="items-center p-6 pb-0 space-y-3">
+        {name.emoji && (
+          <AppleEmoji
+            textClassName="text-3xl leading-none"
+            imageClassName="size-7.5"
+            value={name.emoji}
+          />
+        )}
+        <div className="gap-y-1.5 flex flex-col items-center">
+          <CardTitle className="text-center">{name.prettified}</CardTitle>
+          {term && <CardDescription>{termToLabel[term]}</CardDescription>}
+        </div>
       </CardHeader>
       <CardContent className="flex flex-1 items-center gap-1 p-6 pt-0">
         <div className="flex flex-col gap-1 items-center">
@@ -123,7 +138,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>{name}</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>{name.prettified}</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
@@ -164,7 +179,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
 export function SubjectSummarySkeleton() {
   return (
     <Card className="flex flex-col gap-3 relative items-center">
-      <div className="block p-2 md:absolute top-0 left-0 w-full">
+      <div className="p-2 absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
           <Skeleton className="h-8 w-[120px]" />
 
@@ -173,7 +188,8 @@ export function SubjectSummarySkeleton() {
           </Skeleton>
         </div>
       </div>
-      <CardHeader className="items-center pt-0 md:pt-6 pb-0 md:px-[120px]">
+      <CardHeader className="items-center p-6 pb-0">
+        <Skeleton className="size-9" />
         <Skeleton shouldShrink={false}>
           <CardTitle className="text-center">Subject Name</CardTitle>
         </Skeleton>

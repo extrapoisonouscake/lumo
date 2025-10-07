@@ -26,7 +26,7 @@ export function useCachedQuery<
   } = {}
 ): UseQueryResult<TData, TError> {
   const query = useQuery(options);
-  let cacheKey = `${options.queryKey[0] as string}`;
+  let cacheKey = `${options.queryKey[0] as string}-v1`;
   if (cacheDetails.params) {
     cacheKey += `-${JSON.stringify(cacheDetails.params)}`;
   }

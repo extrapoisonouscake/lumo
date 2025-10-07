@@ -2,14 +2,16 @@ import { ErrorCard } from "@/components/misc/error-card";
 import { TitleManager } from "@/components/misc/title-manager";
 import { Spinner } from "@/components/ui/button";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import ip3country from "ip3country";
 import { RegistrationForm } from "./form";
 import { LoginSuggestionText } from "./login-suggestion-text";
 ip3country.init();
 export default function SettingsPage() {
-  const query = useQuery(trpc.myed.auth.getRegistrationFields.queryOptions());
+  const query = useQuery(
+    getTRPCQueryOptions(trpc.myed.auth.getRegistrationFields)()
+  );
   return (
     <>
       <TitleManager>Register</TitleManager>

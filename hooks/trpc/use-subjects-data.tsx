@@ -1,4 +1,4 @@
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useCachedQuery } from "../use-cached-query";
 export function useSubjectsData(
   {
@@ -14,7 +14,7 @@ export function useSubjectsData(
     termId,
   };
   const query = useCachedQuery(
-    trpc.myed.subjects.getSubjects.queryOptions(params),
+    getTRPCQueryOptions(trpc.myed.subjects.getSubjects)(params),
     {
       params,
     }

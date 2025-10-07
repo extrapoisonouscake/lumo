@@ -24,7 +24,7 @@ import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
-import { isTeacherAdvisory} from "@/helpers/prettifyEducationalName";
+import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
@@ -70,9 +70,21 @@ const columns = [
       if (row.original.type !== "subject") {
         return <ScheduleBreak type={row.original.type} />;
       }
-      const value = cell.getValue();
+      const value = row.original.name;
       return value ? (
-        <span dangerouslySetInnerHTML={{ __html: value }} />
+        <p>
+          <span dangerouslySetInnerHTML={{ __html: value.prettified }} />
+          {value.emoji && (
+            <>
+              &nbsp;&nbsp;
+              <AppleEmoji
+                className="inline"
+                imageClassName="size-4"
+                value={value.emoji}
+              />
+            </>
+          )}
+        </p>
       ) : (
         NULL_VALUE_DISPLAY_FALLBACK
       );
@@ -129,8 +141,8 @@ export const mockScheduleSubjects = (length: number) => {
       startsAt: new Date(),
       endsAt: new Date(),
       teachers: [],
-      actualName: "",
-      name: "1",
+
+      name: { prettified: "1", actual: "1", emoji: null },
       room: "",
       type: "subject" as const,
     } satisfies ScheduleRowSubject);
@@ -186,7 +198,7 @@ export function ScheduleTable({
       nameCell = cells.find((cell) => cell.column.id === "name");
     }
     const isTeacherAdvisoryRow =
-      isSubject && isTeacherAdvisory(rowOriginal.name);
+      isSubject && isTeacherAdvisory(rowOriginal.name.actual);
     const shouldRedirect = isSubject && !isTeacherAdvisoryRow && rowOriginal.id;
     return (
       <TableRow
@@ -236,7 +248,7 @@ export function ScheduleTable({
     () => (row: Row<ScheduleRow>) => {
       const isSubjectRow =
         row.original.type === "subject" &&
-        !isTeacherAdvisory(row.original.name);
+        !isTeacherAdvisory(row.original.name.actual);
       const shouldBeClickable = !isLoading && isSubjectRow;
       return cn({
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-(--mobile-menu-height) bg-background shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
@@ -275,7 +287,7 @@ export function ScheduleTable({
               !!(
                 typeof currentRowIndex === "number" &&
                 (data[currentRowIndex]!.type !== "subject" ||
-                  isTeacherAdvisory(data[currentRowIndex]!.name))
+                  isTeacherAdvisory(data[currentRowIndex]!.name.actual))
               )
             }
           />
@@ -317,8 +329,7 @@ export function ScheduleBreak({
 }
 function ScheduleMobileRow(row: ScheduleRow) {
   const isSubject = row.type === "subject";
-  const isTeacherAdvisoryRow =
-    isSubject && isTeacherAdvisory(row.name);
+  const isTeacherAdvisoryRow = isSubject && isTeacherAdvisory(row.name.actual);
   const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
   const content = (
     <Card
@@ -346,7 +357,19 @@ function ScheduleMobileRow(row: ScheduleRow) {
         </p>
 
         {isSubject ? (
-          <p className="font-medium">{row.name}</p>
+          <p className="font-medium">
+            {row.name.prettified}
+            {row.name.emoji && (
+              <>
+                &nbsp;&nbsp;
+                <AppleEmoji
+                  className="inline"
+                  imageClassName="size-4.5"
+                  value={row.name.emoji}
+                />
+              </>
+            )}
+          </p>
         ) : (
           <ScheduleBreak
             className="text-muted-foreground text-sm whitespace-nowrap"

@@ -18,7 +18,7 @@ import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
@@ -38,7 +38,7 @@ import { WidgetComponentProps } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
 const getQueryKey = () => {
   const today = timezonedDayJS().format(MYED_DATE_FORMAT);
-  return trpc.myed.schedule.getSchedule.queryOptions({
+  return getTRPCQueryOptions(trpc.myed.schedule.getSchedule)({
     day: today,
   });
 };
@@ -52,7 +52,7 @@ function ScheduleTodayWidget(widget: WidgetComponentProps) {
   const subjectNameToIdMap = useMemo(() => {
     return subjectsDataQuery.data?.subjects.main.reduce(
       (acc, subject) => {
-        acc[subject.actualName] = subject.id;
+        acc[subject.name.actual] = subject.id;
         return acc;
       },
       {} as Record<string, string>
@@ -114,13 +114,13 @@ function Content({
       addBreaksToSchedule(
         subjects.map((subject) => ({
           ...subject,
-          id: nameToIdMap?.[subject.actualName],
+          id: nameToIdMap?.[subject.name.actual],
         }))
       ),
     [subjects, nameToIdMap]
   );
   const subjectsWithoutTA = subjects.filter(
-    (subject) => !isTeacherAdvisory(subject.name.toLowerCase())
+    (subject) => !isTeacherAdvisory(subject.name.actual)
   );
   const { currentRowIndex } = useTTNextSubject(rows);
 
@@ -156,7 +156,8 @@ function Content({
       : rows
           .slice(0, currentRowIndex + 1)
           .filter(
-            (row) => row.type === "subject" && !isTeacherAdvisory(row.name)
+            (row) =>
+              row.type === "subject" && !isTeacherAdvisory(row.name.actual)
           ).length;
   return (
     <div className="flex flex-col gap-3 flex-1">
@@ -190,12 +191,14 @@ function Content({
 }
 function NextSubjectPreview({ id, name }: ScheduleRowSubject) {
   const span = (
-    <span className="font-medium text-foreground clickable">{name}</span>
+    <span className="font-medium text-foreground clickable">
+      {name.prettified}
+    </span>
   );
   return (
     <p className="text-sm text-muted-foreground">
       Next class:{" "}
-      {isTeacherAdvisory(name) ? (
+      {isTeacherAdvisory(name.actual) ? (
         span
       ) : (
         <Link
@@ -260,7 +263,11 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
     >
       <div className="flex flex-col flex-1 min-w-0">
         <div className="font-medium truncate">
-          {isSubject ? element.name : <ScheduleBreak type={element.type} />}
+          {isSubject ? (
+            element.name.prettified
+          ) : (
+            <ScheduleBreak type={element.type} />
+          )}
         </div>
         <p className="text-sm text-muted-foreground">
           {timezonedDayJS(element.startsAt).format("h:mm")} –{" "}
@@ -314,7 +321,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
           <p className="text-sm text-muted-foreground">
             First class:{" "}
             <span className="font-medium text-foreground">
-              {firstSubject!.name}
+              {firstSubject!.name.prettified}
             </span>
           </p>
         </div>

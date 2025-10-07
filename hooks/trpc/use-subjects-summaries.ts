@@ -1,5 +1,5 @@
 import { Subject, SubjectSummary } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQueries } from "@tanstack/react-query";
 import { SubjectYear } from "../../types/school";
 
@@ -13,7 +13,7 @@ export function useSubjectSummaries({
   const query = useQueries({
     queries: ids
       ? ids.map((id) =>
-          trpc.myed.subjects.getSubjectInfo.queryOptions({
+          getTRPCQueryOptions(trpc.myed.subjects.getSubjectInfo)({
             id,
             year,
           })

@@ -4,6 +4,6 @@ import { prepareStringForURI } from "./prepareStringForURI";
 export const getSubjectPageURL =
   (year: SubjectYear) => (props: Pick<Subject, "id" | "name">) => {
     return `/classes/${props.id}/${prepareStringForURI(
-      props.name
+      props.name.prettified
     )}?year=${year}`;
   };

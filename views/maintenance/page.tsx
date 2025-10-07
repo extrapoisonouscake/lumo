@@ -8,11 +8,11 @@ import { useQuery } from "@tanstack/react-query";
 import { MegaphoneIcon, RefreshCw } from "lucide-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
-import { trpc } from "../trpc";
+import { getTRPCQueryOptions, trpc } from "../trpc";
 
 export default function MaintenancePage() {
   const navigate = useNavigate();
-  const healthCheck = useQuery(trpc.myed.health.queryOptions());
+  const healthCheck = useQuery(getTRPCQueryOptions(trpc.myed.health)());
   useEffect(() => {
     if (healthCheck.data?.isHealthy) {
       navigate("/");

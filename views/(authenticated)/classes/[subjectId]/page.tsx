@@ -34,7 +34,7 @@ export default function SubjectPage() {
       <QueryWrapper query={summary} skeleton={<SubjectPageSkeleton />}>
         {(summary) => (
           <>
-            <TitleManager>{summary.name} - Classes</TitleManager>
+            <TitleManager>{summary.name.prettified} - Classes</TitleManager>
             <div className="flex flex-col gap-4">
               <SubjectSummary
                 {...summary}

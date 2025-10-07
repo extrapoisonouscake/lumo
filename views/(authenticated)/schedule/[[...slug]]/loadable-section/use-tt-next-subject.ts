@@ -68,12 +68,12 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
           let rowsToSkip;
           if (
             isRowScheduleSubject(nextRow) &&
-            isTeacherAdvisory(nextRow.name)
+            isTeacherAdvisory(nextRow.name.actual)
           ) {
             rowsToSkip = 3;
           } else if (
             isRowScheduleSubject(currentRow) &&
-            isTeacherAdvisory(currentRow.name)
+            isTeacherAdvisory(currentRow.name.actual)
           ) {
             rowsToSkip = 2;
           } else {

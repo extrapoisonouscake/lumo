@@ -62,7 +62,7 @@ export function formatScore(
  */
 export function getAssignmentURL(
   assignment: Assignment,
-  subject: Pick<Subject, "id" | "name">
+  subject: Pick<Subject, "id"> & { name: Pick<Subject["name"], "prettified"> }
 ): string {
-  return `/classes/${subject.id}/${prepareStringForURI(subject.name)}/assignments/${assignment.id}`;
+  return `/classes/${subject.id}/${prepareStringForURI(subject.name.prettified)}/assignments/${assignment.id}`;
 }

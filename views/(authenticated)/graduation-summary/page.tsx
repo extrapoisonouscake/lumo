@@ -20,7 +20,7 @@ import {
   ProgramRequirementEntryStatus,
   TranscriptEducationPlan,
 } from "@/types/school";
-import { trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import {
   ColumnFiltersState,
@@ -137,7 +137,7 @@ const baseColumns = [
 
 export default function GraduationSummaryPage() {
   const query = useQuery(
-    trpc.myed.transcript.getGraduationSummary.queryOptions()
+    getTRPCQueryOptions(trpc.myed.transcript.getGraduationSummary)()
   );
   const [currentEducationPlanId, setCurrentEducationPlanId] = useState<
     string | null
