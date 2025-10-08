@@ -20,7 +20,7 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { useQuery } from "@tanstack/react-query";
+import { useCachedQuery } from "@/hooks/use-cached-query";
 import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
@@ -37,15 +37,17 @@ import {
 import { useTTNextSubject } from "../schedule/[[...slug]]/loadable-section/use-tt-next-subject";
 import { WidgetComponentProps } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
-const getQueryKey = () => {
-  const today = timezonedDayJS().format(MYED_DATE_FORMAT);
-  return getTRPCQueryOptions(trpc.myed.schedule.getSchedule)({
-    day: today,
-  });
-};
+
 function ScheduleTodayWidget(widget: WidgetComponentProps) {
-  const queryKey = useMemo(getQueryKey, []);
-  const todaySchedule = useQuery(queryKey);
+  
+const params = useMemo(()=>{
+const today = timezonedDayJS().format(MYED_DATE_FORMAT);
+return {day:today}
+},[])
+  const todaySchedule = useCachedQuery(getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),{
+      params,
+      ttlKey: "schedule",
+    })
   const subjectsDataQuery = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
