@@ -19,6 +19,7 @@ export function ContentCard({
     value: React.ReactNode;
     valueClassName?: string;
     className?: string;
+    asChild?: boolean;
   }>;
   shouldShowArrow?: boolean;
 } & ComponentProps<typeof Card>) {
@@ -30,18 +31,23 @@ export function ContentCard({
       <div className="flex flex-col gap-3 flex-1">
         {header}
         <div className="grid grid-cols-2 gap-3 text-sm">
-          {items.map((item, index) => (
-            <div key={index} className={cn(item.className)}>
-              <span
-                className={cn("text-muted-foreground", item.labelClassName)}
-              >
-                {item.label}
-              </span>
-              <div className={cn(item.valueClassName)}>
-                {item.value ?? NULL_VALUE_DISPLAY_FALLBACK}
+          {items.map((item, index) => {
+            const content = <> {item.value ?? NULL_VALUE_DISPLAY_FALLBACK}</>;
+            return (
+              <div key={index} className={cn(item.className)}>
+                <span
+                  className={cn("text-muted-foreground", item.labelClassName)}
+                >
+                  {item.label}
+                </span>
+                {item.asChild ? (
+                  content
+                ) : (
+                  <div className={cn(item.valueClassName)}>{content}</div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       {shouldShowArrow && (

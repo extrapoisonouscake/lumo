@@ -3,6 +3,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { ContentCard } from "@/components/misc/content-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SortableColumn } from "@/components/ui/sortable-column";
 import {
   TableCell,
@@ -224,15 +225,19 @@ export function SubjectsTable({
       rowRendererFactory={getRowRenderer}
       table={table}
       columns={columns}
-      renderMobileRow={(row) => (
-        <SubjectCard
-          subject={row.original}
-          year={year}
-          shouldHighlightAveragesWithColour={
-            settings.shouldHighlightAveragesWithColour
-          }
-        />
-      )}
+      renderMobileRow={(row) =>
+        isLoading ? (
+          <SubjectCardSkeleton />
+        ) : (
+          <SubjectCard
+            subject={row.original}
+            year={year}
+            shouldHighlightAveragesWithColour={
+              settings.shouldHighlightAveragesWithColour
+            }
+          />
+        )
+      }
     />
   );
 }
@@ -288,5 +293,48 @@ function SubjectCard({
         }
       />
     </Link>
+  );
+}
+
+function SubjectCardSkeleton() {
+  return (
+    <ContentCard
+      shouldShowArrow={true}
+      items={[
+        {
+          label: "Average",
+          value: (
+            <Skeleton className="block w-fit" shouldShrink={false}>
+              100.0
+            </Skeleton>
+          ),
+          asChild: true,
+        },
+        {
+          label: "Room",
+          value: (
+            <Skeleton className="block w-fit" shouldShrink={false}>
+              10000
+            </Skeleton>
+          ),
+          asChild: true,
+        },
+        {
+          label: "Teachers",
+          className: "col-span-2",
+          value: (
+            <Skeleton className="block w-fit" shouldShrink={false}>
+              Teacher, Teacher
+            </Skeleton>
+          ),
+          asChild: true,
+        },
+      ]}
+      header={
+        <Skeleton shouldShrink={false} className="w-fit">
+          <h3 className="font-medium text-base">Subject Name SUbject</h3>
+        </Skeleton>
+      }
+    />
   );
 }
