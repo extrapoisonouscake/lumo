@@ -498,7 +498,9 @@ function WidgetEditor({
               strategy={rectSortingStrategy}
             >
               <WidgetsGrid gridColumns={gridColumns}>
-                {changelog.data && !isEditing && <ChangelogCard {...changelog.data} />}
+                {changelog.data && !isEditing && (
+                  <ChangelogCard {...changelog.data} />
+                )}
                 {responsiveWidgets.map((entry, index) =>
                   renderWidget({ entry, index, isEditing })
                 )}
@@ -689,6 +691,7 @@ function AddWidgetButton({
       onClick={onClick}
       className="flex items-center pr-0 h-fit gap-0"
     >
+      <PlusIcon className="mr-2 text-muted-foreground" />
       {WIDGET_NAMES[type]}{" "}
       <div
         className="pr-3 pl-2 py-2 cursor-grab"

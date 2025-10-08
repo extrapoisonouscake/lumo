@@ -59,8 +59,8 @@ export function SubjectSummary(
   );
 
   return (
-    <Card className="flex flex-col gap-3 relative items-center">
-      <div className="p-2 absolute top-0 left-0 w-full">
+    <Card className="flex flex-col relative items-center">
+      <div className="block p-2 md:absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
           <SubjectAttendance
             id={id}
@@ -74,46 +74,50 @@ export function SubjectSummary(
           />
         </div>
       </div>
-      <CardHeader className="items-center p-6 pb-0 space-y-3">
-        {name.emoji && (
-          <AppleEmoji
-            textClassName="text-3xl leading-none"
-            imageClassName="size-7.5"
-            value={name.emoji}
-          />
-        )}
-        <div className="gap-y-1.5 flex flex-col items-center">
-          <CardTitle className="text-center">{name.prettified}</CardTitle>
-          {term && <CardDescription>{termToLabel[term]}</CardDescription>}
-        </div>
-      </CardHeader>
-      <CardContent className="flex flex-1 items-center gap-1 p-6 pt-0">
-        <div className="flex flex-col gap-1 items-center">
-          <HalfDonutTextChart
-            height={isLetterGradeShown ? 45 : 50}
-            value={gradeObject?.mark || 0}
-            fillColor={fillColor}
-            topRightContent={
-              wasGradePosted && <Check className={`size-4 text-${fillColor}`} />
-            }
-            mainText={
-              gradeObject
-                ? isLetterGradeShown
-                  ? gradeObject.letter || ""
-                  : gradeObject.mark.toString()
-                : "-"
-            }
-            mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
-            secondaryText={!isLetterGradeShown ? `/ 100` : ""}
-            textContainerClassName={
-              isLetterGradeShown ? "top-[1.05rem]" : "top-5"
-            }
-          />
-          <span className="text-zinc-500 text-[10px] uppercase">
-            {isLetterGradeShown ? "Grade" : "Average"}
-          </span>
-        </div>
-      </CardContent>
+      <div className="flex flex-col gap-3 w-full items-center">
+        <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px] space-y-3">
+          {name.emoji && (
+            <AppleEmoji
+              textClassName="text-3xl leading-none"
+              imageClassName="size-7.5"
+              value={name.emoji}
+            />
+          )}
+          <div className="gap-y-1.5 flex flex-col items-center">
+            <CardTitle className="text-center">{name.prettified}</CardTitle>
+            {term && <CardDescription>{termToLabel[term]}</CardDescription>}
+          </div>
+        </CardHeader>
+        <CardContent className="flex flex-1 items-center gap-1 p-6 pt-0">
+          <div className="flex flex-col gap-1 items-center">
+            <HalfDonutTextChart
+              height={isLetterGradeShown ? 45 : 50}
+              value={gradeObject?.mark || 0}
+              fillColor={fillColor}
+              topRightContent={
+                wasGradePosted && (
+                  <Check className={`size-4 text-${fillColor}`} />
+                )
+              }
+              mainText={
+                gradeObject
+                  ? isLetterGradeShown
+                    ? gradeObject.letter || ""
+                    : gradeObject.mark.toString()
+                  : "-"
+              }
+              mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
+              secondaryText={!isLetterGradeShown ? `/ 100` : ""}
+              textContainerClassName={
+                isLetterGradeShown ? "top-[1.05rem]" : "top-5"
+              }
+            />
+            <span className="text-zinc-500 text-[10px] uppercase">
+              {isLetterGradeShown ? "Grade" : "Average"}
+            </span>
+          </div>
+        </CardContent>
+      </div>
       <InfoDialog {...summary} />
     </Card>
   );
@@ -178,8 +182,8 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
 }
 export function SubjectSummarySkeleton() {
   return (
-    <Card className="flex flex-col gap-3 relative items-center">
-      <div className="p-2 absolute top-0 left-0 w-full">
+    <Card className="flex flex-col relative items-center">
+      <div className="block p-2 md:absolute top-0 left-0 w-full">
         <div className="flex justify-between items-center gap-4">
           <Skeleton className="h-8 w-[120px]" />
 
@@ -188,34 +192,38 @@ export function SubjectSummarySkeleton() {
           </Skeleton>
         </div>
       </div>
-      <CardHeader className="items-center p-6 pb-0">
-        <Skeleton className="size-9" />
-        <Skeleton shouldShrink={false}>
-          <CardTitle className="text-center">Subject Name</CardTitle>
-        </Skeleton>
-        <Skeleton shouldShrink={false}>
-          <CardDescription>Full Year</CardDescription>
-        </Skeleton>
-      </CardHeader>
-      <CardContent className="flex flex-1 items-center gap-1">
-        <div className="flex flex-col gap-1 items-center">
-          <div className={cn("relative", "h-[45px]")}>
-            <div>
-              <HalfDonutProgressChart value={90} isLoading />
+      <div className="flex flex-col gap-3 w-full items-center">
+        <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px] space-y-3">
+          <Skeleton className="size-7.5" />
+          <Skeleton shouldShrink={false}>
+            <CardTitle className="text-center">Subject Name</CardTitle>
+          </Skeleton>
+          <Skeleton shouldShrink={false}>
+            <CardDescription>Full Year</CardDescription>
+          </Skeleton>
+        </CardHeader>
+        <CardContent className="flex flex-1 items-center gap-1">
+          <div className="flex flex-col gap-1 items-center">
+            <div className={cn("relative", "h-[45px]")}>
+              <div>
+                <HalfDonutProgressChart value={90} isLoading />
+              </div>
+              <div
+                className={cn(
+                  "absolute top-[1.05rem] left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
+                )}
+              >
+                <Skeleton>
+                  <span className={cn("font-bold text-2xl leading-none")}>
+                    A
+                  </span>
+                </Skeleton>
+              </div>
             </div>
-            <div
-              className={cn(
-                "absolute top-[1.05rem] left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
-              )}
-            >
-              <Skeleton>
-                <span className={cn("font-bold text-2xl leading-none")}>A</span>
-              </Skeleton>
-            </div>
+            <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
           </div>
-          <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
-        </div>
-      </CardContent>
+        </CardContent>
+      </div>
       <Skeleton className="size-4 absolute bottom-2 right-2" />
     </Card>
   );

@@ -101,7 +101,7 @@ export function NewAssignmentsWidget({
                   <p className="font-medium text-sm leading-tight line-clamp-2 truncate">
                     {assignment.name}
                   </p>
-                  <p className="flex items-center justify-between text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {assignment.subject.name.prettified}
                     {assignment.subject.name.emoji && (
                       <InlineSubjectEmoji

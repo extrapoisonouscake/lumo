@@ -157,15 +157,18 @@ export const isRowScheduleSubject = (
 export function ScheduleTable({
   data: externalData,
   isLoading = false,
-  isWeekdayShown,
+
   shouldShowTimer,
-  className,
+
+  date,
+  weekday,
 }: {
   data?: ExtendedScheduleSubject[];
   isLoading?: boolean;
-  isWeekdayShown?: boolean;
+  date?: Date;
   shouldShowTimer?: boolean;
-  className?: string;
+
+  weekday?: string | null;
 }) {
   const data = useMemo(
     () =>
@@ -255,6 +258,7 @@ export function ScheduleTable({
 
     [currentRowIndex, isLoading]
   );
+
   const table = useReactTable<ScheduleRow>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -267,28 +271,35 @@ export function ScheduleTable({
     columns: isLoading ? columnsSkeletons : columns,
     meta: { getRowClassName },
   });
+  const shouldShowWeekday = weekday !== timezonedDayJS(date).format("dddd");
   return (
-    <>
-      {shouldShowTimer &&
-        (isLoading || typeof timeToNextSubject === "undefined" ? (
-          <CountdownTimerSkeleton />
-        ) : (
-          <CountdownTimer
-            timeToNextSubject={timeToNextSubject}
-            isBreak={
-              !!(
-                typeof currentRowIndex === "number" &&
-                (data[currentRowIndex]!.type !== "subject" ||
-                  isTeacherAdvisory(data[currentRowIndex]!.name.actual))
-              )
-            }
-          />
+    <div className="flex flex-col gap-2">
+      {shouldShowTimer ||
+        (shouldShowWeekday && (
+          <div className="flex gap-2 justify-between items-center">
+            {shouldShowTimer &&
+              (isLoading || typeof timeToNextSubject === "undefined" ? (
+                <CountdownTimerSkeleton />
+              ) : (
+                <CountdownTimer
+                  timeToNextSubject={timeToNextSubject}
+                  isBreak={
+                    !!(
+                      typeof currentRowIndex === "number" &&
+                      (data[currentRowIndex]!.type !== "subject" ||
+                        isTeacherAdvisory(data[currentRowIndex]!.name.actual))
+                    )
+                  }
+                />
+              ))}
+            {shouldShowWeekday && (
+              <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
+                Same as <span className="font-semibold">{weekday}</span>
+              </h3>
+            )}
+          </div>
         ))}
       <TableRenderer
-        containerClassName={cn("col-span-2", className, {
-          "row-start-2":
-            (shouldShowTimer && timeToNextSubject !== null) || isWeekdayShown,
-        })}
         key={currentRowIndex}
         tableContainerClassName="overflow-clip"
         table={table}
@@ -301,7 +312,7 @@ export function ScheduleTable({
         }
         mobileContainerClassName="gap-1"
       />
-    </>
+    </div>
   );
 }
 export function ScheduleBreak({

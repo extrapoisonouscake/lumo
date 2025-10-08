@@ -385,26 +385,16 @@ function DayRenderer({
       <ErrorCard {...scheduleVisualizableErrors[data.knownError]?.({ date })} />
     );
   } else {
-    const shouldShowWeekday =
-      getActualWeekdayIndex(date) === 5 &&
-      data.weekday !== timezonedDayJS(date).format("dddd");
     content = (
-      <div className="grid grid-cols-2 gap-2 auto-rows-max">
-        {shouldShowWeekday && (
-          <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
-            Same as <span className="font-semibold">{data.weekday}</span>
-          </h3>
-        )}
-        <ScheduleTable
-          shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
-          isWeekdayShown={shouldShowWeekday}
-          data={data.subjects.map((subject) => ({
-            ...subject,
-            id: subjects?.find((s) => s.name.actual === subject.name.actual)
-              ?.id,
-          }))}
-        />
-      </div>
+      <ScheduleTable
+        date={date}
+        shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
+        data={data.subjects.map((subject) => ({
+          ...subject,
+          id: subjects?.find((s) => s.name.actual === subject.name.actual)?.id,
+        }))}
+        weekday={data.weekday}
+      />
     );
   }
   return content;
