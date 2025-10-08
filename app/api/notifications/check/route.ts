@@ -166,18 +166,18 @@ const generators: Record<
   }) => NotificationData
 > = {
   [NotificationType.NewAssignment]: ({ subject, assignment }) => ({
-    title: `New assignment for ${subject.name}`,
-    body: `A new assignment '${assignment.name}' has been posted.`,
+    title: `New assignment`,
+    body: `A new assignment '${assignment.name}' has been posted in ${subject.name.prettified}.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.NewGrade]: ({ subject, assignment }) => ({
-    title: `Grade posted for ${assignment.name}`,
-    body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
+    title: `Grade posted`,
+    body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name.prettified}.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
   [NotificationType.GradeUpdated]: ({ subject, assignment }) => ({
-    title: `Grade updated for ${assignment.name}`,
-    body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name}.`,
+    title: `Grade updated`,
+    body: `You scored ${assignment.score}/${assignment.maxScore} on '${assignment.name}' in ${subject.name.prettified}.`,
     navigate: getAssignmentURL(assignment, subject),
   }),
 };
