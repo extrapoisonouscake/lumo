@@ -16,11 +16,11 @@ import { formatCountdown } from "@/helpers/format-countdown";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
+import { useCachedQuery } from "@/hooks/use-cached-query";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { useCachedQuery } from "@/hooks/use-cached-query";
 import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
@@ -37,17 +37,22 @@ import {
 import { useTTNextSubject } from "../schedule/[[...slug]]/loadable-section/use-tt-next-subject";
 import { WidgetComponentProps } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
-
+export const getQueryOptions = () => {
+  const today = timezonedDayJS().format(MYED_DATE_FORMAT);
+  const params = {
+    day: today,
+  };
+  return {
+    query: getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),
+    params,
+  };
+};
 function ScheduleTodayWidget(widget: WidgetComponentProps) {
-  
-const params = useMemo(()=>{
-const today = timezonedDayJS().format(MYED_DATE_FORMAT);
-return {day:today}
-},[])
-  const todaySchedule = useCachedQuery(getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),{
-      params,
-      ttlKey: "schedule",
-    })
+  const { query, params } = getQueryOptions();
+  const todaySchedule = useCachedQuery(query, {
+    params,
+    ttlKey: "schedule",
+  });
   const subjectsDataQuery = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -346,4 +351,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
     </div>
   );
 }
-export default { component: ScheduleTodayWidget, getQueryKey };
+export default {
+  component: ScheduleTodayWidget,
+  getQueryKey: () => getQueryOptions().query.queryKey,
+};
