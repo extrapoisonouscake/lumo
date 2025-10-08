@@ -133,11 +133,11 @@ function TranscriptEntryCard(entry: TranscriptEntry) {
   return (
     <ContentCard
       header={
-        <div className="flex items-center gap-2 justify-between">
-          <h3 className="font-medium text-base text-foreground">
+        <div className="flex gap-4 justify-between">
+          <h3 className="font-medium text-base text-foreground leading-tight">
             {entry.subjectName}
           </h3>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 h-fit">
             {entry.finalGrade !== null ? (
               <>
                 <p className="font-medium whitespace-nowrap">
