@@ -5,7 +5,7 @@ export function getSubjectEmoji(name: string) {
   const matchedKeyword = findBestKeywordMatch(name);
   return matchedKeyword
     ? subjectsEmojis[matchedKeyword as keyof typeof subjectsEmojis]
-    : undefined;
+    : null;
 }
 
 function findBestKeywordMatch(subjectName: string): string | undefined {

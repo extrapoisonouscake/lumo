@@ -48,6 +48,7 @@ function pingSubscriptions(
   return Promise.all(
     subscriptions.map(async (subscription) => {
       if (subscription.apnsDeviceToken) {
+        console.log("SHSHS", subscription);
         await sendApplePushNotification(
           subscription.apnsDeviceToken,
           {
