@@ -57,7 +57,7 @@ function Content({
   return (
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
-        <div className="flex items-center gap-1.5 cursor-pointer group">
+        <div className="flex items-center gap-1.5 cursor-pointer group clickable">
           <p className="text-sm">
             GPA:{" "}
             <span className="font-medium">
@@ -65,7 +65,7 @@ function Content({
               {getUSStyleGPA(gpaData).toFixed(2)})
             </span>
           </p>
-          <InfoIcon className="size-4 text-muted-foreground group-hover:text-foreground clickable" />
+          <InfoIcon className="size-4 text-muted-foreground group-hover:text-foreground" />
         </div>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
