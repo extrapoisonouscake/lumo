@@ -3,8 +3,10 @@ import { redis } from "@/instances/redis";
 import * as cheerio from "cheerio";
 import type { Element } from "domhandler";
 
-import subjectsEmojis from "@/data/subjects-emojis.json";
-import { prepareSubjectNameForEmojiRetrieval } from "@/helpers/getSubjectEmoji";
+import {
+  getSubjectEmoji,
+  prepareSubjectNameForEmojiRetrieval,
+} from "@/helpers/getSubjectEmoji";
 export const MYED_TABLE_HEADER_SELECTOR = ".listHeader";
 
 /**
@@ -101,15 +103,15 @@ export function $getTableValuesMap(
 
   return result;
 }
-const subjectsWithKnownEmojis = new Set(Object.keys(subjectsEmojis));
+
 export async function submitUnknownSubjectsNames(subjectsNames: string[]) {
   const preparedSubjectsNames = subjectsNames.map(
     prepareSubjectNameForEmojiRetrieval
   );
-  const newUnknownSubjectsNames = new Set(preparedSubjectsNames).difference(
-    subjectsWithKnownEmojis
+  const newUnknownSubjectsNames = preparedSubjectsNames.filter(
+    (name) => !getSubjectEmoji(name)
   );
-  if (newUnknownSubjectsNames.size > 0) {
+  if (newUnknownSubjectsNames.length > 0) {
     await redis.sadd(
       "unknown-subjects",
       //@ts-expect-error subjects is not typed
