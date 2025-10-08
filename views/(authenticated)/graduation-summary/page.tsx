@@ -103,11 +103,12 @@ const baseColumns = [
 
   columnHelper.accessor("yearsString", {
     header: "Years",
-    filterFn: "equalsString",
   }),
 
   columnHelper.accessor("grade", {
+    id: "grade",
     header: "Grade",
+    filterFn: "equalsString",
   }),
   columnHelper.accessor("completedUnits", {
     header: "Credits",
@@ -206,11 +207,12 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       Object.fromEntries(
         baseColumns.map((column) => {
           let isVisible = true;
-          if (column.id === "status") {
+          if (["status", "grade"].includes(column.id!)) {
             isVisible = !columnFilters.some(
               (filter) => filter.id === column.id
             );
           }
+
           return [column.id, isVisible];
         })
       ),
@@ -298,19 +300,19 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
         </TableRow>
       );
     };
-  const yearsSelect = (
+  const gradeSelect = (
     <TableFilterSelect
       id="years-filter"
-      column={table.getColumn("yearsString")!}
-      options={Array.from(new Set(preparedData.map((item) => item.yearsString)))
+      column={table.getColumn("grade")!}
+      options={Array.from(new Set(preparedData.map((item) => item.grade)))
         .reverse()
-        .map((years) => ({
-          label: years,
-          value: years,
+        .map((grade) => ({
+          label: grade,
+          value: grade,
         }))}
-      placeholder="Select years"
+      placeholder="Select grade"
       className="flex-1 md:max-w-[150px]"
-      label="Years"
+      label="Grade"
     />
   );
 
@@ -350,7 +352,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
           table={table}
           desktopHeader={
             <div className="flex flex-col md:flex-row flex-wrap gap-2">
-              {yearsSelect}
+              {gradeSelect}
               {statusSelect}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="subject-search">Subject</Label>
@@ -374,9 +376,9 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               <ResponsiveFilters
                 triggerClassName="h-full"
                 table={table}
-                filterKeys={["yearsString", "status"]}
+                filterKeys={["grade", "status"]}
               >
-                {yearsSelect}
+                {gradeSelect}
                 {statusSelect}
               </ResponsiveFilters>
             </div>
@@ -398,7 +400,11 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
                     {entry.requirement.name}
                   </h3>
                 )}
-                <CreditSummaryEntryCard {...entry} />
+                <CreditSummaryEntryCard
+                  entry={entry}
+                  shouldShowGrade={columnVisibility["grade"]}
+                  shouldShowStatus={columnVisibility["status"]}
+                />
               </div>
             );
           }}
@@ -408,7 +414,15 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   );
 }
 
-function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
+function CreditSummaryEntryCard({
+  entry,
+  shouldShowGrade,
+  shouldShowStatus,
+}: {
+  entry: PreparedProgramRequirementEntry;
+  shouldShowGrade: boolean;
+  shouldShowStatus: boolean;
+}) {
   return (
     <ContentCard
       className="transition-colors"
@@ -428,17 +442,24 @@ function CreditSummaryEntryCard(entry: PreparedProgramRequirementEntry) {
           label: "Credits",
           value: entry.completedUnits.toFixed(1),
         },
-        { label: "Years", value: entry.yearsString },
-        {
-          label: "Status",
-          className: "space-y-0.5",
-          value: (
-            <EntryStatusBadge
-              status={entry.status}
-              alternativeEntry={entry.alternativeEntry}
-            />
-          ),
-        },
+        ...(shouldShowGrade !== false
+          ? [{ label: "Grade", value: entry.grade }]
+          : []),
+        ...(shouldShowStatus !== false ||
+        entry.status === ProgramRequirementEntryStatus.AlreadyCounted
+          ? [
+              {
+                label: "Status",
+                className: "space-y-0.5",
+                value: (
+                  <EntryStatusBadge
+                    status={entry.status}
+                    alternativeEntry={entry.alternativeEntry}
+                  />
+                ),
+              },
+            ]
+          : []),
       ]}
     />
   );

@@ -4,7 +4,6 @@ import {
   GraduationCap,
   Home,
   LucideIcon,
-  Menu,
   Settings,
 } from "lucide-react";
 import { Params } from "next/dist/server/request/params";
@@ -48,12 +47,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     icon: GraduationCap,
     showOnMobile: false,
   },
-  "/other": {
-    breadcrumb: [{ name: "Menu" }],
-    icon: Menu,
-    showOnMobile: true,
-    showOnDesktop: false,
-  },
+
   "/settings": {
     breadcrumb: [{ name: "Settings" }],
     icon: Settings,

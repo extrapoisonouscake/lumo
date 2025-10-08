@@ -12,7 +12,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { getGradeInfo } from "@/helpers/grades";
-import { TranscriptEntry } from "@/types/school";
+import { useStudentDetails } from "@/hooks/trpc/use-student-details";
+import { PersonalDetails, TranscriptEntry } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { InfoIcon } from "lucide-react";
@@ -22,25 +23,37 @@ export function GPAOverview() {
   const transcriptEntries = useQuery(
     getTRPCQueryOptions(trpc.myed.transcript.getTranscriptEntries)()
   );
+  const student = useStudentDetails();
   return (
     <QueryWrapper query={transcriptEntries} skeleton={<GPAOverviewSkeleton />}>
-      {(data) => <Content data={data} />}
+      {(data) => (
+        <QueryWrapper query={student} skeleton={<GPAOverviewSkeleton />}>
+          {(studentData) => (
+            <Content data={data} currentGrade={studentData.grade} />
+          )}
+        </QueryWrapper>
+      )}
     </QueryWrapper>
   );
 }
-function Content({ data }: { data: TranscriptEntry[] }) {
-  const gpaData = useMemo(
-    () =>
-      {
-const maxGrade = Math.max(...data.map(entry=>+entry.grade))
-return data
-        .filter((entry) => entry.finalGrade !== null&&+entry.grade>=maxGrade-1)
-        .map((entry) => ({
-          percentage: entry.finalGrade!,
-          credits: entry.creditAmount,
-        }))},
-    [data]
-  );
+function Content({
+  data,
+  currentGrade,
+}: {
+  data: TranscriptEntry[];
+  currentGrade: PersonalDetails["grade"];
+}) {
+  const gpaData = useMemo(() => {
+    return data
+      .filter(
+        //only showing the last 2 years
+        (entry) => entry.finalGrade !== null && entry.grade >= currentGrade - 1
+      )
+      .map((entry) => ({
+        percentage: entry.finalGrade!,
+        credits: entry.creditAmount,
+      }));
+  }, [data]);
   return (
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
@@ -48,7 +61,8 @@ return data
           <p className="text-sm">
             GPA:{" "}
             <span className="font-medium">
-              {getPercentageStyleGPA(gpaData)}% ({getUSStyleGPA(gpaData)})
+              {getPercentageStyleGPA(gpaData)}% (
+              {getUSStyleGPA(gpaData).toFixed(2)})
             </span>
           </p>
           <InfoIcon className="size-4 text-muted-foreground group-hover:text-foreground clickable" />

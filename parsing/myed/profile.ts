@@ -54,7 +54,7 @@ function parseMainDetails($: CheerioAPI): FirstPageDetails {
   if (typeof known.taRoom === "string") {
     known.taRoom = known.taRoom.replace(/^TA\s*/, "");
   }
-  return known;
+  return { ...known, grade: +known.grade };
 }
 
 const addressLabelsMap: Record<string, keyof PersonalDetails["addresses"]> = {
@@ -91,7 +91,7 @@ function parseAddresses($: CheerioAPI): PersonalDetails["addresses"] {
   };
 }
 
-function parseDetails<Known extends Record<string, string>>(
+function parseDetails<Known extends Record<string, string | number>>(
   map: Record<string, keyof Known>,
   rawDetails: Record<string, string>
 ): { known: Known; unknown: Record<string, string> } {

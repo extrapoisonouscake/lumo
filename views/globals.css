@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "tailwindcss-logical";
 @plugin "@tailwindcss/typography";
 @source inline("fill-red-500");
 @source inline("fill-green-500");
@@ -310,4 +311,7 @@
   html {
     @apply scroll-smooth;
   }
+  /* [data-vaul-drawer][data-vaul-drawer-direction=bottom][]::after{
+
+  } */
 }

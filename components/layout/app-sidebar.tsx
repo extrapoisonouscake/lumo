@@ -24,6 +24,7 @@ import { usePathname } from "next/navigation";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { ChevronRight, LogOutIcon } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Spinner } from "../ui/button";
 import {
@@ -32,6 +33,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import { Link } from "../ui/link";
+import { MobileAdditionalMenu } from "./additional-menu";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
@@ -85,89 +87,101 @@ function PagesMenu() {
       (isMobile ? page.showOnMobile : (page.showOnDesktop ?? true))
   );
   const { toggleSidebar, open } = useSidebar();
+  const [additionalMenuOpen, setAdditionalMenuOpen] = useState(false);
   return (
-    <SidebarMenu className={cn(isMobile && "flex-row gap-2 p-2")}>
-      {pages.map(([url, page]) => {
-        const isActive =
-          url === "/" ? url === pathname : pathname.startsWith(url);
-        const mainItemContent = (
-          <>
-            {page.icon && <page.icon />}
-            <span className={cn({ "leading-none": isMobile })}>
-              {page.breadcrumb[0]!.name}
-            </span>
-          </>
-        );
-        return (
-          <Collapsible
-            defaultOpen={isActive}
-            key={url}
-            className={cn("group/collapsible", {
-              "flex-1": isMobile,
-            })}
-          >
-            <SidebarMenuItem key={url}>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive && (isMobile || !page.items?.length)}
-                  className={cn({
-                    "flex-col h-full justify-center gap-1 text-xs px-2 py-1.5 data-[active=true]:text-brand data-[active=true]:bg-brand/10 hover:data-[active=true]:bg-brand/10 hover:data-[active=true]:text-brand":
-                      isMobile,
-                  })}
-                >
-                  {page.items && !isMobile ? (
-                    <div
-                      className="flex items-center gap-2 cursor-pointer"
-                      onClick={(e) => {
-                        if (!open) {
-                          toggleSidebar();
-                        }
-                      }}
-                    >
-                      {mainItemContent}
-                      <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                    </div>
-                  ) : (
-                    <Link to={url} className="py-2 gap-2" viewTransition>
-                      {mainItemContent}
-                    </Link>
-                  )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              {page.items?.length && !isMobile && (
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {page.items.map((item) => {
-                      const fullUrl = url + item.href;
-                      return (
-                        <SidebarMenuSubItem key={fullUrl}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={
-                              fullUrl === url
-                                ? pathname === fullUrl
-                                : pathname.startsWith(fullUrl)
-                            }
-                          >
-                            <Link
-                              to={fullUrl}
-                              className="whitespace-nowrap flex items-center gap-2"
+    <>
+      <SidebarMenu
+        className={cn("relative z-30", isMobile && "flex-row gap-2 p-2")}
+      >
+        {pages.map(([url, page]) => {
+          const isActive =
+            url === "/" ? url === pathname : pathname.startsWith(url);
+          const mainItemContent = (
+            <>
+              {page.icon && <page.icon />}
+              <span className={cn({ "leading-none": isMobile })}>
+                {page.breadcrumb[0]!.name}
+              </span>
+            </>
+          );
+          return (
+            <Collapsible
+              defaultOpen={isActive}
+              key={url}
+              className={cn("group/collapsible", {
+                "flex-1": isMobile,
+              })}
+            >
+              <SidebarMenuItem key={url}>
+                <CollapsibleTrigger asChild>
+                  <SidebarMenuButton
+                    isActive={
+                      isActive &&
+                      (!isMobile || !additionalMenuOpen) &&
+                      (isMobile || !page.items?.length)
+                    }
+                    asChild
+                  >
+                    {page.items && !isMobile ? (
+                      <div
+                        className="flex items-center gap-2 cursor-pointer"
+                        onClick={(e) => {
+                          if (!open) {
+                            toggleSidebar();
+                          }
+                        }}
+                      >
+                        {mainItemContent}
+                        <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                      </div>
+                    ) : (
+                      <Link to={url} className="py-2 gap-2">
+                        {mainItemContent}
+                      </Link>
+                    )}
+                  </SidebarMenuButton>
+                </CollapsibleTrigger>
+                {page.items?.length && !isMobile && (
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {page.items.map((item) => {
+                        const fullUrl = url + item.href;
+                        return (
+                          <SidebarMenuSubItem key={fullUrl}>
+                            <SidebarMenuSubButton
+                              asChild
+                              isActive={
+                                fullUrl === url
+                                  ? pathname === fullUrl
+                                  : pathname.startsWith(fullUrl)
+                              }
                             >
-                              {item.title}
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      );
-                    })}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              )}
-            </SidebarMenuItem>
-          </Collapsible>
-        );
-      })}
-    </SidebarMenu>
+                              <Link
+                                to={fullUrl}
+                                className="whitespace-nowrap flex items-center gap-2"
+                              >
+                                {item.title}
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                )}
+              </SidebarMenuItem>
+            </Collapsible>
+          );
+        })}
+
+        {isMobile && (
+          <MobileAdditionalMenu
+            open={additionalMenuOpen}
+            setOpen={setAdditionalMenuOpen}
+          />
+        )}
+      </SidebarMenu>
+    </>
   );
 }
 function LogOutButton() {

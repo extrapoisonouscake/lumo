@@ -10,7 +10,8 @@ import SubjectsPage from "./(authenticated)/classes/page";
 import GraduationSummaryPage from "./(authenticated)/graduation-summary/page";
 import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
-import OtherPage from "./(authenticated)/other/page";
+
+import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
 import SettingsPage from "./(authenticated)/settings/page";
@@ -20,7 +21,6 @@ import LoginPage from "./(unauthenticated)/login/page";
 import RegisterPage from "./(unauthenticated)/register/page";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
-import { IOSAppAdvertisement} from "@/components/layout/ios-app-advertisement";
 export default function Root() {
   return (
     <>
@@ -57,7 +57,6 @@ export default function Root() {
                 </Route>
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
-                <Route path="other" element={<OtherPage />} />
 
                 <Route path="graduation" element={<GraduationSummaryPage />} />
               </Route>

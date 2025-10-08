@@ -54,11 +54,16 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  overlayClassName,
+  shouldShowKnob = true,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
+  overlayClassName?: string;
+  shouldShowKnob?: boolean;
+}) {
   return (
     <DrawerPortal data-slot="drawer-portal">
-      <DrawerOverlay />
+      <DrawerOverlay className={overlayClassName} />
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
@@ -72,7 +77,9 @@ function DrawerContent({
         )}
         {...props}
       >
-        <div className="mx-auto mt-4 h-1 min-h-1 w-[60px] rounded-full bg-muted shrink-0" />
+        {shouldShowKnob && (
+          <div className="mx-auto mt-4 h-1 min-h-1 w-[60px] rounded-full bg-muted shrink-0" />
+        )}
 
         {children}
       </DrawerPrimitive.Content>

@@ -231,7 +231,7 @@ const Sidebar = React.forwardRef<
         />
         <div
           className={cn(
-            "duration-200 fixed inset-y-0 z-10 hidden h-svh w-(--sidebar-width) transition-[left,right,width] ease-linear sm:flex",
+            "duration-200 fixed inset-y-0 z-[25] hidden h-svh w-(--sidebar-width) transition-[left,right,width] ease-linear sm:flex",
             side === "left"
               ? "left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]"
               : "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
@@ -509,7 +509,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 export const sidebarMenuButtonVariants = cva(
-  "peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg r p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 no whitespace-nowrap active:scale-95",
+  "flex-col sm:flex-row justify-center sm:justify-start gap-1 px-2 py-1.5 sm:py-2 data-[active=true]:text-brand data-[active=true]:bg-brand/10 hover:data-[active=true]:bg-brand/10 hover:data-[active=true]:text-brand peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] sm:hover:bg-sidebar-accent sm:hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 sm:data-[active=true]:bg-sidebar-accent sm:data-[active=true]:text-sidebar-accent-foreground sm:hover:data-[active=true]:bg-sidebar-accent sm:data-[state=open]:hover:bg-sidebar-accent sm:data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 no whitespace-nowrap active:scale-95",
   {
     variants: {
       variant: {
@@ -518,7 +518,7 @@ export const sidebarMenuButtonVariants = cva(
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
       size: {
-        default: "h-8 text-sm",
+        default: "h-full sm:h-8 text-xs sm:text-sm",
         sm: "h-7 text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
       },

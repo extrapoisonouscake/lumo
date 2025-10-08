@@ -2,6 +2,7 @@ import { cn } from "@/helpers/cn";
 import { SelectProps } from "@radix-ui/react-select";
 import { Column } from "@tanstack/react-table";
 import { LucideIcon } from "lucide-react";
+import { ReactNode } from "react";
 import { Label } from "./label";
 import {
   Select,
@@ -23,7 +24,7 @@ export function TableFilterSelect<ColumnType>({
   id: string;
   label?: string;
   options: {
-    label: string;
+    label: ReactNode;
     value: any;
     icon?: LucideIcon;
     className?: string;

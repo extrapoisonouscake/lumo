@@ -25,7 +25,7 @@ export function parseTranscriptEntries({
     const [year, grade, subject, finalGrade, credit] = row;
     return {
       year: +year!,
-      grade: grade!,
+      grade: +grade!,
       subjectName: prettifyEducationalName(subject!),
       finalGrade: finalGrade ? +finalGrade : null,
       creditAmount: +credit!,

@@ -90,7 +90,7 @@ export interface PersonalDetails {
   schoolName: string;
   nextSchoolName?: string;
   graduationYear: string;
-  grade: string;
+  grade: number;
   parkingSpaceNumber?: string;
   licensePlateNumber?: string;
   photoURL?: string;
@@ -149,7 +149,7 @@ export interface TermEntry {
 }
 export interface TranscriptEntry {
   year: number;
-  grade: string;
+  grade: number;
   subjectName: string;
   finalGrade: number | null;
   creditAmount: number;
