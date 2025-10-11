@@ -37,7 +37,7 @@ import {
 import { useTTNextSubject } from "../schedule/[[...slug]]/loadable-section/use-tt-next-subject";
 import { WidgetComponentProps } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
-export const getQueryOptions = () => {
+export const getQuery = () => {
   const today = timezonedDayJS().format(MYED_DATE_FORMAT);
   const params = {
     day: today,
@@ -48,11 +48,12 @@ export const getQueryOptions = () => {
   };
 };
 function ScheduleTodayWidget(widget: WidgetComponentProps) {
-  const { query, params } = getQueryOptions();
+  const { query, params } = getQuery();
   const todaySchedule = useCachedQuery(query, {
     params,
     ttlKey: "schedule",
   });
+
   const subjectsDataQuery = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
@@ -353,5 +354,5 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
 }
 export default {
   component: ScheduleTodayWidget,
-  getQueryKey: () => getQueryOptions().query.queryKey,
+  getQuery: () => getQuery().query,
 };

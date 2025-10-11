@@ -45,7 +45,7 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
   "/graduation": {
     breadcrumb: [{ name: "Graduation" }],
     icon: GraduationCap,
-    showOnMobile: false,
+    showOnMobile: true,
   },
 
   "/settings": {

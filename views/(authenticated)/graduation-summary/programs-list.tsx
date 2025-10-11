@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/responsive-dialog";
 import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import { cn } from "@/helpers/cn";
-import { ProgramEntry } from "@/types/school";
+import { ProgramEntry, ProgramRequirementEntry } from "@/types/school";
 import {
   CheckCircle,
   CircleSlash,
@@ -26,8 +26,10 @@ import { GPAOverview } from "./gpa-overview";
 
 export function GraduationSummaryProgramsList({
   programs,
+  programRequirementEntries,
 }: {
   programs: ProgramEntry[];
+  programRequirementEntries: ProgramRequirementEntry[];
 }) {
   const [currentProgramIndex, setCurrentProgramIndex] = useState<number | null>(
     null
@@ -76,7 +78,7 @@ export function GraduationSummaryProgramsList({
           <GraduationCap className="h-5 w-5 text-brand" />
           <h2 className="text-lg font-semibold">Programs</h2>
         </div>
-        <GPAOverview />
+        <GPAOverview programRequirementEntries={programRequirementEntries} />
       </div>
       {content}
       <RequirementDialog

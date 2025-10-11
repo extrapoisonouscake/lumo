@@ -6,11 +6,13 @@ import {
   websitePagesWithStaticPaths,
 } from "@/constants/website";
 import { createContext, useContext, useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { Link, useLocation, useParams } from "react-router";
 
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Settings } from "lucide-react";
 import { BackButton } from "../ui/back-button";
+import { Button } from "../ui/button";
 import { SidebarTrigger } from "../ui/sidebar";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
@@ -83,6 +85,15 @@ export function PageHeading({
       <div className="w-fit flex gap-2.5 items-center">
         {rightContent ?? (!isMobile ? dynamicContent : null)}
         <div className="w-fit flex sm:hidden gap-3 items-center">
+          <Link to="/settings">
+            <Button
+              variant="ghost"
+              size="smallIcon"
+              className="w-fit hover:bg-transparent"
+            >
+              <Settings />
+            </Button>
+          </Link>
           <ThemeToggle isInSidebar={false} shouldShowText={false} />
 
           <UserHeader className="w-fit" />

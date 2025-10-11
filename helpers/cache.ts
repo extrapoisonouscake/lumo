@@ -44,7 +44,7 @@ export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
     data: data,
   };
 }
-const storage = {
+export const storage = {
   get: function <T>(key: string) {
     const item = localStorage.getItem(key);
     if (!item) return undefined;
@@ -53,7 +53,7 @@ const storage = {
       expiresAt: number;
     };
     if (expiresAt && Date.now() > expiresAt) {
-      this.delete(key);
+      storage.delete(key);
       return undefined;
     }
     return value;

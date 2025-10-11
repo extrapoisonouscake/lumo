@@ -24,7 +24,6 @@ import { usePathname } from "next/navigation";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
 import { ChevronRight, LogOutIcon } from "lucide-react";
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Spinner } from "../ui/button";
 import {
@@ -33,7 +32,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import { Link } from "../ui/link";
-import { MobileAdditionalMenu } from "./additional-menu";
+
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
@@ -87,7 +86,6 @@ function PagesMenu() {
       (isMobile ? page.showOnMobile : (page.showOnDesktop ?? true))
   );
   const { toggleSidebar, open } = useSidebar();
-  const [additionalMenuOpen, setAdditionalMenuOpen] = useState(false);
   return (
     <>
       <SidebarMenu
@@ -115,11 +113,7 @@ function PagesMenu() {
               <SidebarMenuItem key={url}>
                 <CollapsibleTrigger asChild>
                   <SidebarMenuButton
-                    isActive={
-                      isActive &&
-                      (!isMobile || !additionalMenuOpen) &&
-                      (isMobile || !page.items?.length)
-                    }
+                    isActive={isActive && (isMobile || !page.items?.length)}
                     asChild
                   >
                     {page.items && !isMobile ? (
@@ -173,13 +167,6 @@ function PagesMenu() {
             </Collapsible>
           );
         })}
-
-        {isMobile && (
-          <MobileAdditionalMenu
-            open={additionalMenuOpen}
-            setOpen={setAdditionalMenuOpen}
-          />
-        )}
       </SidebarMenu>
     </>
   );

@@ -254,6 +254,7 @@ function SubjectCard({
   return (
     <Link to={getSubjectPageURL(year)(subject)}>
       <ContentCard
+        data-clickable-hover={true}
         className="clickable"
         shouldShowArrow={true}
         items={[

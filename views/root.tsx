@@ -1,7 +1,13 @@
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router";
 import NotFoundPage from "./(authenticated)/[...not-found]/page";
 import AssignmentPage from "./(authenticated)/classes/[subjectId]/[subjectName]/assignments/[assignmentId]/page";
 import SubjectPage from "./(authenticated)/classes/[subjectId]/[subjectName]/page";
@@ -12,6 +18,8 @@ import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
 
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
+import { storage } from "@/helpers/cache";
+import { useEffect } from "react";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
 import SettingsPage from "./(authenticated)/settings/page";
@@ -22,6 +30,10 @@ import RegisterPage from "./(unauthenticated)/register/page";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
 export default function Root() {
+  useEffect(() => {
+    //checking if any of the keys are expired
+    Object.keys(localStorage).forEach(storage.get);
+  }, []);
   return (
     <>
       <meta
@@ -37,6 +49,7 @@ export default function Root() {
           <Toaster />
           <IOSAppAdvertisement />
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route element={<AuthenticatedLayout />}>
                 <Route index element={<HomePage />} />
@@ -83,4 +96,13 @@ export default function Root() {
       </div>
     </>
   );
+}
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
 }

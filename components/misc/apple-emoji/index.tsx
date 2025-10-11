@@ -25,9 +25,9 @@ export function AppleEmoji({
 
   if (isText) {
     return (
-      <p {...props} className={className}>
+      <span {...props} className={className}>
         {value}
-      </p>
+      </span>
     );
   }
   return (

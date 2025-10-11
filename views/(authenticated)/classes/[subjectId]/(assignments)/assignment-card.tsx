@@ -28,6 +28,7 @@ export function AssignmentCard({
   return (
     <ContentCard
       onClick={onClick}
+      data-clickable-hover={true}
       className={cn("cursor-pointer gap-2 hover:bg-muted/50 clickable", {
         "border-red-500/30 dark:border-red-500/20":
           shouldHighlightIfMissing && isMissing,

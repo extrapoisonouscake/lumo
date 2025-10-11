@@ -24,14 +24,15 @@ export function IOSAppAdvertisement() {
   };
   return (
     <div className="fixed bottom-0 left-0 right-0 size-full bg-background z-100">
-      <div className="size-full relative p-4 flex items-center justify-center">
+      <div className="size-full relative px-4 py-12 flex items-center justify-center">
         <div
           className="absolute top-4 right-4 bg-background z-100 clickable"
           onClick={onDismiss}
         >
           <X className="size-6 text-muted-foreground" />
         </div>
-        <div className="flex flex-col gap-6 items-center justify-center">
+        <div className="flex flex-col gap-6 items-center justify-between h-full">
+          <div />
           <div className="flex flex-col gap-4 items-center">
             <img
               src="/app-store-app-icon.png"

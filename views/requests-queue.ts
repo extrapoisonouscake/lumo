@@ -20,6 +20,7 @@ export class PrioritizedRequestQueue {
   }
   enqueue<T>(
     requestFunction: RequestFunction<T>,
+
     isSecondary?: boolean
   ): Promise<T> {
     return new Promise((resolve, reject) => {

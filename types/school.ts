@@ -152,7 +152,7 @@ export interface TranscriptEntry {
   grade: number;
   subjectName: string;
   finalGrade: number | null;
-  creditAmount: number;
+  creditAmount: number | null;
 }
 export interface CreditSummaryEntry {
   years: [number, number];

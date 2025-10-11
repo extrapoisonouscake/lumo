@@ -168,7 +168,12 @@ export default function GraduationSummaryPage() {
         <QueryWrapper query={query} skeleton={<div>Loading...</div>}>
           {({ breakdown, programs, educationPlans }) => (
             <div className="flex flex-col gap-6">
-              <GraduationSummaryProgramsList programs={programs} />
+              <GraduationSummaryProgramsList
+                programs={programs}
+                programRequirementEntries={breakdown.flatMap(
+                  (requirement) => requirement.entries
+                )}
+              />
               <CoursesBreakdown data={breakdown} />
             </div>
           )}

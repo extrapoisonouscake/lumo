@@ -24,7 +24,7 @@ import {
 import { cn } from "@/helpers/cn";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
-import { trpc } from "@/views/trpc";
+import { queryClient, trpc } from "@/views/trpc";
 import {
   DndContext,
   DragOverlay,
@@ -57,6 +57,7 @@ import React, {
   createContext,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
 } from "react";
@@ -67,6 +68,7 @@ import {
   WIDGET_NAMES,
   isCustomizableWidget,
 } from "./helpers";
+import scheduleTodayWidget from "./schedule-today-widget";
 
 // Clean interface definitions
 export interface ResponsiveWidget<T extends Widgets = Widgets>
@@ -129,6 +131,14 @@ const getNewWidgetConfiguration = (type: Widgets) => {
 
 export default function HomePage() {
   const settings = useUserSettings();
+  useLayoutEffect(() => {
+    const widgets = settings.widgetsConfiguration;
+    const widgetTypes = new Set(widgets.map((w) => w.type));
+
+    if (widgetTypes.has(Widgets.SCHEDULE_TODAY)) {
+      queryClient.prefetchQuery(scheduleTodayWidget.getQuery());
+    }
+  }, []);
   return (
     <>
       <TitleManager />
