@@ -350,7 +350,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             icon={BookOpen01StrokeRounded}
             className="h-5 w-5 text-brand"
           />
-          <h2 className="text-lg font-semibold">Courses Summary</h2>
+          <h2 className="text-lg font-semibold">Courses</h2>
         </div>
         <span className="text-sm text-muted-foreground">
           {table.getFilteredRowModel().rows.length} of {preparedData.length}{" "}
