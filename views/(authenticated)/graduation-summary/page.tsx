@@ -370,7 +370,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
                   id="subject-search"
                   table={table}
                   columnName="name-code"
-                  placeholder="Subject Name..."
+                  placeholder="Subject name..."
                 />
               </div>
             </div>
@@ -381,7 +381,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
                 id="subject-search-mobile"
                 table={table}
                 columnName="name-code"
-                placeholder="Subject Name..."
+                placeholder="Subject name..."
               />
               <ResponsiveFilters
                 triggerClassName="h-full"
