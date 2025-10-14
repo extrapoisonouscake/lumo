@@ -44,7 +44,7 @@ export default function Root() {
       />
       <div
         className="flex w-full justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
-        vaul-drawer-wrapper="true"
+        vaul-drawer-wrapper=""
       >
         <Providers>
           <Toaster />

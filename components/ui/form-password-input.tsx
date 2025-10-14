@@ -1,8 +1,8 @@
 "use client";
 import {
-  ViewOffSolidRounded,
-  ViewSolidRounded,
-} from "@hugeicons-pro/core-solid-rounded";
+  ViewOffStrokeRounded,
+  ViewStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { FormInput, FormInputProps } from "./form-input";
@@ -14,7 +14,7 @@ export function FormPasswordInput({
   ...props
 }: FormPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const Icon = showPassword ? ViewOffSolidRounded : ViewSolidRounded;
+  const Icon = showPassword ? ViewOffStrokeRounded : ViewStrokeRounded;
 
   return (
     <FormInput

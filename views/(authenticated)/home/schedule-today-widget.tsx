@@ -298,7 +298,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
     </Card>
   );
 
-  if (isSubject) {
+  if (isSubject && !isTeacherAdvisory(element.name.actual)) {
     return (
       <Link
         to={getSubjectPageURL("current")({
@@ -322,6 +322,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
   if (timeToNextSubject === null) return null;
   const countdown = formatCountdown(timeToNextSubject);
   const isSoon = timeToNextSubject < 1000 * 60 * 15;
+
   return (
     <div className="flex flex-col flex-1 justify-between gap-3">
       <div className="flex gap-2.5 items-center">
@@ -337,13 +338,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
             Classes start {isSoon ? `in ${countdown}` : `soon`}
           </p>
           <p className="text-sm text-muted-foreground">
-            First class:{" "}
-            <span className="font-medium text-foreground">
-              {firstSubject!.name.prettified}
-              {firstSubject!.name.emoji && (
-                <InlineSubjectEmoji emoji={firstSubject!.name.emoji} />
-              )}
-            </span>
+            First class: <FirstSubjectLink {...firstSubject!} />
           </p>
         </div>
       </div>
@@ -365,6 +360,30 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
     </div>
   );
 }
+function FirstSubjectLink(subject: ScheduleRowSubject) {
+  const content = (
+    <>
+      {subject.name.prettified}
+      {subject.name.emoji && <InlineSubjectEmoji emoji={subject.name.emoji} />}
+    </>
+  );
+  if (isTeacherAdvisory(subject.name.actual)) {
+    return <span className="font-medium text-foreground">{content}</span>;
+  } else {
+    return (
+      <Link
+        className="font-medium text-foreground"
+        to={getSubjectPageURL("current")({
+          id: subject.id!,
+          name: subject.name,
+        })}
+      >
+        {content}
+      </Link>
+    );
+  }
+}
+
 export default {
   component: ScheduleTodayWidget,
   getQuery: () => getQuery().query,

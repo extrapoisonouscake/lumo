@@ -46,14 +46,7 @@ export default async function RootLayout({
             }}
           />
         </head>
-        <body className={GeistSans.className}>
-          <div
-            className="flex items-center justify-center h-full pt-[env(safe-area-inset-top,0)]"
-            vaul-drawer-wrapper=""
-          >
-            {children}
-          </div>
-        </body>
+        <body className={GeistSans.className}>{children}</body>
       </html>
     </>
   );
