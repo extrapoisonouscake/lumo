@@ -44,12 +44,15 @@ import {
   AssignmentCard,
   AssignmentCardSkeleton,
   AssignmentScoreDisplay,
+  SubmissionBadge,
   TeacherCommentBadge,
 } from "./assignment-card";
 import { EMPTY_ASSIGNMENTS_MESSAGE } from "./constants";
 import { ASSIGNMENT_STATUS_LABELS, getAssignmentURL } from "./helpers";
-
-const columnHelper = createColumnHelper<Assignment>();
+export type AssignmentWithSubmissionStatus = Assignment & {
+  hasSubmission?: boolean;
+};
+const columnHelper = createColumnHelper<AssignmentWithSubmissionStatus>();
 const getColumns = ({
   shouldShowPercentages,
   shouldHighlightMissingAssignments,
@@ -67,11 +70,14 @@ const getColumns = ({
       const nameNode = (
         <span dangerouslySetInnerHTML={{ __html: cell.getValue() }} />
       );
-      if (row.original.feedback) {
+      const shouldShowBadges =
+        row.original.feedback || row.original.hasSubmission;
+      if (shouldShowBadges) {
         return (
           <div className="flex items-center gap-1.5">
             {nameNode}
-            <TeacherCommentBadge size="sm" />
+            {row.original.feedback && <TeacherCommentBadge size="sm" />}
+            {row.original.hasSubmission && <SubmissionBadge size="sm" />}
           </div>
         );
       } else {
@@ -142,7 +148,7 @@ const mockAssignments = (length: number) =>
         score: 0,
         assignedAt: new Date(),
         feedback: "",
-        status: AssignmentStatus.Unknown,
+        status: AssignmentStatus.Ungraded,
         classAverage: 0,
         categoryId: "",
       }) satisfies Assignment

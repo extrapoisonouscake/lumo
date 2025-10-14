@@ -12,7 +12,6 @@ export const ASSIGNMENT_STATUS_LABELS = {
   [AssignmentStatus.Missing]: "Missing",
   [AssignmentStatus.Exempt]: "Exempt",
   [AssignmentStatus.Ungraded]: "Ungraded",
-  [AssignmentStatus.Unknown]: "Unknown",
 };
 /**
  * Formats the assignment score based on the assignment status and user settings
@@ -22,8 +21,6 @@ export function formatAssignmentScore(
 ) {
   return function (assignment: Assignment): string {
     switch (assignment.status) {
-      case AssignmentStatus.Unknown:
-        return NULL_VALUE_DISPLAY_FALLBACK;
       case AssignmentStatus.Graded:
         return formatScore(shouldShowPercentages)(assignment, "score");
       case AssignmentStatus.Missing:

@@ -48,7 +48,8 @@ function convertAssignment({
         score: +score,
       };
     } else if (scoreLabel) {
-      const status = scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Unknown;
+      const status =
+        scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Ungraded;
       return {
         ...baseAssignment,
         status: status as Exclude<AssignmentStatus, AssignmentStatus.Graded>,
@@ -64,7 +65,7 @@ function convertAssignment({
   }
   return {
     ...baseAssignment,
-    status: AssignmentStatus.Unknown,
+    status: AssignmentStatus.Ungraded,
     score: null,
   };
 }
@@ -82,7 +83,7 @@ export function parseSubjectAssignments({
     Array<
       | OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/categoryDetails/pastDue">
       | OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/categoryDetails/upcoming">
-    >
+    >,
   ];
 
   const preparedAssignments = assignmentsSegments
@@ -119,6 +120,7 @@ export function parseAssignmentFileSubmissionState({
   if ($container.children().length === 0) {
     return {
       isAllowed: false,
+      isOpen: false,
     };
   }
   const $submitButton = $container.find("#submitButton");

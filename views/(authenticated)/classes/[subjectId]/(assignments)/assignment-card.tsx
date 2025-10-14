@@ -8,16 +8,19 @@ import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { Assignment, AssignmentStatus } from "@/types/school";
 import {
+  AttachmentStrokeRounded,
   Clock05StrokeRounded,
+  Message01StrokeRounded,
   TradeDownStrokeRounded,
   TradeUpStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { formatAssignmentScore } from "./helpers";
+import { AssignmentWithSubmissionStatus } from "./table";
 
 interface AssignmentCardProps {
-  assignment: Assignment;
+  assignment: AssignmentWithSubmissionStatus;
   shouldShowPercentages: boolean;
   shouldHighlightIfMissing: boolean;
   onClick?: () => void;
@@ -29,8 +32,9 @@ export function AssignmentCard({
   shouldHighlightIfMissing,
   onClick,
 }: AssignmentCardProps) {
-  const { name, dueAt, status, weight, feedback } = assignment;
+  const { name, dueAt, status, weight, feedback, hasSubmission } = assignment;
   const isMissing = status === AssignmentStatus.Missing;
+  const shouldShowBadges = !!feedback || hasSubmission;
   return (
     <ContentCard
       onClick={onClick}
@@ -61,7 +65,12 @@ export function AssignmentCard({
       ]}
       header={
         <div className="gap-1.5 flex flex-col items-start">
-          {assignment.feedback && <TeacherCommentBadge />}
+          {shouldShowBadges && (
+            <div className="flex items-center flex-wrap gap-1.5">
+              {feedback && <TeacherCommentBadge />}
+              {hasSubmission && <SubmissionBadge />}
+            </div>
+          )}
           <h3 className="font-medium text-base">{name}</h3>
         </div>
       }
@@ -153,7 +162,6 @@ export function AssignmentScoreDisplay({
           { "text-blue-500/70": assignment.status === AssignmentStatus.Exempt },
           {
             "text-muted-foreground":
-              assignment.status === AssignmentStatus.Unknown ||
               assignment.status === AssignmentStatus.Ungraded,
           }
         )}
@@ -171,7 +179,14 @@ export function AssignmentScoreDisplay({
 export function TeacherCommentBadge(props: BadgeProps) {
   return (
     <Badge variant="secondary" {...props}>
-      Comment
+      <HugeiconsIcon icon={Message01StrokeRounded} /> Comment
+    </Badge>
+  );
+}
+export function SubmissionBadge(props: BadgeProps) {
+  return (
+    <Badge variant="secondary">
+      <HugeiconsIcon icon={AttachmentStrokeRounded} /> Submitted
     </Badge>
   );
 }

@@ -360,6 +360,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       <div className="flex flex-col gap-4">
         <TableRenderer
           table={table}
+          containerClassName="gap-2"
           desktopHeader={
             <div className="flex flex-col md:flex-row flex-wrap gap-2">
               {gradeSelect}

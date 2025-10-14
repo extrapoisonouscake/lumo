@@ -25,7 +25,6 @@ import {
   Calendar03StrokeRounded,
   CheckmarkCircle02StrokeRounded,
   Clock01StrokeRounded,
-  HelpCircleStrokeRounded,
   InformationCircleStrokeRounded,
   Message01StrokeRounded,
   MinusSignCircleStrokeRounded,
@@ -153,7 +152,6 @@ const ASSIGNMENT_STATUS_TO_ICON = {
   [AssignmentStatus.Missing]: AlertCircleStrokeRounded,
   [AssignmentStatus.Exempt]: MinusSignCircleStrokeRounded,
   [AssignmentStatus.Ungraded]: Clock01StrokeRounded,
-  [AssignmentStatus.Unknown]: HelpCircleStrokeRounded,
 };
 
 const BADGE_COLOR_CLASSNAMES = {
@@ -169,8 +167,6 @@ const BADGE_CLASSNAMES_BY_STATUS = {
   [AssignmentStatus.Graded]: BADGE_COLOR_CLASSNAMES["positive"],
   [AssignmentStatus.Missing]: BADGE_COLOR_CLASSNAMES["negative"],
   [AssignmentStatus.Exempt]: BADGE_COLOR_CLASSNAMES["blue"],
-
-  [AssignmentStatus.Unknown]: BADGE_COLOR_CLASSNAMES["gray"],
 };
 function ContentSkeleton() {
   return (
@@ -205,18 +201,16 @@ function AssignmentHeader({
   status: AssignmentStatus;
   dueAt: Date;
 }) {
-  const transformedStatus =
-    status === AssignmentStatus.Unknown ? AssignmentStatus.Ungraded : status;
-  const Icon = ASSIGNMENT_STATUS_TO_ICON[transformedStatus];
+  const Icon = ASSIGNMENT_STATUS_TO_ICON[status];
   let className;
-  if (transformedStatus === AssignmentStatus.Ungraded) {
+  if (status === AssignmentStatus.Ungraded) {
     if (timezonedDayJS(dueAt).isBefore(new Date())) {
       className = BADGE_COLOR_CLASSNAMES["pending"];
     } else {
       className = BADGE_COLOR_CLASSNAMES["gray"];
     }
   } else {
-    className = BADGE_CLASSNAMES_BY_STATUS[transformedStatus];
+    className = BADGE_CLASSNAMES_BY_STATUS[status];
   }
   return (
     <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap">
@@ -229,7 +223,7 @@ function AssignmentHeader({
           )}
         >
           <HugeiconsIcon icon={Icon} className="size-4" />
-          {ASSIGNMENT_STATUS_LABELS[transformedStatus]}
+          {ASSIGNMENT_STATUS_LABELS[status]}
         </Badge>
       </div>
     </Card>

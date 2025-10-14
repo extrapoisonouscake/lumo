@@ -108,21 +108,17 @@ export enum AssignmentStatus {
   Missing,
   Exempt,
   Ungraded,
-  Unknown,
 }
 export type AssignmentSubmissionFile = {
   id: string;
   name: string;
   submittedAt: Date;
 };
-export type AssignmentSubmissionState =
-  | { isAllowed: false }
-  | {
-      isAllowed: true;
-      file?: AssignmentSubmissionFile;
-
-      isOpen: boolean;
-    };
+export type AssignmentSubmissionState = {
+  isAllowed: boolean;
+  file?: AssignmentSubmissionFile;
+  isOpen: boolean;
+};
 export type Assignment = {
   id: string;
   name: string;
