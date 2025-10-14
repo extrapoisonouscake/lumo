@@ -48,7 +48,6 @@ export const storage = {
   get: function <T>(key: string) {
     const item = localStorage.getItem(key);
     if (!item) return undefined;
-    console.log(item);
     try {
       const { value, expiresAt } = JSON.parse(item) as {
         value: T;
@@ -60,9 +59,7 @@ export const storage = {
       }
       return value;
     } catch (e) {
-      console.error(item);
-      console.error(e);
-throw e
+      return undefined
     }
   },
   set: (key: string, value: any, ttl: number) =>
