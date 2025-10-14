@@ -196,7 +196,7 @@ function ProgramCard({
             <Badge variant="outline" className="text-muted-foreground">
               <HugeiconsIcon
                 icon={MinusSignCircleStrokeRounded}
-                className="h-3 w-3 mr-1"
+                className="h-3 w-3"
               />
               Excluded
             </Badge>
