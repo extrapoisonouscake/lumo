@@ -1,5 +1,6 @@
 import { cn } from "@/helpers/cn";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft01StrokeSharp } from "@hugeicons-pro/core-stroke-sharp";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 
@@ -21,7 +22,7 @@ export function BackButton({ className }: { className?: string }) {
         className
       )}
     >
-      <ChevronLeft className="w-4 h-4" />
+      <HugeiconsIcon icon={ArrowLeft01StrokeSharp} className="w-4 h-4" />
       Back
     </Link>
   );

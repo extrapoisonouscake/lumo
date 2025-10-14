@@ -1,7 +1,9 @@
 import { cn } from "@/helpers/cn";
 import { SelectProps } from "@radix-ui/react-select";
 import { Column } from "@tanstack/react-table";
-import { LucideIcon } from "lucide-react";
+
+import { IconSvgObject } from "@/types/ui";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { ReactNode } from "react";
 import { Label } from "./label";
 import {
@@ -26,7 +28,7 @@ export function TableFilterSelect<ColumnType>({
   options: {
     label: ReactNode;
     value: any;
-    icon?: LucideIcon;
+    icon?: IconSvgObject;
     className?: string;
   }[];
   placeholder: string;
@@ -53,7 +55,9 @@ export function TableFilterSelect<ColumnType>({
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value.toString()}>
             <div className={cn("flex items-center gap-2", option.className)}>
-              {option.icon && <option.icon className="size-4" />}
+              {option.icon && (
+                <HugeiconsIcon icon={option.icon} className="size-4" />
+              )}
               {option.label}
             </div>
           </SelectItem>

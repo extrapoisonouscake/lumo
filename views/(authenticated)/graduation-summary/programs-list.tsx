@@ -14,13 +14,20 @@ import {
 import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import { cn } from "@/helpers/cn";
 import { ProgramEntry, ProgramRequirementEntry } from "@/types/school";
+// import {
+//   CheckCircle,
+//   CircleSlash,
+//   GraduationCap,
+//   ListCollapse,
+//   XCircle,
+// } from "lucide-react";
 import {
-  CheckCircle,
-  CircleSlash,
-  GraduationCap,
-  ListCollapse,
-  XCircle,
-} from "lucide-react";
+  CheckListStrokeRounded,
+  CheckmarkCircle02StrokeRounded,
+  MinusSignCircleStrokeRounded,
+  ScrollStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo, useState } from "react";
 import { GPAOverview } from "./gpa-overview";
 
@@ -75,7 +82,10 @@ export function GraduationSummaryProgramsList({
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center gap-2">
         <div className="flex items-center gap-2">
-          <GraduationCap className="h-5 w-5 text-brand" />
+          <HugeiconsIcon
+            icon={ScrollStrokeRounded}
+            className="h-5 w-5 text-brand"
+          />
           <h2 className="text-lg font-semibold">Programs</h2>
         </div>
         <GPAOverview programRequirementEntries={programRequirementEntries} />
@@ -134,7 +144,11 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
           </span>
         </p>
         {percentages.completed >= 100 ? (
-          <CheckCircle strokeWidth={2.3} className="size-4 text-green-600" />
+          <HugeiconsIcon
+            icon={CheckmarkCircle02StrokeRounded}
+            strokeWidth={2.3}
+            className="size-4 text-green-600"
+          />
         ) : (
           <CircularProgress
             values={[
@@ -186,7 +200,10 @@ function ProgramCard({
           </h3>
           {isExcluded && (
             <Badge variant="outline" className="text-muted-foreground">
-              <XCircle className="h-3 w-3 mr-1" />
+              <HugeiconsIcon
+                icon={MinusSignCircleStrokeRounded}
+                className="h-3 w-3 mr-1"
+              />
               Excluded
             </Badge>
           )}
@@ -252,12 +269,15 @@ function ProgramCard({
         >
           {program.requirements && program.requirements.length > 0 ? (
             <>
-              <ListCollapse className="size-3" />
+              <HugeiconsIcon icon={CheckListStrokeRounded} className="size-3" />
               View Requirements
             </>
           ) : (
             <>
-              <CircleSlash className="size-3" />
+              <HugeiconsIcon
+                icon={MinusSignCircleStrokeRounded}
+                className="size-3"
+              />
               No Requirements
             </>
           )}

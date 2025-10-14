@@ -2,8 +2,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
+import {
+  ArrowLeft01StrokeStandard,
+  ArrowRight01StrokeStandard,
+} from "@hugeicons-pro/core-stroke-standard";
+import { HugeiconsIcon } from "@hugeicons/react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const TOTAL_WEEKS = 5;
@@ -112,7 +117,10 @@ export function WeekdaySlider({
         }}
         className="p-0 h-full w-fit hover:bg-transparent group"
       >
-        <ChevronLeft className="text-muted-foreground/80 group-hover:text-foreground transition-colors" />
+        <HugeiconsIcon
+          icon={ArrowLeft01StrokeStandard}
+          className="text-muted-foreground/80 group-hover:text-foreground transition-colors"
+        />
       </Button>
       <div className="overflow-hidden rounded-[18px] flex-1" ref={emblaRef}>
         <div className="flex">
@@ -183,7 +191,10 @@ export function WeekdaySlider({
         }}
         className="p-0 h-full w-fit hover:bg-transparent group"
       >
-        <ChevronRight className="text-muted-foreground/80 group-hover:text-foreground transition-colors" />
+        <HugeiconsIcon
+          icon={ArrowRight01StrokeStandard}
+          className="text-muted-foreground/80 group-hover:text-foreground transition-colors"
+        />
       </Button>
     </div>
   );

@@ -1,7 +1,9 @@
 import * as React from "react";
 
 import { cn } from "@/helpers/cn";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 export type TableProps = React.HTMLAttributes<HTMLTableElement> & {
   containerClassName?: string;
 };
@@ -101,7 +103,10 @@ export const TableCellWithRedirectIcon = React.forwardRef<
   <TableCell ref={ref} className="p-2 relative" {...props}>
     <div className="flex gap-2 size-full justify-between">
       <div className="p-2 pr-0 h-fit self-center">{children}</div>
-      <ArrowUpRight className="size-4 min-w-4 text-muted-foreground" />
+      <HugeiconsIcon
+        icon={ArrowUpRight01StrokeRounded}
+        className="size-4 min-w-4 text-muted-foreground"
+      />
     </div>
   </TableCell>
 ));

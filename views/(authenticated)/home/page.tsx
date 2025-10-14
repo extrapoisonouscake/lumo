@@ -44,15 +44,15 @@ import {
   arrayMove,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { useQuery } from "@tanstack/react-query";
 import {
-  CheckIcon,
-  GripIcon,
-  PencilRulerIcon,
-  PlusIcon,
-  Settings2Icon,
-  XIcon,
-} from "lucide-react";
+  Cancel01StrokeRounded,
+  PlusSignStrokeRounded,
+  SlidersHorizontalStrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { useQuery } from "@tanstack/react-query";
+import { GripIcon, PencilRulerIcon } from "lucide-react";
 import React, {
   createContext,
   useCallback,
@@ -424,7 +424,12 @@ function WidgetEditor({
                     size="sm"
                     className="rounded-lg sm:rounded-xl border-0 h-7 px-3 sm:h-9 hover:bg-transparent sm:hover:bg-accent sm:border"
                     onClick={handleCancel}
-                    leftIcon={<XIcon className="size-4 sm:hidden" />}
+                    leftIcon={
+                      <HugeiconsIcon
+                        icon={Cancel01StrokeRounded}
+                        className="size-4 sm:hidden"
+                      />
+                    }
                   >
                     <p className="hidden sm:block">Cancel</p>
                   </Button>
@@ -434,7 +439,7 @@ function WidgetEditor({
                       handleSave();
                     }}
                     className="rounded-lg sm:rounded-xl border-0 h-7 sm:h-9 sm:border"
-                    leftIcon={<CheckIcon />}
+                    leftIcon={<HugeiconsIcon icon={Tick02StrokeRounded} />}
                   >
                     <p className="hidden sm:block">Save</p>
                   </Button>
@@ -594,7 +599,10 @@ function CustomizationModal({
       <ResponsiveDialogContent>
         <ResponsiveDialogHeader>
           <ResponsiveDialogTitle className="flex items-center gap-2">
-            <Settings2Icon className="size-4" />
+            <HugeiconsIcon
+              icon={SlidersHorizontalStrokeRounded}
+              className="size-4"
+            />
             Customize
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
@@ -701,7 +709,10 @@ function AddWidgetButton({
       onClick={onClick}
       className="flex items-center pr-0 h-fit gap-0"
     >
-      <PlusIcon className="mr-2 text-muted-foreground" />
+      <HugeiconsIcon
+        icon={PlusSignStrokeRounded}
+        className="mr-2 text-muted-foreground"
+      />
       {WIDGET_NAMES[type]}{" "}
       <div
         className="pr-3 pl-2 py-2 cursor-grab"
@@ -730,7 +741,7 @@ function DropZone() {
           }
         )}
       >
-        <PlusIcon className="size-6" />
+        <HugeiconsIcon icon={PlusSignStrokeRounded} className="size-6" />
         <p className="text-sm">Drop new widgets here</p>
       </div>
       <p className="text-xs invisible">Dummy title for the drop zone</p>

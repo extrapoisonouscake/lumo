@@ -1,6 +1,13 @@
 import { isIOS, isIOSWebView } from "@/constants/ui";
 import AppStoreBadge from "@/public/app-store-badge.svg";
-import { ArrowUpRight, Check, X } from "lucide-react";
+
+import {
+  ArrowUpRight03StrokeRounded,
+  Cancel01StrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { useEffect, useState } from "react";
 const LINK = "https://apps.apple.com/us/app/lumo/id6752838080";
 const IS_DISMISSED_KEY = "ios-app-advertisement-dismissed";
@@ -29,7 +36,10 @@ export function IOSAppAdvertisement() {
           className="absolute top-4 right-4 bg-background z-100 clickable"
           onClick={onDismiss}
         >
-          <X className="size-6 text-muted-foreground" />
+          <HugeiconsIcon
+            icon={Cancel01StrokeRounded}
+            className="size-6 text-muted-foreground"
+          />
         </div>
         <div className="flex flex-col gap-6 items-center justify-between h-full">
           <div />
@@ -44,7 +54,10 @@ export function IOSAppAdvertisement() {
             <ul className="flex flex-col gap-2">
               {features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <Check className="size-5 text-brand" />
+                  <HugeiconsIcon
+                    icon={Tick02StrokeRounded}
+                    className="size-5 text-brand"
+                  />
                   <p>{feature}</p>
                 </li>
               ))}
@@ -58,7 +71,10 @@ export function IOSAppAdvertisement() {
             className="flex gap-1 items-center clickable"
           >
             <p className="text-muted-foreground">Continue on the website</p>
-            <ArrowUpRight className="size-5 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={ArrowUpRight03StrokeRounded}
+              className="size-5 text-muted-foreground"
+            />
           </div>
         </div>
       </div>

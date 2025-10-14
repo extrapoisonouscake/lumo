@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Sidebar,
   SidebarContent,
@@ -19,11 +18,13 @@ import {
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Logout05StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { usePathname } from "next/navigation";
 
 import { useLogOut } from "@/hooks/trpc/use-log-out";
-import { ChevronRight, LogOutIcon } from "lucide-react";
+import { ArrowRight01StrokeSharp } from "@hugeicons-pro/core-stroke-sharp";
 import { useNavigate } from "react-router";
 import { Spinner } from "../ui/button";
 import {
@@ -94,9 +95,10 @@ function PagesMenu() {
         {pages.map(([url, page]) => {
           const isActive =
             url === "/" ? url === pathname : pathname.startsWith(url);
+          const icon = page.icon?.[isActive ? 1 : 0];
           const mainItemContent = (
             <>
-              {page.icon && <page.icon />}
+              {icon && <HugeiconsIcon icon={icon} />}
               <span className={cn({ "leading-none": isMobile })}>
                 {page.breadcrumb[0]!.name}
               </span>
@@ -126,7 +128,10 @@ function PagesMenu() {
                         }}
                       >
                         {mainItemContent}
-                        <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                        <HugeiconsIcon
+                          icon={ArrowRight01StrokeSharp}
+                          className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90"
+                        />
                       </div>
                     ) : (
                       <Link to={url} className="py-2 gap-2">
@@ -180,7 +185,11 @@ function LogOutButton() {
       disabled={logOutMutation.isPending}
       onClick={() => logOutMutation.mutateAsync()}
     >
-      {logOutMutation.isPending ? <Spinner /> : <LogOutIcon />}
+      {logOutMutation.isPending ? (
+        <Spinner />
+      ) : (
+        <HugeiconsIcon icon={Logout05StrokeRounded} />
+      )}
       Sign Out
     </SidebarMenuButton>
   );

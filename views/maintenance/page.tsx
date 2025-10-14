@@ -5,7 +5,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { useQuery } from "@tanstack/react-query";
-import { MegaphoneIcon, RefreshCw } from "lucide-react";
+
+import { Megaphone03SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import { RefreshIcon } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { getTRPCQueryOptions, trpc } from "../trpc";
@@ -47,7 +50,10 @@ export default function MaintenancePage() {
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-full bg-brand/10">
-                      <MegaphoneIcon className="size-4 text-brand" />
+                      <HugeiconsIcon
+                        icon={Megaphone03SolidRounded}
+                        className="size-4 text-brand"
+                      />
                     </div>
                     <div className="flex flex-col">
                       <h3 className="font-medium text-sm">Official Update</h3>
@@ -76,7 +82,7 @@ export default function MaintenancePage() {
             variant="outline"
             shouldShowChildrenOnLoading
             className="w-full max-w-[200px]"
-            leftIcon={<RefreshCw className="size-4" />}
+            leftIcon={<HugeiconsIcon icon={RefreshIcon} className="size-4" />}
           >
             Check Again
           </Button>

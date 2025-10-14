@@ -26,7 +26,15 @@ import { cn } from "@/helpers/cn";
 import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
 import { UserSettings } from "@/types/core";
 import { type SubjectSummary, SubjectTerm } from "@/types/school";
-import { Check, DoorClosedIcon, InfoIcon, User } from "lucide-react";
+import {
+  Door01SolidRounded,
+  UserSolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  InformationCircleStrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
@@ -96,7 +104,10 @@ export function SubjectSummary(
               fillColor={fillColor}
               topRightContent={
                 wasGradePosted && (
-                  <Check className={`size-4 text-${fillColor}`} />
+                  <HugeiconsIcon
+                    icon={Tick02StrokeRounded}
+                    className={`size-4 text-${fillColor}`}
+                  />
                 )
               }
               mainText={
@@ -137,7 +148,10 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
           variant="ghost"
           className="absolute bottom-0 right-0 text-muted-foreground hover:bg-transparent"
         >
-          <InfoIcon />
+          <HugeiconsIcon
+            icon={InformationCircleStrokeRounded}
+            className="size-4"
+          />
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
@@ -146,7 +160,10 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
-            <User className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={UserSolidRounded}
+              className="size-4 text-muted-foreground"
+            />
             <div>
               <p className="text-muted-foreground text-sm">Teacher(s)</p>
               <QueryWrapper
@@ -160,7 +177,10 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <DoorClosedIcon className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={Door01SolidRounded}
+              className="size-4 text-muted-foreground"
+            />
             <div>
               <p className="text-muted-foreground text-sm">Room</p>
               <QueryWrapper

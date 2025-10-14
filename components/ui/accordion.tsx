@@ -1,10 +1,11 @@
 "use client";
 
+import { ArrowDown01StrokeStandard } from "@hugeicons-pro/core-stroke-standard";
 import * as AccordionPrimitive from "@radix-ui/react-accordion";
-import { ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/helpers/cn";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { cva } from "class-variance-authority";
 
 const Accordion = AccordionPrimitive.Root;
@@ -35,7 +36,10 @@ const AccordionTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-300" />
+      <HugeiconsIcon
+        icon={ArrowDown01StrokeStandard}
+        className="h-4 w-4 shrink-0 transition-transform duration-300"
+      />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ));

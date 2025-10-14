@@ -23,8 +23,10 @@ import {
   TranscriptEntry,
 } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
+import { Clock05SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import { InformationCircleStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { ClockFading, InfoIcon } from "lucide-react";
 import { useMemo } from "react";
 type InferredTranscriptEntry = Omit<TranscriptEntry, "year"> & {
   isCompleted: boolean;
@@ -143,7 +145,10 @@ function Content({
               {getUSStyleGPA(gpaData).toFixed(2)})
             </span>
           </p>
-          <InfoIcon className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <HugeiconsIcon
+            icon={InformationCircleStrokeRounded}
+            className="size-4 text-muted-foreground group-hover:text-foreground transition-colors"
+          />
         </div>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
@@ -222,7 +227,10 @@ function TranscriptEntryCard(entry: InferredTranscriptEntry) {
               {entry.subjectName}
               {!entry.isCompleted && (
                 <span className="ml-1.5 inline-block align-[-0.13rem]">
-                  <ClockFading className="size-4 min-w-4 text-yellow-500" />
+                  <HugeiconsIcon
+                    icon={Clock05SolidRounded}
+                    className="size-4 min-w-4 text-yellow-500"
+                  />
                 </span>
               )}
             </h3>

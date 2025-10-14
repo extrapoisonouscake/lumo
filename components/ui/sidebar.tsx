@@ -2,7 +2,7 @@
 
 import { Slot } from "@radix-ui/react-slot";
 import { VariantProps, cva } from "class-variance-authority";
-import { Menu, PanelLeft } from "lucide-react";
+
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { SidebarLeftStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -261,7 +263,7 @@ const SidebarTrigger = React.forwardRef<
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
   const { toggleSidebar, isMobile } = useSidebar();
-  const Icon = isMobile ? Menu : PanelLeft;
+
   return (
     <Button
       ref={ref}
@@ -275,7 +277,7 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <Icon />
+      <HugeiconsIcon icon={SidebarLeftStrokeRounded} className="h-4 w-4" />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
@@ -509,7 +511,7 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 export const sidebarMenuButtonVariants = cva(
-  "flex-col sm:flex-row justify-center sm:justify-start gap-1 px-2 py-1.5 sm:py-2 data-[active=true]:text-brand data-[active=true]:bg-brand/10 hover:data-[active=true]:bg-brand/10 hover:data-[active=true]:text-brand peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] sm:hover:bg-sidebar-accent sm:hover:text-sidebar-accent-foreground sm:hover:data-[active=true]:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 sm:data-[active=true]:bg-sidebar-accent sm:data-[active=true]:text-sidebar-accent-foreground sm:hover:data-[active=true]:bg-sidebar-accent sm:data-[state=open]:hover:bg-sidebar-accent sm:data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 no whitespace-nowrap active:scale-95",
+  "flex-col sm:flex-row justify-center sm:justify-start gap-1 px-2 py-1.5 sm:py-2 data-[active=true]:text-brand hover:data-[active=true]:text-brand peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] sm:hover:bg-sidebar-accent sm:hover:text-sidebar-accent-foreground sm:hover:data-[active=true]:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 sm:data-[active=true]:bg-sidebar-accent sm:data-[active=true]:text-sidebar-accent-foreground sm:hover:data-[active=true]:bg-sidebar-accent sm:data-[state=open]:hover:bg-sidebar-accent sm:data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 whitespace-nowrap active:scale-95",
   {
     variants: {
       variant: {

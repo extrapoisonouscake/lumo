@@ -1,5 +1,9 @@
 "use client";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import {
+  ViewOffSolidRounded,
+  ViewSolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { FormInput, FormInputProps } from "./form-input";
 export type FormPasswordInputProps = Omit<FormInputProps, "label"> & {
@@ -10,7 +14,7 @@ export function FormPasswordInput({
   ...props
 }: FormPasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const Icon = showPassword ? EyeOffIcon : EyeIcon;
+  const Icon = showPassword ? ViewOffSolidRounded : ViewSolidRounded;
 
   return (
     <FormInput
@@ -18,7 +22,12 @@ export function FormPasswordInput({
       type={showPassword ? "text" : "password"}
       placeholder="········"
       label={label}
-      rightIcon={<Icon className="cursor-pointer size-4 opacity-80" />}
+      rightIcon={
+        <HugeiconsIcon
+          icon={Icon}
+          className="cursor-pointer size-4 opacity-80"
+        />
+      }
       rightIconContainerProps={{
         className: "cursor-pointer",
         onClick: () => setShowPassword(!showPassword),

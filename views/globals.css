@@ -311,7 +311,8 @@
   html {
     @apply scroll-smooth;
   }
-  /* [data-vaul-drawer][data-vaul-drawer-direction=bottom][]::after{
-
-  } */
+  svg,
+  svg :is(path, rect, circle, ellipse, line, polyline, polygon, path) {
+    stroke-width: 2;
+  }
 }

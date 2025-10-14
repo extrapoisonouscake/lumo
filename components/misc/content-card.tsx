@@ -1,6 +1,7 @@
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
-import { ChevronRight } from "lucide-react";
+import { ArrowRight01StrokeSharp } from "@hugeicons-pro/core-stroke-sharp";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { ComponentProps } from "react";
 import { Card } from "../ui/card";
 
@@ -51,7 +52,10 @@ export function ContentCard({
         </div>
       </div>
       {shouldShowArrow && (
-        <ChevronRight className="size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <HugeiconsIcon
+          icon={ArrowRight01StrokeSharp}
+          className="size-5 text-muted-foreground group-hover:text-foreground transition-colors"
+        />
       )}
     </Card>
   );

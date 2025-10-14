@@ -1,6 +1,5 @@
 "use client";
 
-import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { WidgetSize } from "@/constants/core";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
@@ -103,11 +102,6 @@ export function NewAssignmentsWidget({
                   </p>
                   <p className="text-xs text-muted-foreground">
                     {assignment.subject.name.prettified}
-                    {assignment.subject.name.emoji && (
-                      <InlineSubjectEmoji
-                        emoji={assignment.subject.name.emoji}
-                      />
-                    )}
                   </p>
                 </div>
               </>

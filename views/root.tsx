@@ -20,6 +20,7 @@ import AuthenticatedLayout from "./(authenticated)/layout";
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
 import { storage } from "@/helpers/cache";
 import { useEffect } from "react";
+import AnnouncementsPage from "./(authenticated)/announcements/page";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
 import SettingsPage from "./(authenticated)/settings/page";
@@ -53,6 +54,7 @@ export default function Root() {
             <Routes>
               <Route element={<AuthenticatedLayout />}>
                 <Route index element={<HomePage />} />
+                <Route element={<AnnouncementsPage />} path="announcements" />
                 <Route element={<SubjectsLayout />} path="classes">
                   <Route index element={<SubjectsPage />} />
                   <Route
@@ -101,7 +103,7 @@ function ScrollToTop() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
 
   return null;

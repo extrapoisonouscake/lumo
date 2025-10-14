@@ -28,15 +28,16 @@ import {
   Row,
   Table,
 } from "@tanstack/react-table";
+
 import {
-  type LucideIcon,
-  BookOpenText,
-  CheckCircle,
-  CircleDashed,
-  Clock,
-  InfoIcon,
-  XCircle,
-} from "lucide-react";
+  BookOpen01StrokeRounded,
+  CheckmarkCircle02StrokeRounded,
+  Clock05StrokeRounded,
+  DashedLineCircleStrokeRounded,
+  InformationCircleStrokeRounded,
+  MinusSignCircleStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { PageHeading } from "@/components/layout/page-heading";
 import { TitleManager } from "@/components/misc/title-manager";
@@ -48,6 +49,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ConditionalTooltip } from "@/components/ui/tooltip";
+import { IconSvgObject } from "@/types/ui";
 import { useEffect, useMemo, useState } from "react";
 import { GraduationSummaryProgramsList } from "./programs-list";
 
@@ -344,7 +346,10 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
-          <BookOpenText className="h-5 w-5 text-brand" />
+          <HugeiconsIcon
+            icon={BookOpen01StrokeRounded}
+            className="h-5 w-5 text-brand"
+          />
           <h2 className="text-lg font-semibold">Courses Summary</h2>
         </div>
         <span className="text-sm text-muted-foreground">
@@ -472,25 +477,25 @@ function CreditSummaryEntryCard({
 
 const entryStatusBadgeVisualData: Record<
   ProgramRequirementEntryStatus,
-  { icon: LucideIcon; className: string; text: string }
+  { icon: IconSvgObject; className: string; text: string }
 > = {
   [ProgramRequirementEntryStatus.Included]: {
-    icon: CheckCircle,
+    icon: CheckmarkCircle02StrokeRounded,
     className: "text-green-600",
     text: "Included",
   },
   [ProgramRequirementEntryStatus.Pending]: {
-    icon: Clock,
+    icon: Clock05StrokeRounded,
     className: "text-yellow-500",
     text: "In Progress",
   },
   [ProgramRequirementEntryStatus.Excluded]: {
-    icon: XCircle,
+    icon: MinusSignCircleStrokeRounded,
     className: "text-gray-500",
     text: "Not Included",
   },
   [ProgramRequirementEntryStatus.AlreadyCounted]: {
-    icon: CircleDashed,
+    icon: DashedLineCircleStrokeRounded,
     className: "text-gray-500",
     text: "Already Counted",
   },
@@ -502,7 +507,7 @@ function EntryStatusBadge({
   status: ProgramRequirementEntryStatus;
   alternativeEntry?: ProgramRequirementEntry;
 }) {
-  const { icon: Icon, className, text } = entryStatusBadgeVisualData[status];
+  const { icon, className, text } = entryStatusBadgeVisualData[status];
   const onAlreadyCountedBadgeClick = () => {
     if (!alternativeEntry) return;
     const id = getEntryPageId(alternativeEntry);
@@ -554,9 +559,14 @@ function EntryStatusBadge({
           "mt-1 cursor-pointer": !!alternativeEntry,
         })}
       >
-        <Icon className="size-4" />
+        <HugeiconsIcon icon={icon} className="size-4" />
         <span className="text-sm">{text}</span>
-        {alternativeEntry && <InfoIcon className="size-3.5" />}
+        {alternativeEntry && (
+          <HugeiconsIcon
+            icon={InformationCircleStrokeRounded}
+            className="size-3.5"
+          />
+        )}
       </div>
     </ConditionalTooltip>
   );

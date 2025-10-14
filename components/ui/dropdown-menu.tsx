@@ -1,7 +1,12 @@
 "use client";
 
+import {
+  CircleStrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { ArrowRight01StrokeSharp } from "@hugeicons-pro/core-stroke-sharp";
+import { HugeiconsIcon } from "@hugeicons/react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import { Check, ChevronRight, Circle } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/helpers/cn";
@@ -34,7 +39,7 @@ const DropdownMenuSubTrigger = React.forwardRef<
     {...props}
   >
     {children}
-    <ChevronRight className="ml-auto" />
+    <HugeiconsIcon icon={ArrowRight01StrokeSharp} className="ml-auto" />
   </DropdownMenuPrimitive.SubTrigger>
 ));
 DropdownMenuSubTrigger.displayName =
@@ -107,7 +112,7 @@ const DropdownMenuCheckboxItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
+        <HugeiconsIcon icon={Tick02StrokeRounded} className="h-4 w-4" />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}
@@ -130,7 +135,10 @@ const DropdownMenuRadioItem = React.forwardRef<
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <DropdownMenuPrimitive.ItemIndicator>
-        <Circle className="h-2 w-2 fill-current" />
+        <HugeiconsIcon
+          icon={CircleStrokeRounded}
+          className="h-2 w-2 fill-current"
+        />
       </DropdownMenuPrimitive.ItemIndicator>
     </span>
     {children}

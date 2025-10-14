@@ -12,7 +12,8 @@ import {
 } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
-import { Check } from "lucide-react";
+import { Tick02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
 
 const AVAILABLE_THEMES = [
@@ -87,7 +88,11 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
               onClick={() => onChangeHandler(color)}
             >
               {currentTheme === color && (
-                <Check className="text-white drop-shadow-md" size={18} />
+                <HugeiconsIcon
+                  icon={Tick02StrokeRounded}
+                  className="text-white drop-shadow-md"
+                  size={18}
+                />
               )}
             </div>
           ))}

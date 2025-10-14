@@ -121,9 +121,6 @@ function RecentGradesWidget(
         {customSubject && (
           <Badge variant="outline" className="text-brand">
             {customSubject.name.prettified}
-            {customSubject.name.emoji && (
-              <InlineSubjectEmoji emoji={customSubject.name.emoji} />
-            )}
           </Badge>
         )}
         {content}
@@ -186,9 +183,6 @@ function RecentGradedAssignmentCard({
               </p>
               <p className="text-xs text-muted-foreground">
                 {assignment.subject.name.prettified}
-                {assignment.subject.name.emoji && (
-                  <InlineSubjectEmoji emoji={assignment.subject.name.emoji} />
-                )}
               </p>
             </div>
           </>

@@ -10,24 +10,28 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { PersonalDetails } from "@/types/school";
+
+import { IconSvgObject } from "@/types/ui";
 import {
-  AsteriskIcon,
-  CarIcon,
-  CheckIcon,
-  CopyIcon,
-  DoorClosedIcon,
-  EarthIcon,
-  GraduationCapIcon,
-  HashIcon,
-  LockKeyholeIcon,
-  LucideIcon,
-  MailIcon,
-  MapPinIcon,
-  MapPinPlusIcon,
-  SchoolIcon,
-  SquareParkingIcon,
-  UserIcon,
-} from "lucide-react";
+  Asterisk02SolidRounded,
+  Calendar03SolidRounded,
+  Car04SolidRounded,
+  CircleLock01SolidRounded,
+  Door01SolidRounded,
+  GlobalSolidRounded,
+  GridSolidRounded,
+  Location01SolidRounded,
+  LocationAdd01SolidRounded,
+  Mail02SolidRounded,
+  ParkingAreaSquareSolidRounded,
+  School01SolidRounded,
+  UserSolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  Copy01StrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import styles from "./styles.module.css";
@@ -62,19 +66,19 @@ export default function ProfilePage() {
                 <Sections shouldShowParking={shouldShowParking}>
                   <SectionCard
                     title="Personal Details"
-                    icon={UserIcon}
+                    icon={UserSolidRounded}
                     className="[grid-area:a]"
                   >
                     <UserProperty
                       label="Student Number"
                       value={studentNumber}
-                      icon={HashIcon}
+                      icon={GridSolidRounded}
                       isCopyable
                     />
                     <UserProperty
                       label="PEN (Personal Education Number)"
                       value={personalEducationNumber}
-                      icon={HashIcon}
+                      icon={GridSolidRounded}
                       isCopyable
                     />
 
@@ -82,57 +86,57 @@ export default function ProfilePage() {
                   </SectionCard>
                   <SectionCard
                     title="School"
-                    icon={SchoolIcon}
+                    icon={School01SolidRounded}
                     className="[grid-area:b]"
                   >
                     <UserProperty
                       label="Name"
                       value={schoolName}
-                      icon={SchoolIcon}
+                      icon={School01SolidRounded}
                     />
                     {nextSchoolName && nextSchoolName !== schoolName && (
                       <UserProperty
                         label="Next School Name"
                         value={nextSchoolName}
-                        icon={SchoolIcon}
+                        icon={School01SolidRounded}
                       />
                     )}
                     <UserProperty
                       label="Graduation Year"
                       value={graduationYear}
-                      icon={GraduationCapIcon}
+                      icon={Calendar03SolidRounded}
                     />
                     {taRoom && (
                       <UserProperty
                         label="TA Room"
                         value={taRoom}
-                        icon={DoorClosedIcon}
+                        icon={Door01SolidRounded}
                       />
                     )}
                     <UserProperty
                       label="Locker"
                       value={locker}
-                      icon={LockKeyholeIcon}
+                      icon={CircleLock01SolidRounded}
                     />
                   </SectionCard>
                   {shouldShowParking && (
                     <SectionCard
                       title="Parking"
-                      icon={SquareParkingIcon}
+                      icon={ParkingAreaSquareSolidRounded}
                       className="[grid-area:c]"
                     >
                       {parkingSpaceNumber && (
                         <UserProperty
                           label="Parking Space Number"
                           value={parkingSpaceNumber}
-                          icon={SquareParkingIcon}
+                          icon={ParkingAreaSquareSolidRounded}
                         />
                       )}
                       {licensePlateNumber && (
                         <UserProperty
                           label="License Plate Number"
                           value={licensePlateNumber}
-                          icon={CarIcon}
+                          icon={Car04SolidRounded}
                         />
                       )}
                     </SectionCard>
@@ -191,13 +195,13 @@ function ProfileContentSkeleton() {
         </div>
       </Card>
       <Sections shouldShowParking={false}>
-        <SectionCard title="Personal Details" icon={UserIcon}>
+        <SectionCard title="Personal Details" icon={UserSolidRounded}>
           <UserPropertySkeleton />
           <UserPropertySkeleton />
           <UserPropertySkeleton />
           <UserPropertySkeleton />
         </SectionCard>
-        <SectionCard title="School" icon={SchoolIcon}>
+        <SectionCard title="School" icon={School01SolidRounded}>
           <UserPropertySkeleton />
           <UserPropertySkeleton />
         </SectionCard>
@@ -233,13 +237,13 @@ function SectionCard({
   className?: string;
   children: React.ReactNode;
   title: string;
-  icon: LucideIcon;
+  icon: IconSvgObject;
 }) {
   return (
     <Card className={className}>
       <CardHeader className="py-4 px-5 pb-0 flex-row justify-between items-center space-y-0">
         <CardTitle className="text-xl font-medium">{title}</CardTitle>
-        <Icon className="size-5 text-muted-foreground" />
+        <HugeiconsIcon icon={Icon} className="size-5 text-muted-foreground" />
       </CardHeader>
       <CardContent className="p-0">{children}</CardContent>
     </Card>
@@ -253,13 +257,13 @@ function UserProperty({
 }: {
   label: string;
   value: string | number | undefined;
-  icon: LucideIcon;
+  icon: IconSvgObject;
   isCopyable?: boolean;
 }) {
   return (
     <div className="flex gap-3 py-4 px-5 border-b last:border-b-0 items-center">
       <div className="rounded-full p-2 bg-brand/10 text-brand">
-        <Icon className="size-5" />
+        <HugeiconsIcon icon={Icon} className="size-5" />
       </div>
       <div className="flex flex-col gap-0.5">
         <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -277,7 +281,7 @@ function UserProperty({
 }
 function CopyButton({ value }: { value: string }) {
   const [isCopied, setIsCopied] = useState(false);
-  const Icon = isCopied ? CheckIcon : CopyIcon;
+  const Icon = isCopied ? Tick02StrokeRounded : Copy01StrokeRounded;
   return (
     <Button
       size="smallIcon"
@@ -295,7 +299,7 @@ function CopyButton({ value }: { value: string }) {
         }, 1000);
       }}
     >
-      <Icon className="size-3.5!" strokeWidth={2.5} />
+      <HugeiconsIcon icon={Icon} className="size-3.5!" />
     </Button>
   );
 }
@@ -316,16 +320,16 @@ function UserPropertySkeleton() {
 }
 const addressLabelsVisualData: Record<
   keyof PersonalDetails["addresses"],
-  { label: string; icon: LucideIcon }
+  { label: string; icon: IconSvgObject }
 > = {
-  physical: { label: "Physical Address", icon: MapPinIcon },
-  mailing: { label: "Mailing Address", icon: MailIcon },
+  physical: { label: "Physical Address", icon: Location01SolidRounded },
+  mailing: { label: "Mailing Address", icon: Mail02SolidRounded },
   secondaryPhysical: {
     label: "Secondary Physical Address",
-    icon: MapPinPlusIcon,
+    icon: LocationAdd01SolidRounded,
   },
-  other: { label: "Other Address", icon: EarthIcon },
-  custom: { label: "Custom Address", icon: AsteriskIcon },
+  other: { label: "Other Address", icon: GlobalSolidRounded },
+  custom: { label: "Custom Address", icon: Asterisk02SolidRounded },
 };
 function AddressList({
   custom,
@@ -339,7 +343,12 @@ function AddressList({
         return <UserProperty key={key} value={value} {...data} />;
       })}
       {Object.entries(custom).map(([key, value]) => (
-        <UserProperty key={key} label={key} value={value} icon={MapPinIcon} />
+        <UserProperty
+          key={key}
+          label={key}
+          value={value}
+          icon={Location01SolidRounded}
+        />
       ))}
     </>
   );

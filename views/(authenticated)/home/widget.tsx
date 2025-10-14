@@ -9,7 +9,12 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVerticalIcon, Settings2Icon, TrashIcon } from "lucide-react";
+import {
+  Delete02StrokeRounded,
+  SlidersHorizontalStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { GripVerticalIcon } from "lucide-react";
 import { useContext } from "react";
 import {
   isCustomizableWidget,
@@ -99,7 +104,10 @@ export function Widget({
                 onClick={() => handleCustomizeWidget(data)}
                 className="size-7 rounded-lg bg-background backdrop-blur-xs"
               >
-                <Settings2Icon className="size-[14px]!" />
+                <HugeiconsIcon
+                  icon={SlidersHorizontalStrokeRounded}
+                  className="size-[14px]!"
+                />
               </Button>
             )}
             <Button
@@ -110,7 +118,10 @@ export function Widget({
               }}
               className="size-7 rounded-lg bg-background backdrop-blur-xs text-red-600 hover:text-red-700"
             >
-              <TrashIcon className="size-[14px]!" />
+              <HugeiconsIcon
+                icon={Delete02StrokeRounded}
+                className="size-[14px]!"
+              />
             </Button>
           </div>
           <Button

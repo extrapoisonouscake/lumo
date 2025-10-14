@@ -2,7 +2,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 import LetterA from "@/public/icons/letter-a.svg";
-import { Percent } from "lucide-react";
+import { PercentStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 function StyledToggleGroupItem({
   ...props
@@ -42,7 +43,7 @@ export function LetterGradeSwitch({
       onValueChange={handleValueChange}
     >
       <StyledToggleGroupItem value="off" aria-label="Toggle off">
-        <Percent />
+        <HugeiconsIcon icon={PercentStrokeRounded} className="size-4" />
       </StyledToggleGroupItem>
       <StyledToggleGroupItem value="on" aria-label="Toggle on">
         <LetterA />

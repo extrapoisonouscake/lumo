@@ -3,7 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ListItem } from "@/components/ui/list";
 import { Changelog } from "@/types/core";
-import { X } from "lucide-react";
+import { CancelStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { useState } from "react";
 import { Link } from "react-router";
 const LAST_HIDDEN_VERSION_KEY = "changelog-last-hidden-version";
@@ -39,7 +41,7 @@ export function ChangelogCard(changelog: Changelog) {
               variant="ghost"
               onClick={onHide}
             >
-              <X strokeWidth={2.5} />
+              <HugeiconsIcon icon={CancelStrokeRounded} strokeWidth={2.5} />
             </Button>
           </div>
 

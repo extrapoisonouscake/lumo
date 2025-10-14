@@ -23,8 +23,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { trpc } from "@/views/trpc";
+import { Tick02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { UnfoldMoreStrokeStandard } from "@hugeicons-pro/core-stroke-standard";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { defaultFilter } from "cmdk";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 const defaultCmdkFilter = defaultFilter as NonNullable<typeof defaultFilter>;
@@ -103,7 +105,10 @@ export function SchoolPicker({
             })}
           >
             {buttonContent}
-            <ChevronsUpDown className="opacity-50" />
+            <HugeiconsIcon
+              icon={UnfoldMoreStrokeStandard}
+              className="opacity-50"
+            />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="max-w-[300px] p-0">
@@ -129,7 +134,8 @@ export function SchoolPicker({
                     }}
                   >
                     <SchoolName logo={logo}>{name}</SchoolName>
-                    <Check
+                    <HugeiconsIcon
+                      icon={Tick02StrokeRounded}
                       className={cn(
                         "ml-auto",
                         value === id ? "opacity-100" : "opacity-0"

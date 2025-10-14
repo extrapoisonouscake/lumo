@@ -1,18 +1,22 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/helpers/cn";
+
 import {
-  ArchiveIcon,
-  FileCodeIcon,
-  FileIcon,
-  FileSpreadsheetIcon,
-  FileTextIcon,
-  ImageIcon,
-  MusicIcon,
-  PresentationIcon,
-  UploadIcon,
-  VideoIcon,
-  XIcon,
-} from "lucide-react";
+  Archive03SolidRounded as ArchiveIcon,
+  FileScriptSolidRounded as FileCodeIcon,
+  FileEmpty02SolidRounded as FileIcon,
+  TableSolidRounded as FileSpreadsheetIcon,
+  File02SolidRounded as FileTextIcon,
+  Image02SolidRounded as ImageIcon,
+  MusicNote03SolidRounded as MusicIcon,
+  PresentationBarChart01SolidRounded as PresentationIcon,
+  Video02SolidRounded as VideoIcon,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  Cancel01StrokeRounded,
+  Upload01StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useState } from "react";
 
 interface FileUploadProps {
@@ -220,7 +224,7 @@ export function FileUpload({
               onClick={handleRemoveFile}
               className="hover:bg-destructive/10 hover:text-destructive"
             >
-              <XIcon />
+              <HugeiconsIcon icon={Cancel01StrokeRounded} />
             </Button>
           </div>
         ) : (
@@ -232,7 +236,10 @@ export function FileUpload({
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             />
             <div className="flex flex-col items-center justify-center text-center">
-              <UploadIcon className="size-6 text-muted-foreground mb-2" />
+              <HugeiconsIcon
+                icon={Upload01StrokeRounded}
+                className="size-6 text-muted-foreground mb-2"
+              />
               <p className="text-sm font-medium mb-1">
                 Drop your file here, or{" "}
                 <span className="text-primary">browse</span>
@@ -256,6 +263,8 @@ export function FileTypeIcon({
   fileName: string;
   className?: string;
 }) {
-  const IconComponent = getFileTypeIcon(fileName);
-  return <IconComponent className={cn("size-4 text-brand", className)} />;
+  const icon = getFileTypeIcon(fileName);
+  return (
+    <HugeiconsIcon icon={icon} className={cn("size-4 text-brand", className)} />
+  );
 }

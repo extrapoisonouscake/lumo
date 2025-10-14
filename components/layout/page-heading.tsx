@@ -10,7 +10,9 @@ import { Link, useLocation, useParams } from "react-router";
 
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Settings } from "lucide-react";
+import { Settings02SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import { Settings02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { BackButton } from "../ui/back-button";
 import { Button } from "../ui/button";
 import { SidebarTrigger } from "../ui/sidebar";
@@ -69,17 +71,20 @@ export function PageHeading({
   rightContent,
   dynamicContent,
   className,
+  shouldShowBackButton = true,
 }: {
   leftContent?: React.ReactNode;
   rightContent?: React.ReactNode;
   dynamicContent?: React.ReactNode;
   className?: string;
+  shouldShowBackButton?: boolean;
 }) {
   const isMobile = useIsMobile();
+  const { pathname } = useLocation();
   return (
     <div className={cn("flex justify-between gap-4 items-start", className)}>
       {leftContent ?? (isMobile ? dynamicContent : null) ?? (
-        <DefaultLeftContent />
+        <DefaultLeftContent shouldShowBackButton={shouldShowBackButton} />
       )}
 
       <div className="w-fit flex gap-2.5 items-center">
@@ -91,7 +96,13 @@ export function PageHeading({
               size="smallIcon"
               className="w-fit hover:bg-transparent"
             >
-              <Settings />
+              <HugeiconsIcon
+                icon={
+                  pathname === "/settings"
+                    ? Settings02SolidRounded
+                    : Settings02StrokeRounded
+                }
+              />
             </Button>
           </Link>
           <ThemeToggle isInSidebar={false} shouldShowText={false} />
@@ -102,7 +113,11 @@ export function PageHeading({
     </div>
   );
 }
-function DefaultLeftContent() {
+function DefaultLeftContent({
+  shouldShowBackButton = true,
+}: {
+  shouldShowBackButton?: boolean;
+}) {
   const { pathname } = useLocation();
   const hasBackButton = !websitePagesWithStaticPaths[pathname];
   return (
@@ -112,7 +127,9 @@ function DefaultLeftContent() {
       })}
     >
       <SidebarTrigger />
-      {hasBackButton && <BackButton className="h-full" />}
+      {hasBackButton && shouldShowBackButton && (
+        <BackButton className="h-full" />
+      )}
     </div>
   );
 }

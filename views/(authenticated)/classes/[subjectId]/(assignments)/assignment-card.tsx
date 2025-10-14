@@ -7,7 +7,13 @@ import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { Assignment, AssignmentStatus } from "@/types/school";
-import { ClockAlert, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
+import { Clock05SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import {
+  TradeDownStrokeRounded,
+  TradeUpStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { formatAssignmentScore } from "./helpers";
 
 interface AssignmentCardProps {
@@ -68,7 +74,12 @@ function ScoreIcon({
   status,
 }: Pick<Assignment, "classAverage" | "score" | "status">) {
   if (status == AssignmentStatus.Missing) {
-    return <ClockAlert className="size-4 text-red-500" />;
+    return (
+      <HugeiconsIcon
+        icon={Clock05SolidRounded}
+        className="size-4 text-red-500"
+      />
+    );
   }
   if (
     !(typeof classAverage === "number") ||
@@ -78,9 +89,19 @@ function ScoreIcon({
     return null;
   }
   if (score > classAverage) {
-    return <TrendingUpIcon className="size-4 text-green-600" />;
+    return (
+      <HugeiconsIcon
+        icon={TradeUpStrokeRounded}
+        className="size-4 text-green-600"
+      />
+    );
   }
-  return <TrendingDownIcon className="size-4 text-red-500" />;
+  return (
+    <HugeiconsIcon
+      icon={TradeDownStrokeRounded}
+      className="size-4 text-red-500"
+    />
+  );
 }
 export function AssignmentCardSkeleton() {
   return (

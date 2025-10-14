@@ -19,20 +19,21 @@ import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { UserSettings } from "@/types/core";
 import { Assignment, AssignmentStatus, SubjectSummary } from "@/types/school";
+import { IconSvgObject } from "@/types/ui";
 import {
-  Award,
-  Calendar,
-  CheckCircle,
-  CircleSlash,
-  Clock,
-  HelpCircle,
-  InfoIcon,
-  LucideIcon,
-  MessageSquare,
-  MinusCircle,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+  AlertCircleStrokeRounded,
+  Calendar03StrokeRounded,
+  CheckmarkCircle02StrokeRounded,
+  Clock01StrokeRounded,
+  HelpCircleStrokeRounded,
+  InformationCircleStrokeRounded,
+  Message01StrokeRounded,
+  MinusSignCircleStrokeRounded,
+  TradeDownStrokeRounded,
+  TradeUpStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { useParams } from "react-router";
 import {
   ASSIGNMENT_STATUS_LABELS,
@@ -80,7 +81,10 @@ export default function AssignmentPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
                   {/* Score Information */}
-                  <AssignmentSectionCard title="Details" icon={Award}>
+                  <AssignmentSectionCard
+                    title="Details"
+                    icon={InformationCircleStrokeRounded}
+                  >
                     <GradeRow
                       assignment={data}
                       shouldShowPercentages={settings?.shouldShowPercentages}
@@ -96,10 +100,14 @@ export default function AssignmentPage() {
                       categories={subject?.academics?.categories}
                       categoryId={categoryId}
                     />
+                    <SubjectRow />
                   </AssignmentSectionCard>
 
                   {/* Dates Information */}
-                  <AssignmentSectionCard title="Dates" icon={Calendar}>
+                  <AssignmentSectionCard
+                    title="Dates"
+                    icon={Calendar03StrokeRounded}
+                  >
                     <DueDateRow
                       value={dueAt}
                       isMissing={status === AssignmentStatus.Missing}
@@ -119,7 +127,7 @@ export default function AssignmentPage() {
                   {feedback && (
                     <AssignmentSectionCard
                       title="Feedback"
-                      icon={MessageSquare}
+                      icon={Message01StrokeRounded}
                       contentClassName="gap-0.5 text-sm"
                     >
                       {feedback.split("\n").map((line, i) => (
@@ -140,11 +148,11 @@ export default function AssignmentPage() {
   );
 }
 const ASSIGNMENT_STATUS_TO_ICON = {
-  [AssignmentStatus.Graded]: CheckCircle,
-  [AssignmentStatus.Missing]: CircleSlash,
-  [AssignmentStatus.Exempt]: MinusCircle,
-  [AssignmentStatus.Ungraded]: Clock,
-  [AssignmentStatus.Unknown]: HelpCircle,
+  [AssignmentStatus.Graded]: CheckmarkCircle02StrokeRounded,
+  [AssignmentStatus.Missing]: AlertCircleStrokeRounded,
+  [AssignmentStatus.Exempt]: MinusSignCircleStrokeRounded,
+  [AssignmentStatus.Ungraded]: Clock01StrokeRounded,
+  [AssignmentStatus.Unknown]: HelpCircleStrokeRounded,
 };
 
 const BADGE_COLOR_CLASSNAMES = {
@@ -171,14 +179,18 @@ function ContentSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
         {/* Score Information */}
-        <AssignmentSectionCard title="Score" icon={Award}>
+        <AssignmentSectionCard
+          title="Score"
+          icon={InformationCircleStrokeRounded}
+        >
           <PropertyRowSkeleton />
 
+          <PropertyRowSkeleton labelLength={12} valueLength={12} />
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
         </AssignmentSectionCard>
 
         {/* Dates Information */}
-        <AssignmentSectionCard title="Dates" icon={Calendar}>
+        <AssignmentSectionCard title="Dates" icon={Calendar03StrokeRounded}>
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
           <PropertyRowSkeleton />
         </AssignmentSectionCard>
@@ -215,10 +227,10 @@ function AssignmentHeader({
         <Badge
           className={cn(
             className,
-            "flex items-center gap-1 pl-1 pr-2 py-1 font-medium"
+            "flex items-center gap-1.5 pl-1 pr-2 py-1 font-medium"
           )}
         >
-          <Icon className="size-4" />
+          <HugeiconsIcon icon={Icon} className="size-4" />
           {ASSIGNMENT_STATUS_LABELS[transformedStatus]}
         </Badge>
       </div>
@@ -248,7 +260,7 @@ export function AssignmentSectionCard({
 }: {
   children: React.ReactNode;
   title: string;
-  icon: LucideIcon;
+  icon: IconSvgObject;
   className?: string;
   contentClassName?: string;
   rightContent?: React.ReactNode;
@@ -263,7 +275,7 @@ export function AssignmentSectionCard({
         )}
       >
         <CardTitle className="text-base font-medium flex items-center gap-2">
-          <Icon className="size-4 text-brand" />
+          <HugeiconsIcon icon={Icon} className="size-4 text-brand" />
           {title}
         </CardTitle>
         {rightContent}
@@ -289,12 +301,7 @@ export function AssignmentPropertyRow({
   labelClassName?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex items-center text-sm justify-between gap-3",
-        className
-      )}
-    >
+    <div className={cn("flex text-sm justify-between gap-5", className)}>
       <span className={cn("text-muted-foreground", labelClassName)}>
         {label}
       </span>
@@ -371,9 +378,19 @@ function GradeRow({
       return null;
     }
     if (assignment.score > assignment.classAverage) {
-      return <TrendingUp className="h-4 w-4 text-green-600" />;
+      return (
+        <HugeiconsIcon
+          icon={TradeUpStrokeRounded}
+          className="h-4 w-4 text-green-600"
+        />
+      );
     } else if (assignment.score < assignment.classAverage) {
-      return <TrendingDown className="h-4 w-4 text-red-500" />;
+      return (
+        <HugeiconsIcon
+          icon={TradeDownStrokeRounded}
+          className="h-4 w-4 text-red-500"
+        />
+      );
     }
     return null;
   };
@@ -396,7 +413,8 @@ function GradeRow({
                   <div className="group-hover:opacity-80 transition-opacity">
                     {getScoreComparisonIcon()}
                   </div>
-                  <InfoIcon
+                  <HugeiconsIcon
+                    icon={InformationCircleStrokeRounded}
                     className="size-3 text-muted-foreground"
                     strokeWidth={2.5}
                   />
@@ -417,6 +435,15 @@ function GradeRow({
           mainContent
         )
       }
+    />
+  );
+}
+function SubjectRow() {
+  const { subjectName } = useParams() as { subjectName: string };
+  return (
+    <AssignmentPropertyRow
+      label="Subject"
+      value={subjectName.replace(/_/g, " ")}
     />
   );
 }

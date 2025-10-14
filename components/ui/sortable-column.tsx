@@ -1,9 +1,11 @@
-import { Column } from "@tanstack/react-table";
 import {
-  ArrowDownNarrowWide,
-  ArrowUpDown,
-  ArrowUpWideNarrow,
-} from "lucide-react";
+  ArrowUpDownStrokeRounded,
+  Sorting01StrokeRounded,
+  Sorting02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Column } from "@tanstack/react-table";
+
 import { motion } from "motion/react";
 
 export function SortableColumn<TableObject, CellValue>({
@@ -11,16 +13,16 @@ export function SortableColumn<TableObject, CellValue>({
   ...column
 }: { children: string } & Column<TableObject, CellValue>) {
   const sortingDirection = column.getIsSorted();
-  let Icon;
+  let icon;
   switch (sortingDirection) {
     case "asc":
-      Icon = ArrowDownNarrowWide;
+      icon = Sorting02StrokeRounded;
       break;
     case "desc":
-      Icon = ArrowUpWideNarrow;
+      icon = Sorting01StrokeRounded;
       break;
     default:
-      Icon = ArrowUpDown;
+      icon = ArrowUpDownStrokeRounded;
   }
   return (
     <div
@@ -37,7 +39,7 @@ export function SortableColumn<TableObject, CellValue>({
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         className="size-4"
       >
-        <Icon className="size-4" />
+        <HugeiconsIcon icon={icon} className="size-4" />
       </motion.div>
     </div>
   );

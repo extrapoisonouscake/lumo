@@ -28,11 +28,13 @@ import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { ScheduleSubject } from "@/types/school";
-import { ChevronRight, DoorOpen } from "lucide-react";
 
 import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { Link } from "@/components/ui/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Door01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { ArrowRight01StrokeStandard } from "@hugeicons-pro/core-stroke-standard";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { CountdownTimer, CountdownTimerSkeleton } from "./countdown-timer";
@@ -378,12 +380,15 @@ function ScheduleMobileRow(row: ScheduleRow) {
       </div>
       {isSubject && (
         <div className="flex gap-1 items-center text-muted-foreground text-sm">
-          <DoorOpen className="size-4" />
+          <HugeiconsIcon icon={Door01StrokeRounded} className="size-4" />
           <p>{row.room}</p>
         </div>
       )}
       {isSubject && !isTeacherAdvisoryRow && (
-        <ChevronRight className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+        <HugeiconsIcon
+          icon={ArrowRight01StrokeStandard}
+          className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors"
+        />
       )}
     </Card>
   );

@@ -10,7 +10,7 @@ import { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 export const viewport: Viewport = {
   userScalable: false,
-viewportFit:"cover"
+  viewportFit: "cover",
 };
 export const metadata: Metadata = {
   appleWebApp: { capable: true },
@@ -48,8 +48,8 @@ export default async function RootLayout({
         </head>
         <body className={GeistSans.className}>
           <div
-            className="flex items-center justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
-            vaul-drawer-wrapper="true"
+            className="flex items-center justify-center h-full pt-[env(safe-area-inset-top,0)]"
+            vaul-drawer-wrapper=""
           >
             {children}
           </div>

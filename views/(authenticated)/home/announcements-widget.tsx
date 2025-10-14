@@ -7,7 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { useAnnouncements } from "@/hooks/trpc/use-announcements";
 import { pluralize } from "@/instances/intl";
-import { ArrowUpRightIcon } from "lucide-react";
+
+import { ArrowUpRight01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { announcementsNotAvailableReasonToVisualData } from "../announcements/page";
 import { WidgetComponentProps } from "./helpers";
 import { Widget } from "./widget";
@@ -99,7 +101,12 @@ export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
             size="sm"
             variant="ghost"
             className="w-full hover:bg-transparent text-muted-foreground"
-            rightIcon={<ArrowUpRightIcon className="size-4" />}
+            rightIcon={
+              <HugeiconsIcon
+                icon={ArrowUpRight01StrokeRounded}
+                className="size-4"
+              />
+            }
           >
             View all
           </Button>

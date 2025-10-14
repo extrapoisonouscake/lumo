@@ -1,11 +1,17 @@
 import {
-  BookOpenText,
-  Calendar,
-  GraduationCap,
-  Home,
-  LucideIcon,
-  Settings,
-} from "lucide-react";
+  BookOpen01SolidRounded,
+  Calendar02SolidRounded,
+  Home03SolidRounded,
+  ScrollSolidRounded,
+  Settings02SolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  BookOpen01StrokeRounded,
+  Calendar02StrokeRounded,
+  Home03StrokeRounded,
+  ScrollStrokeRounded,
+  Settings02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { Params } from "next/dist/server/request/params";
 
 export const WEBSITE_TITLE = "Lumo";
@@ -16,7 +22,7 @@ export interface BreadcrumbDataItem {
 }
 export interface WebsitePage {
   breadcrumb: (BreadcrumbDataItem | null)[];
-  icon?: LucideIcon;
+  icon?: [any, any];
 }
 interface StaticWebsitePage extends WebsitePage {
   isHiddenInSidebar?: boolean;
@@ -31,26 +37,30 @@ export const publicPathnames = [
   "/support",
 ];
 export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
-  "/": { breadcrumb: [{ name: "Home" }], icon: Home, showOnMobile: true },
+  "/": {
+    breadcrumb: [{ name: "Home" }],
+    icon: [Home03StrokeRounded, Home03SolidRounded],
+    showOnMobile: true,
+  },
   "/classes": {
     breadcrumb: [{ name: "Classes" }],
-    icon: BookOpenText,
+    icon: [BookOpen01StrokeRounded, BookOpen01SolidRounded],
     showOnMobile: true,
   },
   "/schedule": {
     breadcrumb: [{ name: "Schedule" }],
-    icon: Calendar,
+    icon: [Calendar02StrokeRounded, Calendar02SolidRounded],
     showOnMobile: true,
   },
   "/graduation": {
     breadcrumb: [{ name: "Graduation" }],
-    icon: GraduationCap,
+    icon: [ScrollStrokeRounded, ScrollSolidRounded],
     showOnMobile: true,
   },
 
   "/settings": {
     breadcrumb: [{ name: "Settings" }],
-    icon: Settings,
+    icon: [Settings02StrokeRounded, Settings02SolidRounded],
   },
   "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
 };

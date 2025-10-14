@@ -19,14 +19,18 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
 import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
+
 import {
-  Calendar,
-  Clock,
-  ClockAlert,
-  DoorClosed,
-  ListX,
-  UserRoundX,
-} from "lucide-react";
+  Calendar03SolidRounded,
+  Clock05SolidRounded,
+  Door01SolidRounded,
+  UserRemove01SolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  Calendar03StrokeRounded,
+  Clock01StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect } from "react";
 const UPPERCASE_REGEX = /(?=[A-Z])/;
 enum AbsenceType {
@@ -64,7 +68,9 @@ export function SubjectAttendance({
             variant="outline"
             className="h-8 rounded-lg"
             size="sm"
-            leftIcon={<ListX />}
+            leftIcon={
+              <HugeiconsIcon icon={Calendar03SolidRounded} className="size-4" />
+            }
           >
             Attendance
           </Button>
@@ -96,14 +102,16 @@ function SummaryBadges({
             .length
         }
         label="Unexcused"
-        icon={<UserRoundX className="size-4" />}
+        icon={
+          <HugeiconsIcon icon={UserRemove01SolidRounded} className="size-4" />
+        }
         className="bg-destructive/10 text-destructive"
       />
       <SummaryBadge
         value={tardyCount}
         label="Tardy"
-        icon={<ClockAlert className="size-4" />}
-        className="bg-yellow-400/20 text-yellow-600"
+        icon={<HugeiconsIcon icon={Clock05SolidRounded} className="size-4" />}
+        className="bg-yellow-400/20 dark:bg-yellow-400/10 text-yellow-600"
       />
       <SummaryBadge
         value={
@@ -111,7 +119,7 @@ function SummaryBadges({
             .length
         }
         label="Dismissed"
-        icon={<DoorClosed className="size-4" />}
+        icon={<HugeiconsIcon icon={Door01SolidRounded} className="size-4" />}
         className="bg-green-600/10 text-green-600"
       />
     </div>
@@ -228,14 +236,20 @@ function AbsenceCard({
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={Calendar03StrokeRounded}
+              className="size-4 text-muted-foreground"
+            />
             <h3 className="font-medium text-base">
               {timezonedDayJS(date).format(VISIBLE_DATE_FORMAT)}
             </h3>
           </div>
 
           <div className="flex items-center gap-2">
-            <Clock className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={Clock01StrokeRounded}
+              className="size-4 text-muted-foreground"
+            />
             <div>
               <p className="text-muted-foreground text-sm">Code</p>
               <p className="font-medium text-sm">
@@ -266,14 +280,20 @@ function AbsenceCardSkeleton() {
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={Calendar03StrokeRounded}
+              className="size-4 text-muted-foreground"
+            />
             <Skeleton>
               <h3 className="font-medium text-base">00/00/0000</h3>
             </Skeleton>
           </div>
 
           <div className="flex items-center gap-2">
-            <Clock className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={Clock01StrokeRounded}
+              className="size-4 text-muted-foreground"
+            />
             <div className="flex flex-col gap-1 items-start">
               <Skeleton>
                 <p className="text-muted-foreground text-sm">Code</p>

@@ -1,7 +1,9 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useLogOut } from "@/hooks/trpc/use-log-out";
-import { LogOutIcon } from "lucide-react";
+import { Logout05StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { useNavigate } from "react-router";
 
 export function LogOutButton() {
@@ -15,7 +17,7 @@ export function LogOutButton() {
       variant="outline"
       className="sm:hidden"
       onClick={() => logOutMutation.mutateAsync()}
-      rightIcon={<LogOutIcon />}
+      rightIcon={<HugeiconsIcon icon={Logout05StrokeRounded} />}
       shouldShowChildrenOnLoading
     >
       Sign Out

@@ -293,7 +293,7 @@ export function parseAuthGenericErrorMessage($: cheerio.CheerioAPI) {
 
 const logoutStep: FlatRouteStep = {
   method: "GET",
-  path: "logout.do",
+  path: "/logout.do",
   expect: "html",
 };
 export async function deleteSession(externalStore?: PlainCookieStore) {

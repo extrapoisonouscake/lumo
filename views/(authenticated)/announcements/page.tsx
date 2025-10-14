@@ -13,7 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/components/ui/link";
 import { useAnnouncements } from "@/hooks/trpc/use-announcements";
 import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-specific/public";
-import { ArrowUpRightIcon } from "lucide-react";
+
+import { ArrowUpRight01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { AnnouncementsAccordions } from "./accordions";
 function AnnouncementsHeading() {
   return <h3 className="font-medium">Announcements</h3>;
@@ -46,7 +48,10 @@ export function Announcements() {
         {!!announcements.data?.pdfLink && (
           <Link to={announcements.data.pdfLink} target="_blank">
             <Button size="icon" variant="ghost" className="size-7">
-              <ArrowUpRightIcon />
+              <HugeiconsIcon
+                icon={ArrowUpRight01StrokeRounded}
+                className="size-4"
+              />
             </Button>
           </Link>
         )}

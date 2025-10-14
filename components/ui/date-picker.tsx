@@ -1,6 +1,7 @@
 "use client";
 
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar03SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarProps } from "@/components/ui/calendar";
@@ -65,7 +66,9 @@ export function DatePicker({
             !date && "text-muted-foreground",
             className
           )}
-          leftIcon={<CalendarIcon className="h-4 w-4" />}
+          leftIcon={
+            <HugeiconsIcon icon={Calendar03SolidRounded} className="h-4 w-4" />
+          }
         >
           {date ? (
             dayjs(correctDate(date)).format(

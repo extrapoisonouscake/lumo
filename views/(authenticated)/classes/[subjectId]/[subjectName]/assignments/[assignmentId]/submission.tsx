@@ -7,7 +7,14 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { AssignmentSubmissionState } from "@/types/school";
 import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { DownloadIcon, FileText, TrashIcon, UploadIcon } from "lucide-react";
+
+import {
+  Delete02StrokeRounded,
+  Download01StrokeRounded,
+  File02StrokeRounded,
+  Upload01StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { AssignmentSectionCard } from "./page";
 function getSubmissionDownloadLink(id: string) {
@@ -26,7 +33,7 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
         return (
           <AssignmentSectionCard
             title="Submission"
-            icon={FileText}
+            icon={File02StrokeRounded}
             contentClassName="gap-4 flex-col sm:flex-row justify-between items-start sm:items-center"
             headerClassName="pb-3"
           >
@@ -62,7 +69,9 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
                     <Button
                       variant="outline"
                       className="w-full"
-                      leftIcon={<DownloadIcon />}
+                      leftIcon={
+                        <HugeiconsIcon icon={Download01StrokeRounded} />
+                      }
                     >
                       Download
                     </Button>
@@ -102,7 +111,7 @@ function DeleteSubmissionButton({ assignmentId }: { assignmentId: string }) {
       className="bg-destructive/10 rounded-xl text-destructive hover:bg-destructive/15"
       onClick={() => mutation.mutateAsync({ assignmentId })}
     >
-      <TrashIcon />
+      <HugeiconsIcon icon={Delete02StrokeRounded} />
     </Button>
   );
 }
@@ -135,7 +144,7 @@ function UploadSubmission({ assignmentId }: { assignmentId: string }) {
         shouldShowChildrenOnLoading
         disabled={!file}
         variant="brand"
-        leftIcon={<UploadIcon />}
+        leftIcon={<HugeiconsIcon icon={Upload01StrokeRounded} />}
         onClick={() => mutation.mutateAsync()}
         className="self-start"
       >

@@ -4,7 +4,12 @@ import {
 } from "@/components/ui/form-password-input";
 import { getPasswordRequirementsArray } from "@/lib/zod";
 import { PasswordRequirements } from "@/types/auth";
-import { Check, X } from "lucide-react";
+
+import {
+  Cancel01StrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useFormContext } from "react-hook-form";
 
 export function ExtendedFormPasswordInput(
@@ -23,11 +28,11 @@ export function ExtendedFormPasswordInput(
         <ul className="text-sm space-y-1">
           {passwordRequirements.map((requirement, i) => {
             const isValid = requirement.test.safeParse(value).success;
-            const Icon = isValid ? Check : X;
+            const Icon = isValid ? Tick02StrokeRounded : Cancel01StrokeRounded;
             return (
               <li key={i} className="flex items-center gap-2">
                 <span className={isValid ? "text-green-600" : "text-red-500"}>
-                  <Icon className="size-4" />
+                  <HugeiconsIcon icon={Icon} className="size-4" />
                 </span>
                 {requirement.label}
               </li>

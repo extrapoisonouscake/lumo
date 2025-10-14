@@ -21,7 +21,12 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
+
+import {
+  ArrowRight01StrokeRounded,
+  ArrowUpRight01StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { scheduleVisualizableErrors } from "../schedule/[[...slug]]/loadable-section";
@@ -285,7 +290,10 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
         </p>
       </div>
       {isSubject && (
-        <ChevronRight className="size-5 text-muted-foreground group-hover/card:text-foreground transition-colors" />
+        <HugeiconsIcon
+          icon={ArrowRight01StrokeRounded}
+          className="size-5 text-muted-foreground group-hover/card:text-foreground transition-colors"
+        />
       )}
     </Card>
   );
@@ -344,7 +352,12 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
           size="sm"
           variant="ghost"
           className="w-full hover:bg-transparent text-muted-foreground"
-          rightIcon={<ArrowUpRightIcon className="size-4" />}
+          rightIcon={
+            <HugeiconsIcon
+              icon={ArrowUpRight01StrokeRounded}
+              className="size-4"
+            />
+          }
         >
           View all
         </Button>

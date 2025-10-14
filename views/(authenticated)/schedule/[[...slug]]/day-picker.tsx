@@ -3,7 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { RotateCcw } from "lucide-react";
+import { RotateClockwiseStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
+
 import { useState } from "react";
 
 export function ScheduleDayPicker({
@@ -36,7 +38,7 @@ export function ScheduleDayPicker({
                 onClick={resetDate}
                 variant="outline"
                 className="w-full rounded-lg"
-                leftIcon={<RotateCcw />}
+                leftIcon={<HugeiconsIcon icon={RotateClockwiseStrokeRounded} />}
               >
                 Back to today
               </Button>
@@ -46,7 +48,7 @@ export function ScheduleDayPicker({
       />
       {!isToday && (
         <Button size="smallIcon" variant="brand" onClick={resetDate}>
-          <RotateCcw />
+          <HugeiconsIcon icon={RotateClockwiseStrokeRounded} />
         </Button>
       )}
     </div>

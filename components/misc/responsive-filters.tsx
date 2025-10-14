@@ -1,7 +1,11 @@
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  SlidersHorizontalStrokeRounded,
+  Tick02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Table } from "@tanstack/table-core";
-import { CheckIcon, Settings2Icon } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "../ui/button";
 import {
@@ -42,7 +46,7 @@ export function ResponsiveFilters<T>({
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
         <Button
-          leftIcon={<Settings2Icon />}
+          leftIcon={<HugeiconsIcon icon={SlidersHorizontalStrokeRounded} />}
           variant="outline"
           className={cn("w-fit relative", triggerClassName)}
         >
@@ -65,7 +69,10 @@ export function ResponsiveFilters<T>({
 
           <div className="flex flex-col gap-2">
             <ResponsiveDialogClose asChild>
-              <Button className="w-full" leftIcon={<CheckIcon />}>
+              <Button
+                className="w-full"
+                leftIcon={<HugeiconsIcon icon={Tick02StrokeRounded} />}
+              >
                 Apply
               </Button>
             </ResponsiveDialogClose>
