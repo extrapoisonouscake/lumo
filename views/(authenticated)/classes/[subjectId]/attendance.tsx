@@ -21,14 +21,11 @@ import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  Clock05SolidRounded,
-  Door01SolidRounded,
-  UserRemove01SolidRounded,
-} from "@hugeicons-pro/core-solid-rounded";
-
-import {
   Calendar03StrokeRounded,
   Clock01StrokeRounded,
+  Clock05StrokeRounded,
+  Door01StrokeRounded,
+  UserRemove01StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect } from "react";
@@ -106,14 +103,14 @@ function SummaryBadges({
         }
         label="Unexcused"
         icon={
-          <HugeiconsIcon icon={UserRemove01SolidRounded} className="size-4" />
+          <HugeiconsIcon icon={UserRemove01StrokeRounded} className="size-4" />
         }
         className="bg-destructive/10 text-destructive"
       />
       <SummaryBadge
         value={tardyCount}
         label="Tardy"
-        icon={<HugeiconsIcon icon={Clock05SolidRounded} className="size-4" />}
+        icon={<HugeiconsIcon icon={Clock05StrokeRounded} className="size-4" />}
         className="bg-yellow-400/20 dark:bg-yellow-400/10 text-yellow-600"
       />
       <SummaryBadge
@@ -122,7 +119,7 @@ function SummaryBadges({
             .length
         }
         label="Dismissed"
-        icon={<HugeiconsIcon icon={Door01SolidRounded} className="size-4" />}
+        icon={<HugeiconsIcon icon={Door01StrokeRounded} className="size-4" />}
         className="bg-green-600/10 text-green-600"
       />
     </div>

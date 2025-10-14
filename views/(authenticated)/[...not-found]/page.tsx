@@ -5,10 +5,10 @@ import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import UnauthenticatedLayout from "@/views/(unauthenticated)/layout";
 
 import {
-  ArrowLeft01StrokeRounded,
   FastWindStrokeRounded,
   Home03StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
+import { ArrowLeft01StrokeStandard } from "@hugeicons-pro/core-stroke-standard";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Link } from "react-router";
 import AuthenticatedLayout from "../layout";
@@ -52,7 +52,7 @@ export default function NotFoundPage() {
                 onClick={() => window.history.back()}
               >
                 <HugeiconsIcon
-                  icon={ArrowLeft01StrokeRounded}
+                  icon={ArrowLeft01StrokeStandard}
                   className="size-4"
                 />
                 Go Back
