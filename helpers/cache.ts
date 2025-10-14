@@ -62,6 +62,7 @@ export const storage = {
     } catch (e) {
       console.error(item);
       console.error(e);
+throw e
     }
   },
   set: (key: string, value: any, ttl: number) =>
