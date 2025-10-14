@@ -59,7 +59,8 @@ export const storage = {
       }
       return value;
     } catch (e) {
-      return undefined
+      storage.delete(key);
+      return undefined;
     }
   },
   set: (key: string, value: any, ttl: number) =>

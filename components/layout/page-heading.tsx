@@ -117,11 +117,12 @@ function DefaultLeftContent({
   return (
     <div className="flex items-center gap-2.5 h-full">
       <SidebarTrigger />
-      <Link to="/">
-        <Logo className="sm:hidden size-7 text-brand" />
-      </Link>
-      {hasBackButton && shouldShowBackButton && (
-        <BackButton className="h-full" />
+      {hasBackButton ? (
+        shouldShowBackButton && <BackButton className="h-full" />
+      ) : (
+        <Link to="/">
+          <Logo className="sm:hidden size-7 text-brand" />
+        </Link>
       )}
     </div>
   );

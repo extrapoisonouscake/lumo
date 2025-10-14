@@ -11,9 +11,21 @@ import { useUserSettings } from "./use-user-settings";
 const gradeRegex =
   /\b(?:grade|grades|gr\.?)\s*((?:\d+(?:['']?s)?|[A-Z](?:['']?s)?)(?:\s*(?:[-\/]|to|,|and|&|or)\s*(?:\d+(?:['']?s)?|[A-Z](?:['']?s)?))*)\b/gi;
 const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
+  const lowercasedText = text.toLowerCase();
+  if (targetGrade === 12) {
+    const hasRelatedWords = ["grad", "grads"].some((word) => {
+      const index = lowercasedText.indexOf(word);
+      if (index === -1) return false;
+      const wordWithAdjacentChars = lowercasedText.slice(
+        index > 0 ? index - 1 : 0,
+        index + word.length + (index < lowercasedText.length - 1 ? 1 : 0)
+      );
+      return /^[^a-zA-Z](.+[^a-zA-Z])?$/.test(wordWithAdjacentChars);
+    });
+    if (hasRelatedWords) return true;
+  }
   let lastIndex = 0;
 
-  const lowercasedText = text.toLowerCase();
   let match,
     hasOneRelevant = false;
 
@@ -21,7 +33,7 @@ const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
     // Add non-matching text before this match
 
     const gradeText = match[0];
-
+    console.log({ gradeText });
     // Extract numbers from the grade text (removing any 's' suffix)
     const numbers = gradeText.match(/\d+/g)?.map(Number) || [];
 
@@ -100,7 +112,7 @@ export function useAnnouncements({
           for (const item of content) {
             const hasOneRelevant = hasRelevantGrade(item.text);
 
-            if (hasOneRelevant && item.isNew) {
+            if (hasOneRelevant && item.isNew !== false) {
               personalItems.push(item);
             } else {
               listItems.push(item);
