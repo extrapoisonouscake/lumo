@@ -13,23 +13,21 @@ import { PersonalDetails } from "@/types/school";
 
 import { IconSvgObject } from "@/types/ui";
 import {
-  Asterisk02SolidRounded,
-  Calendar03SolidRounded,
-  Car04SolidRounded,
-  CircleLock01SolidRounded,
-  Door01SolidRounded,
-  GlobalSolidRounded,
-  GridSolidRounded,
-  Location01SolidRounded,
-  LocationAdd01SolidRounded,
-  Mail02SolidRounded,
-  ParkingAreaSquareSolidRounded,
-  School01SolidRounded,
-  UserSolidRounded,
-} from "@hugeicons-pro/core-solid-rounded";
-import {
+  Asterisk02StrokeRounded,
+  Calendar03StrokeRounded,
+  Car04StrokeRounded,
+  CircleLock01StrokeRounded,
   Copy01StrokeRounded,
+  Door01StrokeRounded,
+  GlobalStrokeRounded,
+  GridStrokeRounded,
+  Location01StrokeRounded,
+  LocationAdd01StrokeRounded,
+  Mail02StrokeRounded,
+  ParkingAreaSquareStrokeRounded,
+  SchoolStrokeRounded,
   Tick02StrokeRounded,
+  UserStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
@@ -66,19 +64,19 @@ export default function ProfilePage() {
                 <Sections shouldShowParking={shouldShowParking}>
                   <SectionCard
                     title="Personal Details"
-                    icon={UserSolidRounded}
+                    icon={UserStrokeRounded}
                     className="[grid-area:a]"
                   >
                     <UserProperty
                       label="Student Number"
                       value={studentNumber}
-                      icon={GridSolidRounded}
+                      icon={GridStrokeRounded}
                       isCopyable
                     />
                     <UserProperty
                       label="PEN (Personal Education Number)"
                       value={personalEducationNumber}
-                      icon={GridSolidRounded}
+                      icon={GridStrokeRounded}
                       isCopyable
                     />
 
@@ -86,57 +84,57 @@ export default function ProfilePage() {
                   </SectionCard>
                   <SectionCard
                     title="School"
-                    icon={School01SolidRounded}
+                    icon={SchoolStrokeRounded}
                     className="[grid-area:b]"
                   >
                     <UserProperty
                       label="Name"
                       value={schoolName}
-                      icon={School01SolidRounded}
+                      icon={SchoolStrokeRounded}
                     />
                     {nextSchoolName && nextSchoolName !== schoolName && (
                       <UserProperty
                         label="Next School Name"
                         value={nextSchoolName}
-                        icon={School01SolidRounded}
+                        icon={SchoolStrokeRounded}
                       />
                     )}
                     <UserProperty
                       label="Graduation Year"
                       value={graduationYear}
-                      icon={Calendar03SolidRounded}
+                      icon={Calendar03StrokeRounded}
                     />
                     {taRoom && (
                       <UserProperty
                         label="TA Room"
                         value={taRoom}
-                        icon={Door01SolidRounded}
+                        icon={Door01StrokeRounded}
                       />
                     )}
                     <UserProperty
                       label="Locker"
                       value={locker}
-                      icon={CircleLock01SolidRounded}
+                      icon={CircleLock01StrokeRounded}
                     />
                   </SectionCard>
                   {shouldShowParking && (
                     <SectionCard
                       title="Parking"
-                      icon={ParkingAreaSquareSolidRounded}
+                      icon={ParkingAreaSquareStrokeRounded}
                       className="[grid-area:c]"
                     >
                       {parkingSpaceNumber && (
                         <UserProperty
                           label="Parking Space Number"
                           value={parkingSpaceNumber}
-                          icon={ParkingAreaSquareSolidRounded}
+                          icon={ParkingAreaSquareStrokeRounded}
                         />
                       )}
                       {licensePlateNumber && (
                         <UserProperty
                           label="License Plate Number"
                           value={licensePlateNumber}
-                          icon={Car04SolidRounded}
+                          icon={Car04StrokeRounded}
                         />
                       )}
                     </SectionCard>
@@ -195,13 +193,13 @@ function ProfileContentSkeleton() {
         </div>
       </Card>
       <Sections shouldShowParking={false}>
-        <SectionCard title="Personal Details" icon={UserSolidRounded}>
+        <SectionCard title="Personal Details" icon={UserStrokeRounded}>
           <UserPropertySkeleton />
           <UserPropertySkeleton />
           <UserPropertySkeleton />
           <UserPropertySkeleton />
         </SectionCard>
-        <SectionCard title="School" icon={School01SolidRounded}>
+        <SectionCard title="School" icon={SchoolStrokeRounded}>
           <UserPropertySkeleton />
           <UserPropertySkeleton />
         </SectionCard>
@@ -322,14 +320,14 @@ const addressLabelsVisualData: Record<
   keyof PersonalDetails["addresses"],
   { label: string; icon: IconSvgObject }
 > = {
-  physical: { label: "Physical Address", icon: Location01SolidRounded },
-  mailing: { label: "Mailing Address", icon: Mail02SolidRounded },
+  physical: { label: "Physical Address", icon: Location01StrokeRounded },
+  mailing: { label: "Mailing Address", icon: Mail02StrokeRounded },
   secondaryPhysical: {
     label: "Secondary Physical Address",
-    icon: LocationAdd01SolidRounded,
+    icon: LocationAdd01StrokeRounded,
   },
-  other: { label: "Other Address", icon: GlobalSolidRounded },
-  custom: { label: "Custom Address", icon: Asterisk02SolidRounded },
+  other: { label: "Other Address", icon: GlobalStrokeRounded },
+  custom: { label: "Custom Address", icon: Asterisk02StrokeRounded },
 };
 function AddressList({
   custom,
@@ -347,7 +345,7 @@ function AddressList({
           key={key}
           label={key}
           value={value}
-          icon={Location01SolidRounded}
+          icon={Location01StrokeRounded}
         />
       ))}
     </>

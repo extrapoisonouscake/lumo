@@ -10,9 +10,9 @@ import { Link, useLocation, useParams } from "react-router";
 
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Settings02SolidRounded } from "@hugeicons-pro/core-solid-rounded";
 import { Settings02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Logo } from "../misc/logo";
 import { BackButton } from "../ui/back-button";
 import { Button } from "../ui/button";
 import { SidebarTrigger } from "../ui/sidebar";
@@ -80,7 +80,7 @@ export function PageHeading({
   shouldShowBackButton?: boolean;
 }) {
   const isMobile = useIsMobile();
-  const { pathname } = useLocation();
+
   return (
     <div className={cn("flex justify-between gap-4 items-start", className)}>
       {leftContent ?? (isMobile ? dynamicContent : null) ?? (
@@ -96,13 +96,7 @@ export function PageHeading({
               size="smallIcon"
               className="w-fit hover:bg-transparent"
             >
-              <HugeiconsIcon
-                icon={
-                  pathname === "/settings"
-                    ? Settings02SolidRounded
-                    : Settings02StrokeRounded
-                }
-              />
+              <HugeiconsIcon icon={Settings02StrokeRounded} />
             </Button>
           </Link>
           <ThemeToggle isInSidebar={false} shouldShowText={false} />
@@ -121,12 +115,11 @@ function DefaultLeftContent({
   const { pathname } = useLocation();
   const hasBackButton = !websitePagesWithStaticPaths[pathname];
   return (
-    <div
-      className={cn("flex items-center gap-2.5 h-fit", {
-        "h-full": hasBackButton,
-      })}
-    >
+    <div className="flex items-center gap-2.5 h-full">
       <SidebarTrigger />
+      <Link to="/">
+        <Logo className="sm:hidden size-7 text-brand" />
+      </Link>
       {hasBackButton && shouldShowBackButton && (
         <BackButton className="h-full" />
       )}

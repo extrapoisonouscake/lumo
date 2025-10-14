@@ -255,7 +255,7 @@
     --adjusted-safe-area-inset-bottom: calc(env(safe-area-inset-bottom, 0) / 2);
 
     --mobile-menu-height: calc(
-      4.25rem + var(--adjusted-safe-area-inset-bottom)
+      4.375rem + var(--adjusted-safe-area-inset-bottom)
     );
     @variant sm {
       --mobile-menu-height: 0;
@@ -311,8 +311,10 @@
   html {
     @apply scroll-smooth;
   }
-  svg,
-  svg :is(path, rect, circle, ellipse, line, polyline, polygon, path) {
+  svg:not([data-auto-stroke-width="true"]) {
     stroke-width: 2;
+    & :is(path, rect, circle, ellipse, line, polyline, po lygon, path) {
+      stroke-width: 2;
+    }
   }
 }

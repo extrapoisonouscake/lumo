@@ -23,8 +23,10 @@ import {
   TranscriptEntry,
 } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { Clock05SolidRounded } from "@hugeicons-pro/core-solid-rounded";
-import { InformationCircleStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import {
+  Clock05StrokeRounded,
+  InformationCircleStrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -228,7 +230,7 @@ function TranscriptEntryCard(entry: InferredTranscriptEntry) {
               {!entry.isCompleted && (
                 <span className="ml-1.5 inline-block align-[-0.13rem]">
                   <HugeiconsIcon
-                    icon={Clock05SolidRounded}
+                    icon={Clock05StrokeRounded}
                     className="size-4 min-w-4 text-yellow-500"
                   />
                 </span>

@@ -29,6 +29,7 @@ import {
   InformationCircleStrokeRounded,
   Message01StrokeRounded,
   MinusSignCircleStrokeRounded,
+  SealStrokeRounded,
   TradeDownStrokeRounded,
   TradeUpStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
@@ -83,7 +84,7 @@ export default function AssignmentPage() {
                   {/* Score Information */}
                   <AssignmentSectionCard
                     title="Details"
-                    icon={InformationCircleStrokeRounded}
+                    icon={SealStrokeRounded}
                   >
                     <GradeRow
                       assignment={data}
@@ -179,10 +180,7 @@ function ContentSkeleton() {
 
       <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
         {/* Score Information */}
-        <AssignmentSectionCard
-          title="Score"
-          icon={InformationCircleStrokeRounded}
-        >
+        <AssignmentSectionCard title="Details" icon={SealStrokeRounded}>
           <PropertyRowSkeleton />
 
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
@@ -442,7 +440,7 @@ function SubjectRow() {
   const { subjectName } = useParams() as { subjectName: string };
   return (
     <AssignmentPropertyRow
-      label="Subject"
+      label="Class"
       value={subjectName.replace(/_/g, " ")}
     />
   );

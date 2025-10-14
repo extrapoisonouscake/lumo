@@ -6,8 +6,10 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { useQuery } from "@tanstack/react-query";
 
-import { Megaphone03SolidRounded } from "@hugeicons-pro/core-solid-rounded";
-import { RefreshIcon } from "@hugeicons-pro/core-stroke-rounded";
+import {
+  Megaphone03StrokeRounded,
+  RefreshIcon,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
@@ -51,7 +53,7 @@ export default function MaintenancePage() {
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-full bg-brand/10">
                       <HugeiconsIcon
-                        icon={Megaphone03SolidRounded}
+                        icon={Megaphone03StrokeRounded}
                         className="size-4 text-brand"
                       />
                     </div>

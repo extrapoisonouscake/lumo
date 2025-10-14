@@ -156,7 +156,7 @@ export default function GraduationSummaryPage() {
 
   return (
     <>
-      <TitleManager>Graduation Summary</TitleManager>
+      <TitleManager>Transcript</TitleManager>
       <div className="flex flex-col gap-4">
         <PageHeading
           dynamicContent={
@@ -343,7 +343,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <HugeiconsIcon

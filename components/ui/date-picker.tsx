@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar03SolidRounded } from "@hugeicons-pro/core-solid-rounded";
+import { Calendar03StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { Button } from "@/components/ui/button";
@@ -67,7 +67,7 @@ export function DatePicker({
             className
           )}
           leftIcon={
-            <HugeiconsIcon icon={Calendar03SolidRounded} className="h-4 w-4" />
+            <HugeiconsIcon icon={Calendar03StrokeRounded} className="h-4 w-4" />
           }
         >
           {date ? (

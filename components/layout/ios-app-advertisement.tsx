@@ -1,15 +1,16 @@
 import { isIOS, isIOSWebView } from "@/constants/ui";
+import { APP_STORE_APP_ID } from "@/constants/website";
 import AppStoreBadge from "@/public/app-store-badge.svg";
 
 import {
-  ArrowUpRight03StrokeRounded,
   Cancel01StrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
+import { ArrowUpRight03StrokeStandard } from "@hugeicons-pro/core-stroke-standard";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { useEffect, useState } from "react";
-const LINK = "https://apps.apple.com/us/app/lumo/id6752838080";
+const LINK = `https://apps.apple.com/us/app/lumo/id${APP_STORE_APP_ID}`;
 const IS_DISMISSED_KEY = "ios-app-advertisement-dismissed";
 const features = [
   "Get notifications",
@@ -50,21 +51,9 @@ export function IOSAppAdvertisement() {
               className="size-16"
             />
             <h1 className="text-2xl font-semibold">Download our app</h1>
+            <IOSAppFeaturesList />
 
-            <ul className="flex flex-col gap-2">
-              {features.map((feature, index) => (
-                <li key={index} className="flex items-center gap-2">
-                  <HugeiconsIcon
-                    icon={Tick02StrokeRounded}
-                    className="size-5 text-brand"
-                  />
-                  <p>{feature}</p>
-                </li>
-              ))}
-            </ul>
-            <a rel="noopener noreferrer" target="_blank" href={LINK}>
-              <AppStoreBadge className="h-13" />
-            </a>
+            <IOSAppInstallButton />
           </div>
           <div
             onClick={onDismiss}
@@ -72,12 +61,34 @@ export function IOSAppAdvertisement() {
           >
             <p className="text-muted-foreground">Continue on the website</p>
             <HugeiconsIcon
-              icon={ArrowUpRight03StrokeRounded}
+              icon={ArrowUpRight03StrokeStandard}
               className="size-5 text-muted-foreground"
             />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+export function IOSAppFeaturesList() {
+  return (
+    <ul className="flex flex-col gap-2">
+      {features.map((feature, index) => (
+        <li key={index} className="flex items-center gap-2">
+          <HugeiconsIcon
+            icon={Tick02StrokeRounded}
+            className="size-5 text-brand"
+          />
+          <p>{feature}</p>
+        </li>
+      ))}
+    </ul>
+  );
+}
+export function IOSAppInstallButton() {
+  return (
+    <a rel="noopener noreferrer" target="_blank" href={LINK}>
+      <AppStoreBadge className="h-12" />
+    </a>
   );
 }

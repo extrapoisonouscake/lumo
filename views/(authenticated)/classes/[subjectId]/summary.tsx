@@ -27,12 +27,10 @@ import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
 import { UserSettings } from "@/types/core";
 import { type SubjectSummary, SubjectTerm } from "@/types/school";
 import {
-  Door01SolidRounded,
-  UserSolidRounded,
-} from "@hugeicons-pro/core-solid-rounded";
-import {
+  Door01StrokeRounded,
   InformationCircleStrokeRounded,
   Tick02StrokeRounded,
+  UserStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
@@ -161,7 +159,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
         <ResponsiveDialogBody className="grid grid-cols-2 gap-4">
           <div className="flex items-center gap-2">
             <HugeiconsIcon
-              icon={UserSolidRounded}
+              icon={UserStrokeRounded}
               className="size-4 text-muted-foreground"
             />
             <div>
@@ -178,7 +176,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
           </div>
           <div className="flex items-center gap-2">
             <HugeiconsIcon
-              icon={Door01SolidRounded}
+              icon={Door01StrokeRounded}
               className="size-4 text-muted-foreground"
             />
             <div>

@@ -42,9 +42,7 @@ export function ThemeToggle({
     <Select value={theme} onValueChange={setTheme}>
       <SelectTrigger asChild>
         {isInSidebar ? (
-          <SidebarMenuButton shouldCloseSidebarOnMobile={false}>
-            {triggerContent}
-          </SidebarMenuButton>
+          <SidebarMenuButton>{triggerContent}</SidebarMenuButton>
         ) : (
           <Button
             variant="ghost"

@@ -21,11 +21,11 @@ import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 
 import {
-  Calendar03SolidRounded,
   Clock05SolidRounded,
   Door01SolidRounded,
   UserRemove01SolidRounded,
 } from "@hugeicons-pro/core-solid-rounded";
+
 import {
   Calendar03StrokeRounded,
   Clock01StrokeRounded,
@@ -69,7 +69,10 @@ export function SubjectAttendance({
             className="h-8 rounded-lg"
             size="sm"
             leftIcon={
-              <HugeiconsIcon icon={Calendar03SolidRounded} className="size-4" />
+              <HugeiconsIcon
+                icon={Calendar03StrokeRounded}
+                className="size-4"
+              />
             }
           >
             Attendance

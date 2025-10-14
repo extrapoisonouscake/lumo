@@ -1,7 +1,6 @@
 import { PageHeading } from "@/components/layout/page-heading";
 import { TitleManager } from "@/components/misc/title-manager";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import UnauthenticatedLayout from "@/views/(unauthenticated)/layout";
 
@@ -22,7 +21,7 @@ export default function NotFoundPage() {
       <TitleManager>Page Not Found</TitleManager>
       <PageHeading shouldShowBackButton={false} />
       <div className="mx-auto max-w-2xl">
-        <Card className="p-4 w-full max-w-md gap-4 text-center border-dashed border-muted-foreground/20">
+        <div className="p-4 w-full max-w-md flex flex-col gap-4 text-center">
           <div className="flex flex-col gap-3">
             <div className="mx-auto size-16 bg-brand/20 rounded-full flex items-center justify-center">
               <HugeiconsIcon
@@ -60,7 +59,7 @@ export default function NotFoundPage() {
               </Button>
             )}
           </div>
-        </Card>
+        </div>
       </div>
     </Layout>
   );

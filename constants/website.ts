@@ -2,14 +2,14 @@ import {
   BookOpen01SolidRounded,
   Calendar02SolidRounded,
   Home03SolidRounded,
-  ScrollSolidRounded,
+  SchoolReportCardSolidRounded,
   Settings02SolidRounded,
 } from "@hugeicons-pro/core-solid-rounded";
 import {
   BookOpen01StrokeRounded,
   Calendar02StrokeRounded,
   Home03StrokeRounded,
-  ScrollStrokeRounded,
+  SchoolReportCardStrokeRounded,
   Settings02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { Params } from "next/dist/server/request/params";
@@ -52,9 +52,9 @@ export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
     icon: [Calendar02StrokeRounded, Calendar02SolidRounded],
     showOnMobile: true,
   },
-  "/graduation": {
-    breadcrumb: [{ name: "Graduation" }],
-    icon: [ScrollStrokeRounded, ScrollSolidRounded],
+  "/transcript": {
+    breadcrumb: [{ name: "Transcript" }],
+    icon: [SchoolReportCardStrokeRounded, SchoolReportCardSolidRounded],
     showOnMobile: true,
   },
 
@@ -100,3 +100,4 @@ export const getWebsitePageData = (pathname: string, params: Params) => {
 };
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
 export const VISIBLE_TIME_FORMAT = "h:mm A";
+export const APP_STORE_APP_ID = "6752838080";

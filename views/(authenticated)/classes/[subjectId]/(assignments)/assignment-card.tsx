@@ -7,8 +7,8 @@ import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { Assignment, AssignmentStatus } from "@/types/school";
-import { Clock05SolidRounded } from "@hugeicons-pro/core-solid-rounded";
 import {
+  Clock05StrokeRounded,
   TradeDownStrokeRounded,
   TradeUpStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
@@ -76,7 +76,7 @@ function ScoreIcon({
   if (status == AssignmentStatus.Missing) {
     return (
       <HugeiconsIcon
-        icon={Clock05SolidRounded}
+        icon={Clock05StrokeRounded}
         className="size-4 text-red-500"
       />
     );

@@ -46,13 +46,14 @@ import {
 } from "@dnd-kit/sortable";
 import {
   Cancel01StrokeRounded,
+  DashboardSquareEditStrokeRounded,
   PlusSignStrokeRounded,
   SlidersHorizontalStrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { GripIcon, PencilRulerIcon } from "lucide-react";
+import { GripIcon } from "lucide-react";
 import React, {
   createContext,
   useCallback,
@@ -651,7 +652,7 @@ function CustomizeButton({ className, ...props }: ButtonProps) {
         "rounded-lg sm:rounded-xl px-0 size-7 sm:h-9 sm:w-fit sm:px-3",
         className
       )}
-      leftIcon={<PencilRulerIcon />}
+      leftIcon={<HugeiconsIcon icon={DashboardSquareEditStrokeRounded} />}
       {...props}
     >
       <p className="hidden sm:block">Customize</p>

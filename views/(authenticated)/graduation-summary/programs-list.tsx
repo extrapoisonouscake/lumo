@@ -14,13 +14,7 @@ import {
 import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import { cn } from "@/helpers/cn";
 import { ProgramEntry, ProgramRequirementEntry } from "@/types/school";
-// import {
-//   CheckCircle,
-//   CircleSlash,
-//   GraduationCap,
-//   ListCollapse,
-//   XCircle,
-// } from "lucide-react";
+
 import {
   CheckListStrokeRounded,
   CheckmarkCircle02StrokeRounded,

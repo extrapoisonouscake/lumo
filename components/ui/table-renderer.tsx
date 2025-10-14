@@ -68,16 +68,13 @@ export function TableRenderer<T>({
 
   if (isMobile && renderMobileRow) {
     return (
-      <div
-        className={cn(
-          "flex flex-col gap-4",
-          containerClassName,
-          mobileContainerClassName
-        )}
-      >
+      <div className={cn("flex flex-col gap-2", containerClassName)}>
         {mobileHeader}
+
         {rows.length ? (
-          rows.map(renderMobileRow)
+          <div className={cn("flex flex-col gap-4", mobileContainerClassName)}>
+            {rows.map(renderMobileRow)}
+          </div>
         ) : (
           <ErrorCard
             emoji={
@@ -86,7 +83,7 @@ export function TableRenderer<T>({
           >
             {typeof emptyState !== "string"
               ? emptyState?.message
-              : emptyState ?? NO_CONTENT_MESSAGE}
+              : (emptyState ?? NO_CONTENT_MESSAGE)}
           </ErrorCard>
         )}
       </div>

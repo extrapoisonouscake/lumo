@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/button";
+import {
+  IOSAppFeaturesList,
+  IOSAppInstallButton,
+} from "@/components/layout/ios-app-advertisement";
 import {
   ResponsiveDialog,
   ResponsiveDialogBody,
-  ResponsiveDialogClose,
   ResponsiveDialogContent,
   ResponsiveDialogDescription,
-  ResponsiveDialogFooter,
-  ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
 import { Check, Share2, Smartphone } from "lucide-react";
@@ -39,19 +39,37 @@ export function IOSNotificationsHelpDrawer({
 }) {
   return (
     <ResponsiveDialog open={open} onOpenChange={onOpenChange}>
-      <ResponsiveDialogContent>
-        <ResponsiveDialogHeader>
-          <ResponsiveDialogTitle>Install our app</ResponsiveDialogTitle>
-          <ResponsiveDialogDescription>
-            To protect your privacy, we recommend installing our app.
+      <ResponsiveDialogContent className="flex flex-col items-center gap-4 pb-4 px-6 pt-0">
+        <div className="flex mt-2 items-center">
+          <div className="relative">
+            <img
+              src="/app-store-icon.png"
+              alt="App Store Icon"
+              className="size-16 min-w-16 z-10"
+            />
+            <div className="absolute top-0 left-[-1px] size-full shadow-[10px_0px_10px_-2px_rgb(0_0_0_/_0.15)]! rounded-[16px]"></div>
+          </div>
+
+          <img
+            src="/app-store-app-icon.png"
+            alt="Lumo App Icon"
+            className="size-14 -ml-4"
+          />
+        </div>
+        <div className="flex flex-col gap-2 items-center">
+          <ResponsiveDialogTitle className="text-2xl text-center">
+            Get our app for notifications
+          </ResponsiveDialogTitle>
+          <ResponsiveDialogDescription className="text-center">
+            To stay updated with notifications, you'll need to install our app.
+            It's quick and easy!
           </ResponsiveDialogDescription>
-        </ResponsiveDialogHeader>
-        <Steps />
-        <ResponsiveDialogFooter>
-          <ResponsiveDialogClose asChild>
-            <Button className="w-full">Got it!</Button>
-          </ResponsiveDialogClose>
-        </ResponsiveDialogFooter>
+        </div>
+        <IOSAppFeaturesList />
+        <IOSAppInstallButton />
+        <p className="text-xs text-center text-muted-foreground">
+          App Store is a trademark of Apple Inc.
+        </p>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

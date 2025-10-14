@@ -251,39 +251,44 @@ function SubjectCard({
   shouldHighlightAveragesWithColour: UserSettings["shouldHighlightAveragesWithColour"];
 }) {
   const color = getAverageColor(subject.average);
-  return (
-    <Link to={getSubjectPageURL(year)(subject)}>
-      <ContentCard
-        data-clickable-hover={true}
-        className="clickable"
-        shouldShowArrow={true}
-        items={[
-          {
-            label: "Average",
-            value:
-              subject.average === undefined ? (
-                <AverageCellSkeleton className="h-5" />
-              ) : subject.average === null ? (
-                NULL_VALUE_DISPLAY_FALLBACK
-              ) : (
-                formatAverage(subject.average)
-              ),
-            className:
-              color && shouldHighlightAveragesWithColour
-                ? `text-${color === "green-500" ? "green-600" : color}`
-                : undefined,
-          },
-          {
-            label: "Room",
-            value: subject.room,
-          },
-          {
-            label: "Teachers",
-            className: "col-span-2",
-            value: formatTeachers(subject.teachers),
-          },
-        ]}
-        header={
+  const isTeacherAdvisoryRow = isTeacherAdvisory(subject.name.actual);
+  const content = (
+    <ContentCard
+      data-clickable-hover={!isTeacherAdvisoryRow}
+      className={cn({ clickable: !isTeacherAdvisoryRow })}
+      shouldShowArrow={!isTeacherAdvisoryRow}
+      items={[
+        ...(!isTeacherAdvisoryRow
+          ? [
+              {
+                label: "Average",
+                value:
+                  subject.average === undefined ? (
+                    <AverageCellSkeleton className="h-5" />
+                  ) : subject.average === null ? (
+                    NULL_VALUE_DISPLAY_FALLBACK
+                  ) : (
+                    formatAverage(subject.average)
+                  ),
+                className:
+                  color && shouldHighlightAveragesWithColour
+                    ? `text-${color === "green-500" ? "green-600" : color}`
+                    : undefined,
+              },
+            ]
+          : []),
+        {
+          label: "Room",
+          value: subject.room,
+        },
+        {
+          label: "Teacher(s)",
+          className: isTeacherAdvisoryRow ? undefined : "col-span-2",
+          value: formatTeachers(subject.teachers),
+        },
+      ]}
+      header={
+        isTeacherAdvisoryRow ? null : (
           <h3 className="font-medium text-base">
             {subject.name.prettified}
 
@@ -291,10 +296,15 @@ function SubjectCard({
               <InlineSubjectEmoji emoji={subject.name.emoji} />
             )}
           </h3>
-        }
-      />
-    </Link>
+        )
+      }
+    />
   );
+
+  if (isTeacherAdvisoryRow) {
+    return content;
+  }
+  return <Link to={getSubjectPageURL(year)(subject)}>{content}</Link>;
 }
 
 function SubjectCardSkeleton() {

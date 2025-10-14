@@ -73,7 +73,7 @@ export default function Root() {
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="settings" element={<SettingsPage />} />
 
-                <Route path="graduation" element={<GraduationSummaryPage />} />
+                <Route path="transcript" element={<GraduationSummaryPage />} />
               </Route>
               <Route element={<UnauthenticatedLayout />}>
                 <Route path="login" element={<LoginPage />} />

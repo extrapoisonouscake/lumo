@@ -31,9 +31,7 @@ type SidebarContext = {
   state: "expanded" | "collapsed";
   open: boolean;
   setOpen: (open: boolean) => void;
-  openMobile: boolean;
-  setOpenMobile: (open: boolean) => void;
-  isMobile: boolean;
+
   toggleSidebar: () => void;
 };
 
@@ -69,15 +67,13 @@ const SidebarProvider = React.forwardRef<
     },
     ref
   ) => {
-    const isMobile = useIsMobile();
-    const [openMobile, setOpenMobile] = React.useState(false);
-
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen);
     const open = openProp ?? _open;
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
+        console.log("setOpen", value);
         const openState = typeof value === "function" ? value(open) : value;
         if (setOpenProp) {
           setOpenProp(openState);
@@ -92,11 +88,10 @@ const SidebarProvider = React.forwardRef<
     );
 
     // Helper to toggle the sidebar.
-    const toggleSidebar = React.useCallback(() => {
-      return isMobile
-        ? setOpenMobile((open) => !open)
-        : setOpen((open) => !open);
-    }, [isMobile, setOpen, setOpenMobile]);
+    const toggleSidebar = React.useCallback(
+      () => setOpen((open) => !open),
+      [setOpen]
+    );
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
@@ -123,12 +118,10 @@ const SidebarProvider = React.forwardRef<
         state,
         open,
         setOpen,
-        isMobile,
-        openMobile,
-        setOpenMobile,
+
         toggleSidebar,
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, toggleSidebar]
     );
 
     return (
@@ -177,7 +170,8 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const isMobile = useIsMobile();
+    const { state } = useSidebar();
 
     if (collapsible === "none") {
       return (
@@ -262,8 +256,8 @@ const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
 >(({ className, onClick, ...props }, ref) => {
-  const { toggleSidebar, isMobile } = useSidebar();
-
+  const { toggleSidebar } = useSidebar();
+  const isMobile = useIsMobile();
   return (
     <Button
       ref={ref}
@@ -511,11 +505,12 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 export const sidebarMenuButtonVariants = cva(
-  "flex-col sm:flex-row justify-center sm:justify-start gap-1 px-2 py-1.5 sm:py-2 data-[active=true]:text-brand hover:data-[active=true]:text-brand peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] sm:hover:bg-sidebar-accent sm:hover:text-sidebar-accent-foreground sm:hover:data-[active=true]:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 sm:data-[active=true]:bg-sidebar-accent sm:data-[active=true]:text-sidebar-accent-foreground sm:hover:data-[active=true]:bg-sidebar-accent sm:data-[state=open]:hover:bg-sidebar-accent sm:data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 whitespace-nowrap active:scale-95",
+  "flex-col sm:flex-row justify-center sm:justify-start gap-1 px-2 py-1.5 sm:py-2 data-[active=true]:text-brand hover:data-[active=true]:text-brand peer/menu-button cursor-pointer flex w-full items-center gap-2 overflow-hidden rounded-xl sm:rounded-lg p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding,background,color,scale] sm:hover:bg-sidebar-accent sm:hover:text-sidebar-accent-foreground focus-visible:ring-2 sm:active:bg-sidebar-accent sm:active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 sm:hover:data-[active=true]:bg-sidebar-accent sm:data-[state=open]:hover:bg-sidebar-accent sm:data-[state=open]:hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 whitespace-nowrap active:scale-95",
   {
     variants: {
       variant: {
-        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        default:
+          "sm:hover:bg-sidebar-accent sm:hover:not:data-[active=true]:text-sidebar-accent-foreground",
         outline:
           "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
       },
@@ -535,7 +530,6 @@ export const sidebarMenuButtonVariants = cva(
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
-    shouldCloseSidebarOnMobile?: boolean;
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
@@ -545,18 +539,20 @@ const SidebarMenuButton = React.forwardRef<
     {
       asChild = false,
       isActive = false,
-      shouldCloseSidebarOnMobile = true,
+
       variant = "default",
       size = "default",
       tooltip,
-      onClick,
+
       className,
       ...props
     },
     ref
   ) => {
     const Comp = asChild ? Slot : "button";
-    const { isMobile, state, setOpenMobile } = useSidebar();
+    const { state } = useSidebar();
+    const isMobile = useIsMobile();
+
     const button = (
       <Comp
         ref={ref}
@@ -564,14 +560,6 @@ const SidebarMenuButton = React.forwardRef<
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        onClick={
-          isMobile && shouldCloseSidebarOnMobile
-            ? (e) => {
-                onClick?.(e);
-                setOpenMobile(false);
-              }
-            : onClick
-        }
         {...props}
       />
     );
