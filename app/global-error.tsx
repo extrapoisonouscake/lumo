@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import "@/views/globals.css";
 import { RefreshStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
+import * as Sentry from "@sentry/nextjs";
 import { GeistSans } from "geist/font/sans";
-
-export default function GlobalError({
-  error,
-}: {
-  error: Error & { digest?: string };
-}) {
+import Error from "next/error";
+import { useEffect } from "react";
+export default function GlobalError({ error }: { error: Error }) {
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
   return (
     <html>
       <body className={GeistSans.className}>
@@ -30,9 +31,6 @@ export default function GlobalError({
               <HugeiconsIcon icon={RefreshStrokeRounded} />
               Refresh
             </Button>
-            <p className="text-center text-xs text-muted-foreground">
-              Error: {error.message}
-            </p>
           </div>
         </main>
       </body>
