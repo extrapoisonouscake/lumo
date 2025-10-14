@@ -48,15 +48,21 @@ export const storage = {
   get: function <T>(key: string) {
     const item = localStorage.getItem(key);
     if (!item) return undefined;
-    const { value, expiresAt } = JSON.parse(item) as {
-      value: T;
-      expiresAt: number;
-    };
-    if (expiresAt && Date.now() > expiresAt) {
-      storage.delete(key);
-      return undefined;
+    console.log(item);
+    try {
+      const { value, expiresAt } = JSON.parse(item) as {
+        value: T;
+        expiresAt: number;
+      };
+      if (expiresAt && Date.now() > expiresAt) {
+        storage.delete(key);
+        return undefined;
+      }
+      return value;
+    } catch (e) {
+      console.error(item);
+      console.error(e);
     }
-    return value;
   },
   set: (key: string, value: any, ttl: number) =>
     localStorage.setItem(
