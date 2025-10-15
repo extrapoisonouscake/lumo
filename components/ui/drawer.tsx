@@ -4,6 +4,7 @@ import * as React from "react";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/helpers/cn";
+import { ScrollShadow } from "./scroll-shadow";
 
 function Drawer({
   ...props
@@ -101,11 +102,15 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 function DrawerBody({
   className,
+  containerClassName,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & {
+  containerClassName?: string;
+}) {
   return (
-    <div
-      className={cn("px-4 pt-2 pb-4 overflow-y-auto min-h-0 flex-1", className)}
+    <ScrollShadow
+      className={cn("px-4 pt-2 pb-4", className)}
+      containerClassName={containerClassName}
       {...props}
     />
   );

@@ -343,7 +343,7 @@ export function SubjectAssignmentsTable({
               table={table}
               columnName="name"
               className="py-0 pr-0 border-none"
-              placeholder="Assignment Name..."
+              placeholder="Assignment name..."
             />
             <SortableColumn {...table.getColumn("assignedAt")!}>
               Date

@@ -70,7 +70,6 @@ export function TableRenderer<T>({
     return (
       <div className={cn("flex flex-col gap-4", containerClassName)}>
         {mobileHeader}
-
         {rows.length ? (
           <div className={cn("flex flex-col gap-4", mobileContainerClassName)}>
             {rows.map(renderMobileRow)}

@@ -279,7 +279,15 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
       <div className="flex flex-col flex-1 min-w-0">
         <div className="font-medium truncate">
           {isSubject ? (
-            element.name.prettified
+            <>
+              {element.name.prettified}
+              {element.name.emoji && (
+                <InlineSubjectEmoji
+                  emoji={element.name.emoji}
+                  whitespaceCount={1}
+                />
+              )}
+            </>
           ) : (
             <ScheduleBreak type={element.type} />
           )}

@@ -6,11 +6,6 @@ import * as React from "react";
 export interface ScrollShadowProps
   extends React.HTMLAttributes<HTMLDivElement> {
   /**
-   * Shadow color. Can be a Tailwind color class or CSS color value.
-   * @default "from-background/80 to-transparent"
-   */
-  shadowColor?: string;
-  /**
    * Height/thickness of the shadow in pixels
    * @default 20
    */
@@ -31,130 +26,147 @@ export interface ScrollShadowProps
   containerClassName?: string;
 }
 
-export const ScrollShadow = React.forwardRef<HTMLDivElement, ScrollShadowProps>(
-  (
-    {
-      className,
-      children,
-      shadowColor = "from-background/80 to-transparent",
-      shadowSize = 20,
-      showTopShadow = true,
-      showBottomShadow = true,
-      containerClassName,
-      ...props
-    },
-    ref
-  ) => {
-    const [showTop, setShowTop] = React.useState(false);
-    const [showBottom, setShowBottom] = React.useState(false);
-    const scrollRef = React.useRef<HTMLDivElement>(null);
+export const ScrollShadow = ({
+  className,
+  children,
 
-    // Minimal JS to detect scroll position
-    const handleScroll = React.useCallback(() => {
-      const element = scrollRef.current;
-      if (!element) return;
+  shadowSize = 60,
+  showTopShadow = true,
+  showBottomShadow = true,
+  containerClassName,
+  ...props
+}: ScrollShadowProps) => {
+  const [showTop, setShowTop] = React.useState(false);
+  const [showBottom, setShowBottom] = React.useState(false);
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const topSentinelRef = React.useRef<HTMLDivElement>(null);
+  const bottomSentinelRef = React.useRef<HTMLDivElement>(null);
 
-      const { scrollTop, scrollHeight, clientHeight } = element;
+  React.useEffect(() => {
+    const scrollContainer = scrollRef.current;
+    const topSentinel = topSentinelRef.current;
+    const bottomSentinel = bottomSentinelRef.current;
 
-      // Debug info (remove in production)
-      console.log("Scroll Debug:", {
-        scrollTop,
-        scrollHeight,
-        clientHeight,
-        canScrollTop: scrollTop > 5,
-        canScrollBottom: scrollTop < scrollHeight - clientHeight - 5,
-      });
+    if (!scrollContainer || !topSentinel || !bottomSentinel) return;
 
-      // Show top shadow if scrolled down
-      setShowTop(scrollTop > 5);
+    // Create intersection observer for the top sentinel
+    const topObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
+        // When top sentinel is visible, hide top shadow
+        // When top sentinel is hidden, show top shadow
+        setShowTop(!entry.isIntersecting);
+      },
+      {
+        root: scrollContainer,
+        threshold: 0,
+        // Small negative margin to trigger slightly before reaching the edge
+        rootMargin: "-1px 0px 0px 0px",
+      }
+    );
 
-      // Show bottom shadow if not at bottom
-      setShowBottom(scrollTop < scrollHeight - clientHeight - 5);
-    }, []);
+    // Create intersection observer for the bottom sentinel
+    const bottomObserver = new IntersectionObserver(
+      (entries) => {
+        console.log("bottomObserver", entries);
+        const entry = entries[0];
+        if (!entry) return;
+        // When bottom sentinel is visible, hide bottom shadow
+        // When bottom sentinel is hidden, show bottom shadow
+        setShowBottom(!entry.isIntersecting);
+      },
+      {
+        root: scrollContainer,
+        threshold: 0,
+        // Small negative margin to trigger slightly before reaching the edge
+        rootMargin: "0px 0px -1px 0px",
+      }
+    );
 
-    React.useEffect(() => {
-      const element = scrollRef.current;
-      if (!element) return;
+    topObserver.observe(topSentinel);
+    bottomObserver.observe(bottomSentinel);
 
-      console.log("Setting up scroll listener on:", element);
-
-      // Initial check
-      handleScroll();
-
-      // Test that the element is actually scrollable
-      const isScrollable = element.scrollHeight > element.clientHeight;
-      console.log(
-        "Element is scrollable:",
-        isScrollable,
-        "scrollHeight:",
-        element.scrollHeight,
-        "clientHeight:",
-        element.clientHeight
-      );
-
-      element.addEventListener("scroll", handleScroll, { passive: true });
-
-      // Also check on resize
-      const resizeObserver = new ResizeObserver(() => {
-        console.log("ResizeObserver triggered");
-        handleScroll();
-      });
-      resizeObserver.observe(element);
-
-      return () => {
-        element.removeEventListener("scroll", handleScroll);
-        resizeObserver.disconnect();
-      };
-    }, [handleScroll]);
-
-    return (
-      <div ref={ref} className={cn("relative", className)} {...props}>
-        {/* Scrollable content */}
+    return () => {
+      topObserver.disconnect();
+      bottomObserver.disconnect();
+    };
+  }, []);
+  return (
+    <div
+      className="relative flex-1 min-h-0 overflow-hidden flex flex-col"
+      {...props}
+    >
+      {/* Scrollable content */}
+      <div
+        ref={scrollRef}
+        className={cn(
+          "overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border h-full w-full",
+          className
+        )}
+      >
+        {/* Top sentinel - invisible element at the start */}
         <div
-          ref={scrollRef}
-          className={cn(
-            "overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border",
-            containerClassName
-          )}
-          style={{
-            height: "100%",
-          }}
-        >
+          ref={topSentinelRef}
+          className="h-px w-full pointer-events-none"
+          aria-hidden="true"
+        />
+        <div className={cn("flex flex-col", containerClassName)}>
           {children}
         </div>
-
-        {/* Top shadow - CSS gradient approach */}
-        {showTopShadow && (
-          <div
-            className={cn(
-              "pointer-events-none absolute left-0 right-0 top-0 z-10 transition-opacity duration-200",
-              showTop ? "opacity-100" : "opacity-0"
-            )}
-            style={{
-              height: `${shadowSize}px`,
-              background: `linear-gradient(to bottom, var(--background) 0%, transparent 100%)`,
-              backdropFilter: "blur(1px)",
-            }}
-          />
-        )}
-
-        {/* Bottom shadow - CSS gradient approach */}
-        {showBottomShadow && (
-          <div
-            className={cn(
-              "pointer-events-none absolute bottom-0 left-0 right-0 z-10 transition-opacity duration-200",
-              showBottom ? "opacity-100" : "opacity-0"
-            )}
-            style={{
-              height: `${shadowSize}px`,
-              background: `linear-gradient(to top, var(--background) 0%, transparent 100%)`,
-              backdropFilter: "blur(1px)",
-            }}
-          />
-        )}
+        {/* Bottom sentinel - invisible element at the end */}
+        <div
+          ref={bottomSentinelRef}
+          className="h-px w-full pointer-events-none"
+          aria-hidden="true"
+        />
       </div>
-    );
-  }
-);
 
-ScrollShadow.displayName = "ScrollShadow";
+      {/* Top shadow - gradient from transparent to background */}
+      {showTopShadow && (
+        <Shadow
+          size={shadowSize}
+          className="top-0"
+          isVisible={showTop}
+          direction="top"
+        />
+      )}
+
+      {/* Bottom shadow - gradient from transparent to background */}
+      {showBottomShadow && (
+        <Shadow
+          size={shadowSize}
+          className="bottom-0"
+          isVisible={showBottom}
+          direction="bottom"
+        />
+      )}
+    </div>
+  );
+};
+function Shadow({
+  className,
+  size,
+  isVisible,
+  direction,
+}: React.HTMLAttributes<HTMLDivElement> & {
+  size: number;
+  isVisible: boolean;
+  direction: "top" | "bottom";
+}) {
+  const gradientDirection = direction === "top" ? "to top" : "to bottom";
+
+  return (
+    <div
+      className={cn(
+        "w-full opacity-0 pointer-events-none absolute left-0 right-0 z-10 transition-opacity duration-200",
+        { "opacity-100": isVisible },
+        className
+      )}
+      style={{
+        height: `${size}px`,
+        background: `linear-gradient(${gradientDirection}, transparent 0%, hsl(var(--background)) 100%)`,
+      }}
+    />
+  );
+}

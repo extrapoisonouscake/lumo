@@ -3,7 +3,7 @@ import {
   USER_SETTINGS_DEFAULT_VALUES,
   USER_THEME_COLOR_COOKIE_PREFIX,
 } from "@/constants/core";
-import { APP_STORE_APP_ID } from "@/constants/website";
+import { APP_STORE_APP_ID, WEBSITE_TITLE } from "@/constants/website";
 import "@/views/globals.css";
 import { THEME_STORAGE_KEY_NAME } from "@/views/theme-provider/constants";
 import { GeistSans } from "geist/font/sans";
@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   itunes: {
     appId: APP_STORE_APP_ID,
   },
+  title: WEBSITE_TITLE,
 };
 export default async function RootLayout({
   children,

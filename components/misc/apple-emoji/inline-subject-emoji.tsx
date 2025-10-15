@@ -1,12 +1,17 @@
-import { PropsWithChildren } from "react";
 import { AppleEmoji } from ".";
 
 export function InlineSubjectEmoji({
   emoji,
-}: PropsWithChildren<{ emoji: string }>) {
+  whitespaceCount = 2,
+}: {
+  emoji: string;
+  whitespaceCount?: number;
+}) {
   return (
     <>
-      &nbsp;&nbsp;
+      {Array.from({ length: whitespaceCount }).map((_, index) => (
+        <>&nbsp;</>
+      ))}
       <AppleEmoji className="inline" value={emoji} />
     </>
   );

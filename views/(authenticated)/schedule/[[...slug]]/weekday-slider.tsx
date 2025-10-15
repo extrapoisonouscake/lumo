@@ -160,7 +160,7 @@ export function WeekdaySlider({
                         </p>
                         <div
                           className={cn(
-                            "p-1.5 leading-tight size-9 flex items-center justify-center rounded-xl transition-all duration-200 text-foreground hover:bg-secondary",
+                            "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-secondary",
                             {
                               "bg-brand text-white shadow-sm hover:bg-brand":
                                 isCurrent,
@@ -203,6 +203,6 @@ const WeekdaysSkeleton = () =>
   Array.from({ length: 7 }).map((_, dayIndex) => (
     <div key={dayIndex} className="flex flex-col items-center gap-1 my-1.5">
       <Skeleton className="h-2 w-4" />
-      <Skeleton className="p-1.5 leading-tight size-9 flex items-center justify-center rounded-xl text-muted-foreground/50"></Skeleton>
+      <Skeleton className="p-1.5 leading-tight size-9 flex items-center justify-center rounded-full text-muted-foreground/50"></Skeleton>
     </div>
   ));

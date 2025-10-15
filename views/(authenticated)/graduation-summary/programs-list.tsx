@@ -11,7 +11,6 @@ import {
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
 } from "@/components/ui/responsive-dialog";
-import { ScrollShadow } from "@/components/ui/scroll-shadow";
 import { cn } from "@/helpers/cn";
 import { ProgramEntry, ProgramRequirementEntry } from "@/types/school";
 
@@ -132,7 +131,8 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
       <p className="text-sm text-muted-foreground">Total</p>
       <div className="flex items-center gap-1.5">
         <p className="text-sm font-medium">
-          {totalCompletedUnits} / {totalRequiredUnits} units{" "}
+          {totalCompletedUnits.toFixed(1)} / {totalRequiredUnits.toFixed(1)}{" "}
+          units{" "}
           <span className="text-muted-foreground">
             ({percentages.completed.toFixed(1)}%)
           </span>
@@ -193,7 +193,7 @@ function ProgramCard({
             {displayName}
           </h3>
           {isExcluded && (
-            <Badge variant="outline" className="text-muted-foreground">
+            <Badge variant="outline" className="text-muted-foreground pl-1">
               <HugeiconsIcon
                 icon={MinusSignCircleStrokeRounded}
                 className="h-3 w-3"
@@ -352,14 +352,12 @@ function RequirementDialog({
             {currentProgram?.name || currentProgram?.code} - Requirements
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody>
+        <ResponsiveDialogBody containerClassName="gap-4">
           {currentProgram?.requirements &&
           currentProgram.requirements.length > 0 ? (
-            <ScrollShadow containerClassName="flex flex-col gap-4">
-              {currentProgram.requirements.map((requirement, index) => (
-                <RequirementCard key={index} requirement={requirement} />
-              ))}
-            </ScrollShadow>
+            currentProgram.requirements.map((requirement, index) => (
+              <RequirementCard key={index} requirement={requirement} />
+            ))
           ) : (
             <ErrorCard
               emoji="🤔"

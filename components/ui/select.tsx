@@ -43,7 +43,7 @@ const SelectTrigger = React.forwardRef<
       className={
         !asChild
           ? cn(
-              "flex h-10 w-full gap-2 cursor-pointer items-center justify-between rounded-xl r border border-input bg-background px-3 py-2 text-sm ring-offset-background [&[data-placeholder]>span]:text-muted-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+              "flex h-10 w-full gap-2 cursor-pointer items-center justify-between rounded-xl r border border-input bg-background px-3 py-2 text-sm ring-offset-background [&[data-placeholder]>span]:text-muted-foreground focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 [&>span]:text-start",
               className
             )
           : className

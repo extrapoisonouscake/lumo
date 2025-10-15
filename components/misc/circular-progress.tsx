@@ -42,6 +42,7 @@ export function CircularProgress({
   return (
     <div className={cn("relative", className)}>
       <svg
+        data-auto-stroke-width="true"
         className={cn("size-6 rotate-90", {
           "size-4": size === "small",
         })}

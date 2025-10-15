@@ -360,7 +360,6 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       <div className="flex flex-col gap-4">
         <TableRenderer
           table={table}
-          containerClassName="gap-2"
           desktopHeader={
             <div className="flex flex-col md:flex-row flex-wrap gap-2">
               {gradeSelect}
@@ -405,9 +404,9 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               table
             );
             return (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 group">
                 {isFirstRowForRequirement && (
-                  <h3 className="mt-2 font-medium uppercase text-xs text-muted-foreground">
+                  <h3 className="not-group-first:mt-1 font-medium uppercase text-xs text-muted-foreground">
                     {entry.requirement.name}
                   </h3>
                 )}
@@ -483,7 +482,7 @@ const entryStatusBadgeVisualData: Record<
   [ProgramRequirementEntryStatus.Included]: {
     icon: CheckmarkCircle02StrokeRounded,
     className: "text-green-600",
-    text: "Included",
+    text: "Completed",
   },
   [ProgramRequirementEntryStatus.Pending]: {
     icon: Clock05StrokeRounded,
