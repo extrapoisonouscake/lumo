@@ -352,7 +352,7 @@ function RequirementDialog({
             {currentProgram?.name || currentProgram?.code} - Requirements
           </ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody containerClassName="gap-4">
+        <ResponsiveDialogBody className="gap-4">
           {currentProgram?.requirements &&
           currentProgram.requirements.length > 0 ? (
             currentProgram.requirements.map((requirement, index) => (

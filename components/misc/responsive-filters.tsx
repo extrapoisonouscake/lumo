@@ -28,15 +28,13 @@ export function ResponsiveFilters<T>({
   children: React.ReactNode;
   triggerClassName?: string;
   table: Table<T>;
-  filterKeys: (keyof T)[];
+  filterKeys: (keyof T | (string & {}))[];
 }) {
   const isMobile = useIsMobile();
 
   const filters = table.getState().columnFilters;
   const filtersCount = useMemo(
-    () =>
-      filters.filter((filter) => filterKeys.includes(filter.id as keyof T))
-        .length,
+    () => filters.filter((filter) => filterKeys.includes(filter.id)).length,
     [filters, filterKeys]
   );
   if (!isMobile) {
@@ -53,7 +51,7 @@ export function ResponsiveFilters<T>({
           <div className="flex items-center gap-1.5">
             Filters
             {filtersCount > 0 && (
-              <div className="px-1.5 bg-brand rounded-xl text-primary-foreground">
+              <div className="px-1.5 bg-brand rounded-lg text-primary-foreground">
                 {filtersCount}
               </div>
             )}

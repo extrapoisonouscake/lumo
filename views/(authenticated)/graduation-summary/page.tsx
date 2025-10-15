@@ -84,6 +84,9 @@ const baseColumns = [
     cell: ({ row }) => {
       return row.original.requirement.name;
     },
+    filterFn: (row, id, filterValue) => {
+      return row.original.requirement.name === filterValue;
+    },
     id: "requirement.name",
   }),
 
@@ -341,7 +344,21 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       label="Status"
     />
   );
-
+  const requirementSelect = (
+    <TableFilterSelect
+      id="requirement-filter"
+      column={table.getColumn("requirement.name")!}
+      options={data.map((requirement) => {
+        return {
+          label: requirement.name,
+          value: requirement.name,
+        };
+      })}
+      placeholder="Select requirement"
+      className="flex-1 md:max-w-[190px] md:w-[100px]"
+      label="Requirement"
+    />
+  );
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -361,9 +378,10 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
         <TableRenderer
           table={table}
           desktopHeader={
-            <div className="flex flex-col md:flex-row flex-wrap gap-2">
-              {gradeSelect}
+            <div className="flex flex-col md:flex-row flex-wrap gap-x-2 gap-y-3">
               {statusSelect}
+              {requirementSelect}
+              {gradeSelect}
               <div className="flex flex-col gap-2">
                 <Label htmlFor="subject-search">Subject</Label>
                 <TableFilterSearchBar
@@ -376,7 +394,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             </div>
           }
           mobileHeader={
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <TableFilterSearchBar
                 id="subject-search-mobile"
                 table={table}
@@ -386,10 +404,11 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               <ResponsiveFilters
                 triggerClassName="h-full"
                 table={table}
-                filterKeys={["grade", "status"]}
+                filterKeys={["grade", "status", "requirement.name"]}
               >
-                {gradeSelect}
                 {statusSelect}
+                {requirementSelect}
+                {gradeSelect}
               </ResponsiveFilters>
             </div>
           }

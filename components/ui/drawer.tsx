@@ -102,17 +102,11 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
 }
 function DrawerBody({
   className,
-  containerClassName,
+
   ...props
-}: React.HTMLAttributes<HTMLDivElement> & {
-  containerClassName?: string;
-}) {
+}: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <ScrollShadow
-      className={cn("px-4 pt-2 pb-4", className)}
-      containerClassName={containerClassName}
-      {...props}
-    />
+    <ScrollShadow className={cn("px-4 pt-2 pb-4", className)} {...props} />
   );
 }
 function DrawerFooter({ className, ...props }: React.ComponentProps<"div">) {

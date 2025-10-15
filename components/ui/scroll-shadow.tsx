@@ -69,7 +69,6 @@ export const ScrollShadow = ({
     // Create intersection observer for the bottom sentinel
     const bottomObserver = new IntersectionObserver(
       (entries) => {
-        console.log("bottomObserver", entries);
         const entry = entries[0];
         if (!entry) return;
         // When bottom sentinel is visible, hide bottom shadow
@@ -94,16 +93,16 @@ export const ScrollShadow = ({
   }, []);
   return (
     <div
-      className="relative flex-1 min-h-0 overflow-hidden flex flex-col"
+      className={cn(
+        "relative flex-1 min-h-0 overflow-hidden flex flex-col",
+        containerClassName
+      )}
       {...props}
     >
       {/* Scrollable content */}
       <div
         ref={scrollRef}
-        className={cn(
-          "overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border h-full w-full",
-          className
-        )}
+        className="overflow-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-border h-full w-full"
       >
         {/* Top sentinel - invisible element at the start */}
         <div
@@ -111,9 +110,7 @@ export const ScrollShadow = ({
           className="h-px w-full pointer-events-none"
           aria-hidden="true"
         />
-        <div className={cn("flex flex-col", containerClassName)}>
-          {children}
-        </div>
+        <div className={cn("flex flex-col", className)}>{children}</div>
         {/* Bottom sentinel - invisible element at the end */}
         <div
           ref={bottomSentinelRef}

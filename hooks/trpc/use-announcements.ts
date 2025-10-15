@@ -33,7 +33,6 @@ const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
     // Add non-matching text before this match
 
     const gradeText = match[0];
-    console.log({ gradeText });
     // Extract numbers from the grade text (removing any 's' suffix)
     const numbers = gradeText.match(/\d+/g)?.map(Number) || [];
 
