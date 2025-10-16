@@ -267,6 +267,8 @@ function ScheduleCardsSkeleton() {
 }
 function ScheduleElementCard({ element }: { element: ScheduleRow }) {
   const isSubject = element.type === "subject";
+  const isTeacherAdvisorySubject =
+    isSubject && isTeacherAdvisory(element.name.actual);
   const content = (
     <Card
       className={cn(
@@ -297,7 +299,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
           {timezonedDayJS(element.endsAt).format("h:mm")}
         </p>
       </div>
-      {isSubject && (
+      {isSubject && !isTeacherAdvisorySubject && (
         <HugeiconsIcon
           icon={ArrowRight01StrokeRounded}
           className="size-5 text-muted-foreground group-hover/card:text-foreground transition-colors"
@@ -306,7 +308,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
     </Card>
   );
 
-  if (isSubject && !isTeacherAdvisory(element.name.actual)) {
+  if (isSubject && !isTeacherAdvisorySubject) {
     return (
       <Link
         to={getSubjectPageURL("current")({

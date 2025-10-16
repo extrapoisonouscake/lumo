@@ -1,17 +1,22 @@
-import { isIOSWebView } from "@/constants/ui";
-import { callNative } from "@/helpers/ios-bridge";
+import { isIOSApp } from "@/constants/ui";
 import { trpc } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
+import { SavePassword } from "capacitor-ios-autofill-save-password";
 
 export function useLogIn() {
   const options = trpc.myed.auth.login.mutationOptions();
   return useMutation({
     ...options,
-    onSuccess: (...args) => {
-      options.onSuccess?.(...args);
+    onSuccess: async (data, variables, ...args) => {
+      options.onSuccess?.(data, variables, ...args);
 
-      if (isIOSWebView) {
-        callNative("saveAuthData");
+      if (isIOSApp) {
+        SavePassword.promptDialog({
+          username: variables.username,
+          password: variables.password,
+        });
+
+        // callNative("saveAuthData");
       }
     },
   });

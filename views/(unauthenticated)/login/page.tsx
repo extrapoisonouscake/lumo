@@ -2,7 +2,7 @@ import { Logo } from "@/components/misc/logo";
 import { TitleManager } from "@/components/misc/title-manager";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
-import MyEducationBCLogo from "@/public/myeducationbc.svg";
+import MyEducationBCLogo from "@/public/assets/myeducationbc.svg";
 import { queryClient, trpcClient } from "@/views/trpc";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

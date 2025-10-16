@@ -2,40 +2,57 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { isIOSWebView } from "@/constants/ui";
+import { isIOSApp } from "@/constants/ui";
 
 import { cn } from "@/helpers/cn";
-import { callNative } from "@/helpers/ios-bridge";
 import {
   prepareThemeColor,
   setThemeColorCSSVariable,
 } from "@/helpers/prepare-theme-color";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
+import { AppIcon } from "@capacitor-community/app-icon";
 import { Tick02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect, useState } from "react";
-
-const AVAILABLE_THEMES = [
-  USER_SETTINGS_DEFAULT_VALUES.themeColor,
-  "350 72% 52%",
-  "338 49% 43%",
-  "345 100% 78%",
-  "31 100% 48%",
-  "40 97% 64%",
-  "90 34% 63%",
-  "201 100% 36%",
-  "206 46% 37%",
-  "239 77% 70%",
-];
-
+import { capitalize } from "../../../helpers/prettifyEducationalName";
+const AVAILABLE_THEMES = {
+  default: USER_SETTINGS_DEFAULT_VALUES.themeColor,
+  red: "350 72% 52%",
+  burgundy: "338 49% 43%",
+  pink: "345 100% 78%",
+  orange: "31 100% 48%",
+  yellow: "40 97% 64%",
+  lightGreen: "90 34% 63%",
+  blue: "201 100% 36%",
+  navy: "206 46% 37%",
+  purple: "239 77% 70%",
+};
+const IOS_APP_ICON_SUFFIX = "AppIcon";
+const getIOSAppIconName = (key: string) => {
+  return `${capitalize(key)}${IOS_APP_ICON_SUFFIX}`;
+};
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [currentTheme, setCurrentTheme] = useState(initialValue);
   useEffect(() => {
-    if (isIOSWebView) {
-      callNative<string>("getAppTheme").then((theme) => {
-        if (currentTheme !== theme) {
-          callNative("setAppTheme", { hsl: currentTheme });
+    if (isIOSApp) {
+      AppIcon.getName().then(async ({ value: rawIconName }) => {
+        const iconName =
+          rawIconName?.replace(IOS_APP_ICON_SUFFIX, "") || "default";
+        const currentThemeKey = Object.keys(AVAILABLE_THEMES).find(
+          (key) =>
+            AVAILABLE_THEMES[key as keyof typeof AVAILABLE_THEMES] ===
+            currentTheme
+        );
+        console.log("iconName", iconName);
+        console.log("currentThemeKey", currentThemeKey);
+        if (currentThemeKey && currentThemeKey !== iconName) {
+          const formattedName = getIOSAppIconName(currentThemeKey);
+          console.log("formattedName", formattedName);
+          await AppIcon.change({
+            name: formattedName,
+            suppressNotification: false,
+          });
         }
       });
     }
@@ -46,7 +63,8 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
     setThemeColorCSSVariable(theme);
     updateUserSettingState("themeColor", theme);
   };
-  const onChangeHandler = async (theme: string) => {
+  const onChangeHandler = async (key: string) => {
+    const theme = AVAILABLE_THEMES[key as keyof typeof AVAILABLE_THEMES];
     updateThemeLocally(theme);
     const oldValue = currentTheme;
     try {
@@ -57,10 +75,12 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
           value: theme,
         })
       );
-      if (isIOSWebView) {
+      if (isIOSApp) {
+        console.log("getting icon name", getIOSAppIconName(key));
         promises.push(
-          callNative("setAppTheme", {
-            hsl: theme,
+          AppIcon.change({
+            name: getIOSAppIconName(key),
+            suppressNotification: false,
           })
         );
       }
@@ -74,18 +94,18 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
       <Label className="text-sm font-normal">Theme colour</Label>
       <Card className="p-3 overflow-x-auto w-fit max-w-full">
         <div className="flex flex-row gap-2">
-          {AVAILABLE_THEMES.map((color) => (
+          {Object.entries(AVAILABLE_THEMES).map(([key, color]) => (
             <div
-              key={color}
+              key={key}
               className={cn(
                 "size-9 min-w-9 rounded-full cursor-pointer transition-transform flex justify-center items-center hover:scale-110",
                 {
                   "ring-2 ring-white ring-offset-2 scale-110 shadow-md":
-                    currentTheme === color,
+                    currentTheme === key,
                 }
               )}
               style={{ backgroundColor: prepareThemeColor(color) }}
-              onClick={() => onChangeHandler(color)}
+              onClick={() => onChangeHandler(key)}
             >
               {currentTheme === color && (
                 <HugeiconsIcon

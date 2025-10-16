@@ -6,6 +6,7 @@ import {
   TrackedSubject,
 } from "@/db/schema";
 import { hashString } from "@/helpers/hashString";
+import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { createCaller } from "@/lib/trpc";
 import { createTRPCContext } from "@/lib/trpc/context";
 import {
@@ -20,6 +21,7 @@ import { eq, sql } from "drizzle-orm";
 import { after } from "next/server";
 
 export async function POST() {
+  console.log("CHECKEIC");
   const context = await createTRPCContext();
   const caller = createCaller(context);
   await caller.myed.auth.ensureValidSession({ isInBackground: true });
@@ -195,7 +197,3 @@ const broadcastNotificationToSubscriptions =
     const data = generators[type]({ subject, assignment });
     await broadcastNotification(subscriptions, data);
   };
-export const prepareAssignmentForDBStorage = (assignment: Assignment) => ({
-  id: assignment.id,
-  score: typeof assignment.score === "number" ? assignment.score : undefined,
-});

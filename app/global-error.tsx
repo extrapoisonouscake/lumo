@@ -16,7 +16,7 @@ export default function GlobalError({ error }: { error: Error }) {
       <body className={GeistSans.className}>
         <main className="size-full flex flex-col justify-center gap-4 items-center">
           <img
-            src="/app-store-app-icon.png"
+            src="/assets/app-store-app-icon.png"
             alt="Lumo App Icon"
             className="size-14"
           />

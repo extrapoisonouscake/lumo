@@ -1,4 +1,3 @@
-"use client";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +14,21 @@ import {
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Logout05StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import {
+  BookOpen01SolidRounded,
+  Calendar02SolidRounded,
+  Home03SolidRounded,
+  SchoolReportCardSolidRounded,
+  Settings02SolidRounded,
+} from "@hugeicons-pro/core-solid-rounded";
+import {
+  BookOpen01StrokeRounded,
+  Calendar02StrokeRounded,
+  Home03StrokeRounded,
+  Logout05StrokeRounded,
+  SchoolReportCardStrokeRounded,
+  Settings02StrokeRounded,
+} from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { usePathname } from "next/navigation";
@@ -25,6 +38,7 @@ import { useNavigate } from "react-router";
 import { Spinner } from "../ui/button";
 import { Link } from "../ui/link";
 
+import { IconSvgObject } from "@/types/ui";
 import { ThemeToggle } from "./theme-toggle";
 import { UserHeader } from "./user-header";
 
@@ -68,7 +82,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
-
+const pageIcons: Record<string, [IconSvgObject, IconSvgObject]> = {
+  "/": [Home03StrokeRounded, Home03SolidRounded],
+  "/classes": [BookOpen01StrokeRounded, BookOpen01SolidRounded],
+  "/schedule": [Calendar02StrokeRounded, Calendar02SolidRounded],
+  "/transcript": [SchoolReportCardStrokeRounded, SchoolReportCardSolidRounded],
+  "/settings": [Settings02StrokeRounded, Settings02SolidRounded],
+};
 function PagesMenu() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
@@ -89,7 +109,7 @@ function PagesMenu() {
         {pages.map(([url, page]) => {
           const isActive =
             url === "/" ? url === pathname : pathname.startsWith(url);
-          const icon = page.icon?.[isActive ? 1 : 0];
+          const icon = pageIcons[url]?.[isActive ? 1 : 0];
           const mainItemContent = (
             <>
               {icon && (
@@ -103,16 +123,13 @@ function PagesMenu() {
                 />
               )}
               <span className={cn({ "leading-none": isMobile })}>
-                {page.breadcrumb[0]!.name}
+                {page.name}
               </span>
             </>
           );
           return (
             <SidebarMenuItem className="flex-1" key={url}>
-              <SidebarMenuButton
-                isActive={isActive && (isMobile || !page.items?.length)}
-                asChild
-              >
+              <SidebarMenuButton isActive={isActive} asChild>
                 <Link to={url} className="py-2 gap-2">
                   {mainItemContent}
                 </Link>

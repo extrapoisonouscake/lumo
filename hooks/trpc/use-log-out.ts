@@ -1,6 +1,6 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { isIOSWebView } from "@/constants/ui";
-import { callNative } from "@/helpers/ios-bridge";
+import { isIOSApp } from "@/constants/ui";
+import { storage } from "@/helpers/cache";
 import { setThemeColorCSSVariable } from "@/helpers/prepare-theme-color";
 import { trpcClient } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
@@ -11,13 +11,13 @@ export function useLogOut(navigate: ReturnType<typeof useNavigate>) {
     mutationFn: async () => {
       const promises = [];
       promises.push(trpcClient.myed.auth.logOut.mutate());
-      if (isIOSWebView) {
-        promises.push(callNative("logoutWipe"));
+      if (isIOSApp) {
+        // promises.push(callNative("logoutWipe"));
       }
       await Promise.all(promises);
     },
     onSuccess: () => {
-      localStorage.clear();
+      storage.clear();
       navigate("/login");
       setThemeColorCSSVariable(USER_SETTINGS_DEFAULT_VALUES.themeColor);
     },

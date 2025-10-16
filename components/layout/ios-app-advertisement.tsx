@@ -1,7 +1,7 @@
-import { isIOS, isIOSWebView } from "@/constants/ui";
+import { isIOS, isIOSApp } from "@/constants/ui";
 import { APP_STORE_APP_ID } from "@/constants/website";
-import AppStoreBadge from "@/public/app-store-badge.svg";
-
+import { cn } from "@/helpers/cn";
+import AppStoreBadge from "@/public/assets/app-store-badge.svg";
 import {
   Cancel01StrokeRounded,
   Tick02StrokeRounded,
@@ -20,7 +20,7 @@ const features = [
 ];
 export function IOSAppAdvertisement() {
   const [isDismissed, setIsDismissed] = useState(
-    localStorage.getItem(IS_DISMISSED_KEY) === "true" || !isIOS || isIOSWebView
+    localStorage.getItem(IS_DISMISSED_KEY) === "true" || !isIOS || isIOSApp
   );
   useEffect(() => {
     document.body.style.overflow = isDismissed ? "auto" : "hidden";
@@ -45,11 +45,7 @@ export function IOSAppAdvertisement() {
         <div className="flex flex-col gap-6 items-center justify-between h-full">
           <div />
           <div className="flex flex-col gap-4 items-center">
-            <img
-              src="/app-store-app-icon.png"
-              alt="Lumo App Icon"
-              className="size-16"
-            />
+            <AppStoreAppCombinedLogo />
             <h1 className="text-2xl font-semibold">Download our app</h1>
             <IOSAppFeaturesList />
 
@@ -90,5 +86,25 @@ export function IOSAppInstallButton() {
     <a rel="noopener noreferrer" target="_blank" href={LINK}>
       <AppStoreBadge className="h-12" />
     </a>
+  );
+}
+export function AppStoreAppCombinedLogo({ className }: { className?: string }) {
+  return (
+    <div className={cn("flex items-center", className)}>
+      <div className="relative">
+        <img
+          src="/assets/app-store-icon.png"
+          alt="App Store Icon"
+          className="size-16 min-w-16 z-10"
+        />
+        <div className="absolute top-0 left-[-1px] size-full shadow-[10px_0px_10px_-2px_rgb(0_0_0_/_0.15)]! rounded-[16px]"></div>
+      </div>
+
+      <img
+        src="/assets/app-store-app-icon.png"
+        alt="Lumo App Icon"
+        className="size-14 -ml-4"
+      />
+    </div>
   );
 }

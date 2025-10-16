@@ -32,7 +32,7 @@ export function AppSidebarWrapper({
   const insetSlot = (
     <Inset
       topLoader={<TopLoader />}
-      className="pb-(--mobile-menu-height) pt-[env(safe-area-inset-top,0)] sm:pb-0"
+      className="pb-(--mobile-menu-height) sm:pb-0"
     >
       {children}
     </Inset>

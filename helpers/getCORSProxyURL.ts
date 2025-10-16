@@ -1,3 +1,5 @@
+import { WEBSITE_ROOT } from "@/constants/website";
+
 export function getCORSProxyURL(url: string) {
-  return `/api/aspen/${url}`;
+  return `${WEBSITE_ROOT}/api/aspen/${url}`;
 }

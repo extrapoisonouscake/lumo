@@ -1,6 +1,6 @@
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 
-import { prepareAssignmentForDBStorage } from "@/app/api/notifications/check/route";
+import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { submitUnknownSubjectsNames } from "@/parsing/myed/helpers";
 import { SubjectTerm, SubjectYear } from "@/types/school";
 import { after } from "next/server";

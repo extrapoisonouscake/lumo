@@ -1,5 +1,7 @@
+import { CapacitorHttp } from "@capacitor/core";
 import { createTRPCClient, httpLink, retryLink } from "@trpc/client";
 
+import { WEBSITE_ROOT } from "@/constants/website";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
@@ -29,14 +31,8 @@ export const queryClient = new QueryClient({
 
 let refreshPromise: Promise<void> | null = null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
-const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
-  process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
 
-const TRPC_URL = `${
-  NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL}`
-    : "http://localhost:3000"
-}/api/trpc`;
+const TRPC_URL = `${WEBSITE_ROOT}/api/trpc`;
 const SECONDARY_ROUTES = [
   "user.getStudentDetails",
   "subjects.getSubjects",
@@ -44,7 +40,13 @@ const SECONDARY_ROUTES = [
 ];
 const queue = new PrioritizedRequestQueue();
 
-const fetchWithQueue: typeof fetch = async (input, init) => {
+type RequestInitWithDefinedHeaders = Omit<RequestInit, "headers"> & {
+  headers?: Record<string, string>;
+};
+const fetchWithQueue: (
+  input: RequestInfo | URL,
+  init?: RequestInitWithDefinedHeaders
+) => Promise<Response> = async (input, init) => {
   const url =
     typeof input === "string"
       ? new URL(input)
@@ -58,17 +60,37 @@ const fetchWithQueue: typeof fetch = async (input, init) => {
 
   // skipping the queueing if no call is made to the original API
   const restRouteString = restRoute.join(".");
+  const request = async () => {
+    const result = await CapacitorHttp.request({
+      method: init?.method ?? "GET",
+      url: input.toString(),
+      headers: init?.headers,
+      data: init?.body,
+    });
+
+    const response = new Response(
+      typeof result.data === "object"
+        ? JSON.stringify(result.data)
+        : result.data,
+      {
+        status: result.status,
+        headers: result.headers,
+      }
+    );
+    return response;
+  };
   if (routeGroup !== "myed" || restRouteString === "auth.logOut") {
-    return fetch(input, init);
+    return request();
   }
   const isSecondary = SECONDARY_ROUTES.includes(restRouteString);
 
   return queue.enqueue(
     async () => {
-      const response = await fetch(input, init);
+      const response = await request();
       if (response.status === 503) {
         window.location.href = "/maintenance";
       }
+
       return response;
     },
 
@@ -98,11 +120,19 @@ export const trpcClient = createTRPCClient<AppRouter>({
             : input instanceof URL
               ? input
               : new URL(input.url);
+        let headers = init?.headers;
+        if ((headers && headers instanceof Headers) || Array.isArray(headers)) {
+          headers = Object.fromEntries(headers.entries());
+        }
+        const preparedInit: RequestInitWithDefinedHeaders = {
+          ...init,
+          headers: headers as Record<string, string>,
+        };
         if (
           !clientAuthChecks.isLoggedIn() ||
           url.pathname.includes("auth.ensureValidSession")
         ) {
-          return fetchWithQueue(input, init);
+          return fetchWithQueue(input, preparedInit);
         }
         const tokensExpiry = localStorage.getItem(
           TOKEN_EXPIRY_LOCAL_STORAGE_KEY
@@ -113,7 +143,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
 
           if (now < expiryTime) {
             // Session is still valid, proceed with request
-            return fetchWithQueue(input, init);
+            return fetchWithQueue(input, preparedInit);
           }
         }
 
@@ -131,7 +161,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         await refreshPromise;
 
         // Now proceed with the original request
-        return fetchWithQueue(input, init);
+        return fetchWithQueue(input, preparedInit);
       },
     }),
   ],

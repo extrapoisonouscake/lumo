@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { Transition } from "motion/react";
 
 export const NULL_VALUE_DISPLAY_FALLBACK = "–";
@@ -12,4 +13,5 @@ export const isIOS =
   /iphone|ipad|ipod/i.test(userAgent) ||
   (userAgent.includes("Mac") && "ontouchend" in document);
 
-export const isIOSWebView = isIOS && !!window.webkit;
+export const isIOSApp = Capacitor.getPlatform() === "ios";
+export const isMobileApp = process.env.NEXT_PUBLIC_IS_MOBILE === "true";

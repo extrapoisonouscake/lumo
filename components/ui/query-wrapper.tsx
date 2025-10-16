@@ -5,7 +5,7 @@ import { ErrorCard } from "../misc/error-card";
 interface QueryWrapperProps<TData, TError> {
   query: Pick<
     QueryObserverResult<TData, TError>,
-    "isLoading" | "isError" | "data"
+    "isFetching" | "isError" | "data" | "isPaused"
   >;
   children: (data: TData) => ReactNode;
   skeleton?: ReactNode;
@@ -18,7 +18,7 @@ export function QueryWrapper<TData, TError>({
   skeleton,
   onError,
 }: QueryWrapperProps<TData, TError>) {
-  if (query.isLoading) {
+  if (query.isFetching) {
     return <>{skeleton}</>;
   }
 
@@ -29,7 +29,9 @@ export function QueryWrapper<TData, TError>({
   if (query.data) {
     return <>{children(query.data)}</>;
   }
-
+  if (query.isPaused) {
+    return <ErrorCard message="You are offline." />;
+  }
   return null;
 }
 

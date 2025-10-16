@@ -22,7 +22,12 @@ export function ExtendedFormPasswordInput(
   const passwordRequirements = getPasswordRequirementsArray(props.requirements);
   return (
     <div className="flex flex-col gap-2">
-      <FormPasswordInput shouldShowError={false} required {...props} />
+      <FormPasswordInput
+        autoComplete="new-password"
+        shouldShowError={false}
+        required
+        {...props}
+      />
 
       {value && (
         <ul className="text-sm space-y-1">

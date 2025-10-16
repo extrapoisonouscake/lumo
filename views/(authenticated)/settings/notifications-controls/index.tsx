@@ -1,15 +1,16 @@
-import { isIOS, isIOSWebView } from "@/constants/ui";
-import { callNative, IOSActionBinaryResult } from "@/helpers/ios-bridge";
+import { isIOS, isIOSApp } from "@/constants/ui";
+
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { trpc } from "@/views/trpc";
+import { PermissionState } from "@capacitor/core";
+import { PushNotifications } from "@capacitor/push-notifications";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AsyncSwitchField } from "../async-switch-field";
 import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
-
 //assuming notifications are supported if iOS and not in PWA
-const areNotificationsSupported = "Notification" in window || isIOSWebView;
+const areNotificationsSupported = "Notification" in window || isIOSApp;
 const areNotificationsImplicitlySupported = isIOS || areNotificationsSupported;
 export function NotificationsControls({
   initialValue,
@@ -23,32 +24,28 @@ export function NotificationsControls({
     trpc.core.settings.unsubscribeFromNotifications.mutationOptions()
   );
   const [checked, setChecked] = useState(initialValue);
-  const [iosNotificationPermission, setIOSNotificationPermission] = useState<
-    "granted" | "denied" | "notDetermined"
-  >("notDetermined");
+  const [iosNotificationPermission, setIOSNotificationPermission] =
+    useState<PermissionState>("prompt");
   useEffect(() => {
-    if (isIOSWebView) {
-      callNative("checkNotificationPermission").then((result) => {
-        setIOSNotificationPermission(
-          result as "granted" | "denied" | "notDetermined"
-        );
+    if (isIOSApp) {
+      PushNotifications.checkPermissions().then(({ receive }) => {
+        setIOSNotificationPermission(receive);
       });
     }
-  }, [isIOSWebView]);
+  }, [isIOSApp]);
   const notificationsPermissionDenied =
     areNotificationsSupported &&
-    (isIOSWebView
-      ? iosNotificationPermission
-      : window.Notification.permission) === "denied";
+    (isIOSApp ? iosNotificationPermission : window.Notification.permission) ===
+      "denied";
 
   const requestNotificationPermission = async () => {
-    if (isIOSWebView) {
+    if (isIOSApp) {
       if (iosNotificationPermission === "granted") {
         return true;
       }
-      const result = await callNative("requestNotificationPermission");
+      const result = await PushNotifications.requestPermissions();
 
-      return result === "granted";
+      return result.receive === "granted";
     } else {
       if (Notification.permission === "granted") {
         return true;
@@ -60,7 +57,7 @@ export function NotificationsControls({
   const initPush = async () => {
     if (
       !areNotificationsSupported ||
-      (!isIOSWebView &&
+      (!isIOSApp &&
         (!("serviceWorker" in navigator) || !("PushManager" in window)))
     ) {
       toast.error("Push notifications are not supported in this browser");
@@ -71,31 +68,49 @@ export function NotificationsControls({
     if (!permissionGranted) {
       toast.error(
         `Please allow push notifications in your ${
-          isIOSWebView ? "iOS" : "browser"
+          isIOSApp ? "iOS" : "browser"
         }settings.
         }`
       );
       throw new Error("Permission denied");
     }
 
-    if (isIOSWebView) {
-      const apnsToken = await callNative<string | "pending">(
-        "registerForNotifications"
-      );
-
-      if (apnsToken === "pending") {
-        toast.error("Please try again later.");
-        throw new Error("APNS token not available");
-      }
-
-      const result = await callNative<IOSActionBinaryResult>("activateCron");
-      if (result === "error") {
-        toast.error("Failed to enable notifications. Try again later.");
-        throw new Error("Failed to activate cron");
-      }
-      await subscribeToNotificationsMutation.mutateAsync({
-        apnsDeviceToken: apnsToken,
+    if (isIOSApp) {
+      let promiseMethods: {
+        resolve: (value: string) => void;
+        reject: (reason?: any) => void;
+      };
+      const registrationSettled = new Promise<string>((resolve, reject) => {
+        promiseMethods = { resolve, reject };
       });
+      const [
+        { remove: removeRegistrationListener },
+        { remove: removeRegistrationErrorListener },
+      ] = await Promise.all([
+        PushNotifications.addListener("registration", (token) => {
+          promiseMethods.resolve(token.value);
+        }),
+        PushNotifications.addListener("registrationError", (err) => {
+          promiseMethods.reject(err.error);
+        }),
+      ]);
+      try {
+        await PushNotifications.register();
+
+        const apnsToken = await registrationSettled;
+
+        await subscribeToNotificationsMutation.mutateAsync({
+          apnsDeviceToken: apnsToken,
+        });
+      } catch (e) {
+        toast.error(
+          "Failed to register for notifications. Please try again later."
+        );
+        throw e;
+      } finally {
+        removeRegistrationListener();
+        removeRegistrationErrorListener();
+      }
     } else {
       const registration = await waitForServiceWorker();
 
@@ -129,7 +144,7 @@ export function NotificationsControls({
               return;
             }
             if (!areNotificationsSupported) {
-              if (isIOS && !isIOSWebView) {
+              if (isIOS && !isIOSApp) {
                 setDrawerOpen(true);
               }
               return;
@@ -145,12 +160,12 @@ export function NotificationsControls({
                 promises.push(
                   unsubscribeFromNotificationsMutation.mutateAsync()
                 );
-                if (isIOSWebView) {
+                if (isIOSApp) {
                   promises.push(
                     new Promise(async (resolve, reject) => {
                       try {
-                        await callNative("unregisterFromNotifications");
-                        await callNative("deactivateCron");
+                        await PushNotifications.unregister();
+
                         resolve(true);
                       } catch (e) {
                         reject(e);

@@ -3,6 +3,7 @@ import {
   USER_SETTINGS_DEFAULT_VALUES,
   USER_THEME_COLOR_COOKIE_PREFIX,
 } from "@/constants/core";
+import { isMobileApp } from "@/constants/ui";
 import { APP_STORE_APP_ID, WEBSITE_TITLE } from "@/constants/website";
 import "@/views/globals.css";
 import { THEME_STORAGE_KEY_NAME } from "@/views/theme-provider/constants";
@@ -25,17 +26,21 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const store = await cookies();
-  const isLoggedIn = store.get(IS_LOGGED_IN_COOKIE_NAME)?.value === "true";
-  let themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
-  if (isLoggedIn) {
-    const cachedThemeColor = store.get(USER_THEME_COLOR_COOKIE_PREFIX);
+  let theme,
+    themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
+  if (!isMobileApp) {
+    const store = await cookies();
+    const isLoggedIn = store.get(IS_LOGGED_IN_COOKIE_NAME)?.value === "true";
 
-    if (cachedThemeColor) {
-      themeColor = cachedThemeColor.value;
+    if (isLoggedIn) {
+      const cachedThemeColor = store.get(USER_THEME_COLOR_COOKIE_PREFIX);
+
+      if (cachedThemeColor) {
+        themeColor = cachedThemeColor.value;
+      }
     }
+    theme = store.get(THEME_STORAGE_KEY_NAME)?.value;
   }
-  const theme = store.get(THEME_STORAGE_KEY_NAME)?.value;
   return (
     <>
       <html lang="en" suppressHydrationWarning className={theme}>

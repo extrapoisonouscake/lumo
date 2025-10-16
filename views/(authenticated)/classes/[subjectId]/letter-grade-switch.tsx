@@ -1,7 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
-import LetterA from "@/public/icons/letter-a.svg";
+import LetterA from "@/public/assets/icons/letter-a.svg";
 import { PercentStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 

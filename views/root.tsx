@@ -18,7 +18,9 @@ import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
 
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
+import { OfflineBanner } from "@/components/layout/offline-banner";
 import { storage } from "@/helpers/cache";
+import { Capacitor } from "@capacitor/core";
 import { useEffect } from "react";
 import AnnouncementsPage from "./(authenticated)/announcements/page";
 import ProfilePage from "./(authenticated)/profile/page";
@@ -33,7 +35,17 @@ import MaintenancePage from "./maintenance/page";
 export default function Root() {
   useEffect(() => {
     //checking if any of the keys are expired
-    Object.keys(localStorage).forEach(storage.get);
+    storage.clearExpired();
+
+    if (
+      process.env.NODE_ENV === "production" &&
+      Capacitor.getPlatform() === "web"
+    ) {
+      const serviceWorkerPath = `/sw/sw.js`;
+      navigator.serviceWorker
+        .register(serviceWorkerPath, { scope: "/" })
+        .then(console.log);
+    }
   }, []);
   return (
     <>
@@ -43,12 +55,13 @@ export default function Root() {
         media="(prefers-color-scheme: light)"
       />
       <div
-        className="flex w-full justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
+        className="flex flex-col w-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
         vaul-drawer-wrapper=""
       >
         <Providers>
           <Toaster />
           <IOSAppAdvertisement />
+          <OfflineBanner />
           <BrowserRouter>
             <ScrollToTop />
             <Routes>

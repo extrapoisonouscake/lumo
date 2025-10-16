@@ -1,0 +1,64 @@
+PODS:
+  - AparajitaCapacitorIosSilentNotifications (2.0.1):
+    - Capacitor
+  - Capacitor (7.4.3):
+    - CapacitorCordova
+  - CapacitorBackgroundRunner (2.2.0):
+    - Capacitor
+  - CapacitorCommunityAppIcon (6.0.0):
+    - Capacitor
+  - CapacitorCordova (7.4.3)
+  - CapacitorIosAutofillSavePassword (5.0.0):
+    - Capacitor
+  - CapacitorNetwork (7.0.2):
+    - Capacitor
+  - CapacitorPushNotifications (7.0.3):
+    - Capacitor
+  - CapacitorStatusBar (7.0.3):
+    - Capacitor
+
+DEPENDENCIES:
+  - "AparajitaCapacitorIosSilentNotifications (from `../../node_modules/@aparajita/capacitor-ios-silent-notifications`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorBackgroundRunner (from `../../node_modules/@capacitor/background-runner`)"
+  - "CapacitorCommunityAppIcon (from `../../node_modules/@capacitor-community/app-icon`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - CapacitorIosAutofillSavePassword (from `../../node_modules/capacitor-ios-autofill-save-password`)
+  - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
+  - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
+  - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+
+EXTERNAL SOURCES:
+  AparajitaCapacitorIosSilentNotifications:
+    :path: "../../node_modules/@aparajita/capacitor-ios-silent-notifications"
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorBackgroundRunner:
+    :path: "../../node_modules/@capacitor/background-runner"
+  CapacitorCommunityAppIcon:
+    :path: "../../node_modules/@capacitor-community/app-icon"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorIosAutofillSavePassword:
+    :path: "../../node_modules/capacitor-ios-autofill-save-password"
+  CapacitorNetwork:
+    :path: "../../node_modules/@capacitor/network"
+  CapacitorPushNotifications:
+    :path: "../../node_modules/@capacitor/push-notifications"
+  CapacitorStatusBar:
+    :path: "../../node_modules/@capacitor/status-bar"
+
+SPEC CHECKSUMS:
+  AparajitaCapacitorIosSilentNotifications: 5b11f0b74bd451ef866488939bf7606c4a414cca
+  Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
+  CapacitorBackgroundRunner: 5e1c8dbb7d2ebb36f6ca2e24c80fb774488ceb06
+  CapacitorCommunityAppIcon: a937eb756114f0f1aa2de894d23b63db02d042e6
+  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorIosAutofillSavePassword: 60b1afd83532bfa85ab1c3f1341ce5ac397e3d30
+  CapacitorNetwork: 695069886b3c5ed514db69aa3d026b8dc3c03a6b
+  CapacitorPushNotifications: bdd621fbd562be34a41f4a7b1750efa000447d5a
+  CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
+
+PODFILE CHECKSUM: 2b9c499067b52b5ded00b66c63a743396953a2b8
+
+COCOAPODS: 1.16.2

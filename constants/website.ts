@@ -1,34 +1,10 @@
-import {
-  BookOpen01SolidRounded,
-  Calendar02SolidRounded,
-  Home03SolidRounded,
-  SchoolReportCardSolidRounded,
-  Settings02SolidRounded,
-} from "@hugeicons-pro/core-solid-rounded";
-import {
-  BookOpen01StrokeRounded,
-  Calendar02StrokeRounded,
-  Home03StrokeRounded,
-  SchoolReportCardStrokeRounded,
-  Settings02StrokeRounded,
-} from "@hugeicons-pro/core-stroke-rounded";
-import { Params } from "next/dist/server/request/params";
-
 export const WEBSITE_TITLE = "Lumo";
 
-export interface BreadcrumbDataItem {
-  name: string;
-  href?: string;
-}
 export interface WebsitePage {
-  breadcrumb: (BreadcrumbDataItem | null)[];
-  icon?: [any, any];
-}
-interface StaticWebsitePage extends WebsitePage {
+  name: string;
   isHiddenInSidebar?: boolean;
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
-  items?: { title: string; href: string }[];
 }
 export const unauthenticatedPathnames = ["/login", "/register"];
 export const publicPathnames = [
@@ -36,68 +12,40 @@ export const publicPathnames = [
   "/legal/privacy-policy",
   "/support",
 ];
-export const websitePagesWithStaticPaths: Record<string, StaticWebsitePage> = {
+export const websitePagesWithStaticPaths: Record<string, WebsitePage> = {
   "/": {
-    breadcrumb: [{ name: "Home" }],
-    icon: [Home03StrokeRounded, Home03SolidRounded],
+    name: "Home",
+
     showOnMobile: true,
   },
   "/classes": {
-    breadcrumb: [{ name: "Classes" }],
-    icon: [BookOpen01StrokeRounded, BookOpen01SolidRounded],
+    name: "Classes",
+
     showOnMobile: true,
   },
   "/schedule": {
-    breadcrumb: [{ name: "Schedule" }],
-    icon: [Calendar02StrokeRounded, Calendar02SolidRounded],
+    name: "Schedule",
+
     showOnMobile: true,
   },
   "/transcript": {
-    breadcrumb: [{ name: "Transcript" }],
-    icon: [SchoolReportCardStrokeRounded, SchoolReportCardSolidRounded],
+    name: "Transcript",
+
     showOnMobile: true,
   },
 
   "/settings": {
-    breadcrumb: [{ name: "Settings" }],
-    icon: [Settings02StrokeRounded, Settings02SolidRounded],
+    name: "Settings",
   },
-  "/profile": { breadcrumb: [{ name: "Profile" }], isHiddenInSidebar: true },
-};
-export const getWebsitePageData = (pathname: string, params: Params) => {
-  const exactMatch = websitePagesWithStaticPaths[pathname]!;
-  if (exactMatch) return exactMatch;
-  const segments = pathname.split("/").slice(1);
-  let data: WebsitePage | null = null;
-  if (segments[0] === "classes") {
-    let lastPathname = "/classes";
-    data = {
-      breadcrumb: [{ name: "Classes", href: lastPathname }],
-      icon: websitePagesWithStaticPaths["/classes"]!.icon,
-    };
-    const assignmentId = segments[3];
-    if (segments[1]) {
-      const subjectName = segments[2]
-        ? decodeURIComponent(segments[2])
-        : undefined;
-      lastPathname += `/${segments[1]}${subjectName ? `/${subjectName}` : ""}`;
-
-      data.breadcrumb.push({
-        name: subjectName ? subjectName.replaceAll("_", " ") : `Loading...`,
-        href: lastPathname,
-      });
-    }
-    if (assignmentId) {
-      //not showing the assignment page but allowing the user to navigate to the subject page
-      data.breadcrumb.push(null);
-    }
-    return data;
-  }
-  if (segments[0] === "schedule") {
-    return websitePagesWithStaticPaths["/schedule"]!;
-  }
-  return null;
+  "/profile": { name: "Profile", isHiddenInSidebar: true },
 };
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
 export const VISIBLE_TIME_FORMAT = "h:mm A";
 export const APP_STORE_APP_ID = "6752838080";
+const DEFAULT_DOMAIN = "lumobc.ca";
+const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
+  process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
+export const WEBSITE_ROOT =
+  process.env.NODE_ENV === "production"
+    ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL || DEFAULT_DOMAIN}`
+    : "http://localhost:3000";

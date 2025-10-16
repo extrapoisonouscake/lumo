@@ -11,7 +11,7 @@ import {
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useCachedQuery<
   TQueryFnData = unknown,
@@ -26,20 +26,37 @@ export function useCachedQuery<
   } = {}
 ): UseQueryResult<TData, TError> {
   const query = useQuery(options);
+  const [cachedResponse, setCachedResponse] = useState<TData | undefined>(
+    undefined
+  );
+
   let cacheKey = `${options.queryKey[0] as string}-v1`;
   if (cacheDetails.params) {
     cacheKey += `-${JSON.stringify(cacheDetails.params)}`;
   }
+
+  // Load cached response on mount
+  useEffect(() => {
+    getCachedClientResponse<TData>(cacheKey).then((response) => {
+      if (response) {
+        setCachedResponse(response);
+      }
+    });
+  }, [cacheKey]);
+
+  // Save new data to cache
   useEffect(() => {
     if (query.data) {
       saveClientResponseToCache(cacheKey, query.data, cacheDetails.ttlKey);
     }
-  }, [query.data]);
-  const cachedResponse = getCachedClientResponse<TData>(cacheKey);
-  if (query.isPending && cachedResponse)
+  }, [query.data, cacheKey, cacheDetails.ttlKey]);
+
+  if (query.isPending && cachedResponse) {
     return getReactQueryMockSuccessResponse(
       query,
       cachedResponse
     ) as UseQueryResult<TData, TError>;
+  }
+
   return query;
 }

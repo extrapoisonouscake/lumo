@@ -32,5 +32,5 @@
     "types/custom.d.ts",
     "public/notifications-sw.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "app/api"]
 }

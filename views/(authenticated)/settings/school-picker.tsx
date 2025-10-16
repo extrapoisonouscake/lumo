@@ -170,7 +170,7 @@ function SchoolName({
           height={20}
           className="max-h-[20px]"
           alt={`${name} logo`}
-          src={`/schools_logos/${logo}.png`}
+          src={`/assets/schools_logos/${logo}.png`}
         />
       )}
     </div>

@@ -1,23 +1,157 @@
 import { QueryObserverResult } from "@tanstack/react-query";
+
 const TTL_MAP = {
   schedule: 1000 * 60 * 60 * 24,
 } as const;
 
 export type ClientCacheTTLKey = keyof typeof TTL_MAP;
-export function getCachedClientResponse<ResponseType>(
-  key: string,
-  defaultValue?: never
-): ResponseType | undefined;
-export function getCachedClientResponse<ResponseType>(
-  key: string,
-  defaultValue: any
-): ResponseType;
 
-export function getCachedClientResponse<ResponseType>(
+type CacheItem<T> = {
+  value: T;
+  expiresAt?: number;
+};
+
+// IndexedDB storage implementation
+class IndexedDBStorage {
+  private dbName = "app-cache";
+  private storeName = "cache-store";
+  private dbVersion = 1;
+  private db: IDBDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
+
+  async init(): Promise<void> {
+    if (this.db) return;
+    if (this.initPromise) return this.initPromise;
+
+    this.initPromise = new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.dbName, this.dbVersion);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        this.db = request.result;
+        resolve();
+      };
+
+      request.onupgradeneeded = (event) => {
+        const db = (event.target as IDBOpenDBRequest).result;
+        if (!db.objectStoreNames.contains(this.storeName)) {
+          db.createObjectStore(this.storeName);
+        }
+      };
+    });
+
+    return this.initPromise;
+  }
+
+  async get<T>(key: string): Promise<T | undefined> {
+    await this.init();
+    if (!this.db) return undefined;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], "readonly");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.get(key);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => {
+        const item = request.result;
+        if (!item) {
+          resolve(undefined);
+          return;
+        }
+
+        try {
+          const { value, expiresAt } = item as CacheItem<T>;
+
+          if (expiresAt && Date.now() > expiresAt) {
+            this.delete(key);
+            resolve(undefined);
+            return;
+          }
+
+          resolve(value);
+        } catch (e) {
+          this.delete(key);
+          resolve(undefined);
+        }
+      };
+    });
+  }
+
+  async set(key: string, value: any, ttl?: number): Promise<void> {
+    await this.init();
+    if (!this.db) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], "readwrite");
+      const store = transaction.objectStore(this.storeName);
+      const item: CacheItem<any> = { value };
+      if (ttl) {
+        item.expiresAt = Date.now() + ttl;
+      }
+      const request = store.put(item, key);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.init();
+    if (!this.db) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], "readwrite");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.delete(key);
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
+
+  async getAllKeys(): Promise<string[]> {
+    await this.init();
+    if (!this.db) return [];
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], "readonly");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.getAllKeys();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result as string[]);
+    });
+  }
+
+  async clearExpired(): Promise<void> {
+    const keys = await this.getAllKeys();
+    await Promise.all(keys.map((key) => this.get(key)));
+  }
+
+  async clear(): Promise<void> {
+    await this.init();
+    if (!this.db) return;
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction([this.storeName], "readwrite");
+      const store = transaction.objectStore(this.storeName);
+      const request = store.clear();
+
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  }
+}
+
+export const storage = new IndexedDBStorage();
+
+// Async cache functions
+export async function getCachedClientResponse<ResponseType>(
   key: string,
-  defaultValue?: any
-) {
-  const value = storage.get<ResponseType>(key);
+  defaultValue?: ResponseType
+): Promise<ResponseType | undefined> {
+  const value = await storage.get<ResponseType>(key);
   if (!value) return defaultValue;
   const response = {
     ...defaultValue,
@@ -25,13 +159,15 @@ export function getCachedClientResponse<ResponseType>(
   } as ResponseType;
   return response as ResponseType;
 }
-export function saveClientResponseToCache<ResponseType>(
+
+export async function saveClientResponseToCache<ResponseType>(
   key: string,
   value: ResponseType,
   ttlKey?: string
-) {
-  storage.set(key, value, TTL_MAP[ttlKey as ClientCacheTTLKey]);
+): Promise<void> {
+  await storage.set(key, value, TTL_MAP[ttlKey as ClientCacheTTLKey]);
 }
+
 export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
   query: QueryObserverResult<ResponseType, ErrorShape>,
   data: ResponseType
@@ -44,29 +180,3 @@ export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
     data: data,
   };
 }
-export const storage = {
-  get: function <T>(key: string) {
-    const item = localStorage.getItem(key);
-    if (!item) return undefined;
-    try {
-      const { value, expiresAt } = JSON.parse(item) as {
-        value: T;
-        expiresAt: number;
-      };
-      if (expiresAt && Date.now() > expiresAt) {
-        storage.delete(key);
-        return undefined;
-      }
-      return value;
-    } catch (e) {
-      storage.delete(key);
-      return undefined;
-    }
-  },
-  set: (key: string, value: any, ttl: number) =>
-    localStorage.setItem(
-      key,
-      JSON.stringify({ value, expiresAt: Date.now() + ttl })
-    ),
-  delete: (key: string) => localStorage.removeItem(key),
-};

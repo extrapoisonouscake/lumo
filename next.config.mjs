@@ -1,33 +1,77 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const isMobileApp = process.env.NEXT_PUBLIC_IS_MOBILE === "true";
 /** @type {import('next').NextConfig} */
-export default withSentryConfig(
-  {
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-
-    reactStrictMode: false,
-
-    webpack(config) {
-      // Configure SVG imports as React components
-      config.module.rules.push({
-        test: /\.svg$/,
-        use: ["@svgr/webpack"],
-      });
-
-      return config;
-    },
-
-    async rewrites() {
-      return [
-        {
-          source: "/announcements/direct/:id",
-          destination: `https://${process.env.UPLOADTHING_APP_ID}.ufs.sh/f/:id`,
-        },
-      ];
-    },
+let config = {
+  eslint: {
+    ignoreDuringBuilds: true,
   },
-  {
+
+  reactStrictMode: false,
+  outputFileTracingRoot: __dirname,
+  webpack(config) {
+    if (isMobileApp) {
+      config.module.rules.push({
+        test: /app\/(api|swagger)\/.*/,
+        loader: "ignore-loader",
+      });
+    }
+    // Configure SVG imports as React components
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ["@svgr/webpack"],
+    });
+
+    return config;
+  },
+};
+if (isMobileApp) {
+  config.output = "export";
+} else {
+  config.rewrites = async () => {
+    return [
+      {
+        source: "/announcements/direct/:id",
+        destination: `https://${process.env.UPLOADTHING_APP_ID}.ufs.sh/f/:id`,
+      },
+      {
+        source: "/:path((?!api|_next|swagger|favicon.ico|.*\\.).*)",
+        destination: "/",
+      },
+    ];
+  };
+  config.headers = async () => {
+    const headers = [
+      {
+        source: "/sw/:path*",
+        headers: [{ key: "Service-Worker-Allowed", value: "/" }],
+      },
+    ];
+    if (process.env.NODE_ENV === "development") {
+      headers.push({
+        source: "/api/:path*", // Apply to all API routes
+        headers: [
+          { key: "Access-Control-Allow-Credentials", value: "true" },
+          { key: "Access-Control-Allow-Origin", value: "*" }, // Allow all origins (use with caution)
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value:
+              "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+          },
+        ],
+      });
+    }
+    return headers;
+  };
+  config = withSentryConfig(config, {
     // For all available options, see:
     // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
@@ -58,5 +102,6 @@ export default withSentryConfig(
     // https://docs.sentry.io/product/crons/
     // https://vercel.com/docs/cron-jobs
     automaticVercelMonitors: true,
-  }
-);
+  });
+}
+export default config;
