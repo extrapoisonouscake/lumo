@@ -7,7 +7,24 @@ import { formatUserFullName, UserAvatar } from "../misc/user";
 import { QueryWrapper } from "../ui/query-wrapper";
 import { SidebarMenuButton } from "../ui/sidebar";
 import { Skeleton } from "../ui/skeleton";
-
+function MinifiedErrorCard({
+  emoji,
+  message,
+}: {
+  emoji: string;
+  message: string;
+}) {
+  return (
+    <div className="flex gap-2 items-center">
+      <AppleEmoji
+        value={emoji}
+        textClassName="text-xl leading-none"
+        imageClassName="size-5"
+      />
+      <p className="text-sm text-center">{message}</p>
+    </div>
+  );
+}
 export function UserHeader({ className }: { className?: string }) {
   const query = useStudentDetails();
 
@@ -17,15 +34,9 @@ export function UserHeader({ className }: { className?: string }) {
         <QueryWrapper
           query={query}
           onError={
-            <div className="flex gap-2 items-center">
-              <AppleEmoji
-                value="‼️"
-                textClassName="text-xl leading-none"
-                imageClassName="size-5"
-              />
-              <p className="text-sm text-center">Something went wrong.</p>
-            </div>
+            <MinifiedErrorCard emoji="‼️" message="Something went wrong." />
           }
+          onPaused={<MinifiedErrorCard emoji="🔌" message="You are offline." />}
           skeleton={<UserHeaderSkeleton className={className} />}
         >
           {(data) => {

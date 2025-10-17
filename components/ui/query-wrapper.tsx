@@ -11,6 +11,7 @@ interface QueryWrapperProps<TData, TError> {
   children: (data: TData) => ReactNode;
   skeleton?: ReactNode;
   onError?: ReactNode;
+  onPaused?: ReactNode;
 }
 const OfflineError = () => {
   return <ErrorCard message="You are offline." emoji="🔌" />;
@@ -20,6 +21,7 @@ export function QueryWrapper<TData, TError>({
   children,
   skeleton,
   onError,
+  onPaused,
 }: QueryWrapperProps<TData, TError>) {
   const { isOffline } = useNetworkStatus();
   if (query.isFetching) {
@@ -27,17 +29,18 @@ export function QueryWrapper<TData, TError>({
   }
 
   if (query.isError) {
+    if (onError) return onError;
     if (isOffline) {
       return <OfflineError />;
     }
-    return <>{onError || <ErrorCard />}</>;
+    return <ErrorCard />;
   }
 
   if (query.data) {
     return <>{children(query.data)}</>;
   }
   if (query.isPaused) {
-    return <OfflineError />;
+    return onPaused ?? <OfflineError />;
   }
   return null;
 }
