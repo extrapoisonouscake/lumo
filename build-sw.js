@@ -48,6 +48,7 @@ const { count, size, warnings, manifestEntries } = await generateSW({
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   skipWaiting: true,
   clientsClaim: true,
+  cleanupOutdatedCaches: true,
   sourcemap: false,
   navigateFallback: "/",
   navigateFallbackDenylist: [/^\/api\//, /^\/swagger\//, /^\/_next\//],

@@ -33,17 +33,7 @@ import { Spinner } from "@/components/ui/button";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
 const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
-const deleteWorkboxIndexedDB = () => {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.deleteDatabase("workbox-expiration");
-    request.onerror = (event) => {
-      reject(event);
-    };
-    request.onsuccess = () => {
-      resolve(void 0);
-    };
-  });
-};
+
 export default function Root() {
   useEffect(() => {
     //checking if any of the keys are expired
@@ -67,24 +57,13 @@ export default function Root() {
 
             if (newWorker) {
               newWorker.addEventListener("statechange", async () => {
-                // Only reload if there's an existing active service worker
-                // This prevents reload on first install
+                // Wait for the new worker to be activated instead of just installed
+                // This ensures precaching is complete before we reload
                 if (
-                  newWorker.state === "installed" &&
+                  newWorker.state === "activated" &&
                   navigator.serviceWorker.controller
                 ) {
-                  await Promise.all([
-                    caches
-                      .keys()
-                      .then((cacheNames) =>
-                        Promise.all(
-                          cacheNames.map((cacheName) =>
-                            caches.delete(cacheName)
-                          )
-                        )
-                      ),
-                    deleteWorkboxIndexedDB(),
-                  ]);
+                  console.log("New service worker activated, reloading...");
                   window.location.reload();
                 }
               });
