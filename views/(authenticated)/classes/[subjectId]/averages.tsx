@@ -274,13 +274,9 @@ function CategoryCard({
     <Card className="p-4 gap-3">
       {/* Category Header */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-2 flex-1">
-          <HugeiconsIcon
-            icon={Award04StrokeRounded}
-            className="size-4 text-muted-foreground shrink-0"
-          />
+        
           <span className="font-medium text-sm">{category.name}</span>
-        </div>
+        
         {category.average && (
           <div className="flex flex-col items-end">
             <span className="text-lg font-bold">{category.average.mark}</span>
