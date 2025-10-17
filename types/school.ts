@@ -49,6 +49,7 @@ export interface SubjectSummary {
       id: string;
       name: string;
       average: SubjectGrade | null;
+      derivedWeight: number | null;
       terms: {
         name: string;
         weight: number | null;

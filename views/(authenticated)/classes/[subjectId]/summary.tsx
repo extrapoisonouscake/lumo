@@ -52,8 +52,16 @@ const termToLabel: Record<SubjectTerm, string> = {
 export function SubjectSummary(
   summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
 ) {
-  const { id, term, name, academics, year, shouldShowLetterGrade, attendance } =
-    summary;
+  const {
+    id,
+    term,
+    name,
+    academics,
+    year,
+    shouldShowLetterGrade,
+    attendance,
+    currentTermIndex,
+  } = summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted

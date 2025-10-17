@@ -99,7 +99,7 @@ function SummaryBadges({
       />
       <SummaryBadge
         value={tardyCount}
-        label="Tardy"
+        label="Late"
         icon={<HugeiconsIcon icon={Clock05StrokeRounded} className="size-4" />}
         className="bg-yellow-400/20 dark:bg-yellow-400/10 text-yellow-600"
       />

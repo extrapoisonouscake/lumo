@@ -153,7 +153,7 @@ const convertAcademicCategory = (
   const termsEntries = Object.entries(item).filter(([key]) =>
     key.startsWith("Q")
   );
-  return {
+  const result = {
     id: item.categoryOid,
     name: prettifyEducationalName(item.category),
     average: convertStringToGradeObject(item.overall),
@@ -170,6 +170,13 @@ const convertAcademicCategory = (
       };
     }),
   };
+  const derivedWeight =
+    new Set(
+      result.terms.map((term) => term.weight).filter((term) => term !== null)
+    ).size === 1
+      ? result.terms[0]!.weight
+      : null;
+  return { ...result, derivedWeight };
 };
 const GRADES_SUMMARY_ITEM_STATIC_KEYS = [
   "category",

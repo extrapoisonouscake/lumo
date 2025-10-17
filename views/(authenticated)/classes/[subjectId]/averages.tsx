@@ -19,14 +19,14 @@ import {
 import { CircularProgress } from "@/components/misc/circular-progress";
 import { subjectTermToGradeLabelsMap } from "@/constants/myed";
 import { cn } from "@/helpers/cn";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import {
   Award01StrokeRounded,
-  Award04StrokeRounded,
   StarAward01StrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useMemo,ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { SubjectSummaryButton } from "./subject-summary-button";
 
 export function SubjectTermAverages({
@@ -61,7 +61,12 @@ export function SubjectTermAverages({
     </>
   );
 }
-
+interface AveragesItem {
+  term: string;
+  grade: SubjectGrade | null;
+  isPosted: boolean;
+  isCurrent?: boolean;
+}
 function Content({
   id,
   term,
@@ -75,7 +80,7 @@ function Content({
   const mergedGrades = useMemo(() => {
     const terms: Record<
       string,
-      { grade: SubjectGrade | null; isPosted: boolean }
+      Omit<AveragesItem, "term">
     > = Object.fromEntries(
       subjectTermToGradeLabelsMap[term].map((term) => [
         term,
@@ -85,10 +90,7 @@ function Content({
     const { running, posted } = academics;
     const allKeys = new Set([...Object.keys(posted), ...Object.keys(running)]);
 
-    const semesters: Record<
-      string,
-      { grade: SubjectGrade | null; isPosted: boolean }
-    > = {
+    const semesters: Record<string, Omit<AveragesItem, "term">> = {
       S1: { grade: null, isPosted: false },
       S2: { grade: null, isPosted: false },
     };
@@ -98,7 +100,7 @@ function Content({
       const runningGrade = running[key];
 
       const grade = postedGrade ?? runningGrade;
-      const isPosted = typeof postedGrade === "object";
+      const isPosted = typeof postedGrade === "object" && postedGrade !== null;
       if (grade && key !== "overall") {
         const item = { grade, isPosted };
         if (key.startsWith("Q")) {
@@ -119,17 +121,15 @@ function Content({
   }, [academics]);
 
   // Filter categories to show only non-null entries
-  const filteredCategories = useMemo(() => {
+  const sortedCategories = useMemo(() => {
     return academics.categories
       .map((category) => ({
         ...category,
         terms: category.terms.filter((term) => term.average !== null),
       }))
-      .filter(
-        (category) => category.average !== null || category.terms.length > 0
-      );
+      .sort((a, b) => (a.average === null ? 1 : b.average === null ? -1 : 0));
   }, [academics.categories]);
-
+  const { shouldHighlightAveragesWithColour } = useUserSettings();
   return (
     <div className="flex flex-col gap-5 pb-6">
       <div className="flex flex-col gap-3">
@@ -153,18 +153,24 @@ function Content({
       </div>
 
       {/* Categories Performance Section */}
-      {filteredCategories.length > 0 && (
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2">
+      {sortedCategories.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1.5">
             <HugeiconsIcon
               icon={Award01StrokeRounded}
-              className="size-4 text-muted-foreground"
+              className="size-4 text-brand"
             />
-            <h3 className="font-semibold text-sm">Performance by Category</h3>
+            <h3 className="font-semibold text-sm">Categories</h3>
           </div>
           <div className="flex flex-col gap-3">
-            {filteredCategories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
+            {sortedCategories.map((category) => (
+              <CategoryCard
+                key={category.id}
+                category={category}
+                shouldHighlightAveragesWithColour={
+                  shouldHighlightAveragesWithColour
+                }
+              />
             ))}
           </div>
         </div>
@@ -173,21 +179,17 @@ function Content({
   );
 }
 
-function TermGradeCard({
-  term,
-  grade,
-  isPosted,
-}: {
-  term: string;
-  grade: SubjectGrade | null;
-  isPosted: boolean;
-}) {
+function TermGradeCard({ term, grade, isPosted, isCurrent }: AveragesItem) {
   const gradeInfo = grade ? getGradeInfo(grade) : null;
 
   return (
-    <Card className="p-3 flex flex-col gap-1.5 justify-between">
-      <div className="flex items-center justify-between">
-        <span className="font-medium text-sm">{term}</span>
+    <Card
+      className={cn("p-4 flex flex-col gap-1.5 justify-between", {
+        "border-brand": isCurrent,
+      })}
+    >
+      <div className="flex items-start justify-between">
+        <span className="font-medium text-sm leading-none">{term}</span>
         {grade && (
           <CircularProgress
             values={[
@@ -203,17 +205,21 @@ function TermGradeCard({
       </div>
       <div className="flex justify-between gap-2 w-full items-end">
         <div className="flex items-baseline gap-1 text-sm text-muted-foreground">
-          <span className={cn({ "text-2xl font-bold text-primary": grade })}>
+          <span
+            className={cn({
+              "text-2xl font-bold text-primary leading-none": grade,
+            })}
+          >
             {grade?.mark ?? "–"}
           </span>
 
-          <span className="text-sm">/ 100</span>
+          <span className="text-sm leading-none">/ 100</span>
         </div>
 
         {isPosted && (
           <HugeiconsIcon
             icon={Tick02StrokeRounded}
-            className="size-5 text-green-500 self-end"
+            className="size-5 text-brand self-end"
           />
         )}
       </div>
@@ -221,33 +227,29 @@ function TermGradeCard({
   );
 }
 
-function SemesterGradeCard({
-  term,
-  grade,
-  isPosted,
-}: {
-  term: string;
-  grade: SubjectGrade | null;
-  isPosted: boolean;
-}) {
+function SemesterGradeCard({ term, grade, isPosted }: AveragesItem) {
   const gradeInfo = grade ? getGradeInfo(grade) : null;
 
   return (
-    <Card className="p-2 flex-row justify-between items-center">
+    <Card className="px-4 py-2 flex-row justify-between items-center">
       <div className="flex items-center gap-1.5">
-        <span className="font-medium text-sm">{term}</span>{" "}
+        <span className="font-medium text-sm leading-none">{term}</span>
         {isPosted && (
           <HugeiconsIcon
             icon={Tick02StrokeRounded}
-            className="size-4 text-green-500"
+            className="size-4 text-brand"
           />
         )}
       </div>
       <div className="flex gap-1.5 items-center">
         {grade && (
           <div className="flex items-baseline gap-1">
-            <span className="text-sm font-semibold">{grade.mark}</span>
-            <span className="text-xs text-muted-foreground">/ 100</span>
+            <span className="text-sm font-semibold leading-none">
+              {grade.mark}
+            </span>
+            <span className="text-xs text-muted-foreground leading-none">
+              / 100
+            </span>
           </div>
         )}
         <CircularProgress
@@ -267,65 +269,85 @@ function SemesterGradeCard({
 
 function CategoryCard({
   category,
+  shouldHighlightAveragesWithColour,
 }: {
   category: SubjectSummary["academics"]["categories"][number];
+  shouldHighlightAveragesWithColour: boolean;
 }) {
-const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolean)).size === 1
   return (
     <Card>
       {/* Category Header */}
       <div className="p-4 flex items-start justify-between gap-2">
-        
-          <div className="flex items-center gap-1.5"><span className="font-medium text-sm">{category.name}</span>
-      {isSameWeight&&<WeightBadge>{category.terms[0]!.weight}%</WeightBadge>}
-  </div>
-        {category.average && (
-          <div className="flex flex-col gap-0.5 items-end">
-            <span className="text-lg leading-none font-bold">{category.average.mark}</span>
-            <span className="text-xs text-muted-foreground">Overall</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-sm">{category.name}</span>
+          {category.derivedWeight !== null && (
+            <WeightBadge>{category.derivedWeight}%</WeightBadge>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1 items-end">
+          <span
+            className={cn("text-lg leading-none font-bold", {
+              "text-base": !category.average,
+            })}
+          >
+            {category.average?.mark ?? "–"}
+          </span>
+          <span className="leading-none text-xs text-muted-foreground">
+            Overall
+          </span>
+        </div>
       </div>
 
       {/* Category Terms */}
 
       {category.terms.length > 0 && (
         <div className="flex flex-col">
-          {category.terms.map((term, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between border-t px-4 py-2"
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">
-                  {term.name}
-                </span>
-                {term.weight !== null&&!isSameWeight && (
-                  <WeightBadge>
-                    {term.weight}%
-                  </WeightBadge>
+          {category.terms.map((term, index) => {
+            const gradeInfo = term.average ? getGradeInfo(term.average) : null;
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between border-t px-4 py-2"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {term.name}
+                  </span>
+                  {term.weight !== null &&
+                    category.derivedWeight !== term.weight && (
+                      <WeightBadge>{term.weight}%</WeightBadge>
+                    )}
+                </div>
+                {term.average && (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-sm font-semibold">
+                      {term.average.mark}
+                    </span>
+                    {gradeInfo!.letter && (
+                      <span
+                        className={cn("text-xs text-muted-foreground", {
+                          [`text-${gradeInfo!.color}`]:
+                            shouldHighlightAveragesWithColour,
+                        })}
+                      >
+                        ({gradeInfo!.letter})
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              {term.average && (
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-semibold">
-                    {term.average.mark}
-                  </span>
-                  {term.average.letter && (
-                    <span className="text-xs text-muted-foreground">
-                      ({term.average.letter})
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </Card>
   );
 }
-function WeightBadge({children}:{children:ReactNode}){
-return    <Badge variant="outline" className="text-xs h-5 px-1.5">
-{children}</Badge>
+function WeightBadge({ children }: { children: ReactNode }) {
+  return (
+    <Badge variant="outline" className="text-xs h-5 px-1.5">
+      {children}
+    </Badge>
+  );
 }
