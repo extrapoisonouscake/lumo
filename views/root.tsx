@@ -32,6 +32,17 @@ import LoginPage from "./(unauthenticated)/login/page";
 import RegisterPage from "./(unauthenticated)/register/page";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
+const deleteWorkboxIndexedDB = () => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase("workbox-expiration");
+    request.onerror = (event) => {
+      reject(event);
+    };
+    request.onsuccess = () => {
+      resolve(void 0);
+    };
+  });
+};
 export default function Root() {
   useEffect(() => {
     //checking if any of the keys are expired
@@ -43,8 +54,10 @@ export default function Root() {
       navigator.serviceWorker
         .register(serviceWorkerPath, { scope: "/" })
         .then((registration) => {
+          console.log("Service worker registered");
           // Check for updates periodically
           registration.addEventListener("updatefound", () => {
+            console.log("Update found");
             const newWorker = registration.installing;
 
             if (newWorker) {
@@ -55,13 +68,18 @@ export default function Root() {
                   newWorker.state === "installed" &&
                   navigator.serviceWorker.controller
                 ) {
-                  await caches
-                    .keys()
-                    .then((cacheNames) =>
-                      Promise.all(
-                        cacheNames.map((cacheName) => caches.delete(cacheName))
-                      )
-                    );
+                  await Promise.all([
+                    caches
+                      .keys()
+                      .then((cacheNames) =>
+                        Promise.all(
+                          cacheNames.map((cacheName) =>
+                            caches.delete(cacheName)
+                          )
+                        )
+                      ),
+                    deleteWorkboxIndexedDB(),
+                  ]);
                   window.location.reload();
                 }
               });

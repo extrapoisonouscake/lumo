@@ -30,7 +30,7 @@ export function useCachedQuery<
     undefined
   );
 
-  let cacheKey = `${options.queryKey[0] as string}-v1`;
+  let cacheKey = `${options.queryKey[0] as string}`;
   if (cacheDetails.params) {
     cacheKey += `-${JSON.stringify(cacheDetails.params)}`;
   }

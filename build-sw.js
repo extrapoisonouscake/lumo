@@ -16,6 +16,27 @@ const SW_DIR = path.resolve(__dirname, "public/sw");
 fs.rmSync(SW_DIR, { recursive: true, force: true });
 const SW_PATH = path.join(SW_DIR, "sw.js");
 
+// Collect files from public/assets for precaching
+function getAssetsFiles(dir, baseDir = dir, files = []) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      getAssetsFiles(fullPath, baseDir, files);
+    } else {
+      const relativePath = path.relative(baseDir, fullPath);
+      files.push(relativePath);
+    }
+  }
+  return files;
+}
+
+const ASSETS_DIR = path.resolve(__dirname, "public/assets");
+const assetFiles = getAssetsFiles(ASSETS_DIR).map((file) => ({
+  url: `/assets/${file.replace(/\\/g, "/")}`,
+  revision: fs.statSync(path.join(ASSETS_DIR, file)).mtime.getTime().toString(),
+}));
+
 const { count, size, warnings, manifestEntries } = await generateSW({
   swDest: SW_PATH,
   // Precache Next.js static files
@@ -30,30 +51,26 @@ const { count, size, warnings, manifestEntries } = await generateSW({
   sourcemap: false,
   navigateFallback: "/",
   navigateFallbackDenylist: [/^\/api\//, /^\/swagger\//, /^\/_next\//],
+  // Precache the root URL and public/assets files so they're always available
+  additionalManifestEntries: [
+    { url: "/", revision: Date.now().toString() },
+    ...assetFiles,
+  ],
   // Convert .next/static paths to absolute _next/static URLs
+  // But don't transform asset files that already have absolute paths
   manifestTransforms: [
     (manifestEntries) => {
       const manifest = manifestEntries.map((entry) => {
-        entry.url = `/_next/static/${entry.url}`;
+        // Only transform relative paths (from glob), not absolute paths (from additionalManifestEntries)
+        if (!entry.url.startsWith("/")) {
+          entry.url = `/_next/static/${entry.url}`;
+        }
         return entry;
       });
       return { manifest };
     },
   ],
   runtimeCaching: [
-    {
-      // Cache HTML pages (navigation requests) for SPA offline support
-      urlPattern: ({ request }) => request.mode === "navigate",
-      handler: "NetworkFirst",
-      options: {
-        cacheName: "pages",
-        networkTimeoutSeconds: 3,
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
-        },
-      },
-    },
     {
       // Cache asset files (images, fonts, etc.)
       urlPattern: ({ url }) => url.pathname.startsWith("/assets/"),
@@ -89,33 +106,10 @@ if (warnings.length > 0) {
   );
 }
 console.log(
-  `Generated a service worker, which will precache ${count} files, totaling ${size} bytes.`
+  `Generated a service worker, which will precache ${count} files (including ${assetFiles.length} asset files), totaling ${size} bytes.`
 );
 
 let serviceWorkerContent = fs.readFileSync(SW_PATH, "utf8");
 serviceWorkerContent += `\n// Timestamp: ${Date.now()}`;
 
 fs.writeFileSync(SW_PATH, serviceWorkerContent);
-
-// Inject SW into build output directories
-const BUILD_DIRS = [
-  path.resolve(__dirname, ".next"),
-  path.resolve(__dirname, "out"),
-];
-
-for (const buildDir of BUILD_DIRS) {
-  if (fs.existsSync(buildDir)) {
-    const buildSwDir = path.join(buildDir, "sw");
-    fs.mkdirSync(buildSwDir, { recursive: true });
-
-    // Copy all files from public/sw to build/sw
-    const swFiles = fs.readdirSync(SW_DIR);
-    for (const file of swFiles) {
-      const srcPath = path.join(SW_DIR, file);
-      const destPath = path.join(buildSwDir, file);
-      fs.copyFileSync(srcPath, destPath);
-    }
-
-    console.log(`Copied service worker to ${buildDir}/sw`);
-  }
-}

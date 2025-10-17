@@ -9,7 +9,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { websitePagesWithStaticPaths } from "@/constants/website";
 import { cn } from "@/helpers/cn";
@@ -97,7 +96,7 @@ function PagesMenu() {
       !page.isHiddenInSidebar &&
       (isMobile ? page.showOnMobile : (page.showOnDesktop ?? true))
   );
-  const { toggleSidebar, open } = useSidebar();
+
   return (
     <>
       <SidebarMenu

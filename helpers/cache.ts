@@ -174,9 +174,9 @@ export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
 ) {
   return {
     ...query,
-    status: "success",
-    isPending: false,
-    isLoading: false,
-    data: data,
+    isFetching: false,
+    isError: false,
+    data,
+    isPaused: false,
   };
 }
