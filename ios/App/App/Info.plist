@@ -132,9 +132,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
-	<!-- <key>WKAppBoundDomains</key>
+	<key>WKAppBoundDomains</key>
 	<array>
 		<string>lumobc.ca</string>
-	</array> -->
+	</array>
 </dict>
 </plist>

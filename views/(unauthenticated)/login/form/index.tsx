@@ -73,7 +73,7 @@ export function LoginForm({
       const settings = await trpcClient.core.settings.getSettings.query();
 
       saveClientResponseToCache(
-        trpc.core.settings.getSettings.queryKey()[0].join("."),
+        trpc.core.settings.getSettings.queryKey()[0].join(","),
         settings
       );
       setThemeColorCSSVariable(settings.themeColor);

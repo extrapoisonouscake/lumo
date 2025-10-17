@@ -1,5 +1,5 @@
 import type { CapacitorConfig } from "@capacitor/cli";
-import { WEBSITE_ROOT } from "./constants/website";
+import { DEFAULT_DOMAIN } from "./constants/website";
 
 const config: CapacitorConfig = {
   appId: "com.lumobc.lumo",
@@ -24,13 +24,13 @@ const config: CapacitorConfig = {
       enabled: true,
     },
   },
-  server:
-    process.env.NODE_ENV === "development"
-      ? {
-          hostname: WEBSITE_ROOT,
-          androidScheme: "http",
-        }
-      : undefined,
+  ios: {
+    limitsNavigationsToAppBoundDomains: true,
+  },
+  server: {
+    hostname: DEFAULT_DOMAIN,
+    androidScheme: "https",
+  },
 };
 
 export default config;

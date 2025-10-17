@@ -42,7 +42,7 @@ export const websitePagesWithStaticPaths: Record<string, WebsitePage> = {
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
 export const VISIBLE_TIME_FORMAT = "h:mm A";
 export const APP_STORE_APP_ID = "6752838080";
-const DEFAULT_DOMAIN = "lumobc.ca";
+export const DEFAULT_DOMAIN = "lumobc.ca";
 const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
   process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
 export const WEBSITE_ROOT =

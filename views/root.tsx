@@ -37,14 +37,33 @@ export default function Root() {
     //checking if any of the keys are expired
     storage.clearExpired();
 
-    if (
-      process.env.NODE_ENV === "production" &&
-      Capacitor.getPlatform() === "web"
-    ) {
+    if (Capacitor.getPlatform() === "web" && "serviceWorker" in navigator) {
       const serviceWorkerPath = `/sw/sw.js`;
+
       navigator.serviceWorker
         .register(serviceWorkerPath, { scope: "/" })
-        .then(console.log);
+        .then((registration) => {
+          // Check for updates periodically
+          registration.addEventListener("updatefound", () => {
+            const newWorker = registration.installing;
+
+            if (newWorker) {
+              newWorker.addEventListener("statechange", () => {
+                // Only reload if there's an existing active service worker
+                // This prevents reload on first install
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  window.location.reload();
+                }
+              });
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
     }
   }, []);
   return (
@@ -55,7 +74,7 @@ export default function Root() {
         media="(prefers-color-scheme: light)"
       />
       <div
-        className="flex flex-col w-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
+        className="flex flex-col w-full h-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
         vaul-drawer-wrapper=""
       >
         <Providers>
