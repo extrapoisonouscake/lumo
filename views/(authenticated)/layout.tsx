@@ -2,7 +2,6 @@ import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { isIOSApp } from "@/constants/ui";
 import { WEBSITE_ROOT } from "@/constants/website";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
-import { CapacitorHttp } from "@capacitor/core";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router";
@@ -22,8 +21,8 @@ export default function AuthenticatedLayout({
           IosSilentNotifications.addListener(
             "onSilentNotification",
             (notification: Notification) => {
-              CapacitorHttp.post({
-                url: `${WEBSITE_ROOT}/api/notifications/check`,
+              fetch(`${WEBSITE_ROOT}/api/notifications/check`, {
+                method: "POST",
               }).then();
             }
           );

@@ -36,6 +36,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
 import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
+import { SubjectTermAverages } from "./averages";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 
 const termToLabel: Record<SubjectTerm, string> = {
@@ -65,23 +66,15 @@ export function SubjectSummary(
   );
 
   return (
-    <Card className="flex flex-col relative items-center">
-      <div className="block p-2 md:absolute top-0 left-0 w-full">
-        <div className="flex justify-between items-center gap-4">
-          <SubjectAttendance
-            id={id}
-            year={year}
-            tardyCount={attendance.tardy}
-          />
+    <Card className="flex flex-col gap-4 pt-6 relative items-center">
+      <InfoDialog {...summary} />
+      <LetterGradeSwitch
+        value={isLetterGradeShown}
+        onValueChange={setIsLetterGradeShown}
+      />
 
-          <LetterGradeSwitch
-            value={isLetterGradeShown}
-            onValueChange={setIsLetterGradeShown}
-          />
-        </div>
-      </div>
-      <div className="flex flex-col gap-3 w-full items-center">
-        <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px] space-y-3">
+      <div className="flex flex-col flex-1 items-center gap-3 px-6 w-full">
+        <CardHeader className="items-center p-0 space-y-3">
           {name.emoji && (
             <AppleEmoji
               textClassName="text-3xl leading-none"
@@ -94,7 +87,8 @@ export function SubjectSummary(
             {term && <CardDescription>{termToLabel[term]}</CardDescription>}
           </div>
         </CardHeader>
-        <CardContent className="flex flex-1 items-center gap-1 p-6 pt-0">
+
+        <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
           <div className="flex flex-col gap-1 items-center">
             <HalfDonutTextChart
               height={isLetterGradeShown ? 45 : 50}
@@ -127,7 +121,10 @@ export function SubjectSummary(
           </div>
         </CardContent>
       </div>
-      <InfoDialog {...summary} />
+      <div className="flex w-full border-t">
+        <SubjectTermAverages id={id} term={term} academics={academics} />
+        <SubjectAttendance id={id} year={year} tardyCount={attendance.tardy} />
+      </div>
     </Card>
   );
 }
@@ -144,7 +141,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
         <Button
           size="icon"
           variant="ghost"
-          className="absolute bottom-0 right-0 text-muted-foreground hover:bg-transparent"
+          className="absolute top-0 left-0 text-muted-foreground hover:bg-transparent"
         >
           <HugeiconsIcon
             icon={InformationCircleStrokeRounded}
@@ -200,18 +197,14 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
 }
 export function SubjectSummarySkeleton() {
   return (
-    <Card className="flex flex-col relative items-center">
-      <div className="block p-2 md:absolute top-0 left-0 w-full">
-        <div className="flex justify-between items-center gap-4">
-          <Skeleton className="h-8 w-[120px]" />
+    <Card className="flex flex-col gap-4 pt-6 relative items-center">
+      <Skeleton className="size-4 absolute top-2 left-2" />
+      <Skeleton className="absolute top-2 right-2">
+        <LetterGradeSwitch className="static" value={true} />
+      </Skeleton>
 
-          <Skeleton>
-            <LetterGradeSwitch value={true} />
-          </Skeleton>
-        </div>
-      </div>
-      <div className="flex flex-col gap-3 w-full items-center">
-        <CardHeader className="items-center p-6 pt-0 md:pt-6 pb-0 md:px-[120px] space-y-3">
+      <div className="flex flex-col flex-1 items-center gap-3 px-6 w-full">
+        <CardHeader className="items-center p-0 space-y-3">
           <Skeleton className="size-7.5" />
           <Skeleton shouldShrink={false}>
             <CardTitle className="text-center">Subject Name</CardTitle>
@@ -220,7 +213,8 @@ export function SubjectSummarySkeleton() {
             <CardDescription>Full Year</CardDescription>
           </Skeleton>
         </CardHeader>
-        <CardContent className="flex flex-1 items-center gap-1">
+
+        <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
           <div className="flex flex-col gap-1 items-center">
             <div className={cn("relative", "h-[45px]")}>
               <div>
@@ -242,7 +236,24 @@ export function SubjectSummarySkeleton() {
           </div>
         </CardContent>
       </div>
-      <Skeleton className="size-4 absolute bottom-2 right-2" />
+      <div className="flex w-full border-t">
+        <Button
+          variant="ghost"
+          className="w-full h-8 p-0 rounded-none hover:bg-transparent border-r"
+          size="sm"
+          leftIcon={<Skeleton className="size-4" />}
+        >
+          <Skeleton>Average</Skeleton>
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full h-8 p-0 rounded-none hover:bg-transparent"
+          size="sm"
+          leftIcon={<Skeleton className="size-4" />}
+        >
+          <Skeleton>Average</Skeleton>
+        </Button>
+      </div>
     </Card>
   );
 }

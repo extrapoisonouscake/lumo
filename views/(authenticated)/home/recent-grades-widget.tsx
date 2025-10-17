@@ -166,7 +166,7 @@ function RecentGradedAssignmentCard({
             className={cn({
               [`text-${GRADES_VISUAL_CONFIG["F"]?.color}`]: percentage === 0,
             })}
-            values={[{ value: percentage, fillColor: gradeInfo?.color }]}
+            values={[{ value: percentage, fillColor: gradeInfo.color }]}
             letter={gradeInfo?.letter}
             size="normal"
           />

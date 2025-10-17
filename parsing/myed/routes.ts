@@ -2,6 +2,7 @@ import {
   MYED_ALL_GRADE_TERMS_SELECTOR,
   MYED_DATE_FORMAT,
   parseHTMLToken,
+  subjectTermToGradeLabelsMap,
 } from "@/constants/myed";
 import "server-only";
 
@@ -501,21 +502,6 @@ export type MyEdParsingRoutes = typeof myEdParsingRoutes;
 export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 
 export type MyEdRestEndpointURL = keyof paths;
-
-const subjectTermToGradeLabelsMap: Record<
-  SubjectTerm,
-  Array<
-    OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/gradeTerms">["terms"][number]["gradeTermId"]
-  >
-> = {
-  [SubjectTerm.FirstSemester]: ["Q1", "Q2"],
-  [SubjectTerm.SecondSemester]: ["Q3", "Q4"],
-  [SubjectTerm.FullYear]: ["Q1", "Q2", "Q3", "Q4"],
-  [SubjectTerm.FirstQuarter]: ["Q1"],
-  [SubjectTerm.SecondQuarter]: ["Q2"],
-  [SubjectTerm.ThirdQuarter]: ["Q3"],
-  [SubjectTerm.FourthQuarter]: ["Q4"],
-};
 
 const generateSubjectsListStepParams = (
   studentId: string,

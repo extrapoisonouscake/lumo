@@ -1,4 +1,5 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/helpers/cn";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
 import LetterA from "@/public/assets/icons/letter-a.svg";
@@ -20,9 +21,11 @@ function StyledToggleGroupItem({
 export function LetterGradeSwitch({
   value,
   onValueChange,
+  className,
 }: {
   value: boolean;
   onValueChange?: (value: boolean) => void;
+  className?: string;
 }) {
   const updateUserSettingMutation = useDebouncedUpdateGenericUserSetting(
     "shouldShowLetterGrade"
@@ -38,7 +41,10 @@ export function LetterGradeSwitch({
   return (
     <ToggleGroup
       type="single"
-      className="bg-muted rounded-lg p-1 gap-0"
+      className={cn(
+        "bg-muted rounded-lg p-1 gap-0 absolute top-2 right-2",
+        className
+      )}
       value={value ? "on" : "off"}
       onValueChange={handleValueChange}
     >

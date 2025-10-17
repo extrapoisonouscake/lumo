@@ -1,6 +1,5 @@
 import { ErrorCard } from "@/components/misc/error-card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { QueryWrapper } from "@/components/ui/query-wrapper";
 import {
@@ -29,6 +28,7 @@ import {
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useEffect } from "react";
+import { SubjectSummaryButton } from "./subject-summary-button";
 const UPPERCASE_REGEX = /(?=[A-Z])/;
 enum AbsenceType {
   Excused,
@@ -61,23 +61,13 @@ export function SubjectAttendance({
     <>
       <ResponsiveDialog>
         <ResponsiveDialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="h-8 rounded-lg"
-            size="sm"
-            leftIcon={
-              <HugeiconsIcon
-                icon={Calendar03StrokeRounded}
-                className="size-4"
-              />
-            }
-          >
+          <SubjectSummaryButton icon={Calendar03StrokeRounded}>
             Attendance
-          </Button>
+          </SubjectSummaryButton>
         </ResponsiveDialogTrigger>
         <ResponsiveDialogContent className="pb-0">
           <ResponsiveDialogHeader>
-            <ResponsiveDialogTitle>Absences</ResponsiveDialogTitle>
+            <ResponsiveDialogTitle>Attendance</ResponsiveDialogTitle>
           </ResponsiveDialogHeader>
           <ResponsiveDialogBody className="pb-0 flex flex-col gap-3">
             <Content id={id} year={year} tardyCount={tardyCount} />
@@ -188,7 +178,7 @@ function Content({
         <>
           <SummaryBadges tardyCount={tardyCount} absences={data} />
           {data.length > 0 ? (
-            <div className="flex flex-col gap-3 overflow-y-auto rounded-t-lg pb-6">
+            <div className="flex flex-col gap-3 rounded-t-lg pb-6">
               {data.map((absence, index) => (
                 <AbsenceCard key={index} {...absence} />
               ))}

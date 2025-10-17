@@ -1,4 +1,3 @@
-import { CapacitorHttp } from "@capacitor/core";
 import { createTRPCClient, httpLink, retryLink } from "@trpc/client";
 
 import { isMobileApp } from "@/constants/ui";
@@ -62,33 +61,15 @@ const fetchWithQueue: (
 
   // skipping the queueing if no call is made to the original API
   const restRouteString = restRoute.join(".");
-  const request = async () => {
-    const result = await CapacitorHttp.request({
-      method: init?.method ?? "GET",
-      url: input.toString(),
-      headers: init?.headers,
-      data: init?.body,
-    });
 
-    const response = new Response(
-      typeof result.data === "object"
-        ? JSON.stringify(result.data)
-        : result.data,
-      {
-        status: result.status,
-        headers: result.headers,
-      }
-    );
-    return response;
-  };
   if (routeGroup !== "myed" || restRouteString === "auth.logOut") {
-    return request();
+    return fetch(input, init);
   }
   const isSecondary = SECONDARY_ROUTES.includes(restRouteString);
 
   return queue.enqueue(
     async () => {
-      const response = await request();
+      const response = await fetch(input, init);
       if (response.status === 503) {
         window.location.href = "/maintenance";
       }
