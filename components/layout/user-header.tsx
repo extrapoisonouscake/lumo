@@ -2,6 +2,7 @@ import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { usePathname } from "next/navigation";
 import { Link } from "react-router";
+import { AppleEmoji } from "../misc/apple-emoji";
 import { formatUserFullName, UserAvatar } from "../misc/user";
 import { QueryWrapper } from "../ui/query-wrapper";
 import { SidebarMenuButton } from "../ui/sidebar";
@@ -11,34 +12,46 @@ export function UserHeader({ className }: { className?: string }) {
   const query = useStudentDetails();
 
   return (
-    <QueryWrapper
-      query={query}
-      skeleton={<UserHeaderSkeleton className={className} />}
-    >
-      {(data) => {
-        const { firstName, middleName, lastName, grade, photoURL } = data;
-
-        return (
-          <Link to="/profile" className={className}>
-            <UserButton>
-              <UserAvatar
-                firstName={firstName}
-                lastName={lastName}
-                photoURL={photoURL}
+    <Link to="/profile" className={className}>
+      <UserButton>
+        <QueryWrapper
+          query={query}
+          onError={
+            <div className="flex gap-2 items-center">
+              <AppleEmoji
+                value="‼️"
+                textClassName="text-xl leading-none"
+                imageClassName="size-5"
               />
-              <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-foreground">
-                  {formatUserFullName({ firstName, middleName, lastName })}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  Grade {grade}
-                </span>
-              </div>
-            </UserButton>
-          </Link>
-        );
-      }}
-    </QueryWrapper>
+              <p className="text-sm text-center">Something went wrong.</p>
+            </div>
+          }
+          skeleton={<UserHeaderSkeleton className={className} />}
+        >
+          {(data) => {
+            const { firstName, middleName, lastName, grade, photoURL } = data;
+
+            return (
+              <>
+                <UserAvatar
+                  firstName={firstName}
+                  lastName={lastName}
+                  photoURL={photoURL}
+                />
+                <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold text-foreground">
+                    {formatUserFullName({ firstName, middleName, lastName })}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Grade {grade}
+                  </span>
+                </div>
+              </>
+            );
+          }}
+        </QueryWrapper>
+      </UserButton>
+    </Link>
   );
 }
 

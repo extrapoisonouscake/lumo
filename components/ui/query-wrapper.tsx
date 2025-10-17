@@ -1,6 +1,7 @@
 import { QueryObserverResult } from "@tanstack/react-query";
 import { ReactNode } from "react";
 import { ErrorCard } from "../misc/error-card";
+import { useNetworkStatus } from "../providers/network-status-provider";
 
 interface QueryWrapperProps<TData, TError> {
   query: Pick<
@@ -11,18 +12,24 @@ interface QueryWrapperProps<TData, TError> {
   skeleton?: ReactNode;
   onError?: ReactNode;
 }
-
+const OfflineError = () => {
+  return <ErrorCard message="You are offline." emoji="🔌" />;
+};
 export function QueryWrapper<TData, TError>({
   query,
   children,
   skeleton,
   onError,
 }: QueryWrapperProps<TData, TError>) {
+  const { isOffline } = useNetworkStatus();
   if (query.isFetching) {
     return <>{skeleton}</>;
   }
 
   if (query.isError) {
+    if (isOffline) {
+      return <OfflineError />;
+    }
     return <>{onError || <ErrorCard />}</>;
   }
 
@@ -30,7 +37,7 @@ export function QueryWrapper<TData, TError>({
     return <>{children(query.data)}</>;
   }
   if (query.isPaused) {
-    return <ErrorCard message="You are offline." />;
+    return <OfflineError />;
   }
   return null;
 }

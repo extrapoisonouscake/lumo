@@ -1,4 +1,4 @@
-import { OfflineBanner } from "@/components/layout/offline-banner";
+import { NetworkConnectionBanner } from "@/components/layout/network-connection-banner";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import { Navigate, Outlet } from "react-router";
 
@@ -13,7 +13,7 @@ export default function UnauthenticatedLayout({
   }
   return (
     <div className="root-container">
-      <OfflineBanner />
+      <NetworkConnectionBanner />
       {children ?? <Outlet />}
     </div>
   );

@@ -20,7 +20,7 @@ import AuthenticatedLayout from "./(authenticated)/layout";
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
 import { storage } from "@/helpers/cache";
 import { Capacitor } from "@capacitor/core";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import AnnouncementsPage from "./(authenticated)/announcements/page";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
@@ -28,9 +28,11 @@ import SettingsPage from "./(authenticated)/settings/page";
 import UnauthenticatedLayout from "./(unauthenticated)/layout";
 import PrivacyPolicyPage from "./(unauthenticated)/legal/privacy-policy/page";
 import LoginPage from "./(unauthenticated)/login/page";
-import RegisterPage from "./(unauthenticated)/register/page";
+
+import { Spinner } from "@/components/ui/button";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
+const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 const deleteWorkboxIndexedDB = () => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase("workbox-expiration");
@@ -137,7 +139,14 @@ export default function Root() {
               </Route>
               <Route element={<UnauthenticatedLayout />}>
                 <Route path="login" element={<LoginPage />} />
-                <Route path="register" element={<RegisterPage />} />
+                <Route
+                  path="register"
+                  element={
+                    <Suspense fallback={<Spinner />}>
+                      <RegisterPage />
+                    </Suspense>
+                  }
+                />
               </Route>
               <Route path="maintenance" element={<MaintenancePage />} />
               <Route

@@ -3,7 +3,7 @@ import { cn } from "@/helpers/cn";
 import { ReactNode } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { OfflineBanner } from "./offline-banner";
+import { NetworkConnectionBanner } from "./network-connection-banner";
 
 const Inset = ({
   children,
@@ -31,7 +31,7 @@ export function AppSidebarWrapper({
 }) {
   const insetSlot = (
     <Inset
-      topContent={<OfflineBanner />}
+      topContent={<NetworkConnectionBanner />}
       className="pb-(--mobile-menu-height) sm:pb-0"
     >
       {children}
