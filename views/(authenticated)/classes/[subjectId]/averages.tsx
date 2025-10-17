@@ -26,7 +26,7 @@ import {
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useMemo } from "react";
+import { useMemo,ReactNode } from "react";
 import { SubjectSummaryButton } from "./subject-summary-button";
 
 export function SubjectTermAverages({
@@ -325,7 +325,7 @@ const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolea
     </Card>
   );
 }
-function WeightBadge({children}:{children:string}){
+function WeightBadge({children}:{children:ReactNode}){
 return    <Badge variant="outline" className="text-xs h-5 px-1.5">
 {children}</Badge>
 }
