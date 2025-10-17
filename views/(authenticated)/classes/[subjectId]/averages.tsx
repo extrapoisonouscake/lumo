@@ -280,8 +280,8 @@ const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolea
       {isSameWeight&&<WeightBadge>{category.terms[0]!.weight}%</WeightBadge>}
   </div>
         {category.average && (
-          <div className="flex flex-col items-end">
-            <span className="text-lg font-bold">{category.average.mark}</span>
+          <div className="flex flex-col gap-0.5 items-end">
+            <span className="text-lg leading-none font-bold">{category.average.mark}</span>
             <span className="text-xs text-muted-foreground">Overall</span>
           </div>
         )}
