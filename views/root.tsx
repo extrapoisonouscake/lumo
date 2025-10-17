@@ -21,6 +21,7 @@ import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
 import { storage } from "@/helpers/cache";
 import { Capacitor } from "@capacitor/core";
 import { lazy, Suspense, useEffect } from "react";
+import { toast } from "sonner";
 import AnnouncementsPage from "./(authenticated)/announcements/page";
 import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
@@ -56,6 +57,16 @@ export default function Root() {
             const newWorker = registration.installing;
 
             if (newWorker) {
+              // Show toast only if there's an existing controller (not first install)
+              if (navigator.serviceWorker.controller) {
+                toast.loading("Updating app...", {
+                  description:
+                    "Please wait while we update to the latest version.",
+                  duration: Infinity,
+                  id: "sw-update",
+                });
+              }
+
               newWorker.addEventListener("statechange", async () => {
                 // Wait for the new worker to be activated instead of just installed
                 // This ensures precaching is complete before we reload
