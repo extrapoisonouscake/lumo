@@ -30,11 +30,11 @@ const { count, size, warnings, manifestEntries } = await generateSW({
   sourcemap: false,
   navigateFallback: "/",
   navigateFallbackDenylist: [/^\/api\//, /^\/swagger\//, /^\/_next\//],
-  // Convert .next/static paths to _next/static for web URLs
+  // Convert .next/static paths to absolute _next/static URLs
   manifestTransforms: [
     (manifestEntries) => {
       const manifest = manifestEntries.map((entry) => {
-        entry.url = `_next/static/${entry.url}`;
+        entry.url = `/_next/static/${entry.url}`;
         return entry;
       });
       return { manifest };
@@ -96,3 +96,26 @@ let serviceWorkerContent = fs.readFileSync(SW_PATH, "utf8");
 serviceWorkerContent += `\n// Timestamp: ${Date.now()}`;
 
 fs.writeFileSync(SW_PATH, serviceWorkerContent);
+
+// Inject SW into build output directories
+const BUILD_DIRS = [
+  path.resolve(__dirname, ".next"),
+  path.resolve(__dirname, "out"),
+];
+
+for (const buildDir of BUILD_DIRS) {
+  if (fs.existsSync(buildDir)) {
+    const buildSwDir = path.join(buildDir, "sw");
+    fs.mkdirSync(buildSwDir, { recursive: true });
+    
+    // Copy all files from public/sw to build/sw
+    const swFiles = fs.readdirSync(SW_DIR);
+    for (const file of swFiles) {
+      const srcPath = path.join(SW_DIR, file);
+      const destPath = path.join(buildSwDir, file);
+      fs.copyFileSync(srcPath, destPath);
+    }
+    
+    console.log(`Copied service worker to ${buildDir}/sw`);
+  }
+}
