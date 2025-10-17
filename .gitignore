@@ -42,3 +42,4 @@ logfile
 # Sentry Config File
 .env.sentry-build-plugin
 .npmrc
+public/sw

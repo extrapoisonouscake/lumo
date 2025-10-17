@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "web:dev": "next dev",
-    "build": "node prebuild.js && next build",
+    "build": "next build && node build-sw.js",
     "start": "next start",
     "lint": "next lint",
     "generate-myed-types": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",

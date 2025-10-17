@@ -48,13 +48,20 @@ export default function Root() {
             const newWorker = registration.installing;
 
             if (newWorker) {
-              newWorker.addEventListener("statechange", () => {
+              newWorker.addEventListener("statechange", async () => {
                 // Only reload if there's an existing active service worker
                 // This prevents reload on first install
                 if (
                   newWorker.state === "installed" &&
                   navigator.serviceWorker.controller
                 ) {
+                  await caches
+                    .keys()
+                    .then((cacheNames) =>
+                      Promise.all(
+                        cacheNames.map((cacheName) => caches.delete(cacheName))
+                      )
+                    );
                   window.location.reload();
                 }
               });

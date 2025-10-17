@@ -13,28 +13,44 @@ if (isMobileApp) {
   process.exit(0);
 }
 const SW_DIR = path.resolve(__dirname, "public/sw");
-const SW_PATH = path.join(SW_DIR, "sw.js");
 fs.rmSync(SW_DIR, { recursive: true, force: true });
+const SW_PATH = path.join(SW_DIR, "sw.js");
 
-const { count, size, warnings } = await generateSW({
+const { count, size, warnings, manifestEntries } = await generateSW({
   swDest: SW_PATH,
-  // Runtime caching only - no precaching
-  globDirectory: ".",
-  globPatterns: [],
+  // Precache Next.js static files
+  globDirectory: ".next/static",
+  globPatterns: [
+    "**/*.{js,css,woff,woff2,ttf,otf,eot,svg,png,jpg,jpeg,gif,webp,ico,json}",
+  ],
+  globIgnores: ["chunks/app/api/**", "chunks/app/swagger/**"],
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
   skipWaiting: true,
   clientsClaim: true,
   sourcemap: false,
+  navigateFallback: "/",
+  navigateFallbackDenylist: [/^\/api\//, /^\/swagger\//, /^\/_next\//],
+  // Convert .next/static paths to _next/static for web URLs
+  manifestTransforms: [
+    (manifestEntries) => {
+      const manifest = manifestEntries.map((entry) => {
+        entry.url = `_next/static/${entry.url}`;
+        return entry;
+      });
+      return { manifest };
+    },
+  ],
   runtimeCaching: [
     {
-      // Cache Next.js static files (JS, CSS, etc.)
-      urlPattern: ({ url }) => url.pathname.startsWith("/_next/static/"),
-      handler: "CacheFirst",
+      // Cache HTML pages (navigation requests) for SPA offline support
+      urlPattern: ({ request }) => request.mode === "navigate",
+      handler: "NetworkFirst",
       options: {
-        cacheName: "next-static",
+        cacheName: "pages",
+        networkTimeoutSeconds: 3,
         expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
+          maxEntries: 50,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
       },
     },
@@ -68,7 +84,8 @@ const { count, size, warnings } = await generateSW({
 if (warnings.length > 0) {
   console.warn(
     "Warnings encountered while generating a service worker:",
-    warnings.join("\n")
+    warnings.join("\n"),
+    manifestEntries
   );
 }
 console.log(
