@@ -110,8 +110,10 @@ function parseDetails<Known extends Record<string, string | number>>(
 }
 
 function parsePhotoURL($: CheerioAPI): string | undefined {
-  const url = $(
+  const rawURL = $(
     '[id="propertyValue(relStdPsnOid_psnPhoOIDPrim)-span"] img'
   ).prop("src");
-  return url ? getCORSProxyURL(url) : undefined;
+  if (!rawURL) return undefined;
+
+  return getCORSProxyURL(rawURL.split("?")[0]!);
 }
