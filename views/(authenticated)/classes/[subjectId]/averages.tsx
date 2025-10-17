@@ -270,13 +270,15 @@ function CategoryCard({
 }: {
   category: SubjectSummary["academics"]["categories"][number];
 }) {
+const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolean)).size === 1
   return (
     <Card className="p-4 gap-3">
       {/* Category Header */}
       <div className="flex items-start justify-between gap-2">
         
-          <span className="font-medium text-sm">{category.name}</span>
-        
+          <div className="flex items-center gap-1.5"><span className="font-medium text-sm">{category.name}</span>
+      {isSameWeight&&<WeightBadge>{category.terms[0]!.weight}%</WeightBadge>}
+  </div>
         {category.average && (
           <div className="flex flex-col items-end">
             <span className="text-lg font-bold">{category.average.mark}</span>
@@ -298,10 +300,10 @@ function CategoryCard({
                 <span className="text-sm text-muted-foreground">
                   {term.name}
                 </span>
-                {term.weight !== null && (
-                  <Badge variant="outline" className="text-xs h-5 px-1.5">
+                {term.weight !== null&&!isSameWeight && (
+                  <WeightBadge>
                     {term.weight}%
-                  </Badge>
+                  </WeightBadge>
                 )}
               </div>
               {term.average && (
@@ -322,4 +324,8 @@ function CategoryCard({
       )}
     </Card>
   );
+}
+function WeightBadge({children}:{children:string}){
+return    <Badge variant="outline" className="text-xs h-5 px-1.5">
+{children}</Badge>
 }
