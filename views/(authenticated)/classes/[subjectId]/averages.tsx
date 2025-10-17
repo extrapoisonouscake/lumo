@@ -272,9 +272,9 @@ function CategoryCard({
 }) {
 const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolean)).size === 1
   return (
-    <Card className="p-4 gap-3">
+    <Card className="gap-3">
       {/* Category Header */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="p-4 pb-0 flex items-start justify-between gap-2">
         
           <div className="flex items-center gap-1.5"><span className="font-medium text-sm">{category.name}</span>
       {isSameWeight&&<WeightBadge>{category.terms[0]!.weight}%</WeightBadge>}
@@ -290,11 +290,11 @@ const isSameWeight = new Set(category.terms.map(term=>term.weight).filter(Boolea
       {/* Category Terms */}
 
       {category.terms.length > 0 && (
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col">
           {category.terms.map((term, index) => (
             <div
               key={index}
-              className="flex items-center justify-between border-l-2 border-muted pl-3"
+              className="flex items-center justify-between border-t px-4 py-3"
             >
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
