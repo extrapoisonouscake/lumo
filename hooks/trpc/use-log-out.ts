@@ -1,6 +1,7 @@
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { isIOSApp } from "@/constants/ui";
+import { isIOSApp, isMobileApp } from "@/constants/ui";
 import { storage } from "@/helpers/cache";
+import { clearAuthCookies } from "@/helpers/capacitor-cookie-persistence";
 import { setThemeColorCSSVariable } from "@/helpers/prepare-theme-color";
 import { trpcClient } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
@@ -16,8 +17,14 @@ export function useLogOut(navigate: ReturnType<typeof useNavigate>) {
       }
       await Promise.all(promises);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       storage.clear();
+
+      // Clear cookies from Preferences on mobile
+      if (isMobileApp) {
+        await clearAuthCookies();
+      }
+
       navigate("/login");
       setThemeColorCSSVariable(USER_SETTINGS_DEFAULT_VALUES.themeColor);
     },

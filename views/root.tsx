@@ -18,6 +18,8 @@ import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
 
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
+import { CookieRestorationProvider } from "@/components/misc/cookie-restoration-provider";
+import { Spinner } from "@/components/ui/button";
 import { storage } from "@/helpers/cache";
 import { Capacitor } from "@capacitor/core";
 import { lazy, Suspense, useEffect } from "react";
@@ -30,14 +32,13 @@ import UnauthenticatedLayout from "./(unauthenticated)/layout";
 import PrivacyPolicyPage from "./(unauthenticated)/legal/privacy-policy/page";
 import LoginPage from "./(unauthenticated)/login/page";
 
-import { Spinner } from "@/components/ui/button";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
 const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 
 export default function Root() {
   useEffect(() => {
-    //checking if any of the keys are expired
+    // Clear expired cache keys on startup
     storage.clearExpired();
 
     if (
@@ -86,6 +87,7 @@ export default function Root() {
         });
     }
   }, []);
+
   return (
     <>
       <meta
@@ -97,58 +99,63 @@ export default function Root() {
         className="flex w-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
         vaul-drawer-wrapper=""
       >
-        <Providers>
-          <Toaster />
-          <IOSAppAdvertisement />
+        <CookieRestorationProvider>
+          <Providers>
+            <Toaster />
+            <IOSAppAdvertisement />
 
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              <Route element={<AuthenticatedLayout />}>
-                <Route index element={<HomePage />} />
-                <Route element={<AnnouncementsPage />} path="announcements" />
-                <Route element={<SubjectsLayout />} path="classes">
-                  <Route index element={<SubjectsPage />} />
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                <Route element={<AuthenticatedLayout />}>
+                  <Route index element={<HomePage />} />
+                  <Route element={<AnnouncementsPage />} path="announcements" />
+                  <Route element={<SubjectsLayout />} path="classes">
+                    <Route index element={<SubjectsPage />} />
+                    <Route
+                      path=":subjectId/:subjectName"
+                      element={<SubjectPage />}
+                    />
+                    <Route
+                      path=":subjectId/:subjectName/assignments/:assignmentId"
+                      element={<AssignmentPage />}
+                    />
+                  </Route>
+                  <Route path="schedule">
+                    <Route index element={<SchedulePage />} />
+                    <Route path=":day" element={<SchedulePage />} />
+                  </Route>
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+
                   <Route
-                    path=":subjectId/:subjectName"
-                    element={<SubjectPage />}
-                  />
-                  <Route
-                    path=":subjectId/:subjectName/assignments/:assignmentId"
-                    element={<AssignmentPage />}
+                    path="transcript"
+                    element={<GraduationSummaryPage />}
                   />
                 </Route>
-                <Route path="schedule">
-                  <Route index element={<SchedulePage />} />
-                  <Route path=":day" element={<SchedulePage />} />
+                <Route element={<UnauthenticatedLayout />}>
+                  <Route path="login" element={<LoginPage />} />
+                  <Route
+                    path="register"
+                    element={
+                      <Suspense fallback={<Spinner />}>
+                        <RegisterPage />
+                      </Suspense>
+                    }
+                  />
                 </Route>
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="settings" element={<SettingsPage />} />
-
-                <Route path="transcript" element={<GraduationSummaryPage />} />
-              </Route>
-              <Route element={<UnauthenticatedLayout />}>
-                <Route path="login" element={<LoginPage />} />
+                <Route path="maintenance" element={<MaintenancePage />} />
                 <Route
-                  path="register"
-                  element={
-                    <Suspense fallback={<Spinner />}>
-                      <RegisterPage />
-                    </Suspense>
-                  }
+                  path="legal/privacy-policy"
+                  element={<PrivacyPolicyPage />}
                 />
-              </Route>
-              <Route path="maintenance" element={<MaintenancePage />} />
-              <Route
-                path="legal/privacy-policy"
-                element={<PrivacyPolicyPage />}
-              />
-              <Route path="support" element={<SupportPage />} />
-              <Route path="index.html" element={<Navigate to="/" />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </BrowserRouter>
-        </Providers>
+                <Route path="support" element={<SupportPage />} />
+                <Route path="index.html" element={<Navigate to="/" />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </BrowserRouter>
+          </Providers>
+        </CookieRestorationProvider>
         {process.env.NODE_ENV === "production" && (
           <GoogleAnalytics
             gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}

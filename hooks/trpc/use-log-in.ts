@@ -1,4 +1,5 @@
-import { isIOSApp } from "@/constants/ui";
+import { isIOSApp, isMobileApp } from "@/constants/ui";
+import { saveAuthCookiesToPreferences } from "@/helpers/capacitor-cookie-persistence";
 import { trpc } from "@/views/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { SavePassword } from "capacitor-ios-autofill-save-password";
@@ -15,8 +16,10 @@ export function useLogIn() {
           username: variables.username,
           password: variables.password,
         });
+      }
 
-        // callNative("saveAuthData");
+      if (isMobileApp) {
+        await saveAuthCookiesToPreferences();
       }
     },
   });

@@ -8,13 +8,14 @@ import {
   ResponseCookie,
   ResponseCookies,
 } from "next/dist/compiled/@edge-runtime/cookies";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import "server-only";
 import { getFullCookieName } from "./getFullCookieName";
 export const cookieDefaultOptions: Partial<ResponseCookie> = {
   secure: shouldSecureCookies,
   maxAge: COOKIE_MAX_AGE,
   httpOnly: true,
+  sameSite: "strict",
 };
 
 export type PlainCookieStore =
@@ -24,9 +25,17 @@ type AuthCookieName =
   (typeof AUTH_COOKIES_NAMES)[keyof typeof AUTH_COOKIES_NAMES];
 export class MyEdCookieStore {
   private store: PlainCookieStore;
+  private cookieOptions: Partial<ResponseCookie>;
 
-  private constructor(store: PlainCookieStore) {
+  private constructor(store: PlainCookieStore, isMobileApp?: boolean) {
     this.store = store;
+    // Set cookie options based on platform (checked once at creation)
+    this.cookieOptions = {
+      ...cookieDefaultOptions,
+    };
+    if (isMobileApp) {
+      this.cookieOptions.httpOnly = false;
+    }
   }
 
   static async create(plainStore?: PlainCookieStore): Promise<MyEdCookieStore> {
@@ -34,7 +43,12 @@ export class MyEdCookieStore {
       plainStore && !(plainStore instanceof MyEdCookieStore)
         ? plainStore
         : await cookies();
-    return new MyEdCookieStore(store);
+
+    // Check platform once during creation
+    const origin = (await headers()).get("origin");
+    const isCapacitorOrigin = origin?.startsWith("capacitor://");
+    console.log({ origin });
+    return new MyEdCookieStore(store, isCapacitorOrigin);
   }
 
   get = (name: AuthCookieName): ReturnType<PlainCookieStore["get"]> => {
@@ -60,7 +74,7 @@ export class MyEdCookieStore {
       const options = props[0];
 
       props[0] = {
-        ...cookieDefaultOptions,
+        ...this.cookieOptions,
         ...options,
         name: getFullCookieName(options.name),
         value: encryption.encrypt(options.value),
@@ -74,11 +88,11 @@ export class MyEdCookieStore {
       if (props[2]) {
         const options = props[2];
         props[2] = {
-          ...cookieDefaultOptions,
+          ...this.cookieOptions,
           ...options,
         };
       } else {
-        props.push(cookieDefaultOptions as any);
+        props.push(this.cookieOptions as any);
       }
     }
     return this.store.set(...props);

@@ -1,7 +1,9 @@
 import { CapacitorHttp } from "@capacitor/core";
 import { createTRPCClient, httpLink, retryLink } from "@trpc/client";
 
+import { isMobileApp } from "@/constants/ui";
 import { WEBSITE_ROOT } from "@/constants/website";
+import { saveAuthCookiesToPreferences } from "@/helpers/capacitor-cookie-persistence";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
@@ -153,6 +155,9 @@ export const trpcClient = createTRPCClient<AppRouter>({
             .mutate()
             .then(() => {
               refreshPromise = null;
+              if (isMobileApp) {
+                saveAuthCookiesToPreferences();
+              }
               refreshSessionExpiresAt();
             });
         }

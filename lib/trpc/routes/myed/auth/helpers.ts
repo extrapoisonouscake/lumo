@@ -141,7 +141,7 @@ export async function setUpLogin({
   const store = externalStore ?? (await cookies());
   const cookieStore = await MyEdCookieStore.create(store);
 
-  setUpSessionTokens({ tokens, store });
+  await setUpSessionTokens({ tokens, store });
 
   cookieStore.set(AUTH_COOKIES_NAMES.studentId, studentId);
   if (credentials) {

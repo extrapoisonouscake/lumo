@@ -238,7 +238,7 @@ export const authRouter = router({
           ctx.credentials.password
         );
 
-        setUpSessionTokens({ tokens, store: ctx.authCookieStore });
+        await setUpSessionTokens({ tokens, store: ctx.authCookieStore });
 
         if (!input?.isInBackground) {
           after(async () => {
