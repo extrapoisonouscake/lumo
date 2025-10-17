@@ -37,7 +37,7 @@ export default function SchedulePage() {
   return (
     <>
       <TitleManager>
-        {timezonedDayJS(date).format("MM/DD/YYYY")} - Schedule
+        {timezonedDayJS(date).format("ddd, MM/DD/YYYY")} - Schedule
       </TitleManager>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-3">

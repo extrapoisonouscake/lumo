@@ -57,8 +57,8 @@ export function UserHeader({ className }: { className?: string }) {
 
 export function UserHeaderSkeleton({ className }: { className?: string }) {
   return (
-    <UserButton isLoading className={cn(className, "hover:bg-transparent")}>
-      <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-xl" />
+    <>
+      <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-lg" />
 
       <div className="hidden sm:grid flex-1 gap-1 text-left text-sm leading-tight">
         <Skeleton className="truncate w-fit">
@@ -68,7 +68,7 @@ export function UserHeaderSkeleton({ className }: { className?: string }) {
           <span className="text-xs">Grade 11</span>
         </Skeleton>
       </div>
-    </UserButton>
+    </>
   );
 }
 function UserButton({
