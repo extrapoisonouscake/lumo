@@ -7,6 +7,7 @@
     "build": "next build && node build-sw.js",
     "start": "next start",
     "lint": "next lint",
+    "test": "echo \"No tests configured\"",
     "generate-myed-types": "openapi-typescript app/swagger/myed-rest.yaml -o types/myed-rest.ts --exclude-deprecated true",
     "postinstall": "if [ \"$SKIP_POSTINSTALL\" != \"true\" ]; then npm run generate-myed-types && npm run db:update; fi",
     "trigger:dev": "npx trigger.dev@4.0.4 dev",

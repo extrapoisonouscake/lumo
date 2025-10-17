@@ -107,7 +107,7 @@ for (const buildDir of BUILD_DIRS) {
   if (fs.existsSync(buildDir)) {
     const buildSwDir = path.join(buildDir, "sw");
     fs.mkdirSync(buildSwDir, { recursive: true });
-    
+
     // Copy all files from public/sw to build/sw
     const swFiles = fs.readdirSync(SW_DIR);
     for (const file of swFiles) {
@@ -115,7 +115,7 @@ for (const buildDir of BUILD_DIRS) {
       const destPath = path.join(buildSwDir, file);
       fs.copyFileSync(srcPath, destPath);
     }
-    
+
     console.log(`Copied service worker to ${buildDir}/sw`);
   }
 }
