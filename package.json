@@ -101,7 +101,6 @@
     "lucide-react": "^0.545.0",
     "motion": "^12.19.1",
     "next": "^15.2.4",
-    "nextjs-toploader": "^3.9.17",
     "npmrc-replace-env": "^1.1.4",
     "nprogress": "^0.2.0",
     "postgres": "^3.4.5",

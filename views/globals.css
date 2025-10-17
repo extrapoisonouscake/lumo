@@ -187,7 +187,7 @@
 }
 
 @utility root-container {
-  @apply w-full flex-1 p-4 flex flex-col gap-4;
+  @apply w-full flex-1 p-4 flex flex-col gap-4 bg-background z-10;
 }
 @utility clickable {
   @apply cursor-pointer data-[clickable-hover]:hover:bg-muted/50 transition-[color,background-color,transform,scale] active:scale-[98%];

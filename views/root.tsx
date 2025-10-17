@@ -18,7 +18,6 @@ import HomePage from "./(authenticated)/home/page";
 import AuthenticatedLayout from "./(authenticated)/layout";
 
 import { IOSAppAdvertisement } from "@/components/layout/ios-app-advertisement";
-import { OfflineBanner } from "@/components/layout/offline-banner";
 import { storage } from "@/helpers/cache";
 import { Capacitor } from "@capacitor/core";
 import { useEffect } from "react";
@@ -48,7 +47,11 @@ export default function Root() {
     //checking if any of the keys are expired
     storage.clearExpired();
 
-    if (Capacitor.getPlatform() === "web" && "serviceWorker" in navigator) {
+    if (
+      process.env.NODE_ENV === "production" &&
+      Capacitor.getPlatform() === "web" &&
+      "serviceWorker" in navigator
+    ) {
       const serviceWorkerPath = `/sw/sw.js`;
 
       navigator.serviceWorker
@@ -99,13 +102,13 @@ export default function Root() {
         media="(prefers-color-scheme: light)"
       />
       <div
-        className="flex flex-col w-full h-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
+        className="flex w-full relative justify-center min-h-full pt-[env(safe-area-inset-top,0)]"
         vaul-drawer-wrapper=""
       >
         <Providers>
           <Toaster />
           <IOSAppAdvertisement />
-          <OfflineBanner />
+
           <BrowserRouter>
             <ScrollToTop />
             <Routes>

@@ -3,19 +3,19 @@ import { cn } from "@/helpers/cn";
 import { ReactNode } from "react";
 import { SidebarInset, SidebarProvider } from "../ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
-import { TopLoader } from "./top-loader";
+import { OfflineBanner } from "./offline-banner";
 
 const Inset = ({
   children,
-  topLoader,
+  topContent,
   className,
 }: {
   children: ReactNode;
-  topLoader: ReactNode;
+  topContent: ReactNode;
   className?: string;
 }) => (
   <SidebarInset className={cn("min-w-0", className)}>
-    {topLoader}
+    {topContent}
     <div className="root-container">{children}</div>
   </SidebarInset>
 );
@@ -31,7 +31,7 @@ export function AppSidebarWrapper({
 }) {
   const insetSlot = (
     <Inset
-      topLoader={<TopLoader />}
+      topContent={<OfflineBanner />}
       className="pb-(--mobile-menu-height) sm:pb-0"
     >
       {children}
