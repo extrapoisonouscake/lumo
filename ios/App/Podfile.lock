@@ -12,6 +12,8 @@ PODS:
     - Capacitor
   - CapacitorNetwork (7.0.2):
     - Capacitor
+  - CapacitorPreferences (7.0.2):
+    - Capacitor
   - CapacitorPushNotifications (7.0.3):
     - Capacitor
   - CapacitorStatusBar (7.0.3):
@@ -25,6 +27,7 @@ DEPENDENCIES:
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - CapacitorIosAutofillSavePassword (from `../../node_modules/capacitor-ios-autofill-save-password`)
   - "CapacitorNetwork (from `../../node_modules/@capacitor/network`)"
+  - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
 
@@ -43,6 +46,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/capacitor-ios-autofill-save-password"
   CapacitorNetwork:
     :path: "../../node_modules/@capacitor/network"
+  CapacitorPreferences:
+    :path: "../../node_modules/@capacitor/preferences"
   CapacitorPushNotifications:
     :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorStatusBar:
@@ -56,9 +61,10 @@ SPEC CHECKSUMS:
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorIosAutofillSavePassword: 60b1afd83532bfa85ab1c3f1341ce5ac397e3d30
   CapacitorNetwork: 695069886b3c5ed514db69aa3d026b8dc3c03a6b
+  CapacitorPreferences: 65107ed7437d96ee72583df5763985e3c0ff2bc2
   CapacitorPushNotifications: bdd621fbd562be34a41f4a7b1750efa000447d5a
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
 
-PODFILE CHECKSUM: 2b9c499067b52b5ded00b66c63a743396953a2b8
+PODFILE CHECKSUM: 0fae60ea7ac1642bddd951b84066ac7e2c1f5700
 
 COCOAPODS: 1.16.2

@@ -15,6 +15,7 @@ def capacitor_pods
   pod 'CapacitorCommunityAppIcon', :path => '../../node_modules/@capacitor-community/app-icon'
   pod 'CapacitorBackgroundRunner', :path => '../../node_modules/@capacitor/background-runner'
   pod 'CapacitorNetwork', :path => '../../node_modules/@capacitor/network'
+  pod 'CapacitorPreferences', :path => '../../node_modules/@capacitor/preferences'
   pod 'CapacitorPushNotifications', :path => '../../node_modules/@capacitor/push-notifications'
   pod 'CapacitorStatusBar', :path => '../../node_modules/@capacitor/status-bar'
   pod 'CapacitorIosAutofillSavePassword', :path => '../../node_modules/capacitor-ios-autofill-save-password'

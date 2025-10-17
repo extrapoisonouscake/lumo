@@ -1,3 +1,4 @@
+import { useNetworkStatus } from "@/components/providers/network-status-provider";
 import {
   ClientCacheTTLKey,
   getCachedClientResponse,
@@ -25,6 +26,7 @@ export function useCachedQuery<
     ttlKey?: ClientCacheTTLKey;
   } = {}
 ): UseQueryResult<TData, TError> {
+  const { isOffline } = useNetworkStatus();
   const query = useQuery(options);
   const [cachedResponse, setCachedResponse] = useState<TData | undefined>(
     undefined
@@ -51,7 +53,7 @@ export function useCachedQuery<
     }
   }, [query.data, cacheKey, cacheDetails.ttlKey]);
 
-  if (query.isPending && cachedResponse) {
+  if (cachedResponse && (query.isPending || isOffline)) {
     return getReactQueryMockSuccessResponse(
       query,
       cachedResponse

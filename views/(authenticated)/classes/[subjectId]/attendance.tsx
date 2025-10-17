@@ -231,6 +231,7 @@ function AbsenceCard({
   code,
   type,
 }: RichSubjectAttendance[number] & { type: AbsenceType }) {
+  const formattedDate = formatDate(date);
   return (
     <Card className="p-4">
       <div className="flex items-start justify-between gap-3">
@@ -240,9 +241,7 @@ function AbsenceCard({
               icon={Calendar03StrokeRounded}
               className="size-4 text-muted-foreground"
             />
-            <h3 className="font-medium text-base">
-              {timezonedDayJS(date).format(VISIBLE_DATE_FORMAT)}
-            </h3>
+            <h3 className="font-medium text-base">{formattedDate}</h3>
           </div>
 
           <div className="flex items-center gap-2">
@@ -316,4 +315,22 @@ function AbsenceCardSkeleton() {
       </div>
     </Card>
   );
+}
+function formatDate(date: Date) {
+  const formattedDateObj = timezonedDayJS(date);
+  const today = timezonedDayJS();
+
+  if (formattedDateObj.isSame(today, "day")) {
+    return "Today";
+  }
+  const yesterday = today.subtract(1, "day");
+  if (formattedDateObj.isSame(yesterday, "day")) {
+    return "Yesterday";
+  }
+  let format = VISIBLE_DATE_FORMAT;
+
+  if (today.diff(formattedDateObj, "week") < 1) {
+    format = `ddd, ${VISIBLE_DATE_FORMAT}`;
+  }
+  return formattedDateObj.format(format);
 }
