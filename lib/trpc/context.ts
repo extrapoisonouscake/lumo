@@ -12,6 +12,7 @@ type AuthenticatedTRPCContext = {
 };
 export const createTRPCContext = async () => {
   const store = await cookies();
+  console.log("cookies", store.getAll());
   const cookieStore = await MyEdCookieStore.create(store);
   let studentDatabaseId, username, password, tokens, studentId;
   try {
