@@ -191,6 +191,7 @@ export interface ProgramEntry {
   requiredUnits: number;
   completedUnits: number;
   pendingUnits?: number;
+  limitedPendingUnits?: number;
   excessUnits?: number;
   creditsWaived?: number;
   isIncluded: boolean;

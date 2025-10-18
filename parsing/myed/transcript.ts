@@ -98,17 +98,31 @@ export function parseGraduationSummary({
         })),
       })
     );
+    const pendingUnits = requirementsWithPendingUnits
+      ?.flatMap((requirement) => [
+        requirement.pendingUnits,
+        ...(requirement.requirements?.map(
+          (requirement) => requirement.pendingUnits
+        ) ?? []),
+      ])
+      .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0);
+    let limitedPendingUnits = 0;
+
+    for (const requirement of requirementsWithPendingUnits ?? []) {
+      limitedPendingUnits += Math.max(
+        0,
+        Math.min(
+          requirement.pendingUnits ?? 0,
+          requirement.requiredUnits - requirement.completedUnits
+        )
+      );
+    }
+
     return {
       ...program,
       requirements: requirementsWithPendingUnits,
-      pendingUnits: requirementsWithPendingUnits
-        ?.flatMap((requirement) => [
-          requirement.pendingUnits,
-          ...(requirement.requirements?.map(
-            (requirement) => requirement.pendingUnits
-          ) ?? []),
-        ])
-        .reduce((acc, curr) => (acc ?? 0) + (curr ?? 0), 0),
+      pendingUnits,
+      limitedPendingUnits,
     };
   });
 
@@ -223,7 +237,18 @@ function parsePrograms($: cheerio.CheerioAPI): ProgramEntry[] {
       result.push({
         name: $cells.eq(headerMap["Description"]!).find("a").text().trim(), //rest of the content are the minified requirements
         code: cellsValues[headerMap["Code"]!]!,
-        requiredUnits: +cellsValues[headerMap["Required unit"]!]!.trim(),
+        requiredUnits: requirements
+          ? requirements.reduce(
+              (acc, requirement) =>
+                acc +
+                requirement.requiredUnits +
+                (requirement.requirements?.reduce(
+                  (acc, requirement) => acc + requirement.requiredUnits,
+                  0
+                ) ?? 0),
+              0
+            )
+          : +cellsValues[headerMap["Required unit"]!]!.trim(),
         completedUnits,
 
         excessUnits,

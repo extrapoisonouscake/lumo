@@ -220,7 +220,7 @@ export const authRouter = router({
   }),
 
   sendPasswordResetEmail,
-  //* if the name is changed, change in trpc client initialization as well
+
   ensureValidSession: authenticatedProcedure
     .input(z.object({ isInBackground: z.boolean().optional() }).optional())
     .mutation(async ({ ctx, input }) => {

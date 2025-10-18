@@ -47,13 +47,13 @@ export class MyEdCookieStore {
     // Check platform once during creation
     const origin = (await headers()).get("origin");
     const isCapacitorOrigin = origin?.startsWith("capacitor://");
-    console.log({ origin });
+
     return new MyEdCookieStore(store, isCapacitorOrigin);
   }
 
   get = (name: AuthCookieName): ReturnType<PlainCookieStore["get"]> => {
     const rawValue = this.store.get(getFullCookieName(name));
-    console.log("rawValue", rawValue);
+
     if (rawValue) {
       try {
         return {

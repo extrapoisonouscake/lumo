@@ -27,7 +27,7 @@ export default function MaintenancePage() {
   return (
     <>
       <TitleManager>Maintenance</TitleManager>
-      <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-[600px] mx-auto gap-6 p-4">
+      <div className="flex flex-col items-center justify-center min-h-dvh w-full max-w-[600px] mx-auto gap-6 p-4">
         {/* Header Section */}
         <div className="flex flex-col items-center gap-4 text-center">
           <AppleEmoji

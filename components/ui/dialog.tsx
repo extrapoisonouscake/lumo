@@ -6,6 +6,7 @@ import * as React from "react";
 
 import { cn } from "@/helpers/cn";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { ScrollShadow } from "./scroll-shadow";
 
 function Dialog({
   ...props
@@ -88,11 +89,8 @@ const DialogHeader = ({
   />
 );
 
-const DialogBody = ({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
-  <div {...props} className={cn("overflow-y-auto min-h-0 flex-1", className)} />
+const DialogBody = (props: React.HTMLAttributes<HTMLDivElement>) => (
+  <ScrollShadow {...props} />
 );
 
 const DialogFooter = ({

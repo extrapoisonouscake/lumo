@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/helpers/cn";
 import "@/views/globals.css";
 import { RefreshStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -13,7 +14,7 @@ export default function GlobalError({ error }: { error: Error }) {
   }, [error]);
   return (
     <html>
-      <body className={GeistSans.className}>
+      <body className={cn(GeistSans.className, "bg-background")}>
         <main className="size-full flex flex-col justify-center gap-4 items-center">
           <img
             src="/assets/app-store-app-icon.png"

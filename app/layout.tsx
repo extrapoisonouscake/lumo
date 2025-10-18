@@ -5,6 +5,7 @@ import {
 } from "@/constants/core";
 import { isMobileApp } from "@/constants/ui";
 import { APP_STORE_APP_ID, WEBSITE_TITLE } from "@/constants/website";
+import { cn } from "@/helpers/cn";
 import "@/views/globals.css";
 import { THEME_STORAGE_KEY_NAME } from "@/views/theme-provider/constants";
 import { GeistSans } from "geist/font/sans";
@@ -56,7 +57,9 @@ export default async function RootLayout({
             }}
           />
         </head>
-        <body className={GeistSans.className}>{children}</body>
+        <body className={cn(GeistSans.className, "bg-background")}>
+          {children}
+        </body>
       </html>
     </>
   );

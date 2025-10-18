@@ -15,7 +15,7 @@ import {
 import { useSearchParams } from "next/navigation";
 
 import { saveClientResponseToCache } from "@/helpers/cache";
-import { setThemeColorCSSVariable } from "@/helpers/prepare-theme-color";
+import { setThemeColorCSSVariable } from "@/helpers/theme";
 import { useLogIn } from "@/hooks/trpc/use-log-in";
 import { isTRPCError } from "@/lib/trpc/helpers";
 import { trpc, trpcClient } from "@/views/trpc";

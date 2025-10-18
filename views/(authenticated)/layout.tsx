@@ -2,6 +2,8 @@ import { AppSidebarWrapper } from "@/components/layout/app-sidebar-wrapper";
 import { isIOSApp } from "@/constants/ui";
 import { WEBSITE_ROOT } from "@/constants/website";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
+import { setThemeColorCSSVariable } from "@/helpers/theme";
+import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router";
@@ -11,6 +13,10 @@ export default function AuthenticatedLayout({
   children?: React.ReactNode;
 }) {
   const isLoggedIn = clientAuthChecks.isLoggedIn();
+  const settings = useUserSettings();
+  useEffect(() => {
+    setThemeColorCSSVariable(settings.themeColor);
+  }, [settings.themeColor]);
   if (!isLoggedIn) {
     return <Navigate to="/login" />;
   }

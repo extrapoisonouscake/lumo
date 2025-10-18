@@ -8,6 +8,7 @@ export function getSubjectEmoji(name: string) {
     : null;
 }
 
+const keywords = Object.keys(subjectsEmojis);
 function findBestKeywordMatch(subjectName: string): string | undefined {
   // Clean the subject name: remove grade numbers and normalize whitespace
   const cleanedName = subjectName
@@ -15,12 +16,7 @@ function findBestKeywordMatch(subjectName: string): string | undefined {
     .replace(/\s+/g, " ") // Normalize whitespace
     .trim();
 
-  const keywords = Object.keys(subjectsEmojis);
-
-  // Sort keywords by length (longest first) to prioritize more specific matches
-  const sortedKeywords = keywords.sort((a, b) => b.length - a.length);
-
-  for (const keyword of sortedKeywords) {
+  for (const keyword of keywords) {
     if (isKeywordMatch(keyword, cleanedName)) {
       return keyword;
     }

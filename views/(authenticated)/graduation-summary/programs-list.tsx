@@ -117,7 +117,7 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
   const totalPendingUnits = useMemo(
     () =>
       includedPrograms.reduce(
-        (acc, program) => acc + (program.pendingUnits ?? 0),
+        (acc, program) => acc + (program.limitedPendingUnits ?? 0),
         0
       ),
     [includedPrograms]
@@ -177,7 +177,7 @@ function ProgramCard({
         100
       ),
       pending: program.pendingUnits
-        ? (program.pendingUnits / program.requiredUnits) * 100
+        ? ((program.limitedPendingUnits ?? 0) / program.requiredUnits) * 100
         : undefined,
     };
   }
@@ -231,9 +231,9 @@ function ProgramCard({
           segments={
             percentages
               ? [
-                  { value: percentages?.completed, color: "bg-green-500" },
+                  { value: percentages.completed, color: "bg-green-500" },
                   {
-                    value: percentages?.pending ?? 0,
+                    value: percentages.pending ?? 0,
                     color: "bg-yellow-400",
                   },
                 ]
@@ -243,16 +243,18 @@ function ProgramCard({
           indicatorClassName={cn(isExcluded && "bg-muted-foreground/30")}
         />
 
-        <div className="flex justify-end text-xs">
-          <span
-            className={cn(
-              "font-medium",
-              isExcluded ? "text-muted-foreground" : "text-green-500"
-            )}
-          >
-            {percentages?.completed.toFixed(1)}%
-          </span>
-        </div>
+        {percentages && (
+          <div className="flex justify-end text-xs">
+            <span
+              className={cn(
+                "font-medium",
+                isExcluded ? "text-muted-foreground" : "text-green-500"
+              )}
+            >
+              {percentages.completed.toFixed(1)}%
+            </span>
+          </div>
+        )}
 
         <Button
           variant="ghost"

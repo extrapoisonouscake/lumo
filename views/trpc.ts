@@ -113,7 +113,9 @@ export const trpcClient = createTRPCClient<AppRouter>({
         };
         if (
           !clientAuthChecks.isLoggedIn() ||
-          url.pathname.includes("auth.ensureValidSession")
+          url.pathname.includes(
+            `auth.${"ensureValidSession" satisfies keyof AppRouter["myed"]["auth"]}`
+          )
         ) {
           return fetchWithQueue(input, preparedInit);
         }

@@ -2,7 +2,7 @@ import { Logo } from "../misc/logo";
 
 export function FullscreenLoader() {
   return (
-    <div className="size-full flex items-center justify-center [@media(prefers-color-scheme:dark)]:bg-[#09090B]">
+    <div className="size-full flex h-dvh items-center justify-center [@media(prefers-color-scheme:dark)]:bg-[#09090B]">
       <div className="relative overflow-hidden h-fit w-fit">
         <Logo
           data-auto-stroke-width="true"

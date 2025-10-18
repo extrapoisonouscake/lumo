@@ -37,7 +37,7 @@ export async function getAuthCookiesFromBrowser(): Promise<
     authCookies[IS_LOGGED_IN_COOKIE_NAME] =
       allCookies[IS_LOGGED_IN_COOKIE_NAME];
   }
-  console.log(authCookies);
+
   return authCookies;
 }
 
@@ -59,13 +59,12 @@ export async function saveAuthCookiesToPreferences(): Promise<void> {
       key: PREFERENCES_KEY,
       value: JSON.stringify(data),
     });
-
-    console.log("[Auth] Cookies saved to Preferences", Object.keys(cookies));
   }
 }
 
 /**
  * Load auth cookies from Capacitor Preferences and restore them to browser (mobile only)
+ * Decodes URL-encoded cookie values before setting them to ensure proper decryption on the server
  */
 export async function restoreAuthCookiesFromPreferences(): Promise<boolean> {
   if (!isMobileApp) return false;
@@ -74,30 +73,37 @@ export async function restoreAuthCookiesFromPreferences(): Promise<boolean> {
     const { value } = await Preferences.get({ key: PREFERENCES_KEY });
 
     if (!value) {
-      console.log("[Auth] No stored cookies found");
       return false;
     }
 
     const data: StoredCookies = JSON.parse(value);
 
     // Restore each cookie using Capacitor Cookies API
-    const cookiePromises = Object.entries(data.cookies).map(([key, value]) =>
-      CapacitorCookies.setCookie({
-        key,
-        value,
-        url: WEBSITE_ROOT,
-      })
-    );
+    // Decode URL-encoded values to restore original encrypted data
+    const cookiePromises = Object.entries(data.cookies).map(([key, value]) => {
+      try {
+        // Decode the URL-encoded cookie value
+        const decodedValue = decodeURIComponent(value);
+
+        return CapacitorCookies.setCookie({
+          key,
+          value: decodedValue,
+          url: WEBSITE_ROOT,
+        });
+      } catch (error) {
+        // Fallback: try setting the original value
+        return CapacitorCookies.setCookie({
+          key,
+          value,
+          url: WEBSITE_ROOT,
+        });
+      }
+    });
 
     await Promise.all(cookiePromises);
 
-    console.log(
-      "[Auth] Cookies restored from Preferences",
-      Object.keys(data.cookies)
-    );
     return true;
   } catch (error) {
-    console.error("[Auth] Failed to restore cookies:", error);
     return false;
   }
 }
@@ -126,5 +132,4 @@ export async function clearAuthCookies(): Promise<void> {
   // Clear from Preferences (mobile only)
 
   await Preferences.remove({ key: PREFERENCES_KEY });
-  console.log("[Auth] Cookies cleared from Preferences and browser");
 }

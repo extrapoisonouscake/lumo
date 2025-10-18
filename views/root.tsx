@@ -36,6 +36,7 @@ import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
 const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 
+const serviceWorkerPath = `/sw/sw.js`;
 export default function Root() {
   useEffect(() => {
     // Clear expired cache keys on startup
@@ -46,15 +47,11 @@ export default function Root() {
       Capacitor.getPlatform() === "web" &&
       "serviceWorker" in navigator
     ) {
-      const serviceWorkerPath = `/sw/sw.js`;
-
       navigator.serviceWorker
         .register(serviceWorkerPath, { scope: "/" })
         .then((registration) => {
-          console.log("Service worker registered");
           // Check for updates periodically
           registration.addEventListener("updatefound", () => {
-            console.log("Update found");
             const newWorker = registration.installing;
 
             if (newWorker) {
@@ -75,7 +72,7 @@ export default function Root() {
                   newWorker.state === "activated" &&
                   navigator.serviceWorker.controller
                 ) {
-                  console.log("New service worker activated, reloading...");
+                  alert("Service worker activated");
                   window.location.reload();
                 }
               });

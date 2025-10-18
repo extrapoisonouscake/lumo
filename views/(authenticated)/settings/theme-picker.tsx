@@ -5,10 +5,7 @@ import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
 import { isIOSApp } from "@/constants/ui";
 
 import { cn } from "@/helpers/cn";
-import {
-  prepareThemeColor,
-  setThemeColorCSSVariable,
-} from "@/helpers/prepare-theme-color";
+import { prepareThemeColor, setThemeColorCSSVariable } from "@/helpers/theme";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { AppIcon } from "@capacitor-community/app-icon";
@@ -30,7 +27,7 @@ const AVAILABLE_THEMES = {
 };
 const IOS_APP_ICON_SUFFIX = "AppIcon";
 const getIOSAppIconName = (key: string) => {
-  return `${capitalize(key)}${IOS_APP_ICON_SUFFIX}`;
+  return `${key !== "default" ? capitalize(key) : ""}${IOS_APP_ICON_SUFFIX}`;
 };
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [currentTheme, setCurrentTheme] = useState(initialValue);
@@ -38,17 +35,16 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
     if (isIOSApp) {
       AppIcon.getName().then(async ({ value: rawIconName }) => {
         const iconName =
-          rawIconName?.replace(IOS_APP_ICON_SUFFIX, "") || "default";
+          rawIconName?.replace(IOS_APP_ICON_SUFFIX, "").toLowerCase() ||
+          "default";
         const currentThemeKey = Object.keys(AVAILABLE_THEMES).find(
           (key) =>
             AVAILABLE_THEMES[key as keyof typeof AVAILABLE_THEMES] ===
             currentTheme
         );
-        console.log("iconName", iconName);
-        console.log("currentThemeKey", currentThemeKey);
         if (currentThemeKey && currentThemeKey !== iconName) {
           const formattedName = getIOSAppIconName(currentThemeKey);
-          console.log("formattedName", formattedName);
+
           await AppIcon.change({
             name: formattedName,
             suppressNotification: false,
@@ -76,7 +72,6 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
         })
       );
       if (isIOSApp) {
-        console.log("getting icon name", getIOSAppIconName(key));
         promises.push(
           AppIcon.change({
             name: getIOSAppIconName(key),
@@ -84,7 +79,7 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
           })
         );
       }
-      await Promise.all(promises);
+      await Promise.allSettled(promises);
     } catch (e) {
       updateThemeLocally(oldValue);
     }
