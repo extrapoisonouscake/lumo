@@ -53,13 +53,15 @@ export class MyEdCookieStore {
 
   get = (name: AuthCookieName): ReturnType<PlainCookieStore["get"]> => {
     const rawValue = this.store.get(getFullCookieName(name));
+    console.log("rawValue", rawValue);
     if (rawValue) {
       try {
         return {
           ...rawValue,
           value: encryption.decrypt(rawValue.value),
         };
-      } catch {
+      } catch (e) {
+        console.error(e);
         return undefined;
       }
     } else {
