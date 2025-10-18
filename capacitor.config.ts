@@ -20,6 +20,9 @@ const config: CapacitorConfig = {
     StatusBar: {
       overlaysWebView: false,
     },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
   ios: {
     limitsNavigationsToAppBoundDomains: true,

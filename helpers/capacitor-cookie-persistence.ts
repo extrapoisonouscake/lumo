@@ -4,6 +4,7 @@ import {
   IS_LOGGED_IN_COOKIE_NAME,
 } from "@/constants/auth";
 import { isMobileApp } from "@/constants/ui";
+import { WEBSITE_ROOT } from "@/constants/website";
 import { CapacitorCookies } from "@capacitor/core";
 import { Preferences } from "@capacitor/preferences";
 
@@ -36,7 +37,7 @@ export async function getAuthCookiesFromBrowser(): Promise<
     authCookies[IS_LOGGED_IN_COOKIE_NAME] =
       allCookies[IS_LOGGED_IN_COOKIE_NAME];
   }
-
+  console.log(authCookies);
   return authCookies;
 }
 
@@ -84,7 +85,7 @@ export async function restoreAuthCookiesFromPreferences(): Promise<boolean> {
       CapacitorCookies.setCookie({
         key,
         value,
-        path: "/",
+        url: WEBSITE_ROOT,
       })
     );
 
