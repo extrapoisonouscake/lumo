@@ -14,9 +14,11 @@ export const createTRPCContext = async () => {
   const store = await cookies();
   console.log("cookies", store.getAll());
   const cookieStore = await MyEdCookieStore.create(store);
+  console.log("cookieStore", cookieStore.getAll());
   let studentDatabaseId, username, password, tokens, studentId;
   try {
     studentId = cookieStore.get("studentId")?.value;
+    console.log("studentId", studentId);
     if (studentId) {
       studentDatabaseId = hashString(studentId);
     }
@@ -24,7 +26,9 @@ export const createTRPCContext = async () => {
     [username, password] =
       credentials?.split("|").map(decodeURIComponent) ?? [];
     tokens = cookieStore.get("tokens")?.value;
-  } catch {}
+  } catch (e) {
+    console.error(e);
+  }
   const ip = ((await headers()).get("x-forwarded-for") ?? "127.0.0.1").split(
     ","
   )[0];
