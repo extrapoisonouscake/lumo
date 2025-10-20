@@ -20,8 +20,7 @@ const config: CapacitorConfig = {
     limitsNavigationsToAppBoundDomains: true,
   },
   server: {
-    //NODE_ENV doesnt work???!
-    hostname: "lumobc.ca",
+    hostname: process.env.NODE_ENV === "production" ? "lumobc.ca" : "localhost",
     androidScheme: "https",
   },
 };

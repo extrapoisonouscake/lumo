@@ -142,6 +142,5 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   ],
 };
 
-const environment = process.env.NEXT_PUBLIC_NODE_ENV ?? process.env.NODE_ENV;
-export const isDevelopment = environment === "development";
-export const isProduction = environment === "production";
+export const isDevelopment = process.env.NODE_ENV === "development";
+export const isProduction = process.env.NODE_ENV === "production";

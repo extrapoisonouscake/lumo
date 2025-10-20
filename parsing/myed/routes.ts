@@ -394,17 +394,24 @@ export const myEdParsingRoutes = {
       },
       ({ metadata: { shouldSetupFilters } }) => shouldSetupFilters
     ),
-  transcriptEntries: new Route().step({
-    method: "GET",
-    path: "/transcriptList.do?navkey=myInfo.trn.list",
-    expect: "html",
-  }),
-  creditSummary: new Route().step({
-    method: "GET",
-    path: "/creditSummary.do?navkey=myInfo.credits.summary",
-    expect: "html",
-  }),
+  transcriptEntries: new Route()
+    .step({
+      method: "GET",
+      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
+      expect: "html",
+    })
+    .step({
+      method: "GET",
+      path: "/transcriptList.do?navkey=myInfo.trn.list",
+      expect: "html",
+    }),
   graduationSummary: new Route()
+
+    .step({
+      method: "GET",
+      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
+      expect: "html",
+    })
     .step({
       method: "GET",
       path: "/graduationSummary.do?includeProjection=false&navkey=myInfo.gradSummary.graduation",

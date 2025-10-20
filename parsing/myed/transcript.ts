@@ -1,6 +1,5 @@
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
 import {
-  CreditSummaryEntry,
   ProgramEntry,
   ProgramMinifiedRequirement,
   ProgramRequirement,
@@ -29,36 +28,6 @@ export function parseTranscriptEntries({
       subjectName: prettifyEducationalName(subject!),
       finalGrade: finalGrade ? +finalGrade : null,
       creditAmount: +credit!,
-    };
-  });
-  return transcript;
-}
-const NUMBER_EXTRACT_REGEX = /^\d+(\.\d+)?$/;
-export function parseCreditSummary({
-  responses,
-}: ParserFunctionArguments<"creditSummary">): CreditSummaryEntry[] {
-  const $ = responses.at(-1)!;
-  const $tableBody = $getGenericContentTableBody($);
-  if (!$tableBody) throw new Error("No table body");
-  if ("knownError" in $tableBody) throw new Error($tableBody.knownError);
-  const values = $getTableValues($tableBody);
-  //last row is the total
-  values.pop();
-  const transcript = values.map((row) => {
-    const [yearsString, grade, transcriptCreditsString, adjustedCreditsString] =
-      row;
-    const transcriptCredits = +transcriptCreditsString!.trim();
-    const adjustedCredits = +adjustedCreditsString!.trim();
-    const totalCredits = transcriptCredits + adjustedCredits;
-    return {
-      years: yearsString!
-        .trim()
-        .split("-")
-        .map((year) => +year) as [number, number],
-      grade: +grade!.trim(),
-      transcriptCredits,
-      adjustedCredits,
-      totalCredits,
     };
   });
   return transcript;

@@ -1,8 +1,24 @@
 import { Subject, SubjectSummary } from "@/types/school";
-import { getTRPCQueryOptions, trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useQueries } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { SubjectYear } from "../../types/school";
-
+const getQueries = ({
+  ids,
+  year,
+}: {
+  ids?: Subject["id"][];
+  year: SubjectYear;
+}) => {
+  return ids
+    ? ids.map((id) =>
+        getTRPCQueryOptions(trpc.myed.subjects.getSubjectInfo)({
+          id,
+          year,
+        })
+      )
+    : [];
+};
 export function useSubjectSummaries<TSelected = SubjectSummary>(
   {
     ids,
@@ -13,15 +29,27 @@ export function useSubjectSummaries<TSelected = SubjectSummary>(
   },
   select?: (data: SubjectSummary) => TSelected
 ) {
+  const [queries, setQueries] = useState(() => getQueries({ ids, year }));
+  useEffect(() => {
+    if (queries) {
+      const newQueries = getQueries({ ids, year });
+      const differentQueries = queries.filter(
+        (q) =>
+          !newQueries.some(
+            (nq) => nq.queryKey.join(",") === q.queryKey.join(",")
+          )
+      );
+
+      differentQueries.forEach((q) => {
+        queryClient.cancelQueries({ queryKey: q.queryKey });
+      });
+      setQueries(newQueries);
+    } else {
+      setQueries(getQueries({ ids, year }));
+    }
+  }, [ids?.join(","), year]);
   const query = useQueries({
-    queries: ids
-      ? ids.map((id) =>
-          getTRPCQueryOptions(trpc.myed.subjects.getSubjectInfo)({
-            id,
-            year,
-          })
-        )
-      : [],
+    queries,
     combine: (results) => {
       const filteredData = results
         .map((result) =>
@@ -43,5 +71,6 @@ export function useSubjectSummaries<TSelected = SubjectSummary>(
       };
     },
   });
+
   return query;
 }

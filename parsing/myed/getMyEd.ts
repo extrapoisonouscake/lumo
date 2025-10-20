@@ -25,11 +25,7 @@ import {
   parseSubjects,
   parseSubjectSummary,
 } from "./subjects";
-import {
-  parseCreditSummary,
-  parseGraduationSummary,
-  parseTranscriptEntries,
-} from "./transcript";
+import { parseGraduationSummary, parseTranscriptEntries } from "./transcript";
 import { ParserFunctionArguments } from "./types";
 const voidFunction = () => {};
 const endpointToParsingFunction = {
@@ -43,7 +39,7 @@ const endpointToParsingFunction = {
   subjectIdByName: parseSubjectIdByName,
   subjectAttendance: parseSubjectAttendance,
   transcriptEntries: parseTranscriptEntries,
-  creditSummary: parseCreditSummary,
+
   graduationSummary: parseGraduationSummary,
   assignmentFileSubmissionState: parseAssignmentFileSubmissionState,
   uploadAssignmentFile: voidFunction,

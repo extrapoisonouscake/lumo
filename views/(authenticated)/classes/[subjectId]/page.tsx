@@ -53,22 +53,35 @@ export default function SubjectPage() {
                 {...summary}
                 shouldShowLetterGrade={settings.shouldShowLetterGrade}
               />
+
               <QueryWrapper
                 query={assignments}
                 skeleton={<SubjectAssignmentsTableSkeleton />}
               >
                 {(data) => (
-                  <SubjectAssignmentsTable
-                    {...data}
-                    assignments={data.assignments.map((assignment, index) => ({
-                      ...assignment,
-                      hasSubmission:
-                        !!assignmentsSubmissionStatuses[index]?.file,
-                    }))}
-                    term={termId ?? undefined}
-                    categories={summary.academics.categories}
-                    categoryId={category}
-                  />
+                  <>
+                    {/* <DesiredAverageCalculator
+                      assignments={data.assignments}
+                      categories={summary.academics.categories}
+                      currentAverage={
+                        summary.academics.running.overall ??
+                        summary.academics.posted.overall
+                      }
+                    /> */}
+                    <SubjectAssignmentsTable
+                      {...data}
+                      assignments={data.assignments.map(
+                        (assignment, index) => ({
+                          ...assignment,
+                          hasSubmission:
+                            !!assignmentsSubmissionStatuses[index]?.file,
+                        })
+                      )}
+                      term={termId ?? undefined}
+                      categories={summary.academics.categories}
+                      categoryId={category}
+                    />
+                  </>
                 )}
               </QueryWrapper>
             </div>

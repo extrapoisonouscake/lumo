@@ -40,11 +40,6 @@ const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 const serviceWorkerPath = `/sw/sw.js`;
 export default function Root() {
   useEffect(() => {
-    console.log(
-      process.env.NODE_ENV,
-      process.env.NEXT_PUBLIC_NODE_ENV,
-      process.env
-    );
     // Clear expired cache keys on startup
     storage.clearExpired();
 

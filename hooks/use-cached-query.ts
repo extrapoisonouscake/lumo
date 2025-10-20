@@ -39,6 +39,7 @@ export function useCachedQuery<
 
   // Load cached response on mount
   useEffect(() => {
+    setCachedResponse(undefined);
     getCachedClientResponse<TData>(cacheKey).then((response) => {
       if (response) {
         setCachedResponse(response);

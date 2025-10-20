@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { isIOSApp } from "@/constants/ui";
+import { isIOSApp, isMobileApp } from "@/constants/ui";
 
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor, setThemeColorCSSVariable } from "@/helpers/theme";
@@ -30,6 +30,7 @@ export const getIOSAppIconName = (key: string) => {
   return `${key !== "default" ? capitalize(key) : ""}${IOS_APP_ICON_SUFFIX}`;
 };
 export const reconcileMobileAppIcon = async (currentTheme: string) => {
+  if (!isMobileApp) return;
   AppIcon.getName().then(async ({ value: rawIconName }) => {
     const iconName =
       rawIconName?.replace(IOS_APP_ICON_SUFFIX, "").toLowerCase() || "default";

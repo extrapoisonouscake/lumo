@@ -24,6 +24,7 @@ export default function SubjectsPage() {
     isPreviousYear,
     termId: isPreviousYear && !term ? MYED_ALL_GRADE_TERMS_SELECTOR : term,
   });
+
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
     year: isPreviousYear ? "previous" : "current",
@@ -33,7 +34,6 @@ export default function SubjectsPage() {
       Object.values(subjectSummaries.data)[0]?.currentTermIndex ?? undefined,
     [subjectSummaries.data]
   );
-
   return (
     <>
       <TitleManager>Classes</TitleManager>
