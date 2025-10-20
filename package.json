@@ -16,13 +16,13 @@
     "redis:dev": "docker run -it -d -p 8080:80 --name srh -e SRH_MODE=env -e SRH_TOKEN=token -e SRH_CONNECTION_STRING=\"redis://127.0.0.1:6379\" hiett/serverless-redis-http:latest",
     "db:update": "drizzle-kit push",
     "prepare": "husky",
-    "build:static": "rm -rf .next && mv app/api temp_api && NEXT_PUBLIC_IS_MOBILE=true next build ; mv temp_api app/api",
+    "build:static": "rm -rf .next && mv ./app/api ./temp_api && NEXT_PUBLIC_NODE_ENV=production NEXT_PUBLIC_IS_MOBILE=true next build ; mv ./temp_api ./app/api",
+    "build:static:dev": "NEXT_PUBLIC_NODE_ENV=development npm run build:static",
     "ios:dev": "ionic cap run ios -l --external"
   },
   "dependencies": {
     "@aparajita/capacitor-ios-silent-notifications": "^2.0.1",
     "@capacitor-community/app-icon": "^6.0.0",
-    "@capacitor/background-runner": "^2.2.0",
     "@capacitor/core": "^7.4.3",
     "@capacitor/ios": "^7.4.3",
     "@capacitor/network": "^7.0.2",

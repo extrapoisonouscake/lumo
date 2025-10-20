@@ -1,5 +1,5 @@
 import { isIOS, isIOSApp } from "@/constants/ui";
-import { APP_STORE_APP_ID } from "@/constants/website";
+import { APP_STORE_APP_ID, WEBSITE_TITLE } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import AppStoreBadge from "@/public/assets/app-store-badge.svg";
 import {
@@ -102,7 +102,7 @@ export function AppStoreAppCombinedLogo({ className }: { className?: string }) {
 
       <img
         src="/assets/app-store-app-icon.png"
-        alt="Lumo App Icon"
+        alt={`${WEBSITE_TITLE} App Icon`}
         className="size-14 -ml-4"
       />
     </div>

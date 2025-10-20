@@ -318,3 +318,39 @@
     }
   }
 }
+
+/* Print styles */
+@media print {
+  @page {
+    size: 11in 8.5in;
+    margin: 0;
+  }
+  body {
+    margin: 0.5in;
+    overflow: visible !important;
+  }
+  /* Hide elements with no-print class */
+  .no-print {
+    display: none !important;
+  }
+
+  * {
+    border-color: #c2c2c2 !important;
+  }
+  *:not(.preserve-color):not(.preserve-color *) {
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Ensure proper spacing for print */
+  .root-container {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Style for print-friendly text colors */
+  .text-brand,
+  th {
+    color: #6b7280 !important; /* muted-foreground equivalent */
+  }
+}

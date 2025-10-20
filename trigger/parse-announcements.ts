@@ -12,7 +12,6 @@ import {
 import { zodEnum } from "@/types/utils";
 import { runs, schedules, schemaTask } from "@trigger.dev/sdk/v3";
 import * as cheerio from "cheerio";
-import fs from "fs";
 import { z } from "zod";
 export const directURLFunctionsBySchool: Record<
   KnownSchools,
@@ -58,7 +57,6 @@ export const directURLFunctionsBySchool: Record<
         throw new Error("Failed to fetch home page");
       }
       const html = await homePageResponse.text();
-      fs.writeFileSync("vanier.html", html);
       const $ = cheerio.load(html);
 
       const parsedURL = $(

@@ -1,6 +1,8 @@
+import { isDevelopment } from "./core";
+
 export const AUTH_COOKIES_PREFIX = "auth";
 export const SESSION_EXPIRED_ERROR_MESSAGE = "Session expired";
-export const shouldSecureCookies = process.env.NODE_ENV !== "development";
+export const shouldSecureCookies = !isDevelopment;
 export const COOKIE_MAX_AGE = 34560000;
 export const SESSION_TTL_IN_SECONDS = 3600;
 export const AUTH_COOKIES_NAMES = {

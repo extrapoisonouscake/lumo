@@ -11,7 +11,7 @@ import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-use
 import { AppIcon } from "@capacitor-community/app-icon";
 import { Tick02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { capitalize } from "../../../helpers/prettifyEducationalName";
 const AVAILABLE_THEMES = {
   default: USER_SETTINGS_DEFAULT_VALUES.themeColor,
@@ -26,33 +26,30 @@ const AVAILABLE_THEMES = {
   purple: "239 77% 70%",
 };
 const IOS_APP_ICON_SUFFIX = "AppIcon";
-const getIOSAppIconName = (key: string) => {
+export const getIOSAppIconName = (key: string) => {
   return `${key !== "default" ? capitalize(key) : ""}${IOS_APP_ICON_SUFFIX}`;
+};
+export const reconcileMobileAppIcon = async (currentTheme: string) => {
+  AppIcon.getName().then(async ({ value: rawIconName }) => {
+    const iconName =
+      rawIconName?.replace(IOS_APP_ICON_SUFFIX, "").toLowerCase() || "default";
+    const currentThemeKey = Object.keys(AVAILABLE_THEMES).find(
+      (key) =>
+        AVAILABLE_THEMES[key as keyof typeof AVAILABLE_THEMES] === currentTheme
+    );
+    if (currentThemeKey && currentThemeKey !== iconName) {
+      const formattedName = getIOSAppIconName(currentThemeKey);
+
+      await AppIcon.change({
+        name: formattedName,
+        suppressNotification: false,
+      });
+    }
+  });
 };
 export function ThemePicker({ initialValue }: { initialValue: string }) {
   const [currentTheme, setCurrentTheme] = useState(initialValue);
-  useEffect(() => {
-    if (isIOSApp) {
-      AppIcon.getName().then(async ({ value: rawIconName }) => {
-        const iconName =
-          rawIconName?.replace(IOS_APP_ICON_SUFFIX, "").toLowerCase() ||
-          "default";
-        const currentThemeKey = Object.keys(AVAILABLE_THEMES).find(
-          (key) =>
-            AVAILABLE_THEMES[key as keyof typeof AVAILABLE_THEMES] ===
-            currentTheme
-        );
-        if (currentThemeKey && currentThemeKey !== iconName) {
-          const formattedName = getIOSAppIconName(currentThemeKey);
 
-          await AppIcon.change({
-            name: formattedName,
-            suppressNotification: false,
-          });
-        }
-      });
-    }
-  }, []);
   const updateUserSettingMutation = useUpdateGenericUserSetting();
   const updateThemeLocally = (theme: string) => {
     setCurrentTheme(theme);

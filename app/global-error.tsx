@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { WEBSITE_TITLE } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import "@/views/globals.css";
 import { RefreshStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
@@ -18,7 +19,7 @@ export default function GlobalError({ error }: { error: Error }) {
         <main className="size-full flex flex-col justify-center gap-4 items-center">
           <img
             src="/assets/app-store-app-icon.png"
-            alt="Lumo App Icon"
+            alt={`${WEBSITE_TITLE} App Icon`}
             className="size-14"
           />
           <div className="flex flex-col gap-2">

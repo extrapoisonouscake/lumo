@@ -192,7 +192,7 @@ const Sidebar = React.forwardRef<
         <div
           ref={ref}
           className={cn(
-            "fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t bg-sidebar text-sidebar-foreground sm:hidden pb-(--adjusted-safe-area-inset-bottom)",
+            "no-print fixed bottom-0 left-0 right-0 z-50 flex w-full items-center justify-center border-t bg-sidebar text-sidebar-foreground sm:hidden pb-(--adjusted-safe-area-inset-bottom)",
             className
           )}
           {...props}
@@ -207,7 +207,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden sm:block text-sidebar-foreground z-50"
+        className="no-print group peer hidden sm:block text-sidebar-foreground z-50"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}

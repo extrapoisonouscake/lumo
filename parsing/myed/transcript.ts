@@ -165,8 +165,12 @@ function parseEducationPlans($: cheerio.CheerioAPI): TranscriptEducationPlan[] {
 const parseEducationPlanCompletedUnits = (string: string) => {
   const match = string.match(/^(\d+(?:\.\d+)?)(?:\s*\((\d+(?:\.\d+)?)\))?$/);
 
-  if (!match)
-    throw new Error(`Invalid education plan completed units: ${string}`);
+  if (!match) {
+    return {
+      completedUnits: 0,
+      excessUnits: 0,
+    };
+  }
   const [, completedUnits, excessUnits = "0"] = match;
   return {
     completedUnits: +completedUnits!,

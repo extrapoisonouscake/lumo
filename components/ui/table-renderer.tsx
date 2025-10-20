@@ -90,7 +90,10 @@ export function TableRenderer<T>({
   }
   const content = (
     <div
-      className={cn("rounded-xl r border overflow-auto", containerClassName)}
+      className={cn(
+        "rounded-xl r border overflow-auto print:overflow-visible",
+        containerClassName
+      )}
     >
       <Table {...props} containerClassName={tableContainerClassName}>
         <TableHeader>

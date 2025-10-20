@@ -1,15 +1,11 @@
 import UIKit
 import Capacitor
-import CapacitorBackgroundRunner
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        BackgroundRunnerPlugin.registerBackgroundTask()
-        BackgroundRunnerPlugin.handleApplicationDidFinishLaunching(launchOptions: launchOptions)
-        // Override point for customization after application launch.
         return true
     }
 

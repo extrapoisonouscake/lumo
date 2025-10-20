@@ -68,6 +68,7 @@ export const sendApplePushNotification = async (
   if ("contentAvailable" in data) {
     notification.contentAvailable = true;
     notification.pushType = "background";
+    notification.priority = 5;
   } else {
     notification.alert = {
       title: data.title,

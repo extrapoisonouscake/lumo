@@ -29,7 +29,12 @@ export function PageHeading({
   const isMobile = useIsMobile();
 
   return (
-    <div className={cn("flex justify-between gap-4 items-start", className)}>
+    <div
+      className={cn(
+        "no-print flex justify-between gap-4 items-start",
+        className
+      )}
+    >
       {leftContent ?? (isMobile ? dynamicContent : null) ?? (
         <DefaultLeftContent shouldShowBackButton={shouldShowBackButton} />
       )}

@@ -73,7 +73,8 @@ export function GPAOverview({
       }) satisfies Omit<InferredTranscriptEntry, "grade">
   );
   const student = useStudentDetails();
-
+  //GPA matters only for grade 11 and above
+  if (student.isSuccess && student.data.grade < 11) return null;
   return (
     <QueryWrapper query={transcriptEntries} skeleton={<GPAOverviewSkeleton />}>
       {(data) => (
@@ -117,7 +118,7 @@ function Content({
       (entry) =>
         entry.finalGrade !== null &&
         entry.creditAmount !== null &&
-        entry.grade >= currentGrade - 1
+        entry.grade >= 11
     );
 
     const seenNames = new Set();
@@ -149,7 +150,7 @@ function Content({
           </p>
           <HugeiconsIcon
             icon={InformationCircleStrokeRounded}
-            className="size-4 text-muted-foreground group-hover:text-foreground transition-colors"
+            className="no-print size-4 text-muted-foreground group-hover:text-foreground transition-colors"
           />
         </div>
       </ResponsiveDialogTrigger>
@@ -273,7 +274,7 @@ function TranscriptEntryCard(entry: InferredTranscriptEntry) {
 }
 function GPAOverviewSkeleton() {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 no-print">
       <p>GPA:</p>
       <Spinner className="size-4 text-brand" />
       <Skeleton className="text-sm">99% (4.0)</Skeleton>

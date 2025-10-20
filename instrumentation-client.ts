@@ -3,11 +3,12 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from "@sentry/nextjs";
+import { isProduction } from "./constants/core";
 
 Sentry.init({
   dsn: "https://044f7cfed8d518021870324fa7e59d7e@o4509261052641280.ingest.us.sentry.io/4509261053493248",
 
-  enabled: process.env.NODE_ENV === "production",
+  enabled: isProduction,
   // Add optional integrations for additional features
   integrations: [Sentry.replayIntegration()],
 

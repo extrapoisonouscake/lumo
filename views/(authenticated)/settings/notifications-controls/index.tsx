@@ -1,7 +1,7 @@
-import { isIOS, isIOSApp } from "@/constants/ui";
+import { isIOS, isIOSApp, isMobileApp } from "@/constants/ui";
 
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { trpc } from "@/views/trpc";
+import { trpc, trpcClient } from "@/views/trpc";
 import { PermissionState } from "@capacitor/core";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { useMutation } from "@tanstack/react-query";
@@ -10,8 +10,96 @@ import { toast } from "sonner";
 import { AsyncSwitchField } from "../async-switch-field";
 import { IOSNotificationsHelpDrawer } from "./ios-notifications-help-drawer";
 //assuming notifications are supported if iOS and not in PWA
-const areNotificationsSupported = "Notification" in window || isIOSApp;
+const areNotificationsSupported = "Notification" in window || isMobileApp;
 const areNotificationsImplicitlySupported = isIOS || areNotificationsSupported;
+
+export const initPush =
+  (
+    requestNotificationPermission: () => Promise<boolean>,
+    silenceToast = false
+  ) =>
+  async () => {
+    if (
+      !areNotificationsSupported ||
+      (!isIOSApp &&
+        (!("serviceWorker" in navigator) || !("PushManager" in window)))
+    ) {
+      if (!silenceToast) {
+        toast.error("Push notifications are not supported in this browser");
+      }
+      throw new Error("Unsupported browser");
+    }
+
+    const permissionGranted = await requestNotificationPermission();
+    if (!permissionGranted) {
+      if (!silenceToast) {
+        toast.error(
+          `Please allow push notifications in your ${
+            isIOSApp ? "iOS" : "browser"
+          }settings.
+      }`
+        );
+      }
+      throw new Error("Permission denied");
+    }
+
+    if (isIOSApp) {
+      let promiseMethods: {
+        resolve: (value: string) => void;
+        reject: (reason?: any) => void;
+      };
+      const registrationSettled = new Promise<string>((resolve, reject) => {
+        promiseMethods = { resolve, reject };
+      });
+      const [
+        { remove: removeRegistrationListener },
+        { remove: removeRegistrationErrorListener },
+      ] = await Promise.all([
+        PushNotifications.addListener("registration", (token) => {
+          console.log("Registration successful", token.value);
+          promiseMethods.resolve(token.value);
+        }),
+        PushNotifications.addListener("registrationError", (err) => {
+          console.log("Registration error", err.error);
+          promiseMethods.reject(err.error);
+        }),
+      ]);
+      try {
+        await PushNotifications.register();
+
+        const apnsToken = await registrationSettled;
+
+        await trpcClient.core.settings.subscribeToNotifications.mutate({
+          apnsDeviceToken: apnsToken,
+        });
+      } catch (e) {
+        if (!silenceToast) {
+          toast.error(
+            "Failed to register for notifications. Please try again later."
+          );
+        }
+        throw e;
+      } finally {
+        removeRegistrationListener();
+        removeRegistrationErrorListener();
+      }
+    } else {
+      const registration = await waitForServiceWorker();
+
+      const subscription = await getWebPushSubscription(registration);
+      const { endpoint, keys } = subscription.toJSON();
+      if (!endpoint || !keys) {
+        toast.error("Push notifications are not supported in this browser.");
+        throw new Error("Unsupported browser");
+      }
+      await trpcClient.core.settings.subscribeToNotifications.mutate({
+        endpointUrl: endpoint,
+        publicKey: keys.p256dh!,
+        authKey: keys.auth!,
+      });
+    }
+  };
+
 export function NotificationsControls({
   initialValue,
 }: {
@@ -54,79 +142,7 @@ export function NotificationsControls({
       return permission === "granted";
     }
   };
-  const initPush = async () => {
-    if (
-      !areNotificationsSupported ||
-      (!isIOSApp &&
-        (!("serviceWorker" in navigator) || !("PushManager" in window)))
-    ) {
-      toast.error("Push notifications are not supported in this browser");
-      throw new Error("Unsupported browser");
-    }
 
-    const permissionGranted = await requestNotificationPermission();
-    if (!permissionGranted) {
-      toast.error(
-        `Please allow push notifications in your ${
-          isIOSApp ? "iOS" : "browser"
-        }settings.
-        }`
-      );
-      throw new Error("Permission denied");
-    }
-
-    if (isIOSApp) {
-      let promiseMethods: {
-        resolve: (value: string) => void;
-        reject: (reason?: any) => void;
-      };
-      const registrationSettled = new Promise<string>((resolve, reject) => {
-        promiseMethods = { resolve, reject };
-      });
-      const [
-        { remove: removeRegistrationListener },
-        { remove: removeRegistrationErrorListener },
-      ] = await Promise.all([
-        PushNotifications.addListener("registration", (token) => {
-          promiseMethods.resolve(token.value);
-        }),
-        PushNotifications.addListener("registrationError", (err) => {
-          promiseMethods.reject(err.error);
-        }),
-      ]);
-      try {
-        await PushNotifications.register();
-
-        const apnsToken = await registrationSettled;
-
-        await subscribeToNotificationsMutation.mutateAsync({
-          apnsDeviceToken: apnsToken,
-        });
-      } catch (e) {
-        toast.error(
-          "Failed to register for notifications. Please try again later."
-        );
-        throw e;
-      } finally {
-        removeRegistrationListener();
-        removeRegistrationErrorListener();
-      }
-    } else {
-      const registration = await waitForServiceWorker();
-
-      const subscription = await getWebPushSubscription(registration);
-      const { endpoint, keys } = subscription.toJSON();
-      if (!endpoint || !keys) {
-        toast.error("Push notifications are not supported in this browser.");
-        throw new Error("Unsupported browser");
-      }
-      await subscribeToNotificationsMutation.mutateAsync({
-        endpointUrl: endpoint,
-        publicKey: keys.p256dh!,
-        authKey: keys.auth!,
-      });
-    }
-  };
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -154,7 +170,7 @@ export function NotificationsControls({
             updateUserSettingState("notificationsEnabled", newValue);
             try {
               if (newValue) {
-                await initPush();
+                await initPush(requestNotificationPermission)();
               } else {
                 const promises = [];
                 promises.push(

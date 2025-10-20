@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.lumobc.lumo.notifications</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -135,6 +131,7 @@
 	<key>WKAppBoundDomains</key>
 	<array>
 		<string>lumobc.ca</string>
+		<string>localhost</string>
 	</array>
 </dict>
 </plist>

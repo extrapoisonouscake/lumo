@@ -1,3 +1,4 @@
+import { isProduction } from "@/constants/core";
 import { drizzle, PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import * as schema from "./schema";
 type DB = PostgresJsDatabase<typeof schema>;
@@ -8,7 +9,7 @@ declare global {
 
 let db: DB;
 
-if (process.env.NODE_ENV === "production") {
+if (isProduction) {
   db = drizzle(process.env.DATABASE_URL!, { schema });
 } else {
   if (!global.db) global.db = drizzle(process.env.DATABASE_URL!, { schema });

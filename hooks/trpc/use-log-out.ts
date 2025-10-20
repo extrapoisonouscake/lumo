@@ -14,13 +14,12 @@ export function useLogOut(navigate: ReturnType<typeof useNavigate>) {
     onSuccess: async () => {
       storage.clear();
 
+      navigate("/login");
+      setThemeColorCSSVariable(USER_SETTINGS_DEFAULT_VALUES.themeColor);
       // Clear cookies from Preferences on mobile
       if (isMobileApp) {
         await clearAuthCookies();
       }
-
-      navigate("/login");
-      setThemeColorCSSVariable(USER_SETTINGS_DEFAULT_VALUES.themeColor);
     },
   });
 }

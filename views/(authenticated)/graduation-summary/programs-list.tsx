@@ -77,7 +77,7 @@ export function GraduationSummaryProgramsList({
         <div className="flex items-center gap-2">
           <HugeiconsIcon
             icon={ScrollStrokeRounded}
-            className="h-5 w-5 text-brand"
+            className="h-5 w-5 text-brand print:text-muted-foreground"
           />
           <h2 className="text-lg font-semibold">Programs</h2>
         </div>
@@ -131,10 +131,11 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
       <p className="text-sm text-muted-foreground">Total</p>
       <div className="flex items-center gap-1.5">
         <p className="text-sm font-medium">
-          {totalCompletedUnits.toFixed(1)} / {totalRequiredUnits.toFixed(1)}{" "}
-          units{" "}
+          {(totalCompletedUnits + totalPendingUnits).toFixed(1)} /{" "}
+          {totalRequiredUnits.toFixed(1)} units{" "}
           <span className="text-muted-foreground">
-            ({percentages.completed.toFixed(1)}%)
+            ({(percentages.completed + percentages.pending).toFixed(1)}
+            %)
           </span>
         </p>
         {percentages.completed >= 100 ? (
@@ -156,6 +157,7 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
               },
             ]}
             size="small"
+            className="no-print"
           />
         )}
       </div>
@@ -186,99 +188,102 @@ function ProgramCard({
   const isExcluded = !program.isIncluded;
 
   return (
-    <Card className="p-4 gap-3 justify-between pb-0">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between">
-          <h3 className="font-medium truncate" title={displayName}>
-            {displayName}
-          </h3>
-          {isExcluded && (
-            <Badge variant="outline" className="text-muted-foreground pl-1">
-              <HugeiconsIcon
-                icon={MinusSignCircleStrokeRounded}
-                className="h-3 w-3"
-              />
-              Excluded
-            </Badge>
+    <Card className="p-4 justify-between pb-0 print:pb-4">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium truncate" title={displayName}>
+              {displayName}
+            </h3>
+            {isExcluded && (
+              <Badge variant="outline" className="text-muted-foreground pl-1">
+                <HugeiconsIcon
+                  icon={MinusSignCircleStrokeRounded}
+                  className="h-3 w-3"
+                />
+                Excluded
+              </Badge>
+            )}
+          </div>
+
+          {program.creditsWaived !== undefined && program.creditsWaived > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {program.creditsWaived} credits waived
+            </p>
           )}
         </div>
 
-        {program.creditsWaived !== undefined && program.creditsWaived > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {program.creditsWaived} credits waived
-          </p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <div className="flex justify-between text-sm text-muted-foreground">
-          <span>Progress</span>
-          <span className="font-medium text-primary">
-            {program.completedUnits.toFixed(1)} /{" "}
-            {program.requiredUnits.toFixed(1)} units{" "}
-            {!!program.pendingUnits && (
-              <>
-                {" "}
-                <span className="text-muted-foreground font-normal text-xs">
-                  ({program.pendingUnits.toFixed(1)} in progress)
-                </span>
-              </>
-            )}
-          </span>
-        </div>
-
-        <Progress
-          segments={
-            percentages
-              ? [
-                  { value: percentages.completed, color: "bg-green-500" },
-                  {
-                    value: percentages.pending ?? 0,
-                    color: "bg-yellow-400",
-                  },
-                ]
-              : []
-          }
-          className="h-2"
-          indicatorClassName={cn(isExcluded && "bg-muted-foreground/30")}
-        />
-
-        {percentages && (
-          <div className="flex justify-end text-xs">
-            <span
-              className={cn(
-                "font-medium",
-                isExcluded ? "text-muted-foreground" : "text-green-500"
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Progress</span>
+            <span className="font-medium text-primary">
+              {(
+                program.completedUnits + (program.limitedPendingUnits ?? 0)
+              ).toFixed(1)}{" "}
+              / {program.requiredUnits.toFixed(1)} units{" "}
+              {!!program.limitedPendingUnits && (
+                <>
+                  <span className="text-muted-foreground font-normal text-xs">
+                    ({program.limitedPendingUnits.toFixed(1)} in progress)
+                  </span>
+                </>
               )}
-            >
-              {percentages.completed.toFixed(1)}%
             </span>
           </div>
-        )}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onViewRequirements}
-          disabled={!program.requirements || program.requirements.length === 0}
-          className="w-full text-xs h-fit hover:bg-transparent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pb-4"
-        >
-          {program.requirements && program.requirements.length > 0 ? (
-            <>
-              <HugeiconsIcon icon={CheckListStrokeRounded} className="size-3" />
-              View Requirements
-            </>
-          ) : (
-            <>
-              <HugeiconsIcon
-                icon={MinusSignCircleStrokeRounded}
-                className="size-3"
-              />
-              No Requirements
-            </>
+          <Progress
+            segments={
+              percentages
+                ? [
+                    { value: percentages.completed, color: "bg-green-500" },
+                    {
+                      value: percentages.pending ?? 0,
+                      color: "bg-yellow-400",
+                    },
+                  ]
+                : []
+            }
+            className="h-2"
+            indicatorClassName={cn(
+              "preserve-color",
+              isExcluded && "bg-muted-foreground/30"
+            )}
+          />
+
+          {percentages && (
+            <div className="flex justify-end text-xs">
+              <span className={cn("font-medium", "text-muted-foreground")}>
+                {(percentages.completed + (percentages.pending ?? 0)).toFixed(
+                  1
+                )}
+                %
+              </span>
+            </div>
           )}
-        </Button>
+        </div>
       </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onViewRequirements}
+        disabled={!program.requirements || program.requirements.length === 0}
+        className="w-full text-xs h-fit hover:bg-transparent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pt-2 pb-4 no-print"
+      >
+        {program.requirements && program.requirements.length > 0 ? (
+          <>
+            <HugeiconsIcon icon={CheckListStrokeRounded} className="size-3" />
+            View Requirements
+          </>
+        ) : (
+          <>
+            <HugeiconsIcon
+              icon={MinusSignCircleStrokeRounded}
+              className="size-3"
+            />
+            No Requirements
+          </>
+        )}
+      </Button>
     </Card>
   );
 }

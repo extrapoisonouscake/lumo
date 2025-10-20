@@ -22,7 +22,7 @@ export default function MaintenancePage() {
     if (healthCheck.data?.isHealthy) {
       navigate("/");
     }
-  }, [healthCheck.data?.isHealthy]);
+  }, [healthCheck.data]);
 
   return (
     <>

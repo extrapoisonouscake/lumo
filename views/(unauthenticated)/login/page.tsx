@@ -1,5 +1,6 @@
 import { Logo } from "@/components/misc/logo";
 import { TitleManager } from "@/components/misc/title-manager";
+import { WEBSITE_TITLE } from "@/constants/website";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { loginSchema } from "@/lib/trpc/routes/myed/auth/public";
 import MyEducationBCLogo from "@/public/assets/myeducationbc.svg";
@@ -58,9 +59,11 @@ export default function LoginPage() {
               <div className="space-y-0.5 text-sm text-muted-foreground text-center max-w-[450px]">
                 <p>
                   Use your MyEducationBC username and password to sign in to
-                  Lumo.
+                  {WEBSITE_TITLE}.
                 </p>
-                <p>Your data is fully encrypted and stored on your device.</p>
+                <p>
+                  Your data is stored on your device and is fully encrypted.
+                </p>
               </div>
             </div>
           </div>

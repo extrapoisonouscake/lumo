@@ -2,7 +2,10 @@ import { createTRPCClient, httpLink, retryLink } from "@trpc/client";
 
 import { isMobileApp } from "@/constants/ui";
 import { WEBSITE_ROOT } from "@/constants/website";
-import { saveAuthCookiesToPreferences } from "@/helpers/capacitor-cookie-persistence";
+import {
+  clearAuthCookies,
+  saveAuthCookiesToPreferences,
+} from "@/helpers/capacitor-cookie-persistence";
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
@@ -21,7 +24,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
-      retry: false,
+      retry: 3,
     },
     dehydrate: {
       shouldDehydrateQuery: (query) =>
@@ -88,6 +91,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         const code = opts.error.data?.code;
 
         if (code === "UNAUTHORIZED") {
+          clearAuthCookies();
           window.location.href = "/login";
         }
         return false; // Never retry

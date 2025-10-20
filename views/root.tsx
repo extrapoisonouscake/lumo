@@ -32,6 +32,7 @@ import UnauthenticatedLayout from "./(unauthenticated)/layout";
 import PrivacyPolicyPage from "./(unauthenticated)/legal/privacy-policy/page";
 import LoginPage from "./(unauthenticated)/login/page";
 
+import { isProduction } from "@/constants/core";
 import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
 const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
@@ -39,11 +40,16 @@ const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 const serviceWorkerPath = `/sw/sw.js`;
 export default function Root() {
   useEffect(() => {
+    console.log(
+      process.env.NODE_ENV,
+      process.env.NEXT_PUBLIC_NODE_ENV,
+      process.env
+    );
     // Clear expired cache keys on startup
     storage.clearExpired();
 
     if (
-      process.env.NODE_ENV === "production" &&
+      isProduction &&
       Capacitor.getPlatform() === "web" &&
       "serviceWorker" in navigator
     ) {
@@ -72,7 +78,6 @@ export default function Root() {
                   newWorker.state === "activated" &&
                   navigator.serviceWorker.controller
                 ) {
-                  alert("Service worker activated");
                   window.location.reload();
                 }
               });
@@ -153,7 +158,7 @@ export default function Root() {
             </BrowserRouter>
           </Providers>
         </CookieRestorationProvider>
-        {process.env.NODE_ENV === "production" && (
+        {isProduction && (
           <GoogleAnalytics
             gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID!}
           />

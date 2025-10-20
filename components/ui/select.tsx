@@ -31,7 +31,7 @@ const SelectTrigger = React.forwardRef<
       <SelectPrimitive.Icon asChild>
         <HugeiconsIcon
           icon={ArrowDown01StrokeStandard}
-          className="h-4 w-4 opacity-50"
+          className="h-4 w-4 opacity-50 min-w-4"
         />
       </SelectPrimitive.Icon>
     </>

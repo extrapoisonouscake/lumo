@@ -36,11 +36,13 @@ import {
   DashedLineCircleStrokeRounded,
   InformationCircleStrokeRounded,
   MinusSignCircleStrokeRounded,
+  PrinterStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 
 import { PageHeading } from "@/components/layout/page-heading";
 import { TitleManager } from "@/components/misc/title-manager";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -50,7 +52,7 @@ import {
 } from "@/components/ui/select";
 import { ConditionalTooltip } from "@/components/ui/tooltip";
 import { IconSvgObject } from "@/types/ui";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { GraduationSummaryProgramsList } from "./programs-list";
 
 const formatYears = (years: number[]) => {
@@ -148,6 +150,7 @@ export default function GraduationSummaryPage() {
   const [currentEducationPlanId, setCurrentEducationPlanId] = useState<
     string | null
   >(null);
+
   useEffect(() => {
     if (query.data?.educationPlans) {
       const initialPlan = query.data.educationPlans.find(
@@ -160,7 +163,7 @@ export default function GraduationSummaryPage() {
   return (
     <>
       <TitleManager>Transcript</TitleManager>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 print:px-1">
         <PageHeading
           dynamicContent={
             <ProgramSelect
@@ -217,7 +220,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       Object.fromEntries(
         baseColumns.map((column) => {
           let isVisible = true;
-          if (["status", "grade"].includes(column.id!)) {
+          if (["status", "grade", "requirement.name"].includes(column.id!)) {
             isVisible = !columnFilters.some(
               (filter) => filter.id === column.id
             );
@@ -299,9 +302,14 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
               <TableCell
                 key={cell.id}
                 rowSpan={rowSpan}
-                className={cn("whitespace-nowrap transition-colors", {
-                  "border-r": isRequirementNameCell,
-                })}
+                className={cn(
+                  "whitespace-nowrap print:whitespace-normal transition-colors",
+                  {
+                    "border-r": isRequirementNameCell,
+                    "print:whitespace-nowrap!":
+                      cell.column.id === "yearsString",
+                  }
+                )}
               >
                 {content}
               </TableCell>
@@ -344,6 +352,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       label="Status"
     />
   );
+
   const requirementSelect = (
     <TableFilterSelect
       id="requirement-filter"
@@ -359,26 +368,44 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
       label="Requirement"
     />
   );
+  const handlePrint = useCallback(() => {
+    document.body.classList.add("print-mode");
+
+    window.print();
+
+    document.body.classList.remove("print-mode");
+  }, []);
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <HugeiconsIcon
             icon={BookOpen01StrokeRounded}
-            className="h-5 w-5 text-brand"
+            className="h-5 w-5 text-brand print:text-muted-foreground"
           />
           <h2 className="text-lg font-semibold">Courses</h2>
         </div>
-        <span className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} of {preparedData.length}{" "}
-          entries
-        </span>
+        <div className="flex gap-1.5 items-center">
+          <span className="text-sm text-muted-foreground">
+            {table.getFilteredRowModel().rows.length} of {preparedData.length}{" "}
+            entries
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePrint}
+            className="no-print h-8"
+            leftIcon={<HugeiconsIcon icon={PrinterStrokeRounded} />}
+          >
+            Print
+          </Button>
+        </div>
       </div>
       <div className="flex flex-col gap-4">
         <TableRenderer
           table={table}
           desktopHeader={
-            <div className="flex flex-col md:flex-row flex-wrap gap-x-2 gap-y-3">
+            <div className="flex flex-col md:flex-row flex-wrap gap-x-2 gap-y-3 no-print">
               {statusSelect}
               {requirementSelect}
               {gradeSelect}
@@ -394,7 +421,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             </div>
           }
           mobileHeader={
-            <div className="flex gap-3">
+            <div className="flex gap-3 no-print">
               <TableFilterSearchBar
                 id="subject-search-mobile"
                 table={table}
@@ -574,16 +601,20 @@ function EntryStatusBadge({
     >
       <div
         onClick={onAlreadyCountedBadgeClick}
-        className={cn("flex items-center gap-1.5", className, {
-          "mt-1 cursor-pointer": !!alternativeEntry,
-        })}
+        className={cn(
+          "print:whitespace-nowrap flex items-center gap-1.5",
+          className,
+          {
+            "mt-1 cursor-pointer": !!alternativeEntry,
+          }
+        )}
       >
-        <HugeiconsIcon icon={icon} className="size-4" />
-        <span className="text-sm">{text}</span>
+        <HugeiconsIcon icon={icon} className="size-4 min-w-4" />
+        <span className="text-sm text-left">{text}</span>
         {alternativeEntry && (
           <HugeiconsIcon
             icon={InformationCircleStrokeRounded}
-            className="size-3.5"
+            className="size-3.5 no-print"
           />
         )}
       </div>

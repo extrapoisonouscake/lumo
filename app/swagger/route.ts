@@ -1,3 +1,4 @@
+import { isDevelopment } from "@/constants/core";
 import { readFileSync } from "fs";
 import yaml from "js-yaml";
 import { NextResponse } from "next/server";
@@ -5,7 +6,7 @@ import { join } from "path";
 
 export async function GET() {
   // Only allow in development
-  if (process.env.NODE_ENV !== "development") {
+  if (!isDevelopment) {
     return new NextResponse("Not found", { status: 404 });
   }
 
