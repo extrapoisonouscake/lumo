@@ -39,7 +39,8 @@ if (isMobileApp) {
         destination: `https://${process.env.UPLOADTHING_APP_ID}.ufs.sh/f/:id`,
       },
       {
-        source: "/:path((?!api|_next|swagger|favicon.ico|.*\\.).*)",
+        source:
+          "/:path((?!api|_next|swagger|assets|.well-known|js|favicon.ico|.*\\.).*)",
         destination: "/",
       },
     ];

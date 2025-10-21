@@ -149,21 +149,23 @@ export function SubjectsTable({
   shownColumns,
   isLoading = false,
   year,
+  isHiddenSection = false,
 }: {
   isLoading: boolean;
   shownColumns?: string[];
   data?: SubjectWithAverage[];
   year: SubjectYear;
+  isHiddenSection?: boolean;
 }) {
   const data = useMemo(
     () =>
       isLoading
         ? mockSubjects(5)
         : (externalData as NonNullable<typeof externalData>).filter(
-            (subject) => !subject.isHidden
+            (subject) => isHiddenSection || !subject.isHidden
           ),
 
-    [isLoading, externalData]
+    [isLoading, externalData, isHiddenSection]
   );
   const settings = useUserSettings();
   const columns = useMemo(

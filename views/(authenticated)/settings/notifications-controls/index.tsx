@@ -219,7 +219,7 @@ export function NotificationsControls({
     </>
   );
 }
-const SW_PATH = "/notifications-sw.js";
+const SW_PATH = "/js/notifications-sw.js";
 const waitForServiceWorker = async () => {
   let registration = await navigator.serviceWorker.getRegistration();
   if (!registration) {

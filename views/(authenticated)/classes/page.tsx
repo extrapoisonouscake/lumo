@@ -23,6 +23,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
 import { saveClientResponseToCache } from "@/helpers/cache";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
@@ -46,14 +47,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { QueryKey, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import {
-  Dispatch,
-  LegacyRef,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { LegacyRef, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 export default function SubjectsPage() {
@@ -116,7 +110,7 @@ function Content({
   subjectSummaries?: Record<string, SubjectSummary>;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div>
       {response ? (
         <LoadedContent
           currentTerm={term}
@@ -128,8 +122,11 @@ function Content({
         />
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-2">
-            <TermSelectsSkeleton />
+          <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
+            <div className="flex flex-wrap gap-2">
+              <TermSelectsSkeleton />
+            </div>
+            <Skeleton className="size-10 sm:w-20" />
           </div>
           <SubjectsTable isLoading year={year} />
         </div>
@@ -232,14 +229,17 @@ function LoadedContent({
       saveClientResponseToCache(getCacheKey(queryKey), newSubjectsData);
     }
   };
+  useEffect(() => {
+    console.log(mainSubjects);
+  }, [mainSubjects]);
   const [isHiddenSubjectsOpen, setIsHiddenSubjectsOpen] = useState(false);
-   return (
+  return (
     <div
-      className={cn("flex flex-col gap-1.5", {
-        "mb-2": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
+      className={cn("flex flex-col gap-2.5", {
+        "mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
       })}
     >
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3 sm:gap-2.5">
         <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
           <div className="flex flex-wrap gap-2">
             <TermSelects
@@ -258,29 +258,35 @@ function LoadedContent({
           </div>
           <Button
             variant={isEditing ? "default" : "outline"}
-            className="px-3 sm:px-4"
+            className="w-10 sm:px-4 sm:w-fit"
             onClick={() => {
               if (isEditing) {
                 onSave();
               }
               setIsEditing(!isEditing);
-              
-                setIsHiddenSubjectsOpen(!isEditing);
-              
+
+              setIsHiddenSubjectsOpen(!isEditing);
             }}
           >
-            <span className="hidden sm:block">
-              {isEditing ? "Save" : "Edit"}
-            </span>
             <HugeiconsIcon
               icon={isEditing ? Tick02StrokeRounded : Edit03StrokeRounded}
             />
+            <span className="hidden sm:block">
+              {isEditing ? "Save" : "Edit"}
+            </span>
           </Button>
         </div>
         {isEditing ? (
           <EditableSubjectsList
             subjects={filteredMainSubjects}
-            setSubjects={setMainSubjects}
+            setSubjects={(getNewSubjects) =>
+              setMainSubjects([
+                ...getNewSubjects(filteredMainSubjects),
+                ...mainSubjects.filter((subject) =>
+                  hiddenSubjects.includes(subject.id)
+                ),
+              ])
+            }
             hiddenSubjects={hiddenSubjects}
             onVisibilityChange={onVisibilityChange}
           />
@@ -293,63 +299,95 @@ function LoadedContent({
         )}
       </div>
       {hiddenSubjects.length > 0 && (
-        <Collapsible
-          open={isHiddenSubjectsOpen}
-          onOpenChange={setIsHiddenSubjectsOpen}
-          className="flex flex-col gap-1"
-        >
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              onClick={() => setIsHiddenSubjectsOpen(!isHiddenSubjectsOpen)}
-              className={cn(
-                "text-sm text-muted-foreground flex justify-center items-center w-full hover:bg-transparent font-normal gap-2",
-                { "pointer-events-none": isEditing }
-              )}
-            >
-              <HugeiconsIcon
-                icon={ViewOffSlashStrokeRounded}
-                className="size-4"
-              />
-              <span>
-                {hiddenSubjects.length} hidden subject
-                {hiddenSubjects.length > 1 ? "s" : ""}
-              </span>
-              {!isEditing && (
-                <HugeiconsIcon
-                  icon={
-                    isHiddenSubjectsOpen
-                      ? ArrowUp01StrokeStandard
-                      : ArrowDown01StrokeStandard
-                  }
-                  className="size-4 text-muted-foreground"
-                />
-              )}
-            </Button>
-          </CollapsibleTrigger>
-
-          <CollapsibleContent className="flex flex-col gap-2">
-            {hiddenSubjects
-              .map((subjectId) =>
-                mainSubjects.find((subject) => subject.id === subjectId)
-              )
-              .filter(Boolean)
-              .map((subject) => (
-                <EditingModeSubjectCard
-                  {...subject!}
-                  setIsHidden={
-                    isEditing ? onVisibilityChange(subject!.id) : undefined
-                  }
-                  isClickable={!isEditing}
-                  year={year}
-                  isHidden={hiddenSubjects.includes(subject!.id)}
-                  className="pr-4"
-                />
-              ))}
-          </CollapsibleContent>
-        </Collapsible>
+        <HiddenSubjectsList
+          data={hiddenSubjects
+            .map(
+              (subjectId) =>
+                mainSubjects.find((subject) => subject.id === subjectId)!
+            )
+            .filter(Boolean)}
+          onVisibilityChange={onVisibilityChange}
+          isEditing={isEditing}
+          isOpen={isHiddenSubjectsOpen}
+          setIsOpen={setIsHiddenSubjectsOpen}
+          year={year}
+        />
       )}
     </div>
+  );
+}
+function HiddenSubjectsList({
+  data,
+
+  onVisibilityChange,
+  isEditing,
+  isOpen,
+  setIsOpen,
+  year,
+}: {
+  data: SubjectWithVisibility[];
+
+  onVisibilityChange: (subjectId: string) => (isHidden: boolean) => void;
+  isEditing: boolean;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  year: SubjectYear;
+}) {
+  return (
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      className="flex flex-col gap-1"
+    >
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="ghost"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "text-sm self-center text-muted-foreground flex justify-center items-center w-fit hover:bg-transparent font-normal gap-2",
+            { "pointer-events-none": isEditing }
+          )}
+        >
+          <HugeiconsIcon icon={ViewOffSlashStrokeRounded} className="size-4" />
+          <span>
+            {data.length} hidden subject
+            {data.length > 1 ? "s" : ""}
+          </span>
+          {!isEditing && (
+            <HugeiconsIcon
+              icon={
+                isOpen ? ArrowUp01StrokeStandard : ArrowDown01StrokeStandard
+              }
+              className="size-4 text-muted-foreground"
+            />
+          )}
+        </Button>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className="flex flex-col gap-2.5">
+        {isEditing ? (
+          data.map((subject) => (
+            <EditingModeSubjectCard
+              {...subject!}
+              setIsHidden={
+                isEditing ? onVisibilityChange(subject!.id) : undefined
+              }
+              isClickable={!isEditing}
+              year={year}
+              isHidden={true}
+              className="pr-4"
+            />
+          ))
+        ) : (
+          <SubjectsTable
+            isHiddenSection
+            data={data}
+            isLoading={false}
+            year={year}
+          />
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 function EditableSubjectsList({
@@ -361,7 +399,9 @@ function EditableSubjectsList({
   onVisibilityChange: (subjectId: string) => (isHidden: boolean) => void;
   subjects: SubjectWithVisibility[];
   hiddenSubjects: string[];
-  setSubjects: Dispatch<SetStateAction<SubjectWithVisibility[]>>;
+  setSubjects: (
+    getNewSubjects: (prev: SubjectWithVisibility[]) => SubjectWithVisibility[]
+  ) => void;
 }) {
   //will rerender when isEditing is toggled
   const cachedSubjects = useMemo(() => subjects, []);
@@ -385,7 +425,7 @@ function EditableSubjectsList({
         }
       }}
     >
-      <ul className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         {cachedSubjects
           .filter((subject) => !hiddenSubjects.includes(subject.id))
           .map((subject, index) => (
@@ -397,7 +437,7 @@ function EditableSubjectsList({
               isHidden={hiddenSubjects.includes(subject.id)}
             />
           ))}
-      </ul>
+      </div>
     </DragDropProvider>
   );
 }
@@ -435,13 +475,13 @@ function EditingModeSubjectCard(
     <Card
       ref={ref}
       className={cn(
-        "flex-row justify-between pl-4 pr-2 py-3 items-center group",
+        "flex-row justify-between gap-3 pl-4 pr-2 py-3 items-center group",
         className,
         { clickable: isClickable }
       )}
-      data-clickable-hover={isClickable}
+      data-clickable-hover
     >
-      <h3 className="font-medium text-base truncate">
+      <h3 className="font-medium sm:font-normal text-base sm:text-sm truncate">
         {name.prettified}
 
         {name.emoji && <InlineSubjectEmoji emoji={name.emoji} />}

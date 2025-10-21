@@ -21,6 +21,16 @@ export const metadata: Metadata = {
     appId: APP_STORE_APP_ID,
   },
   title: WEBSITE_TITLE,
+  keywords: [
+    "Lumo",
+    "LumoBC",
+    "myed",
+    "myedbc",
+    "myed bc",
+    "myeducationbc",
+    "myeducation bc",
+    "my ed bc",
+  ],
 };
 export default async function RootLayout({
   children,
