@@ -34,7 +34,12 @@ export function Announcements() {
   let content;
   if (!announcements.data) {
     if (announcements.error) {
+if(typeof announcements.error==="string"){
+
       content = <AnnouncementsNotAvailableCard reason={announcements.error} />;
+}else{
+content=<ErrorCard/>
+}
     } else {
       content = <AnnouncementsSkeleton />;
     }
