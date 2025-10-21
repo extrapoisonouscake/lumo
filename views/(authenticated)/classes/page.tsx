@@ -233,8 +233,7 @@ function LoadedContent({
     }
   };
   const [isHiddenSubjectsOpen, setIsHiddenSubjectsOpen] = useState(false);
-  console.log(hiddenSubjects, mainSubjects);
-  return (
+   return (
     <div
       className={cn("flex flex-col gap-1.5", {
         "mb-2": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
@@ -265,9 +264,9 @@ function LoadedContent({
                 onSave();
               }
               setIsEditing(!isEditing);
-              if (!isEditing) {
-                setIsHiddenSubjectsOpen(true);
-              }
+              
+                setIsHiddenSubjectsOpen(!isEditing);
+              
             }}
           >
             <span className="hidden sm:block">
