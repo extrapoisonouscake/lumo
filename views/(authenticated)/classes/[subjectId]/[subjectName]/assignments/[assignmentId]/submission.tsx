@@ -42,13 +42,13 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
                 <div className="flex flex-col gap-2 min-w-0">
                   <div className="text-muted-foreground text-sm truncate flex items-center gap-1">
                     Name:
+                    <span className="text-primary font-medium">
+                      {data.file.name}
+                    </span>
                     <FileTypeIcon
                       className="inline-block"
                       fileName={data.file.name}
                     />
-                    <span className="text-primary font-medium">
-                      {data.file.name}
-                    </span>
                   </div>
                   <p className="text-muted-foreground text-sm">
                     Submitted at{" "}

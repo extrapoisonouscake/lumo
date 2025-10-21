@@ -2,19 +2,17 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/helpers/cn";
 
 import {
-  Archive03SolidRounded as ArchiveIcon,
-  FileScriptSolidRounded as FileCodeIcon,
-  FileEmpty02SolidRounded as FileIcon,
-  TableSolidRounded as FileSpreadsheetIcon,
-  File02SolidRounded as FileTextIcon,
-  Image02SolidRounded as ImageIcon,
-  MusicNote03SolidRounded as MusicIcon,
-  PresentationBarChart01SolidRounded as PresentationIcon,
-  Video02SolidRounded as VideoIcon,
-} from "@hugeicons-pro/core-solid-rounded";
-import {
+  Archive03StrokeRounded as ArchiveIcon,
   Cancel01StrokeRounded,
+  FileScriptStrokeRounded as FileCodeIcon,
+  FileEmpty02StrokeRounded as FileIcon,
+  TableStrokeRounded as FileSpreadsheetIcon,
+  File02StrokeRounded as FileTextIcon,
+  Image02StrokeRounded as ImageIcon,
+  MusicNote03StrokeRounded as MusicIcon,
+  PresentationBarChart01StrokeRounded as PresentationIcon,
   Upload01StrokeRounded,
+  Video02StrokeRounded as VideoIcon,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useCallback, useState } from "react";

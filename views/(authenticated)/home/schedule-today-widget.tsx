@@ -192,7 +192,7 @@ function Content({
                     : 0) /
                   subjectsWithoutTA.length) *
                 100,
-              fillColor: "brand",
+              className: "text-brand",
             },
           ]}
           size="small"
@@ -236,7 +236,7 @@ function ContentSkeleton() {
           4/4 classes
         </Skeleton>
         <CircularProgress
-          values={[{ value: 0, fillColor: "muted" }]}
+          values={[{ value: 0, className: "text-muted-foreground" }]}
           size="small"
         />
       </div>

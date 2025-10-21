@@ -3,7 +3,7 @@ import { useMemo } from "react";
 
 interface ProgressValue {
   value: number;
-  fillColor: string;
+  className: string;
 }
 const limitValues = (values: ProgressValue[]) => {
   let cumulativeValue = 0;
@@ -86,7 +86,7 @@ export function CircularProgress({
               strokeLinecap="round"
               className={cn(
                 "transition-all duration-500",
-                `text-${progressValue.fillColor}`
+                progressValue.className
               )}
             />
           );

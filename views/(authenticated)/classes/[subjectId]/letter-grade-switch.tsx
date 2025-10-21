@@ -1,7 +1,7 @@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/helpers/cn";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
-import { useDebouncedUpdateGenericUserSetting } from "@/hooks/trpc/use-debounced-update-generic-user-setting";
+import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import LetterA from "@/public/assets/icons/letter-a.svg";
 import { PercentStrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -27,15 +27,16 @@ export function LetterGradeSwitch({
   onValueChange?: (value: boolean) => void;
   className?: string;
 }) {
-  const updateUserSettingMutation = useDebouncedUpdateGenericUserSetting(
-    "shouldShowLetterGrade"
-  );
+  const updateUserSettingMutation = useUpdateGenericUserSetting();
 
   async function handleValueChange(newValue: string) {
     const newIsLetterGradeToggled = newValue === "on";
     onValueChange?.(newIsLetterGradeToggled);
     updateUserSettingState("shouldShowLetterGrade", newIsLetterGradeToggled);
-    updateUserSettingMutation.mutateAsync(newIsLetterGradeToggled);
+    updateUserSettingMutation.mutateAsync({
+      key: "shouldShowLetterGrade",
+      value: newIsLetterGradeToggled,
+    });
   }
 
   return (

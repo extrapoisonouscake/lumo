@@ -52,23 +52,15 @@ const termToLabel: Record<SubjectTerm, string> = {
 export function SubjectSummary(
   summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
 ) {
-  const {
-    id,
-    term,
-    name,
-    academics,
-    year,
-    shouldShowLetterGrade,
-    attendance,
-    currentTermIndex,
-  } = summary;
+  const { id, term, name, academics, year, shouldShowLetterGrade, attendance } =
+    summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted
     ? academics.posted.overall
     : academics.running.overall;
   const gradeInfo = gradeObject ? getGradeInfo(gradeObject) : null;
-  const fillColor = gradeInfo ? gradeInfo.color : "zinc-200";
+
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(
     shouldShowLetterGrade
   );
@@ -101,12 +93,12 @@ export function SubjectSummary(
             <HalfDonutTextChart
               height={isLetterGradeShown ? 45 : 50}
               value={gradeObject?.mark || 0}
-              fillColor={fillColor}
+              fillClassName={gradeInfo?.fillClassName ?? "fill-zinc-200"}
               topRightContent={
                 wasGradePosted && (
                   <HugeiconsIcon
                     icon={Tick02StrokeRounded}
-                    className={`size-4 text-${fillColor}`}
+                    className={cn("size-4", gradeInfo?.textClassName)}
                   />
                 )
               }

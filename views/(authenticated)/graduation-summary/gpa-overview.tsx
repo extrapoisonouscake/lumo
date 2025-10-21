@@ -248,7 +248,7 @@ function TranscriptEntryCard(entry: InferredTranscriptEntry) {
                   values={[
                     {
                       value: entry.finalGrade,
-                      fillColor: getGradeInfo(entry.finalGrade)!.color,
+                      className: getGradeInfo(entry.finalGrade)!.textClassName,
                     },
                   ]}
                   size="small"

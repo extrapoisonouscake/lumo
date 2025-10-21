@@ -164,9 +164,9 @@ function RecentGradedAssignmentCard({
 
           <CircularProgress
             className={cn({
-              [`text-${GRADES_VISUAL_CONFIG["F"]?.color}`]: percentage === 0,
+              [GRADES_VISUAL_CONFIG["F"]!.textClassName]: percentage === 0,
             })}
-            values={[{ value: percentage, fillColor: gradeInfo.color }]}
+            values={[{ value: percentage, className: gradeInfo.textClassName }]}
             letter={gradeInfo?.letter}
             size="normal"
           />
@@ -196,7 +196,7 @@ function ContentSkeleton({ progress }: { progress: number }) {
   return (
     <div className="flex flex-1 flex-col gap-1.5 items-center justify-center min-h-[50px]">
       <CircularProgress
-        values={[{ value: progress, fillColor: "brand" }]}
+        values={[{ value: progress, className: "text-brand" }]}
         thickness={2}
         size="normal"
       />

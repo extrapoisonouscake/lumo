@@ -149,11 +149,11 @@ function TotalProgressCard({ programs }: { programs: ProgramEntry[] }) {
             values={[
               {
                 value: percentages.completed,
-                fillColor: "green-500",
+                className: "text-green-500",
               },
               {
                 value: percentages.pending,
-                fillColor: "yellow-400",
+                className: "text-yellow-400",
               },
             ]}
             size="small"
@@ -334,8 +334,8 @@ function RequirementCard({
         {percentages && (
           <CircularProgress
             values={[
-              { value: percentages.completed, fillColor: "green-500" },
-              { value: percentages.pending ?? 0, fillColor: "yellow-400" },
+              { value: percentages.completed, className: "text-green-500" },
+              { value: percentages.pending ?? 0, className: "text-yellow-400" },
             ]}
             size="normal"
           />

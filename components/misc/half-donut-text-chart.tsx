@@ -3,7 +3,7 @@ import { HalfDonutProgressChart } from "../ui/charts/half-donut-progress-chart";
 
 export function HalfDonutTextChart({
   height,
-  fillColor,
+  fillClassName,
   value,
   topRightContent,
   mainText,
@@ -12,7 +12,7 @@ export function HalfDonutTextChart({
   textContainerClassName,
 }: {
   height: number;
-  fillColor: string;
+  fillClassName: string;
 
   value: number;
   topRightContent?: React.ReactNode;
@@ -29,7 +29,7 @@ export function HalfDonutTextChart({
       <div>
         <HalfDonutProgressChart
           value={Math.min(value, 100)}
-          filledClassName={`fill-${fillColor}`}
+          filledClassName={fillClassName}
         />
       </div>
       <div

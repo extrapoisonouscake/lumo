@@ -195,7 +195,7 @@ function TermGradeCard({ term, grade, isPosted, isCurrent }: AveragesItem) {
             values={[
               {
                 value: grade?.mark ?? 0,
-                fillColor: gradeInfo?.color ?? "zinc-200",
+                className: gradeInfo?.textClassName ?? "text-zinc-200",
               },
             ]}
             letter={gradeInfo?.letter}
@@ -256,7 +256,7 @@ function SemesterGradeCard({ term, grade, isPosted }: AveragesItem) {
           values={[
             {
               value: grade?.mark ?? 0,
-              fillColor: gradeInfo?.color ?? "zinc-200",
+              className: gradeInfo?.textClassName ?? "text-zinc-200",
             },
           ]}
           letter={gradeInfo?.letter ?? "–"}
@@ -327,7 +327,7 @@ function CategoryCard({
                     {gradeInfo!.letter && (
                       <span
                         className={cn("text-xs text-muted-foreground", {
-                          [`text-${gradeInfo!.color}`]:
+                          [gradeInfo!.textClassName]:
                             shouldHighlightAveragesWithColour,
                         })}
                       >

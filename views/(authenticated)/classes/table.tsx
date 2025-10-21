@@ -50,11 +50,10 @@ const formatTeachers = (teachers: string[]) => {
 function AverageCellSkeleton({ className }: { className?: string }) {
   return <CellSkeleton length={5} className={className} />;
 }
-const getAverageColor = (average: SubjectGrade | null | undefined) => {
+const getAverageClassName = (average: SubjectGrade | null | undefined) => {
   if (!average) return undefined;
-  const baseColor = getGradeInfo(average)?.color;
 
-  return baseColor === "green-500" ? "green-600" : baseColor;
+  return getGradeInfo(average)?.textClassName;
 };
 const getColumns = (
   shouldHighlightAveragesWithColour: UserSettings["shouldHighlightAveragesWithColour"]
@@ -83,12 +82,10 @@ const getColumns = (
       const average = cell.getValue();
       if (average === undefined) return <AverageCellSkeleton />;
       if (average === null) return NULL_VALUE_DISPLAY_FALLBACK;
-      const color = getAverageColor(average);
+      const className = getAverageClassName(average);
       return (
         <span
-          className={cn({
-            [`text-${color}`]: color && shouldHighlightAveragesWithColour,
-          })}
+          className={shouldHighlightAveragesWithColour ? className : undefined}
         >
           {formatAverage(average)}
         </span>
@@ -250,7 +247,7 @@ function SubjectCard({
   year: SubjectYear;
   shouldHighlightAveragesWithColour: UserSettings["shouldHighlightAveragesWithColour"];
 }) {
-  const color = getAverageColor(subject.average);
+  const className = getAverageClassName(subject.average);
   const isTeacherAdvisoryRow = isTeacherAdvisory(subject.name.actual);
   const content = (
     <ContentCard
@@ -270,10 +267,9 @@ function SubjectCard({
                   ) : (
                     formatAverage(subject.average)
                   ),
-                className:
-                  color && shouldHighlightAveragesWithColour
-                    ? `text-${color === "green-500" ? "green-600" : color}`
-                    : undefined,
+                className: shouldHighlightAveragesWithColour
+                  ? className
+                  : undefined,
               },
             ]
           : []),
