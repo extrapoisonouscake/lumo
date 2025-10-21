@@ -236,7 +236,7 @@ function LoadedContent({
   return (
     <div
       className={cn("flex flex-col gap-2.5", {
-        "mb-8 sm:mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
+        "mb-10 sm:mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
       })}
     >
       <div className="flex flex-col gap-3 sm:gap-2.5">
