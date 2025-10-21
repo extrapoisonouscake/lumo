@@ -5,11 +5,17 @@ import { count, gt } from "drizzle-orm";
 
 //im too lazy to protect this route
 export async function GET() {
-  const dailyUsers = await db
+const yesterday = dayjs().subtract(1, "day").toDate()
+const weekAgo=dayjs().subtract(1, "week").toDate()
+  const [dailyUsers,weeklyUsers] = await Promise.all([db
     .select({ count: count() })
     .from(users)
-    .where(gt(users.lastLoggedInAt, dayjs().subtract(1, "day").toDate()));
+    .where(gt(users.lastLoggedInAt, yesterday)),db
+    .select({ count: count() })
+    .from(users)
+    .where(gt(users.lastLoggedInAt, weekAgo))])
   return Response.json({
     dailyUsers: dailyUsers[0]?.count,
+weeklyUsers:weeklyUsers[0]?.count
   });
 }
