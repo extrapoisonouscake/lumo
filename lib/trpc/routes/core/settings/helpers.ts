@@ -24,7 +24,7 @@ export const updateSubjectLastAssignments = async (
     .insert(tracked_school_data)
     .values({
       userId,
-      subjects: {
+      subjectsWithAssignments: {
         [subjectId]: {
           assignments: lastAssignments,
         } satisfies TrackedSubject,
@@ -34,8 +34,8 @@ export const updateSubjectLastAssignments = async (
     .onConflictDoUpdate({
       target: tracked_school_data.userId,
       set: {
-        subjects: sql`jsonb_set(
-          ${tracked_school_data.subjects},
+        subjectsWithAssignments: sql`jsonb_set(
+          ${tracked_school_data.subjectsWithAssignments},
           ${`{${subjectId}}`}::text[],
           ${JSON.stringify({
             assignments: lastAssignments,
@@ -66,9 +66,9 @@ export const runNotificationUnsubscriptionDBCalls = async (
         eq(notifications_subscriptions.deviceId, deviceId)
       ),
     });
-  if (!existingSubscription) {
-    await db
-      .delete(tracked_school_data)
-      .where(eq(tracked_school_data.userId, studentDatabaseId));
-  }
+  // if (!existingSubscription) {
+  //   await db
+  //     .delete(tracked_school_data)
+  //     .where(eq(tracked_school_data.userId, studentDatabaseId));
+  // }
 };

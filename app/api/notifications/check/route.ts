@@ -52,16 +52,23 @@ const sendNotificationsToUser = async ({
       where: eq(tracked_school_data.userId, hashedId),
     }),
   ]);
-  const subjectsSavedAssignments = trackedData
+  const trackedSubjectsWithAssignments =
+    trackedData?.subjectsWithAssignments as
+      | Record<string, TrackedSubject>
+      | undefined;
+  const subjectsSavedAssignments = trackedSubjectsWithAssignments
     ? Object.fromEntries(
-        Object.entries(
-          trackedData.subjects as Record<string, TrackedSubject>
-        ).map(([subjectId, subject]) => [
-          subjectId,
-          Object.fromEntries(
-            subject.assignments.map(({ id, ...assignment }) => [id, assignment])
-          ),
-        ])
+        Object.entries(trackedSubjectsWithAssignments).map(
+          ([subjectId, subject]) => [
+            subjectId,
+            Object.fromEntries(
+              subject.assignments.map(({ id, ...assignment }) => [
+                id,
+                assignment,
+              ])
+            ),
+          ]
+        )
       )
     : null;
   const subjectsResponse = await getMyEdWithParameters("subjects", {
@@ -134,7 +141,7 @@ const sendNotificationsToUser = async ({
         .insert(tracked_school_data)
         .values({
           userId: hashString(studentId),
-          subjects: Object.fromEntries(
+          subjectsWithAssignments: Object.fromEntries(
             subjectsWithAssignments.map((subject) => [
               subject.id,
               {
@@ -148,7 +155,9 @@ const sendNotificationsToUser = async ({
         .onConflictDoUpdate({
           target: tracked_school_data.userId,
           set: {
-            subjects: sql.raw(`excluded.${tracked_school_data.subjects.name}`),
+            subjectsWithAssignments: sql.raw(
+              `excluded.${tracked_school_data.subjectsWithAssignments}`
+            ),
           },
         })
     );

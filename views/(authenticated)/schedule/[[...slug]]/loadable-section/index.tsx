@@ -409,7 +409,6 @@ function useScheduleQuery(date: Date) {
   return useCachedQuery(
     getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),
     {
-      params,
       ttlKey: "schedule",
     }
   );

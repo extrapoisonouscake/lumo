@@ -11,10 +11,11 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   Delete02StrokeRounded,
+  DragDropVerticalStrokeRounded,
   SlidersHorizontalStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { GripVerticalIcon } from "lucide-react";
+
 import { useContext } from "react";
 import {
   isCustomizableWidget,
@@ -131,7 +132,10 @@ export function Widget({
             {...attributes}
             {...listeners}
           >
-            <GripVerticalIcon className="size-4 text-muted-foreground" />
+            <HugeiconsIcon
+              icon={DragDropVerticalStrokeRounded}
+              className="text-muted-foreground"
+            />
           </Button>
         </div>
       )}

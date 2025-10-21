@@ -140,12 +140,14 @@ export function useAnnouncements({
   useEffect(() => {
     setGcTime(query.data ? undefined : 0);
   }, [query.data]);
-
+  let derivedError = error;
+  if (query.isSuccess && query.data.sections.length === 0) {
+    derivedError = AnnouncementsNotAvailableReason.NoAnnouncements;
+  }
   return {
     ...query,
-    error:
-      error ??
-      (query.error?.message as AnnouncementsNotAvailableReason | undefined),
+    error: derivedError ?? query.error,
+    data: derivedError ? undefined : query.data,
   };
 }
 export type PersonalizedAnnouncements = Omit<

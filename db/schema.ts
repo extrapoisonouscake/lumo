@@ -112,7 +112,17 @@ export const tracked_school_data = table("tracked_school_data", {
     .references(() => users.id, { onDelete: "cascade" })
     .notNull()
     .unique(),
-  subjects: t.jsonb("subjects").notNull(),
+  subjectsWithAssignments: t.jsonb("subjects_with_assignments"),
+  subjectsListOrder: t
+    .text("subjects_list_order")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
+  hiddenSubjects: t
+    .text("hidden_subjects")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
   updatedAt: t
     .timestamp("updated_at")
     .defaultNow()

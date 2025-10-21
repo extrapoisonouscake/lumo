@@ -248,7 +248,8 @@ function TranscriptEntryCard(entry: InferredTranscriptEntry) {
                   values={[
                     {
                       value: entry.finalGrade,
-                      className: getGradeInfo(entry.finalGrade)!.textClassName,
+                      className: getGradeInfo(entry.finalGrade)!
+                        .secondaryTextClassName,
                     },
                   ]}
                   size="small"

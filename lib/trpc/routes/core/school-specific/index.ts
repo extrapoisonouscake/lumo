@@ -11,7 +11,6 @@ import { TRPCError } from "@trpc/server";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import { getUserSettings } from "../settings";
-import { AnnouncementsNotAvailableReason } from "./public";
 export const schoolSpecificRouter = router({
   getAnnouncements: authenticatedProcedure.query(async ({ ctx }) => {
     const date = timezonedDayJS();
@@ -43,10 +42,10 @@ export const schoolSpecificRouter = router({
       }));
     }
     if (data.length === 0) {
-      throw new TRPCError({
-        code: "NOT_FOUND",
-        message: AnnouncementsNotAvailableReason.NoAnnouncements,
-      });
+      return {
+        sections: [],
+        pdfLink: null,
+      };
     }
     return {
       sections: data,

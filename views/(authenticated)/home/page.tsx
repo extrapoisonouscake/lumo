@@ -47,13 +47,14 @@ import {
 import {
   Cancel01StrokeRounded,
   DashboardSquareEditStrokeRounded,
+  DragDropStrokeRounded,
   PlusSignStrokeRounded,
   SlidersHorizontalStrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useQuery } from "@tanstack/react-query";
-import { GripIcon } from "lucide-react";
+
 import React, {
   createContext,
   useCallback,
@@ -157,7 +158,9 @@ function WidgetEditor({
   const [isEditing, setIsEditing] = useState(false);
   const [configuration, setConfiguration] =
     useState<WidgetsConfiguration>(initialConfiguration);
-
+  useEffect(() => {
+    setConfiguration(initialConfiguration);
+  }, [initialConfiguration]);
   const [customizingWidget, setCustomizingWidget] =
     useState<WidgetGridItem | null>(null);
   const [dragState, setDragState] = useState<WidgetDragState>(initialDragState);
@@ -720,7 +723,10 @@ function AddWidgetButton({
         {...attributes}
         {...listeners}
       >
-        <GripIcon className="size-4 text-muted-foreground" />
+        <HugeiconsIcon
+          icon={DragDropStrokeRounded}
+          className="text-muted-foreground"
+        />
       </div>
     </Button>
   );

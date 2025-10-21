@@ -192,12 +192,16 @@ function TermGradeCard({ term, grade, isPosted, isCurrent }: AveragesItem) {
         <span className="font-medium text-sm leading-none">{term}</span>
         {grade && (
           <CircularProgress
-            values={[
-              {
-                value: grade?.mark ?? 0,
-                className: gradeInfo?.textClassName ?? "text-zinc-200",
-              },
-            ]}
+            values={
+              grade
+                ? [
+                    {
+                      value: grade.mark,
+                      className: gradeInfo!.secondaryTextClassName,
+                    },
+                  ]
+                : []
+            }
             letter={gradeInfo?.letter}
             size="normal"
           />
@@ -253,12 +257,16 @@ function SemesterGradeCard({ term, grade, isPosted }: AveragesItem) {
           </div>
         )}
         <CircularProgress
-          values={[
-            {
-              value: grade?.mark ?? 0,
-              className: gradeInfo?.textClassName ?? "text-zinc-200",
-            },
-          ]}
+          values={
+            grade
+              ? [
+                  {
+                    value: grade.mark,
+                    className: gradeInfo!.secondaryTextClassName,
+                  },
+                ]
+              : []
+          }
           letter={gradeInfo?.letter ?? "–"}
           size="normal"
         />
@@ -327,7 +335,7 @@ function CategoryCard({
                     {gradeInfo!.letter && (
                       <span
                         className={cn("text-xs text-muted-foreground", {
-                          [gradeInfo!.textClassName]:
+                          [gradeInfo!.secondaryTextClassName]:
                             shouldHighlightAveragesWithColour,
                         })}
                       >

@@ -55,7 +55,6 @@ export const getQuery = () => {
 function ScheduleTodayWidget(widget: WidgetComponentProps) {
   const { query, params } = getQuery();
   const todaySchedule = useCachedQuery(query, {
-    params,
     ttlKey: "schedule",
   });
 

@@ -29,6 +29,9 @@ class IndexedDBStorage {
       request.onerror = () => reject(request.error);
       request.onsuccess = () => {
         this.db = request.result;
+        if (navigator.storage?.persist) {
+          navigator.storage.persist();
+        }
         resolve();
       };
 

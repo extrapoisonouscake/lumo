@@ -31,7 +31,9 @@ export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
   if (!announcements.data) {
     if (announcements.error) {
       richError =
-        announcementsNotAvailableReasonToVisualData[announcements.error];
+        typeof announcements.error === "string"
+          ? announcementsNotAvailableReasonToVisualData[announcements.error]
+          : {};
     } else {
       content = <ContentSkeleton />;
     }

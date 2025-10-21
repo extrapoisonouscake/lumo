@@ -30,13 +30,16 @@ import {
 } from "@/helpers/tables";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { useTable } from "@/hooks/use-table";
+import { SubjectWithVisibility } from "@/lib/trpc/routes/myed/subjects";
 import { UserSettings } from "@/types/core";
-import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
+import { SubjectGrade, SubjectYear } from "@/types/school";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { getGradeInfo } from "../../../helpers/grades";
 
-type SubjectWithAverage = Subject & { average?: SubjectGrade | null };
+type SubjectWithAverage = SubjectWithVisibility & {
+  average?: SubjectGrade | null;
+};
 const columnHelper = createColumnHelper<SubjectWithAverage>();
 const formatAverage = (average: SubjectGrade) => {
   const letter = average.letter ?? getGradeInfo(average)?.letter;
@@ -156,7 +159,9 @@ export function SubjectsTable({
     () =>
       isLoading
         ? mockSubjects(5)
-        : (externalData as NonNullable<typeof externalData>),
+        : (externalData as NonNullable<typeof externalData>).filter(
+            (subject) => !subject.isHidden
+          ),
 
     [isLoading, externalData]
   );
@@ -311,7 +316,7 @@ function SubjectCardSkeleton() {
         {
           label: "Average",
           value: (
-            <Skeleton className="block w-fit" shouldShrink={false}>
+            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
               100.0
             </Skeleton>
           ),
@@ -319,8 +324,9 @@ function SubjectCardSkeleton() {
         },
         {
           label: "Room",
+
           value: (
-            <Skeleton className="block w-fit" shouldShrink={false}>
+            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
               10000
             </Skeleton>
           ),
@@ -329,8 +335,9 @@ function SubjectCardSkeleton() {
         {
           label: "Teachers",
           className: "col-span-2",
+          valueClassName: "mt-0.5",
           value: (
-            <Skeleton className="block w-fit" shouldShrink={false}>
+            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
               Teacher, Teacher
             </Skeleton>
           ),

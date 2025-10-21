@@ -1,6 +1,8 @@
+import { saveClientResponseToCache } from "@/helpers/cache";
 import { trpc } from "@/views/trpc";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getCacheKey } from "../use-cached-query";
 
 export function useUpdateGenericUserSetting() {
   const queryClient = useQueryClient();
@@ -8,27 +10,23 @@ export function useUpdateGenericUserSetting() {
     mutationFn:
       trpc.core.settings.updateGenericUserSetting.mutationOptions().mutationFn,
     onMutate: async (variables) => {
+      const queryKey = trpc.core.settings.getSettings.queryKey();
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({
-        queryKey: trpc.core.settings.getSettings.queryKey(),
+        queryKey,
       });
 
       // Snapshot the previous value
-      const previousSettings = queryClient.getQueryData(
-        trpc.core.settings.getSettings.queryKey()
-      );
-
-      // Optimistically update the cache
-      queryClient.setQueryData(
-        trpc.core.settings.getSettings.queryKey(),
-        (old) => {
-          return {
-            ...old!,
-            [variables.key]: variables.value,
-          };
-        }
-      );
-
+      const previousSettings = queryClient.getQueryData(queryKey);
+      if (previousSettings) {
+        const newSettings = {
+          ...previousSettings,
+          [variables.key]: variables.value,
+        };
+        saveClientResponseToCache(getCacheKey(queryKey), newSettings);
+        // Optimistically update the cache
+        queryClient.setQueryData(queryKey, newSettings);
+      }
       // Return context with previous data for potential rollback
       return { previousSettings };
     },
