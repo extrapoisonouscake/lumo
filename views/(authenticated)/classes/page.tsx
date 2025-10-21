@@ -344,7 +344,7 @@ function HiddenSubjectsList({
           variant="ghost"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "text-sm self-center text-muted-foreground flex justify-center items-center w-fit hover:bg-transparent font-normal gap-2",
+            "text-sm self-center text-muted-foreground flex justify-center items-center w-fit hover:bg-transparent font-medium gap-2",
             { "pointer-events-none": isEditing }
           )}
         >
