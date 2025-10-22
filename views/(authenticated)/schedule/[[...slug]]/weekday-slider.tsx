@@ -115,7 +115,7 @@ export function WeekdaySlider({
         onClick={() => {
           emblaApi?.scrollPrev();
         }}
-        className="p-0 h-full w-fit hover:bg-transparent group"
+        className="p-0 h-full w-fit group"
       >
         <HugeiconsIcon
           icon={ArrowLeft01StrokeStandard}
@@ -189,7 +189,7 @@ export function WeekdaySlider({
         onClick={() => {
           emblaApi?.scrollNext();
         }}
-        className="p-0 h-full w-fit hover:bg-transparent group"
+        className="p-0 h-full w-fit group"
       >
         <HugeiconsIcon
           icon={ArrowRight01StrokeStandard}

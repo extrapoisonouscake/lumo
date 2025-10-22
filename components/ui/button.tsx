@@ -12,12 +12,12 @@ const buttonVariants = cva(
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive/10 text-destructive hover:bg-destructive/20",
         outline:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         brand: "bg-brand text-white hover:bg-brand/90",
       },
@@ -101,14 +101,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           hasExternalIsLoading
             ? onClick
             : onClick
-            ? async (e) => {
-                setIsLoading(true);
-                try {
-                  await onClick(e);
-                } catch {}
-                setIsLoading(false);
-              }
-            : undefined
+              ? async (e) => {
+                  setIsLoading(true);
+                  try {
+                    await onClick(e);
+                  } catch {}
+                  setIsLoading(false);
+                }
+              : undefined
         }
       >
         <>

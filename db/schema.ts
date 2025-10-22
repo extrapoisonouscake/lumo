@@ -113,6 +113,7 @@ export const tracked_school_data = table("tracked_school_data", {
     .notNull()
     .unique(),
   subjectsWithAssignments: t.jsonb("subjects_with_assignments"),
+  subjectsGoals: t.jsonb("subjects_goals"),
   subjectsListOrder: t
     .text("subjects_list_order")
     .array()

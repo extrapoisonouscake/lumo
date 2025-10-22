@@ -355,7 +355,7 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
         <Button
           size="sm"
           variant="ghost"
-          className="w-full hover:bg-transparent text-muted-foreground"
+          className="w-full text-muted-foreground"
           rightIcon={
             <HugeiconsIcon
               icon={ArrowUpRight01StrokeRounded}

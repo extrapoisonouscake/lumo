@@ -24,7 +24,7 @@ export function SubjectSummaryButton({
     >
       <Button
         variant="ghost"
-        className="w-full h-8 p-0 rounded-none hover:bg-transparent"
+        className="w-full h-8 p-0 rounded-none"
         size="sm"
         leftIcon={<HugeiconsIcon icon={icon} className="size-4" />}
       >

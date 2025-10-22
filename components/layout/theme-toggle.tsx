@@ -44,11 +44,7 @@ export function ThemeToggle({
         {isInSidebar ? (
           <SidebarMenuButton>{triggerContent}</SidebarMenuButton>
         ) : (
-          <Button
-            variant="ghost"
-            size="smallIcon"
-            className="w-fit hover:bg-transparent"
-          >
+          <Button variant="ghost" size="smallIcon" className="w-fit">
             {triggerContent}
           </Button>
         )}

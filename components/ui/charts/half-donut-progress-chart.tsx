@@ -30,6 +30,9 @@ export function HalfDonutProgressChart({
   emptyClassName,
   emptyStyle,
   isLoading = false,
+  secondaryValue,
+  secondaryFilledClassName,
+  secondaryFilledStyle,
 }: {
   value: number;
   width?: number;
@@ -38,9 +41,26 @@ export function HalfDonutProgressChart({
   emptyClassName?: string;
   emptyStyle?: React.CSSProperties;
   isLoading?: boolean;
+  secondaryValue?: number;
+  secondaryFilledClassName?: string;
+  secondaryFilledStyle?: React.CSSProperties;
 }) {
   // Create the background arc (empty portion)
   const emptyArc = pieLayout([{ value: 100 }])[0]!;
+
+  // Create the secondary progress arc (if provided)
+  const secondaryProgressPieLayout =
+    secondaryValue !== undefined
+      ? pie<Item>()
+          .value((d) => d.value)
+          .startAngle(-Math.PI * 0.68)
+          .endAngle(-Math.PI * 0.68 + Math.PI * 1.36 * (secondaryValue / 100))
+          .sort(null)
+      : null;
+
+  const secondaryProgressArc = secondaryProgressPieLayout
+    ? secondaryProgressPieLayout([{ value: 100 }])[0]!
+    : null;
 
   // Create the progress arc that overlays the background
   const progressPieLayout = pie<Item>()
@@ -61,6 +81,11 @@ export function HalfDonutProgressChart({
         <clipPath id="fillable-half-donut-clip-empty">
           <path d={arcClip(emptyArc) || undefined} />
         </clipPath>
+        {secondaryProgressArc && (
+          <clipPath id="fillable-half-donut-clip-secondary">
+            <path d={arcClip(secondaryProgressArc) || undefined} />
+          </clipPath>
+        )}
         <clipPath id="fillable-half-donut-clip-filled">
           <path d={arcClip(progressArc) || undefined} />
         </clipPath>
@@ -77,6 +102,17 @@ export function HalfDonutProgressChart({
             d={arcGenerator(emptyArc) || undefined}
           />
         </g>
+        {/* Secondary progress arc (behind main progress) */}
+        {!isLoading && secondaryProgressArc && (
+          <g clipPath="url(#fillable-half-donut-clip-secondary)">
+            <path
+              className={cn("fill-brand", secondaryFilledClassName)}
+              style={secondaryFilledStyle}
+              strokeWidth={lightStrokeEffect}
+              d={arcGenerator(secondaryProgressArc) || undefined}
+            />
+          </g>
+        )}
         {/* Progress arc */}
         {!isLoading && (
           <g clipPath="url(#fillable-half-donut-clip-filled)">

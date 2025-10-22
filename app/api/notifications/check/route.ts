@@ -5,6 +5,7 @@ import {
   tracked_school_data,
   TrackedSubject,
 } from "@/db/schema";
+import { getTrackedSchoolData } from "@/helpers/customizations";
 import { hashString } from "@/helpers/hashString";
 import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { createCaller } from "@/lib/trpc";
@@ -48,9 +49,7 @@ const sendNotificationsToUser = async ({
     db.query.notifications_subscriptions.findMany({
       where: eq(notifications_subscriptions.userId, hashedId),
     }),
-    db.query.tracked_school_data.findFirst({
-      where: eq(tracked_school_data.userId, hashedId),
-    }),
+    getTrackedSchoolData(hashedId),
   ]);
   const trackedSubjectsWithAssignments =
     trackedData?.subjectsWithAssignments as

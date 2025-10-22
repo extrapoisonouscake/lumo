@@ -23,6 +23,7 @@ export function FormSelect<T extends FieldValues>({
   placeholder,
   description,
   onChange,
+  triggerClassName,
   ...props
 }: {
   name: /*Path<T>*/ any;
@@ -31,7 +32,7 @@ export function FormSelect<T extends FieldValues>({
   placeholder?: string;
   description?: string;
   onChange?: () => void;
-} & SelectProps) {
+} & SelectProps & { triggerClassName?: string }) {
   const { control, trigger, clearErrors } = useFormContext();
   return (
     <FormField
@@ -40,7 +41,9 @@ export function FormSelect<T extends FieldValues>({
       render={({ field }) => {
         return (
           <FormItem>
-            <FormLabel required={props.required}>{label}</FormLabel>
+            <FormLabel required={props.required} className="mb-2">
+              {label}
+            </FormLabel>
             <Select
               onValueChange={async function (e) {
                 field.onChange(e);
@@ -56,7 +59,7 @@ export function FormSelect<T extends FieldValues>({
               {...field}
             >
               <FormControl>
-                <SelectTrigger>
+                <SelectTrigger className={triggerClassName}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
               </FormControl>
@@ -69,7 +72,7 @@ export function FormSelect<T extends FieldValues>({
               </SelectContent>
             </Select>
             {description && <FormDescription>{description}</FormDescription>}
-            <FormMessage />
+            <FormMessage className="mt-1" />
           </FormItem>
         );
       }}

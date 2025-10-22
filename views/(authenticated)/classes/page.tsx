@@ -16,7 +16,7 @@ import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
 import { RouterOutput } from "@/lib/trpc/types";
-import { SubjectSummary, SubjectYear } from "@/types/school";
+import { Subject, SubjectSummary, SubjectYear } from "@/types/school";
 
 import {
   Collapsible,
@@ -28,7 +28,7 @@ import { saveClientResponseToCache } from "@/helpers/cache";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { getCacheKey } from "@/hooks/use-cached-query";
-import { SubjectWithVisibility } from "@/lib/trpc/routes/myed/subjects";
+
 import { queryClient, trpc } from "@/views/trpc";
 import { isSortable, useSortable } from "@dnd-kit/react/sortable";
 import { arrayMove } from "@dnd-kit/sortable";
@@ -165,7 +165,7 @@ function LoadedContent({
   const [hiddenSubjects, setHiddenSubjects] = useState<string[]>(
     response.customization?.hiddenSubjects ?? []
   );
-  const [mainSubjects, setMainSubjects] = useState<SubjectWithVisibility[]>(
+  const [mainSubjects, setMainSubjects] = useState<Subject[]>(
     response.subjects.main
   );
   const filteredMainSubjects = useMemo(() => {
@@ -173,7 +173,6 @@ function LoadedContent({
       (subject) => !hiddenSubjects.includes(subject.id)
     );
   }, [mainSubjects, hiddenSubjects]);
-
   useEffect(() => {
     if (subjectSummaries) {
       setMainSubjects((prev) =>
@@ -194,7 +193,10 @@ function LoadedContent({
     if (response.customization?.hiddenSubjects) {
       setHiddenSubjects(response.customization?.hiddenSubjects);
     }
-  }, [response.customization?.hiddenSubjects]);
+  }, [response.customization?.hiddenSubjects.join(",")]);
+
+  //TODO make mainSubjects update when external data changes
+
   const updateSubjectsCustomization = useMutation(
     trpc.myed.subjects.updateSubjectsCustomization.mutationOptions()
   );
@@ -211,14 +213,11 @@ function LoadedContent({
     if (queryKey) {
       const newSubjectsData = {
         ...response,
-        subjects: {
-          ...response.subjects,
-          main: mainSubjects.map((subject) => {
-            return {
-              ...subject,
-              isHidden: hiddenSubjects.includes(subject.id),
-            };
-          }),
+
+        customization: {
+          ...response.customization,
+          subjectsListOrder: mainSubjects.map((subject) => subject.id),
+          hiddenSubjects,
         },
       };
       queryClient.setQueryData<RouterOutput["myed"]["subjects"]["getSubjects"]>(
@@ -229,13 +228,11 @@ function LoadedContent({
       saveClientResponseToCache(getCacheKey(queryKey), newSubjectsData);
     }
   };
-  useEffect(() => {
-    console.log(mainSubjects);
-  }, [mainSubjects]);
   const [isHiddenSubjectsOpen, setIsHiddenSubjectsOpen] = useState(false);
   return (
     <div
       className={cn("flex flex-col gap-2.5", {
+        "gap-1.5": hiddenSubjects.length > 0,
         "mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
       })}
     >
@@ -325,7 +322,7 @@ function HiddenSubjectsList({
   setIsOpen,
   year,
 }: {
-  data: SubjectWithVisibility[];
+  data: Subject[];
 
   onVisibilityChange: (subjectId: string) => (isHidden: boolean) => void;
   isEditing: boolean;
@@ -344,7 +341,7 @@ function HiddenSubjectsList({
           variant="ghost"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "text-sm self-center text-muted-foreground flex justify-center items-center w-fit hover:bg-transparent font-normal gap-2",
+            "text-sm self-center text-muted-foreground flex justify-center items-center w-fit font-normal gap-2",
             { "pointer-events-none": isEditing }
           )}
         >
@@ -397,14 +394,12 @@ function EditableSubjectsList({
   setSubjects,
 }: {
   onVisibilityChange: (subjectId: string) => (isHidden: boolean) => void;
-  subjects: SubjectWithVisibility[];
+  subjects: Subject[];
   hiddenSubjects: string[];
-  setSubjects: (
-    getNewSubjects: (prev: SubjectWithVisibility[]) => SubjectWithVisibility[]
-  ) => void;
+  setSubjects: (getNewSubjects: (prev: Subject[]) => Subject[]) => void;
 }) {
   //will rerender when isEditing is toggled
-  const cachedSubjects = useMemo(() => subjects, []);
+  const cachedSubjects = useMemo(() => subjects, [hiddenSubjects]);
 
   return (
     <DragDropProvider
@@ -442,8 +437,9 @@ function EditableSubjectsList({
   );
 }
 function DraggableSubjectCard(
-  props: SubjectWithVisibility & {
+  props: Subject & {
     index: number;
+    isHidden: boolean;
     setIsHidden: (isHidden: boolean) => void;
   }
 ) {
@@ -452,13 +448,14 @@ function DraggableSubjectCard(
 }
 
 function EditingModeSubjectCard(
-  subject: SubjectWithVisibility & {
+  subject: Subject & {
     handleRef?: LegacyRef<SVGSVGElement>;
     ref?: LegacyRef<HTMLDivElement>;
     setIsHidden?: (isHidden: boolean) => void;
     className?: string;
     isClickable?: boolean;
     year?: SubjectYear;
+    isHidden: boolean;
   }
 ) {
   const {

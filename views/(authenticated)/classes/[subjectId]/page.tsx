@@ -50,8 +50,9 @@ export default function SubjectPage() {
             <TitleManager>{summary.name.prettified} - Classes</TitleManager>
             <div className="flex flex-col gap-4">
               <SubjectSummary
-                {...summary}
+                summary={summary}
                 shouldShowLetterGrade={settings.shouldShowLetterGrade}
+                assignments={assignments.data?.assignments}
               />
 
               <QueryWrapper
@@ -60,14 +61,6 @@ export default function SubjectPage() {
               >
                 {(data) => (
                   <>
-                    {/* <DesiredAverageCalculator
-                      assignments={data.assignments}
-                      categories={summary.academics.categories}
-                      currentAverage={
-                        summary.academics.running.overall ??
-                        summary.academics.posted.overall
-                      }
-                    /> */}
                     <SubjectAssignmentsTable
                       {...data}
                       assignments={data.assignments.map(

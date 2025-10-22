@@ -267,7 +267,7 @@ function ProgramCard({
         size="sm"
         onClick={onViewRequirements}
         disabled={!program.requirements || program.requirements.length === 0}
-        className="w-full text-xs h-fit hover:bg-transparent text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pt-2 pb-4 no-print"
+        className="w-full text-xs h-fit text-muted-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed pt-2 pb-4 no-print"
       >
         {program.requirements && program.requirements.length > 0 ? (
           <>

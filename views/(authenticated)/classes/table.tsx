@@ -161,9 +161,7 @@ export function SubjectsTable({
     () =>
       isLoading
         ? mockSubjects(5)
-        : (externalData as NonNullable<typeof externalData>).filter(
-            (subject) => isHiddenSection || !subject.isHidden
-          ),
+        : (externalData as NonNullable<typeof externalData>),
 
     [isLoading, externalData, isHiddenSection]
   );

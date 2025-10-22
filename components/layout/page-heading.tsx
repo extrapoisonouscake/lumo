@@ -43,11 +43,7 @@ export function PageHeading({
         {rightContent ?? (!isMobile ? dynamicContent : null)}
         <div className="w-fit flex sm:hidden gap-3 items-center">
           <Link to="/settings">
-            <Button
-              variant="ghost"
-              size="smallIcon"
-              className="w-fit hover:bg-transparent"
-            >
+            <Button variant="ghost" size="smallIcon" className="w-fit">
               <HugeiconsIcon icon={Settings02StrokeRounded} />
             </Button>
           </Link>

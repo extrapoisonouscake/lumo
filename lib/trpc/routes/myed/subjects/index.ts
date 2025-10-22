@@ -2,28 +2,43 @@ import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { db } from "@/db";
 
 import { tracked_school_data } from "@/db/schema";
+import { getTrackedSchoolData } from "@/helpers/customizations";
 import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { submitUnknownSubjectsNames } from "@/parsing/myed/helpers";
-import { Subject, SubjectTerm, SubjectYear, TermEntry } from "@/types/school";
-import { eq } from "drizzle-orm";
+import {
+  Subject,
+  SubjectSummary,
+  SubjectTerm,
+  SubjectYear,
+  TermEntry,
+} from "@/types/school";
+import { sql } from "drizzle-orm";
 import { after } from "next/server";
 import { z } from "zod";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import { updateSubjectLastAssignments } from "../../core/settings/helpers";
+import { getSubjectGoalSchema } from "./public";
 const subjectYearEnum = z.enum([
   "current",
   "previous",
 ] as const satisfies SubjectYear[]);
-export type SubjectWithVisibility = Subject & { isHidden?: boolean };
 interface GetSubjectsResponse {
   terms: TermEntry[];
-  subjects: { main: SubjectWithVisibility[]; teacherAdvisory: Subject | null };
+  subjects: { main: Subject[]; teacherAdvisory: Subject | null };
   isDerivedAllTerms?: boolean;
   customization?: {
     subjectsListOrder: string[];
     hiddenSubjects: string[];
   };
+}
+export type SubjectGoal = {
+  value: number;
+  categoryId: string;
+  minimumScore: number;
+};
+export interface GetSubjectInfoResponse extends SubjectSummary {
+  goal?: SubjectGoal;
 }
 export const subjectsRouter = router({
   getSubjects: authenticatedProcedure
@@ -39,9 +54,7 @@ export const subjectsRouter = router({
     .query(async ({ input, ctx: { getMyEd, studentDatabaseId } }) => {
       const [response, trackedSchoolData] = await Promise.all([
         getMyEd("subjects", input),
-        db.query.tracked_school_data.findFirst({
-          where: eq(tracked_school_data.userId, studentDatabaseId),
-        }),
+        getTrackedSchoolData(studentDatabaseId),
       ]);
       let result: GetSubjectsResponse;
       if (response.subjects.main.length === 0) {
@@ -75,10 +88,6 @@ export const subjectsRouter = router({
               (subjectId) => subjectsIds.includes(subjectId)
             ),
           };
-          result.subjects.main = result.subjects.main.map((subject) => ({
-            ...subject,
-            isHidden: trackedSchoolData.hiddenSubjects.includes(subject.id),
-          }));
         }
       }
       return result;
@@ -113,8 +122,45 @@ export const subjectsRouter = router({
         year: subjectYearEnum,
       })
     )
-    .query(async ({ input, ctx: { getMyEd } }) => {
-      return getMyEd("subjectSummary", input);
+    .query(async ({ input, ctx: { getMyEd, studentDatabaseId } }) => {
+      const [result, trackedSchoolData] = await Promise.all([
+        getMyEd("subjectSummary", input),
+        getTrackedSchoolData(studentDatabaseId),
+      ]);
+      return {
+        ...result,
+        goal: (
+          trackedSchoolData?.subjectsGoals as
+            | Record<string, GetSubjectInfoResponse["goal"]>
+            | undefined
+        )?.[input.id],
+      };
+    }),
+  setSubjectGoal: authenticatedProcedure
+    .input(
+      z.object({
+        subjectId: z.string(),
+        goal: z.union([getSubjectGoalSchema(), z.undefined()]),
+      })
+    )
+    .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
+      await db
+        .insert(tracked_school_data)
+        .values({
+          userId: studentDatabaseId,
+          subjectsGoals: {
+            [input.subjectId]: input.goal,
+          },
+        })
+        .onConflictDoUpdate({
+          target: tracked_school_data.userId,
+          set: {
+            subjectsGoals:
+              input.goal === undefined
+                ? sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) - ${input.subjectId}`
+                : sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) || ${JSON.stringify({ [input.subjectId]: input.goal })}::jsonb`,
+          },
+        });
     }),
   getSubjectAssignments: authenticatedProcedure
     .input(

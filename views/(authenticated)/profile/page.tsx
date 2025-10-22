@@ -285,7 +285,7 @@ function CopyButton({ value }: { value: string }) {
       size="smallIcon"
       variant="ghost"
       className={cn(
-        "text-muted-foreground p-1 size-fit hover:bg-transparent",
+        "text-muted-foreground p-1 size-fit",
         isCopied && "text-brand hover:text-brand"
       )}
       onClick={() => {

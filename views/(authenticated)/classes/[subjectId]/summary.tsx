@@ -24,8 +24,9 @@ import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
+import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
 import { UserSettings } from "@/types/core";
-import { type SubjectSummary, SubjectTerm } from "@/types/school";
+import { Assignment, type SubjectSummary, SubjectTerm } from "@/types/school";
 import {
   Door01StrokeRounded,
   InformationCircleStrokeRounded,
@@ -38,6 +39,7 @@ import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
 import { SubjectTermAverages } from "./averages";
 import { LetterGradeSwitch } from "./letter-grade-switch";
+import { SubjectGoalDialog } from "./subject-goal-dialog";
 
 const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FirstSemester]: "Semester I",
@@ -49,11 +51,15 @@ const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FourthQuarter]: "Quarter IV",
 };
 
-export function SubjectSummary(
-  summary: SubjectSummary & Pick<UserSettings, "shouldShowLetterGrade">
-) {
-  const { id, term, name, academics, year, shouldShowLetterGrade, attendance } =
-    summary;
+export function SubjectSummary({
+  summary,
+  assignments,
+  shouldShowLetterGrade,
+}: { summary: GetSubjectInfoResponse; assignments?: Assignment[] } & Pick<
+  UserSettings,
+  "shouldShowLetterGrade"
+>) {
+  const { id, term, name, academics, year, attendance } = summary;
   const wasGradePosted = typeof academics.posted.overall?.mark === "number";
 
   const gradeObject = wasGradePosted
@@ -64,7 +70,7 @@ export function SubjectSummary(
   const [isLetterGradeShown, setIsLetterGradeShown] = useState(
     shouldShowLetterGrade
   );
-
+  const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
   return (
     <Card className="flex flex-col gap-4 pt-6 relative items-center">
       <InfoDialog {...summary} />
@@ -89,35 +95,55 @@ export function SubjectSummary(
         </CardHeader>
 
         <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
-          <div className="flex flex-col gap-1 items-center">
-            <HalfDonutTextChart
-              height={isLetterGradeShown ? 45 : 50}
-              value={gradeObject?.mark || 0}
-              fillClassName={gradeInfo?.fillClassName ?? "fill-zinc-200"}
-              topRightContent={
-                wasGradePosted && (
-                  <HugeiconsIcon
-                    icon={Tick02StrokeRounded}
-                    className={cn("size-4", gradeInfo?.textClassName)}
-                  />
-                )
-              }
-              mainText={
-                gradeObject
-                  ? isLetterGradeShown
-                    ? gradeObject.letter || ""
-                    : gradeObject.mark.toString()
-                  : "-"
-              }
-              mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
-              secondaryText={!isLetterGradeShown ? `/ 100` : ""}
-              textContainerClassName={
-                isLetterGradeShown ? "top-[1.05rem]" : "top-5"
-              }
-            />
-            <span className="text-zinc-500 text-[10px] uppercase">
-              {isLetterGradeShown ? "Grade" : "Average"}
-            </span>
+          <div className="relative">
+            {assignments &&
+              academics.running.overall &&
+              academics.categories.length > 0 && (
+                <SubjectGoalDialog
+                  isOpen={isGoalDialogOpen}
+                  onOpenChange={setIsGoalDialogOpen}
+                  assignments={assignments}
+                  categories={academics.categories}
+                  currentAverage={academics.running.overall.mark}
+                  initialGoal={summary.goal}
+                  subjectId={id}
+                />
+              )}
+            <div
+              className="flex flex-col cursor-pointer group gap-1 items-center"
+              onClick={() => setIsGoalDialogOpen(true)}
+            >
+              <HalfDonutTextChart
+                height={isLetterGradeShown ? 45 : 50}
+                value={gradeObject?.mark || 0}
+                secondaryValue={summary.goal?.value}
+                secondaryFillClassName="fill-zinc-400/65 dark:fill-zinc-500/80"
+                fillClassName={gradeInfo?.fillClassName ?? "fill-zinc-200"}
+                topRightContent={
+                  wasGradePosted && (
+                    <HugeiconsIcon
+                      icon={Tick02StrokeRounded}
+                      className={cn("size-4", gradeInfo?.textClassName)}
+                    />
+                  )
+                }
+                mainText={
+                  gradeObject
+                    ? isLetterGradeShown
+                      ? gradeObject.letter || ""
+                      : gradeObject.mark.toString()
+                    : "-"
+                }
+                mainTextClassName={cn({ "text-2xl": isLetterGradeShown })}
+                secondaryText={!isLetterGradeShown ? `/ 100` : ""}
+                textContainerClassName={
+                  isLetterGradeShown ? "top-[1.05rem]" : "top-5"
+                }
+              />
+              <span className="text-zinc-500 text-[10px] uppercase">
+                {isLetterGradeShown ? "Grade" : "Average"}
+              </span>
+            </div>
           </div>
         </CardContent>
       </div>
@@ -141,7 +167,7 @@ function InfoDialog({ name, id, year }: SubjectSummary) {
         <Button
           size="icon"
           variant="ghost"
-          className="absolute top-0 left-0 text-muted-foreground hover:bg-transparent"
+          className="absolute top-0 left-0 text-muted-foreground"
         >
           <HugeiconsIcon
             icon={InformationCircleStrokeRounded}
@@ -239,7 +265,7 @@ export function SubjectSummarySkeleton() {
       <div className="flex w-full border-t">
         <Button
           variant="ghost"
-          className="w-full h-8 p-0 rounded-none hover:bg-transparent border-r"
+          className="w-full h-8 p-0 rounded-none border-r"
           size="sm"
           leftIcon={<Skeleton className="size-4" />}
         >
@@ -247,7 +273,7 @@ export function SubjectSummarySkeleton() {
         </Button>
         <Button
           variant="ghost"
-          className="w-full h-8 p-0 rounded-none hover:bg-transparent"
+          className="w-full h-8 p-0 rounded-none"
           size="sm"
           leftIcon={<Skeleton className="size-4" />}
         >

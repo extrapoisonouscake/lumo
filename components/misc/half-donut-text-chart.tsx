@@ -10,6 +10,9 @@ export function HalfDonutTextChart({
   mainTextClassName,
   secondaryText,
   textContainerClassName,
+  secondaryValue,
+  secondaryFillClassName,
+  ...props
 }: {
   height: number;
   fillClassName: string;
@@ -20,9 +23,11 @@ export function HalfDonutTextChart({
   mainTextClassName?: string;
   secondaryText?: string;
   textContainerClassName?: string;
-}) {
+  secondaryValue?: number;
+  secondaryFillClassName?: string;
+} & React.ComponentProps<"div">) {
   return (
-    <div className="relative" style={{ height }}>
+    <div className="relative" style={{ height }} {...props}>
       {topRightContent && (
         <div className={`absolute -top-1.5 -right-1.5`}>{topRightContent}</div>
       )}
@@ -30,6 +35,12 @@ export function HalfDonutTextChart({
         <HalfDonutProgressChart
           value={Math.min(value, 100)}
           filledClassName={fillClassName}
+          secondaryValue={
+            secondaryValue !== undefined
+              ? Math.min(secondaryValue, 100)
+              : undefined
+          }
+          secondaryFilledClassName={secondaryFillClassName}
         />
       </div>
       <div

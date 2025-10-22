@@ -32,40 +32,43 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         control={context.control}
         name={name}
         defaultValue={""}
-        render={({ field }) => (
-          <FormItem>
-            {label && (
-              <FormLabel
-                shouldShowError={shouldShowError}
-                required={props.required}
-              >
-                {label}
-              </FormLabel>
-            )}
-            <FormControl shouldShowError={shouldShowError}>
-              <Input
-                {...field}
-                {...props}
-                ref={(e) => {
-                  field.ref(e);
-                  if (ref) {
-                    if ("current" in ref) {
-                      ref.current = e;
-                    } else {
-                      ref(e);
+        render={({ field }) => {
+          return (
+            <FormItem>
+              {label && (
+                <FormLabel
+                  shouldShowError={shouldShowError}
+                  required={props.required}
+                  className="mb-2"
+                >
+                  {label}
+                </FormLabel>
+              )}
+              <FormControl shouldShowError={shouldShowError}>
+                <Input
+                  {...field}
+                  {...props}
+                  ref={(e) => {
+                    field.ref(e);
+                    if (ref) {
+                      if ("current" in ref) {
+                        ref.current = e;
+                      } else {
+                        ref(e);
+                      }
                     }
-                  }
-                }}
-                onChange={(e) => {
-                  field.onChange(e);
-                  props.onChange?.(e);
-                }}
-              />
-            </FormControl>
-            {description && <FormDescription>{description}</FormDescription>}
-            {shouldShowError && <FormMessage />}
-          </FormItem>
-        )}
+                  }}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    props.onChange?.(e);
+                  }}
+                />
+              </FormControl>
+              {description && <FormDescription>{description}</FormDescription>}
+              {shouldShowError && <FormMessage className="mt-1" />}
+            </FormItem>
+          );
+        }}
       />
     );
   }
