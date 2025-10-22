@@ -277,7 +277,7 @@ export function parseSubjectSummary({
       }
     }
     const academics: SubjectSummary["academics"] = {
-      running: { ...runningAverages, overall: { mark: 90, letter: "A" } },
+      running: runningAverages,
       posted: postedAverages,
       categories: categories.map(convertAcademicCategory),
     };
