@@ -7,7 +7,7 @@ export const getSubjectGoalSchema = (currentAverage?: number) =>
       .min(
         currentAverage ? currentAverage + 1 : 0,
         currentAverage
-          ? `Goal must be greater than current average (${currentAverage}%)`
+          ? `Must be greater than current average (${currentAverage}%)`
           : undefined
       )
       .max(100),

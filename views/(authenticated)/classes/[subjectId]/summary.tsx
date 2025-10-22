@@ -39,7 +39,10 @@ import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
 import { SubjectTermAverages } from "./averages";
 import { LetterGradeSwitch } from "./letter-grade-switch";
-import { SubjectGoalDialog } from "./subject-goal-dialog";
+import {
+  SubjectGoalButtonSkeleton,
+  SubjectGoalDialog,
+} from "./subject-goal-dialog";
 
 const termToLabel: Record<SubjectTerm, string> = {
   [SubjectTerm.FirstSemester]: "Semester I",
@@ -96,7 +99,7 @@ export function SubjectSummary({
 
         <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
           <div className="relative">
-            {assignments &&
+            {assignments ? (
               academics.running.overall &&
               academics.categories.length > 0 && (
                 <SubjectGoalDialog
@@ -108,9 +111,15 @@ export function SubjectSummary({
                   initialGoal={summary.goal}
                   subjectId={id}
                 />
-              )}
+              )
+            ) : (
+              <SubjectGoalButtonSkeleton />
+            )}
             <div
-              className="flex flex-col cursor-pointer group gap-1 items-center"
+              className={cn(
+                "flex flex-col cursor-pointer group gap-1 items-center",
+                { clickable: !!assignments }
+              )}
               onClick={() => setIsGoalDialogOpen(true)}
             >
               <HalfDonutTextChart
@@ -241,24 +250,28 @@ export function SubjectSummarySkeleton() {
         </CardHeader>
 
         <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
-          <div className="flex flex-col gap-1 items-center">
-            <div className={cn("relative", "h-[45px]")}>
-              <div>
-                <HalfDonutProgressChart value={90} isLoading />
+          <div className="relative">
+            <SubjectGoalButtonSkeleton />
+
+            <div className="flex flex-col gap-1 items-center">
+              <div className={cn("relative", "h-[45px]")}>
+                <div>
+                  <HalfDonutProgressChart value={90} isLoading />
+                </div>
+                <div
+                  className={cn(
+                    "absolute top-[1.05rem] left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
+                  )}
+                >
+                  <Skeleton>
+                    <span className={cn("font-bold text-2xl leading-none")}>
+                      A
+                    </span>
+                  </Skeleton>
+                </div>
               </div>
-              <div
-                className={cn(
-                  "absolute top-[1.05rem] left-1/2 -translate-x-1/2 flex flex-col gap-1 items-center justify-center"
-                )}
-              >
-                <Skeleton>
-                  <span className={cn("font-bold text-2xl leading-none")}>
-                    A
-                  </span>
-                </Skeleton>
-              </div>
+              <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
             </div>
-            <span className="text-zinc-500 text-[10px] uppercase">Grade</span>
           </div>
         </CardContent>
       </div>

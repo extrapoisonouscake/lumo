@@ -205,7 +205,7 @@
     overflow-x: hidden;
   }
 
-  *:not(:focus-visible) {
+  *:not(:is(input, textarea, button, select, option, select):focus-visible) {
     outline: none !important;
     outline-width: 0 !important;
     box-shadow: none;

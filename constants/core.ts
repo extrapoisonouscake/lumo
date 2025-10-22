@@ -121,7 +121,7 @@ export const USER_SETTINGS_DEFAULT_VALUES = {
   shouldShowNextSubjectTimer: true,
   shouldShowPercentages: true,
   shouldHighlightMissingAssignments: true,
-  shouldHighlightAveragesWithColour: false,
+  shouldHighlightAveragesWithColour: true,
   shouldShowLetterGrade: false,
   themeColor: "162 23.3% 45.7%",
   widgetsConfiguration: [
