@@ -55,6 +55,12 @@ const getOptionalNumberString = (minValue = 0) =>
         ),
       ])
     );
+enum Outcome {
+  Achievable = "achievable",
+  AlreadyAchieved = "already-achieved",
+  ValuesOutOfRange = "values-out-of-range",
+  Unknown = "unknown",
+}
 export function SubjectGoalDialog({
   isOpen,
   onOpenChange,
@@ -107,7 +113,7 @@ export function SubjectGoalDialog({
   };
   const result = useMemo(() => {
     if (!desiredAverageString || !minimumScoreString || !categoryId)
-      return null;
+      return { outcome: Outcome.Unknown };
 
     // Convert string values to numbers for calculations
     const desiredAverage = Number(desiredAverageString);
@@ -119,30 +125,49 @@ export function SubjectGoalDialog({
         assignment.categoryId === categoryId
     ).length;
     const category = categories.find((cat) => cat.id === categoryId);
-    if (!category) return Infinity;
+    if (!category) return { outcome: Outcome.Unknown };
     const categoryWeight = category.derivedWeight;
-    if (!categoryWeight) return Infinity;
+    if (!categoryWeight) return { outcome: Outcome.Unknown };
     const categoryWeightPercentage = categoryWeight / 100;
     const categoryAverage = category.average?.mark ?? 100;
-
-    const neededAssignmentsCount =
+    const numerator =
       (categoryAssignmentsCount * (currentAverage - desiredAverage)) /
-      categoryWeightPercentage /
-      (categoryAverage -
-        minimumScore +
-        (desiredAverage - currentAverage) / categoryWeightPercentage);
-    if (neededAssignmentsCount > 10) return Infinity;
-    return Math.ceil(neededAssignmentsCount);
+      categoryWeightPercentage;
+    const denominator =
+      categoryAverage -
+      minimumScore +
+      (desiredAverage - currentAverage) / categoryWeightPercentage;
+    if (numerator > 0) return { outcome: Outcome.AlreadyAchieved };
+    if (denominator > 0) {
+      return { outcome: Outcome.ValuesOutOfRange };
+    }
+    const minimumThreshold =
+      categoryAverage +
+      (desiredAverage - currentAverage) / categoryWeightPercentage;
+
+    // Maximum achievable total average if all future assignments are 100%
+    const maxAchievable =
+      currentAverage + categoryWeightPercentage * (100 - categoryAverage);
+    if (desiredAverage > maxAchievable || minimumScore < minimumThreshold)
+      return { outcome: Outcome.ValuesOutOfRange };
+    const neededAssignmentsCount = Math.ceil(numerator / denominator);
+
+    if (neededAssignmentsCount > 10)
+      return { outcome: Outcome.ValuesOutOfRange };
+    return {
+      outcome: Outcome.Achievable,
+      neededAssignmentsCount: Math.ceil(neededAssignmentsCount),
+    };
   }, [assignments, desiredAverageString, minimumScoreString, categoryId]);
   const [isBreakdownShown, setIsBreakdownShown] = useState(!!initialGoal);
 
-  const isCalculated = methods.formState.isValid || !methods.formState.isDirty;
-  const isAchievable = isCalculated && result !== Infinity;
+  const isCalculated =
+    methods.formState.isValid && !!desiredAverageString && !!minimumScoreString;
+  const isAchievable = isCalculated && result.outcome === Outcome.Achievable;
   const isAchieved = useMemo(
-    () => typeof result === "number" && result <= 0,
+    () => result.outcome === Outcome.AlreadyAchieved,
     [initialGoal]
   );
-
   const shouldShowFinalLayout = isBreakdownShown && isCalculated && isAchieved;
   const onSave = async (data: z.infer<typeof schema> | undefined) => {
     if (typeof data === "object") {
@@ -173,7 +198,6 @@ export function SubjectGoalDialog({
       id: subjectId,
       year: "current",
     });
-    const oldData = queryClient.getQueryData<GetSubjectInfoResponse>(key);
 
     // Convert string values to numbers for the API
     const goalData: SubjectGoalSchema | undefined = data
@@ -183,11 +207,8 @@ export function SubjectGoalDialog({
           minimumScore: Number(data.minimumScore!),
         }
       : undefined;
+    const oldData = queryClient.getQueryData<GetSubjectInfoResponse>(key);
 
-    queryClient.setQueryData<GetSubjectInfoResponse>(key, (oldData) => ({
-      ...oldData!,
-      goal: goalData,
-    }));
     if (isBreakdownShown) {
       if (!shouldShowFinalLayout) {
         onOpenChange(false);
@@ -200,7 +221,10 @@ export function SubjectGoalDialog({
       resetForm();
       setIsBreakdownShown(false);
     }
-
+    queryClient.setQueryData<GetSubjectInfoResponse>(key, (oldData) => ({
+      ...oldData!,
+      goal: goalData,
+    }));
     try {
       await setSubjectGoalMutation.mutateAsync({
         subjectId,
@@ -217,18 +241,25 @@ export function SubjectGoalDialog({
         <Button
           size="smallIcon"
           className={cn(
-            "size-6 absolute z-10 -top-2 -right-4.5 text-muted-foreground group-hover:text-accent-foreground",
-            !isAchievable && "text-red-500/80 group-hover:text-red-500/90"
+            "size-6 absolute z-10 -top-2 -right-4.5 text-muted-foreground/60 group-hover:text-accent-foreground",
+            { "text-muted-foreground": !!isBreakdownShown },
+            isCalculated &&
+              !isAchievable &&
+              "text-red-500/80 group-hover:text-red-500/90"
           )}
           variant="ghost"
         >
           <HugeiconsIcon
-            icon={!isAchievable ? Alert02StrokeRounded : Target02StrokeRounded}
+            icon={
+              isCalculated && !isAchievable
+                ? Alert02StrokeRounded
+                : Target02StrokeRounded
+            }
           />
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
-        <ResponsiveDialogHeader>
+        <ResponsiveDialogHeader className="pb-0">
           <ResponsiveDialogTitle>Goal</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody className="gap-6">
@@ -275,7 +306,10 @@ export function SubjectGoalDialog({
                         !isAchievable ? "text-red-500" : "text-green-600"
                       )}
                     >
-                      {desiredAverageString}%
+                      {desiredAverageString
+                        ? Math.min(100, Number(desiredAverageString))
+                        : "??"}
+                      %
                     </p>
                   </div>
                 </div>
@@ -284,7 +318,7 @@ export function SubjectGoalDialog({
               {isCalculated && (
                 <div
                   className={cn(
-                    "flex items-center font-medium gap-1.5 text-sm",
+                    "flex items-center font-medium gap-2.5 text-sm",
                     !isAchievable ? "text-red-500" : "text-green-600"
                   )}
                 >
@@ -294,14 +328,14 @@ export function SubjectGoalDialog({
                         ? Alert02StrokeRounded
                         : Target02StrokeRounded
                     }
-                    className="size-4"
+                    className="size-4 min-w-4"
                   />
                   <span>
                     {!isAchievable
-                      ? "This goal cannot be achieved"
-                      : typeof result === "number" && result <= 0
+                      ? "Goal cannot be reached, adjust desired average or minimum score"
+                      : isAchieved
                         ? "Goal achieved!"
-                        : `Need ${result} more grade${result === 1 ? "" : "s"} of at least ${minimumScoreString}%`}
+                        : `Need ${result.neededAssignmentsCount} more grade${result.neededAssignmentsCount === 1 ? "" : "s"} of at least ${minimumScoreString}%`}
                   </span>
                 </div>
               )}
@@ -355,7 +389,7 @@ export function SubjectGoalDialog({
               {!shouldShowFinalLayout ? (
                 <Button
                   leftIcon={
-                    initialGoal ? (
+                    isBreakdownShown ? (
                       <HugeiconsIcon icon={Tick02StrokeRounded} />
                     ) : (
                       <HugeiconsIcon icon={ViewStrokeRounded} />
@@ -364,7 +398,7 @@ export function SubjectGoalDialog({
                   type="submit"
                   className="w-full sm:w-auto min-h-10"
                 >
-                  {initialGoal ? "Done" : "Preview"}
+                  {isBreakdownShown ? "Done" : "Preview"}
                 </Button>
               ) : (
                 <Button
@@ -384,7 +418,7 @@ export function SubjectGoalDialog({
                 variant="outline"
                 className="flex-1 min-h-10"
                 onClick={() => {
-                  if (initialGoal) {
+                  if (isBreakdownShown) {
                     onSave(undefined);
                   } else {
                     resetForm();
@@ -392,7 +426,7 @@ export function SubjectGoalDialog({
                   onOpenChange(false);
                 }}
               >
-                {initialGoal ? "Reset" : "Cancel"}
+                {isBreakdownShown ? "Reset" : "Cancel"}
               </Button>
             </ResponsiveDialogFooter>
           </Form>
