@@ -235,9 +235,7 @@ function LoadedContent({
   const [isHiddenSubjectsOpen, setIsHiddenSubjectsOpen] = useState(false);
   return (
     <div
-      className={cn("flex flex-col gap-2.5", {
-        "mb-10 sm:mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
-      })}
+      className={cn("flex flex-col gap-2.5", ( isHiddenSubjectsOpen || hiddenSubjects.length === 0)?"mb-4":"mb-2 sm:mb-0")}
     >
       <div className="flex flex-col gap-3 sm:gap-2.5">
         <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
