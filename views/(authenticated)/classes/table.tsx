@@ -30,14 +30,14 @@ import {
 } from "@/helpers/tables";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { useTable } from "@/hooks/use-table";
-import { SubjectWithVisibility } from "@/lib/trpc/routes/myed/subjects";
+
 import { UserSettings } from "@/types/core";
-import { SubjectGrade, SubjectYear } from "@/types/school";
+import { Subject, SubjectGrade, SubjectYear } from "@/types/school";
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { getGradeInfo } from "../../../helpers/grades";
 
-type SubjectWithAverage = SubjectWithVisibility & {
+type SubjectWithAverage = Subject & {
   average?: SubjectGrade | null;
 };
 const columnHelper = createColumnHelper<SubjectWithAverage>();
