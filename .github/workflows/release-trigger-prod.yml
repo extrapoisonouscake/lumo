@@ -27,7 +27,7 @@ jobs:
           node-version: "22.x"
 
       - name: Sync Vercel environment variables
-        run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --yes
+        run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --environment production --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
