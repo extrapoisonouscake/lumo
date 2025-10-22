@@ -273,7 +273,8 @@ export function ScheduleTable({
     columns: isLoading ? columnsSkeletons : columns,
     meta: { getRowClassName },
   });
-  const shouldShowWeekday = weekday !== timezonedDayJS(date).format("dddd");
+  const shouldShowWeekday =
+    !isLoading && weekday !== timezonedDayJS(date).format("dddd");
   return (
     <div className="flex flex-col gap-2">
       {shouldShowTimer ||
@@ -378,7 +379,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
           </p>
         )}
       </div>
-      {isSubject && (
+      {isSubject && row.room && (
         <div className="flex gap-1 items-center text-muted-foreground text-sm">
           <HugeiconsIcon icon={Door01StrokeRounded} className="size-4" />
           <p>{row.room}</p>

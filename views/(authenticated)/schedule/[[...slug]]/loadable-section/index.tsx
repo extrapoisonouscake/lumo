@@ -4,27 +4,16 @@ import {
   MYED_ALL_GRADE_TERMS_SELECTOR,
   MYED_DATE_FORMAT,
 } from "@/constants/myed";
-import { cn } from "@/helpers/cn";
+import { saveClientResponseToCache } from "@/helpers/cache";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
-import { useCachedQuery } from "@/hooks/use-cached-query";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { getCacheKey, useCachedQuery } from "@/hooks/use-cached-query";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RouterOutput } from "@/lib/trpc/types";
 import { Subject } from "@/types/school";
-import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { useQueryClient } from "@tanstack/react-query";
+import { queryClient, trpc, trpcClient } from "@/views/trpc";
 import { Dayjs } from "dayjs";
-import {
-  MutableRefObject,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect } from "react";
 import { ScheduleTable } from "./table";
 const getWinterBreakDates = (date: Dayjs) => {
   const month = date.month();
@@ -119,408 +108,107 @@ export const scheduleVisualizableErrors: Record<
 };
 interface Props {
   date: Date;
-  setDate: (date: Date) => void;
 }
-const getActualWeekdayIndex = (date: Props["date"]) =>
-  timezonedDayJS(date).day();
-export function ScheduleLoadableSection({ date, setDate }: Props) {
+export function ScheduleLoadableSection({ date }: Props) {
+  let currentDayObject = timezonedDayJS(date);
+
+  if ([0, 6].includes(currentDayObject.day())) {
+    return (
+      <ErrorCard
+        {...scheduleVisualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({
+          date,
+          isWeekend: true,
+        })}
+      />
+    );
+  }
+  return <Loader date={date} />;
+}
+function Loader({ date }: { date: Date }) {
+  const scheduleQuery = useCachedQuery(getScheduleQueryOptions(date));
+  useEffect(() => {
+    const abortController = new AbortController();
+    const dateObject = timezonedDayJS(date);
+
+    [
+      dateObject.add(1, "day"),
+      dateObject.add(2, "day"),
+      dateObject.subtract(1, "day"),
+      dateObject.subtract(2, "day"),
+    ].forEach(async (date) => {
+      const options = getScheduleQueryOptions(date.toDate());
+
+      const result = await queryClient.fetchQuery({
+        ...options,
+        queryFn: ({ signal }) => {
+          return trpcClient.myed.schedule.getSchedule.query(
+            {
+              day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
+            },
+            { signal }
+          );
+        },
+      });
+      saveClientResponseToCache(
+        getCacheKey(options.queryKey),
+        result,
+        "schedule"
+      );
+    });
+
+    return () => abortController.abort();
+  }, [date]);
   const subjectsDataQuery = useSubjectsData({
     isPreviousYear: false,
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
-  const isMobile = useIsMobile();
-  return isMobile ? (
-    <MobileLoader
-      currentDate={date}
-      subjects={subjectsDataQuery.data?.subjects.main}
-      setDate={setDate}
-    />
-  ) : (
-    <DesktopLoader
-      key={date.toISOString()}
-      date={date}
-      subjects={subjectsDataQuery.data?.subjects.main}
-    />
-  );
-}
-function DesktopLoader({
-  date,
-  subjects,
-}: {
-  date: Date;
-  subjects: Subject[] | undefined;
-}) {
-  const scheduleQuery = useScheduleQuery(date);
   return (
     <QueryWrapper query={scheduleQuery} skeleton={<ScheduleContentSkeleton />}>
       {(schedule) => (
-        <DayRenderer date={date} subjects={subjects} data={schedule} />
+        <Content
+          schedule={schedule}
+          date={date}
+          subjects={subjectsDataQuery.data?.subjects.main}
+        />
       )}
     </QueryWrapper>
   );
 }
-function MobileLoader({
-  currentDate,
-  setDate,
-  subjects,
-}: {
-  currentDate: Date;
-  setDate: (date: Date) => void;
-  subjects: Subject[] | undefined;
-}) {
-  const queryClient = useQueryClient();
-  const [centerDate, setCenterDate] = useState(currentDate);
-  useEffect(() => {
-    setCenterDate(currentDate);
-  }, [currentDate]);
-  const dates = useMemo(() => {
-    const dateObject = timezonedDayJS(centerDate);
-    return [
-      dateObject.subtract(3, "day").toDate(),
-      dateObject.subtract(2, "day").toDate(),
-      dateObject.subtract(1, "day").toDate(),
-      centerDate,
-      dateObject.add(1, "day").toDate(),
-      dateObject.add(2, "day").toDate(),
-      dateObject.add(3, "day").toDate(),
-    ];
-  }, [centerDate]);
-
-  const ref = useRef<HTMLDivElement | null>(null);
-
-  const waitForScrollEnd = useWaitForScrollEnd(ref);
-  const prefetchDates = (baseDate: Date) => {
-    const getOptions = (date: Date) =>
-      getTRPCQueryOptions(trpc.myed.schedule.getSchedule)({
-        day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
-      });
-
-    const dateObject = timezonedDayJS(baseDate);
-    queryClient.prefetchQuery(getOptions(baseDate));
-    queryClient.prefetchQuery(getOptions(dateObject.add(1, "day").toDate()));
-    queryClient.prefetchQuery(getOptions(dateObject.add(2, "day").toDate()));
-    queryClient.prefetchQuery(
-      getOptions(dateObject.subtract(1, "day").toDate())
-    );
-    queryClient.prefetchQuery(
-      getOptions(dateObject.subtract(2, "day").toDate())
-    );
-  };
-
-  useLayoutEffect(() => {
-    prefetchDates(centerDate);
-  }, [centerDate]);
-
-  const isLoadingRef = useRef(false);
-
-  const [hasFirstLoaded, setHasFirstLoaded] = useState(false);
-
-  // Intersection observer to detect when user settles on any slide
-  useEffect(() => {
-    if (!hasFirstLoaded) return;
-
-    const slideElements = ref.current?.querySelectorAll("[data-date]");
-    if (!slideElements || slideElements.length === 0) return;
-    const slideObserver = new IntersectionObserver(
-      async (entries) => {
-        entries.forEach(async (entry) => {
-          if (entry.isIntersecting) {
-            // Wait for scroll to settle before calling setDate
-            await waitForScrollEnd();
-
-            const dateString = entry.target.getAttribute("data-date");
-            if (dateString) {
-              const date = new Date(dateString);
-              setDate(date);
-              const isEdge =
-                entry.target.getAttribute("data-is-edge") === "true";
-              if (isEdge) {
-                const scrollContainer = document.getElementById(
-                  "schedule-mobile-container"
-                ) as HTMLDivElement;
-                scrollContainer.scrollTo({
-                  left:
-                    (scrollContainer.scrollWidth -
-                      scrollContainer.clientWidth) /
-                    2,
-                  behavior: "instant",
-                });
-              }
-            }
-          }
-        });
-      },
-      {
-        root: ref.current,
-        rootMargin: "0px",
-        threshold: 1.0, // Trigger when 80% or more is visible
-      }
-    );
-
-    slideElements.forEach((element) => {
-      slideObserver.observe(element);
-    });
-
-    return () => {
-      slideObserver.disconnect();
-    };
-  }, [hasFirstLoaded, centerDate, waitForScrollEnd]);
-
-  return (
-    <div
-      ref={ref}
-      id="schedule-mobile-container"
-      className={cn(
-        "-mx-4 w-[calc(100%+1rem*2)] flex overflow-x-auto snap-x snap-mandatory",
-        { "pointer-events-none": !hasFirstLoaded }
-      )}
-    >
-      <ScrollElement date={dates[0]!} isEdge>
-        <ScheduleContentSkeleton />
-      </ScrollElement>
-      {dates.slice(1, -1).map((date) => {
-        const isMiddle = date === centerDate;
-        return (
-          <ScrollElement date={date} key={date.toISOString()}>
-            {[0, 6].includes(timezonedDayJS(date).day()) ? (
-              <ErrorCard
-                {...scheduleVisualizableErrors[SCHOOL_NOT_IN_SESSION_MESSAGE]!({
-                  date,
-                  isWeekend: true,
-                })}
-              />
-            ) : (
-              <MobileDayLoader
-                loadingRef={isMiddle ? isLoadingRef : null}
-                setHasFirstLoaded={setHasFirstLoaded}
-                isMiddle={isMiddle}
-                key={date.toISOString()}
-                date={date}
-                subjects={subjects}
-              />
-            )}
-          </ScrollElement>
-        );
-      })}
-      <ScrollElement date={dates.at(-1)!} isEdge>
-        <ScheduleContentSkeleton />
-      </ScrollElement>
-    </div>
-  );
-}
-function ScrollElement({
-  children,
-  date,
-  isEdge,
-}: {
-  children: ReactNode;
-  date: Date;
-  isEdge?: boolean;
-}) {
-  return (
-    <div
-      data-date={date?.toISOString()}
-      data-is-edge={isEdge}
-      className="mx-1 box-content first:ml-4 last:mr-4 w-[calc(100%-1rem*2)] snap-center min-w-[calc(100%-1rem*2)]"
-    >
-      {children}
-    </div>
-  );
-}
-function MobileDayLoader({
-  date,
-  setHasFirstLoaded,
-  subjects,
-  isMiddle,
-  loadingRef,
-}: {
-  date: Date;
-  setHasFirstLoaded: (hasFirstLoaded: boolean) => void;
-  subjects: Subject[] | undefined;
-  isMiddle: boolean;
-  loadingRef: MutableRefObject<boolean | null> | null;
-}) {
-  const scheduleQuery = useScheduleQuery(date);
-
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (isMiddle && scheduleQuery.data) {
-      const element = ref.current;
-      if (!element) return;
-      const scrollContainer = document.getElementById(
-        "schedule-mobile-container"
-      ) as HTMLDivElement;
-
-      scrollContainer.scrollLeft = element.offsetLeft;
-
-      loadingRef!.current = false;
-      setHasFirstLoaded(true);
-    }
-  }, [isMiddle, scheduleQuery.data, ref]);
-  return (
-    <QueryWrapper query={scheduleQuery} skeleton={<ScheduleContentSkeleton />}>
-      {(schedule) => {
-        return (
-          <div ref={ref}>
-            <DayRenderer date={date} subjects={subjects} data={schedule} />
-          </div>
-        );
-      }}
-    </QueryWrapper>
-  );
-}
-function DayRenderer({
+function Content({
+  schedule,
   date,
   subjects,
-  data,
 }: {
+  schedule: RouterOutput["myed"]["schedule"]["getSchedule"];
   date: Date;
-  subjects: Subject[] | undefined;
-  data: RouterOutput["myed"]["schedule"]["getSchedule"];
+  subjects?: Subject[];
 }) {
   const userSettings = useUserSettings();
-  let content;
-  if ("knownError" in data) {
-    content = (
-      <ErrorCard {...scheduleVisualizableErrors[data.knownError]?.({ date })} />
-    );
-  } else {
-    content = (
-      <ScheduleTable
-        date={date}
-        shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
-        data={data.subjects.map((subject) => ({
-          ...subject,
-          id: subjects?.find((s) => s.name.actual === subject.name.actual)?.id,
-        }))}
-        weekday={data.weekday}
+  if ("knownError" in schedule) {
+    return (
+      <ErrorCard
+        {...scheduleVisualizableErrors[schedule.knownError]?.({ date })}
       />
     );
   }
-  return content;
+  return (
+    <ScheduleTable
+      shouldShowTimer={!!userSettings.shouldShowNextSubjectTimer}
+      weekday={schedule.weekday}
+      data={schedule.subjects.map((subject) => ({
+        ...subject,
+        id: subjects?.find((s) => s.name.actual === subject.name.actual)?.id,
+      }))}
+    />
+  );
 }
 export function ScheduleContentSkeleton() {
   return <ScheduleTable isLoading />;
 }
-function useScheduleQuery(date: Date) {
-  const params = {
-    day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
-  };
-  return useCachedQuery(
-    getTRPCQueryOptions(trpc.myed.schedule.getSchedule)(params),
+const getScheduleQueryOptions = (date: Date) =>
+  trpc.myed.schedule.getSchedule.queryOptions(
     {
-      ttlKey: "schedule",
-    }
+      day: timezonedDayJS(date).format(MYED_DATE_FORMAT),
+    },
+    { trpc: { abortOnUnmount: true } }
   );
-}
-function useWaitForScrollEnd(ref: MutableRefObject<HTMLDivElement | null>) {
-  const isScrollingRef = useRef(false);
-  const scrollEndPromiseRef = useRef<Promise<void> | null>(null);
-  const scrollEndResolveRef = useRef<(() => void) | null>(null);
-  const scrollEndTimerRef = useRef<number | null>(null);
-  const handleScrollStart = useCallback(() => {
-    isScrollingRef.current = true;
-
-    // Create a new promise for scroll end if one doesn't exist
-    if (!scrollEndPromiseRef.current) {
-      scrollEndPromiseRef.current = new Promise<void>((resolve) => {
-        scrollEndResolveRef.current = resolve;
-      });
-    }
-  }, []);
-
-  const handleScrollEnd = useCallback(() => {
-    isScrollingRef.current = false;
-
-    // Resolve the scroll end promise
-    if (scrollEndResolveRef.current) {
-      scrollEndResolveRef.current();
-      scrollEndResolveRef.current = null;
-      scrollEndPromiseRef.current = null;
-    }
-  }, []);
-
-  // Debounced scroll handler to synthesize a reliable scrollend on iOS/Safari
-  const onScroll = useCallback(() => {
-    handleScrollStart();
-    if (scrollEndTimerRef.current !== null) {
-      window.clearTimeout(scrollEndTimerRef.current);
-    }
-    scrollEndTimerRef.current = window.setTimeout(() => {
-      handleScrollEnd();
-    }, 120);
-  }, [handleScrollStart, handleScrollEnd]);
-
-  const waitForScrollEnd = useCallback(async () => {
-    if (!isScrollingRef.current) {
-      return;
-    }
-
-    if (scrollEndPromiseRef.current) {
-      await scrollEndPromiseRef.current;
-    }
-  }, []);
-
-  // Add scroll event listeners for both desktop and touch devices
-  useEffect(() => {
-    const container = ref.current;
-    if (!container) return;
-    const controller = new AbortController();
-    // Desktop scroll events
-    container.addEventListener("scroll", onScroll, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("scrollend", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-
-    // Touch events for mobile devices
-    container.addEventListener("touchstart", handleScrollStart, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("touchend", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("touchcancel", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-
-    // Mouse events for desktop
-    container.addEventListener("mousedown", handleScrollStart, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("mouseup", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-
-    // Pointer events (unified across mouse/touch/pen); improves iOS behavior
-    container.addEventListener("pointerdown", handleScrollStart, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("pointerup", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-    container.addEventListener("pointercancel", handleScrollEnd, {
-      passive: true,
-      signal: controller.signal,
-    });
-
-    return () => {
-      if (scrollEndTimerRef.current !== null) {
-        window.clearTimeout(scrollEndTimerRef.current);
-        scrollEndTimerRef.current = null;
-      }
-      controller.abort();
-    };
-  }, [handleScrollStart, handleScrollEnd, onScroll]);
-  return waitForScrollEnd;
-}

@@ -30,7 +30,7 @@
     ".next/types/**/*.ts",
     "trigger.config.ts",
     "types/custom.d.ts",
-    "public/notifications-sw.js"
+    "public/js/notifications-sw.js"
   ],
   "exclude": ["node_modules", "app/api"]
 }
