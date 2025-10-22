@@ -1,8 +1,9 @@
 {
   "applinks": {
+"apps":[],
     "details": [
       {
-        "appID": "com.lumobc.lumo",
+        "appID": "8VHZSXX2LV.com.lumobc.lumo",
         "paths": ["*"]
       }
     ]
