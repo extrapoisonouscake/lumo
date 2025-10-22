@@ -53,7 +53,7 @@ export default function SchedulePage() {
             />
           )}
         </div>
-        <ScheduleLoadableSection setDate={dateSetHandler} date={date} />
+        <ScheduleLoadableSection date={date} />
       </div>
     </>
   );
