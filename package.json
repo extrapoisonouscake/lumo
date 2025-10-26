@@ -16,7 +16,7 @@
     "redis:dev": "docker run -it -d -p 8080:80 --name srh -e SRH_MODE=env -e SRH_TOKEN=token -e SRH_CONNECTION_STRING=\"redis://127.0.0.1:6379\" hiett/serverless-redis-http:latest",
     "db:update": "drizzle-kit push",
     "prepare": "husky",
-    "build:static": "rm -rf .next && mv ./app/api ./temp_api && NEXT_PUBLIC_IS_MOBILE=true next build ; mv ./temp_api ./app/api && npx cap sync",
+    "build:static": "rm -rf .next && mkdir temp && mv ./app/api ./temp/api && mv ./app/.well-known ./temp/.well-known && NEXT_PUBLIC_IS_MOBILE=true next build ; mv ./temp/api ./app/api && mv ./temp/.well-known ./app/.well-known && rm -rf temp",
     "build:static:prod": "npm run build:static && NODE_ENV=production npx cap sync",
     "build:static:dev": "npm run build:static && NODE_ENV=development npx cap sync",
     "ios:dev": "ionic cap run ios -l --external"

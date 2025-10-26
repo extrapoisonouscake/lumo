@@ -16,10 +16,21 @@ export type FormInputProps = WithRequired<InputProps, "name"> & {
   label: string;
   description?: string;
   shouldShowError?: boolean;
+  formItemClassName?: string;
 };
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
-  ({ name, description, label, shouldShowError = true, ...props }, ref) => {
+  (
+    {
+      name,
+      description,
+      label,
+      shouldShowError = true,
+      formItemClassName,
+      ...props
+    },
+    ref
+  ) => {
     const context = useFormContext();
     let currentError: string | null = null;
     if (context) {
@@ -34,7 +45,7 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
         defaultValue={""}
         render={({ field }) => {
           return (
-            <FormItem>
+            <FormItem className={formItemClassName}>
               {label && (
                 <FormLabel
                   shouldShowError={shouldShowError}
@@ -64,7 +75,11 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
                   }}
                 />
               </FormControl>
-              {description && <FormDescription>{description}</FormDescription>}
+              {description && (
+                <FormDescription className="mt-1">
+                  {description}
+                </FormDescription>
+              )}
               {shouldShowError && <FormMessage className="mt-1" />}
             </FormItem>
           );

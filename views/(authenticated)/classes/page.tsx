@@ -23,10 +23,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Skeleton } from "@/components/ui/skeleton";
-import { saveClientResponseToCache } from "@/helpers/cache";
+import { saveClientResponseToCache, storage } from "@/helpers/cache";
 import { cn } from "@/helpers/cn";
-import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { getCacheKey } from "@/hooks/use-cached-query";
 
 import { queryClient, trpc } from "@/views/trpc";
@@ -39,7 +37,6 @@ import {
   ViewOffSlashStrokeRounded,
   ViewStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
-import { ArrowRight01StrokeSharp } from "@hugeicons-pro/core-stroke-sharp";
 import {
   ArrowDown01StrokeStandard,
   ArrowUp01StrokeStandard,
@@ -48,7 +45,6 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { QueryKey, useMutation } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { LegacyRef, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
 
 export default function SubjectsPage() {
   const searchParams = useSearchParams();
@@ -112,21 +108,36 @@ function Content({
   return (
     <div>
       {response ? (
-        <LoadedContent
-          currentTerm={term}
-          year={year}
-          queryKey={queryKey}
-          response={response}
-          currentTermIndex={currentTermIndex}
-          subjectSummaries={subjectSummaries}
-        />
+        (!term || term === MYED_ALL_GRADE_TERMS_SELECTOR) &&
+        year === "current" ? (
+          <LoadedContent
+            currentTerm={term}
+            year={year}
+            queryKey={queryKey}
+            response={response}
+            currentTermIndex={currentTermIndex}
+            subjectSummaries={subjectSummaries}
+          />
+        ) : (
+          <div className="flex flex-col gap-2.5">
+            <TermSelectsRow
+              year={year}
+              response={response}
+              currentTerm={term}
+              currentTermIndex={currentTermIndex}
+            />
+
+            <SubjectsTable
+              data={response.subjects.main}
+              isLoading={false}
+              year={year}
+            />
+          </div>
+        )
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
-            <div className="flex flex-wrap gap-2">
-              <TermSelectsSkeleton />
-            </div>
-            <Skeleton className="size-10 sm:w-20" />
+          <div className="flex flex-wrap gap-2">
+            <TermSelectsSkeleton />
           </div>
           <SubjectsTable isLoading year={year} />
         </div>
@@ -224,6 +235,18 @@ function LoadedContent({
         queryKey,
         newSubjectsData
       );
+      console.log(queryKey);
+      const termSpecificQueryKeys = queryClient.getQueryCache().findAll({
+        predicate: (query) =>
+          (query.queryKey[0] as string[]).join(",") ===
+          (queryKey[0] as string[]).join(","),
+      });
+      console.log(termSpecificQueryKeys);
+      termSpecificQueryKeys.forEach((query) => {
+        queryClient.removeQueries({ queryKey: query.queryKey });
+        storage.delete(getCacheKey(query.queryKey));
+      });
+      //invalidate term specific queries
 
       saveClientResponseToCache(getCacheKey(queryKey), newSubjectsData);
     }
@@ -236,43 +259,34 @@ function LoadedContent({
         "mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
       })}
     >
-      <div className="flex flex-col gap-3 sm:gap-2.5">
-        <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
-          <div className="flex flex-wrap gap-2">
-            <TermSelects
-              terms={response.terms}
-              initialYear={year}
-              initialTerm={
-                currentTerm ??
-                (typeof currentTermIndex === "number"
-                  ? response.terms[currentTermIndex]!.id
-                  : //when the term is not set and year is previous, automatically select all terms
-                    "isDerivedAllTerms" in response || year === "previous"
-                    ? MYED_ALL_GRADE_TERMS_SELECTOR
-                    : undefined)
-              }
-            />
-          </div>
-          <Button
-            variant={isEditing ? "default" : "outline"}
-            className="w-10 sm:px-4 sm:w-fit"
-            onClick={() => {
-              if (isEditing) {
-                onSave();
-              }
-              setIsEditing(!isEditing);
+      <div className="flex flex-col gap-2.5">
+        <TermSelectsRow
+          year={year}
+          response={response}
+          currentTerm={currentTerm}
+          currentTermIndex={currentTermIndex}
+          rightContent={
+            <Button
+              variant={isEditing ? "default" : "outline"}
+              className="w-10 sm:px-4 sm:w-fit"
+              onClick={() => {
+                if (isEditing) {
+                  onSave();
+                }
+                setIsEditing(!isEditing);
 
-              setIsHiddenSubjectsOpen(!isEditing);
-            }}
-          >
-            <HugeiconsIcon
-              icon={isEditing ? Tick02StrokeRounded : Edit03StrokeRounded}
-            />
-            <span className="hidden sm:block">
-              {isEditing ? "Save" : "Edit"}
-            </span>
-          </Button>
-        </div>
+                setIsHiddenSubjectsOpen(!isEditing);
+              }}
+            >
+              <HugeiconsIcon
+                icon={isEditing ? Tick02StrokeRounded : Edit03StrokeRounded}
+              />
+              <span className="hidden sm:block">
+                {isEditing ? "Save" : "Edit"}
+              </span>
+            </Button>
+          }
+        />
         {isEditing ? (
           <EditableSubjectsList
             subjects={filteredMainSubjects}
@@ -310,6 +324,40 @@ function LoadedContent({
           year={year}
         />
       )}
+    </div>
+  );
+}
+function TermSelectsRow({
+  rightContent,
+  year,
+  currentTerm,
+  currentTermIndex,
+  response,
+}: {
+  rightContent?: React.ReactNode;
+  year: SubjectYear;
+  currentTerm?: string;
+  currentTermIndex?: number;
+  response: RouterOutput["myed"]["subjects"]["getSubjects"];
+}) {
+  return (
+    <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
+      <div className="flex flex-wrap gap-2">
+        <TermSelects
+          terms={response.terms}
+          initialYear={year}
+          initialTerm={
+            currentTerm ??
+            (typeof currentTermIndex === "number"
+              ? response.terms[currentTermIndex]!.id
+              : //when the term is not set and year is previous, automatically select all terms
+                "isDerivedAllTerms" in response || year === "previous"
+                ? MYED_ALL_GRADE_TERMS_SELECTOR
+                : undefined)
+          }
+        />
+      </div>
+      {rightContent}
     </div>
   );
 }
@@ -370,10 +418,7 @@ function HiddenSubjectsList({
               setIsHidden={
                 isEditing ? onVisibilityChange(subject!.id) : undefined
               }
-              isClickable={!isEditing}
-              year={year}
               isHidden={true}
-              className="pr-4"
             />
           ))
         ) : (
@@ -448,72 +493,67 @@ function DraggableSubjectCard(
   return <EditingModeSubjectCard {...props} ref={ref} handleRef={handleRef} />;
 }
 
-function EditingModeSubjectCard(
-  subject: Subject & {
-    handleRef?: LegacyRef<SVGSVGElement>;
-    ref?: LegacyRef<HTMLDivElement>;
-    setIsHidden?: (isHidden: boolean) => void;
-    className?: string;
-    isClickable?: boolean;
-    year?: SubjectYear;
-    isHidden: boolean;
-  }
-) {
-  const {
-    name,
-    isHidden,
-    handleRef,
-    ref,
-    setIsHidden,
-    className,
-    isClickable = false,
-  } = subject;
+function EditingModeSubjectCard({
+  name,
+  isHidden,
+  handleRef,
+  ref,
+  setIsHidden,
+  className,
+}: Subject & {
+  handleRef?: LegacyRef<HTMLButtonElement>;
+  ref?: LegacyRef<HTMLDivElement>;
+  setIsHidden?: (isHidden: boolean) => void;
+  className?: string;
 
-  const content = (
+  isHidden: boolean;
+}) {
+  return (
     <Card
       ref={ref}
       className={cn(
-        "flex-row justify-between gap-3 pl-4 pr-2 py-3 items-center group",
-        className,
-        { clickable: isClickable }
+        "flex-row p-1 justify-between items-center group",
+        className
       )}
-      data-clickable-hover
     >
-      <h3 className="font-medium sm:font-normal text-base sm:text-sm truncate">
+      <h3 className="user-select-none font-medium sm:font-normal text-base sm:text-sm truncate my-2 mx-3">
         {name.prettified}
 
         {name.emoji && <InlineSubjectEmoji emoji={name.emoji} />}
       </h3>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center">
         {setIsHidden && (
-          <HugeiconsIcon
-            icon={isHidden ? ViewStrokeRounded : ViewOffSlashStrokeRounded}
+          <Button
+            size="icon"
             onClick={() => {
               setIsHidden(!isHidden);
             }}
-            className="text-muted-foreground clickable size-4 cursor-pointer hover:text-primary transition-colors"
-          />
+            variant="ghost"
+            className={cn("text-muted-foreground", {
+              "w-fit px-2": !!handleRef,
+            })}
+          >
+            <HugeiconsIcon
+              icon={isHidden ? ViewStrokeRounded : ViewOffSlashStrokeRounded}
+            />
+          </Button>
         )}
         {handleRef && (
-          <HugeiconsIcon
-            strokeWidth={3}
-            data-auto-stroke-width
-            icon={DragDropVerticalStrokeRounded}
-            className="text-muted-foreground clickable size-5 hover:text-primary transition-colors"
+          <Button
+            size="icon"
+            variant="ghost"
+            className="text-muted-foreground hover:bg-accent active:bg-accent"
             ref={handleRef}
-          />
-        )}
-        {isClickable && (
-          <HugeiconsIcon
-            icon={ArrowRight01StrokeSharp}
-            className="size-5 text-muted-foreground group-hover:text-foreground transition-colors"
-          />
+          >
+            <HugeiconsIcon
+              strokeWidth={3}
+              data-auto-stroke-width
+              icon={DragDropVerticalStrokeRounded}
+              className="size-5!"
+            />
+          </Button>
         )}
       </div>
     </Card>
   );
-  if (subject.isClickable && subject.year) {
-    return <Link to={getSubjectPageURL(subject.year)(subject)}>{content}</Link>;
-  }
-  return content;
 }

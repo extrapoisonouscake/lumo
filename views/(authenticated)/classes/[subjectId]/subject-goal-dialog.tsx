@@ -259,10 +259,10 @@ export function SubjectGoalDialog({
         </Button>
       </ResponsiveDialogTrigger>
       <ResponsiveDialogContent>
-        <ResponsiveDialogHeader className="pb-0">
+        <ResponsiveDialogHeader className="pb-2">
           <ResponsiveDialogTitle>Goal</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody className="gap-6">
+        <ResponsiveDialogBody className="gap-5">
           {isBreakdownShown && (
             <Card
               className={cn(
@@ -341,11 +341,11 @@ export function SubjectGoalDialog({
               )}
             </Card>
           )}
-          <Form className="gap-6 relative" {...methods} onSubmit={onSave}>
+          <Form className="gap-4" {...methods} onSubmit={onSave}>
             {!shouldShowFinalLayout && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <FormSelect
-                  triggerClassName="sm:col-span-2"
+                  formItemClassName="sm:col-span-2"
                   label="Category"
                   name="categoryId"
                   options={categories.map((category) => ({
@@ -353,7 +353,6 @@ export function SubjectGoalDialog({
                     value: category.id,
                   }))}
                 />
-
                 <FormInput
                   leftIcon={
                     <HugeiconsIcon
@@ -363,7 +362,8 @@ export function SubjectGoalDialog({
                       icon={Target02StrokeRounded}
                     />
                   }
-                  label="Goal (out of 100)"
+                  label="Goal Average"
+                  description="The total average you would like to achieve."
                   name="value"
                   type="number"
                   min="0"
@@ -374,7 +374,8 @@ export function SubjectGoalDialog({
 
                 <FormInput
                   leftIcon={<HugeiconsIcon icon={PercentStrokeRounded} />}
-                  label="Minimum Score (%)"
+                  label="Minimum Score"
+                  description="Minimum grade per assignment needed to reach your goal average."
                   name="minimumScore"
                   type="number"
                   min="0"
@@ -398,7 +399,7 @@ export function SubjectGoalDialog({
                   type="submit"
                   className="w-full sm:w-auto min-h-10"
                 >
-                  {isBreakdownShown ? "Done" : "Preview"}
+                  {isBreakdownShown ? "Save Goal" : "Preview"}
                 </Button>
               ) : (
                 <Button
@@ -408,7 +409,7 @@ export function SubjectGoalDialog({
                     e.stopPropagation();
                     onSave(undefined);
                   }}
-                  className="flex-1 min-h-10"
+                  className="w-full sm:w-auto min-h-10"
                 >
                   Create a new goal
                 </Button>
@@ -416,7 +417,7 @@ export function SubjectGoalDialog({
 
               <Button
                 variant="outline"
-                className="flex-1 min-h-10"
+                className="w-full sm:w-auto min-h-10"
                 onClick={() => {
                   if (isBreakdownShown) {
                     onSave(undefined);

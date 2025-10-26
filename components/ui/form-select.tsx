@@ -24,6 +24,7 @@ export function FormSelect<T extends FieldValues>({
   description,
   onChange,
   triggerClassName,
+  formItemClassName,
   ...props
 }: {
   name: /*Path<T>*/ any;
@@ -32,6 +33,7 @@ export function FormSelect<T extends FieldValues>({
   placeholder?: string;
   description?: string;
   onChange?: () => void;
+  formItemClassName?: string;
 } & SelectProps & { triggerClassName?: string }) {
   const { control, trigger, clearErrors } = useFormContext();
   return (
@@ -40,7 +42,7 @@ export function FormSelect<T extends FieldValues>({
       name={name}
       render={({ field }) => {
         return (
-          <FormItem>
+          <FormItem className={formItemClassName}>
             <FormLabel required={props.required} className="mb-2">
               {label}
             </FormLabel>
