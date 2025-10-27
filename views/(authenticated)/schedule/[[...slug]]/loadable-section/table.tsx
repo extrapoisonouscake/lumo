@@ -388,7 +388,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
       {isSubject && !isTeacherAdvisoryRow && (
         <HugeiconsIcon
           icon={ArrowRight01StrokeStandard}
-          className="absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors"
+          className={cn("absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors",{"top-1/2":!row.room})}
         />
       )}
     </Card>
