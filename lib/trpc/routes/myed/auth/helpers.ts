@@ -40,7 +40,6 @@ import { cookies } from "next/headers";
 import { after } from "next/server";
 import "server-only";
 import { runNotificationUnsubscriptionDBCalls } from "../../core/settings/helpers";
-import { genericErrorMessageVariableRegex } from "./public";
 export class LoginError extends Error {
   authCookies?: AuthCookies;
   constructor(message: string, authCookies?: AuthCookies) {
@@ -57,16 +56,16 @@ const initStudentFirstLogin = async ({
   tokens: AuthCookies;
   studentId: string;
 }) => {
-  const hashedStudentId = hashString(studentId);
+  const studentDatabaseId = hashString(studentId);
   const existingUser = await db.query.users.findFirst({
-    where: eq(users.id, hashedStudentId),
+    where: eq(users.id, studentDatabaseId),
   });
   if (existingUser) return;
   const personalInfo = await getMyEd({ authCookies: tokens, studentId })(
     "personalDetails"
   );
   const knownSchool = KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName];
-  await db.insert(users).values({ id: hashedStudentId });
+  await db.insert(users).values({ id: studentDatabaseId });
   const widgetsConfiguration: WidgetsConfiguration = [
     ...USER_SETTINGS_DEFAULT_VALUES.widgetsConfiguration,
   ];
@@ -81,7 +80,7 @@ const initStudentFirstLogin = async ({
   await db.insert(user_settings).values({
     ...USER_SETTINGS_DEFAULT_VALUES,
     widgetsConfiguration: widgetsConfiguration,
-    userId: hashedStudentId,
+    userId: studentDatabaseId,
     schoolId: knownSchool,
   });
 };
@@ -192,6 +191,11 @@ export async function getFreshAuthCookies() {
   );
   return cookiesToAdd as AuthCookies;
 }
+const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
+  "This account has been disabled.": LoginErrors.accountDisabled,
+  "Invalid login.": LoginErrors.invalidAuth,
+};
+
 export async function fetchAuthCookiesAndStudentId(
   username: string,
   password: string
@@ -271,24 +275,6 @@ export async function fetchStudentId(cookies: AuthCookies) {
   const studentId = studentsData[0]!.studentOid;
   if (!studentId) throw new LoginError(LoginErrors.invalidAuth);
   return studentId;
-}
-export const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
-  "This account has been disabled.": LoginErrors.accountDisabled,
-  "Invalid login.": LoginErrors.invalidAuth,
-};
-export function parseAuthGenericErrorMessage($: cheerio.CheerioAPI) {
-  let errorMessage: string | null = null;
-  $('script[language="JavaScript"]').each(function () {
-    const scriptContent = $(this).html();
-    if (!scriptContent) return;
-
-    const match = scriptContent.match(genericErrorMessageVariableRegex);
-    if (match) {
-      errorMessage = match[2] ?? null;
-      return false;
-    }
-  });
-  return errorMessage;
 }
 
 const logoutStep: FlatRouteStep = {

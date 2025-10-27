@@ -105,13 +105,23 @@ export type NotificationsSubscriptionSelectModel = InferSelectModel<
 export const notificationSubscriptionSchema = createSelectSchema(
   notifications_subscriptions
 );
+export type TrackedSubject = {
+  assignments: Array<{
+    id: string;
+    score?: number;
+  }>;
+};
 export const tracked_school_data = table("tracked_school_data", {
   id: t.uuid().defaultRandom().primaryKey(),
+
+  //* Hashed userId
   userId: t
     .text("user_id")
     .references(() => users.id, { onDelete: "cascade" })
     .notNull()
     .unique(),
+
+  /** Format: { [subjectId: string]: TrackedSubject } } */
   subjectsWithAssignments: t.jsonb("subjects_with_assignments"),
   subjectsGoals: t.jsonb("subjects_goals"),
   subjectsListOrder: t
@@ -133,12 +143,7 @@ export const tracked_school_data = table("tracked_school_data", {
 export type TrackedSchoolDataSelectModel = InferSelectModel<
   typeof tracked_school_data
 >;
-export type TrackedSubject = {
-  assignments: Array<{
-    id: string;
-    score?: number;
-  }>;
-};
+
 export const tracked_school_dataRelations = relations(
   tracked_school_data,
   ({ one }) => ({
