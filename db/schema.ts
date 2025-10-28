@@ -4,7 +4,8 @@ import * as t from "drizzle-orm/pg-core";
 import { pgTable as table } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 export const users = table("users", {
-  id: t.text("id").primaryKey(), //user student id
+  id: t.text("id").primaryKey(), //hashed student id
+createdAt: t.timestamp("created_at").defaultNow().notNull(),
   lastLoggedInAt: t.timestamp("last_logged_in_at").defaultNow().notNull(),
 });
 export const usersRelations = relations(users, ({ many, one }) => ({
