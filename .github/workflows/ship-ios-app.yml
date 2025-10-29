@@ -19,6 +19,14 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - uses: cardinalby/export-env-action@v1
+        with:
+          envFile: ".env"
+          expand: "true"
+      - name: Create .npmrc file
+        run: |
+          echo "$NPM_RC" > .npmrc
+        shell: bash
       - name: Install dependencies
         run: npm install
         env:
