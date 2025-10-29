@@ -32,6 +32,7 @@ xcrun xcodebuild \
     -sdk "${SDK}" \
     -parallelizeTargets \
     -showBuildTimingSummary \
+	-allowProvisioningUpdates \
     -disableAutomaticPackageResolution \
     -derivedDataPath "${DERIVED_DATA_PATH}" \
     -archivePath "${ARCHIVE_PATH}" \

@@ -84,6 +84,10 @@ jobs:
           token: ${{secrets.github_token}}
       - name: Build archive
         run: ./ios/Build
+        env:
+          APP_STORE_CONNECT_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
       - name: Upload debug files to Sentry
         run: sentry-cli debug-files upload --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} --org ${{ secrets.SENTRY_ORG }} --project ${{ secrets.SENTRY_PROJECT }} .build/Archives/App.xcarchive/dSYMs/App.app.dSYM
       - name: "Upload app to TestFlight"
