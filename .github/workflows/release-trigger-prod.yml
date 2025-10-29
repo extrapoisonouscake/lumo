@@ -25,23 +25,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: Sync Vercel environment variables
+      - name: Pull .env from Vercel
         run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --environment production --yes
         env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - uses: cardinalby/export-env-action@v1
-        with:
-          envFile: ".env"
-          expand: "true"
-      - name: Create .npmrc file
+            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Create temporary .npmrc and install dependencies
         run: |
-          echo "$NPM_RC" > .npmrc
-        shell: bash
-
-      - name: Install dependencies
-        run: npm install
+          NPM_RC=$(grep '^NPM_RC=' .env | cut -d '=' -f2-)
+          echo "::add-mask::$NPM_RC"
+          echo "$NPM_RC" > ~/.npmrc
+          npm install --no-audit --no-fund
+          rm -f ~/.npmrc
         env:
           SKIP_POSTINSTALL: true
       - name: 🚀 Deploy Trigger.dev
