@@ -343,10 +343,9 @@ function ScheduleMobileRow(row: ScheduleRow) {
       className={cn(
         "p-4 group relative flex-row gap-2 justify-between items-start",
         {
-          "bg-background border-brand/65 shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] overflow-hidden":
+          "bg-background border-brand/65 shadow-[0_0_45px_hsl(var(--background))]! overflow-hidden":
             isCurrent,
-          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] shadow-[0_0_45px_hsl(var(--background))]!":
-            isCurrent && isSubject,
+          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]": isCurrent && isSubject,
           "border-none py-2.5 rounded-md items-center": !isSubject,
           clickable: isSubject && !isTeacherAdvisoryRow,
         }
@@ -388,7 +387,10 @@ function ScheduleMobileRow(row: ScheduleRow) {
       {isSubject && !isTeacherAdvisoryRow && (
         <HugeiconsIcon
           icon={ArrowRight01StrokeStandard}
-          className={cn("absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors",{"top-1/2":!row.room})}
+          className={cn(
+            "absolute right-3 top-[calc(50%+4px)] -translate-y-1/2 size-5 text-muted-foreground group-hover:text-foreground transition-colors",
+            { "top-1/2": !row.room }
+          )}
         />
       )}
     </Card>
