@@ -23,11 +23,9 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Create temporary .npmrc and install dependencies
         run: |
-          cat .env
           NPM_RC=$(grep '^NPM_RC=' .env | cut -d '=' -f2-)
-          echo "NPM_RC: $NPM_RC"
           echo "::add-mask::$NPM_RC"
-          echo "$NPM_RC" > ~/.npmrc
+          echo -e "$NPM_RC" > ~/.npmrc
           npm ci --no-audit --no-fund
           rm -f ~/.npmrc
       - name: Build Capacitor app
