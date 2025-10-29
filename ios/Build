@@ -11,7 +11,7 @@ function finish() {
 trap finish EXIT
 
 SDK="${SDK:-iphoneos}"
-WORKSPACE="${WORKSPACE:-App.xcworkspace}"
+WORKSPACE="${WORKSPACE:-ios/App/App.xcworkspace}"
 SCHEME="${SCHEME:-App}"
 CONFIGURATION=${CONFIGURATION:-Release}
 
