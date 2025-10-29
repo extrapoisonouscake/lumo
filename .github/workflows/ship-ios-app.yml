@@ -25,6 +25,28 @@ jobs:
         with:
           envFile: ".env"
           expand: "true"
+      
+      - name: Fail if iOS version/build not bumped
+        shell: bash
+        run: |
+          set -euo pipefail
+          pushd ios/App > /dev/null
+          CURRENT_MARKETING_VERSION=$(xcrun agvtool what-marketing-version -terse1 | tail -n 1)
+          CURRENT_BUILD_NUMBER=$(xcrun agvtool what-version -terse1 | tail -n 1)
+          popd > /dev/null
+
+          echo "Current MARKETING_VERSION: ${CURRENT_MARKETING_VERSION}"
+          echo "Current BUILD_NUMBER: ${CURRENT_BUILD_NUMBER}"
+
+          if [ -n "${IOS_MARKETING_VERSION:-}" ] && [ "${IOS_MARKETING_VERSION}" = "${CURRENT_MARKETING_VERSION}" ]; then
+            echo "ERROR: IOS_MARKETING_VERSION (${IOS_MARKETING_VERSION}) matches current MARKETING_VERSION. Bump it before shipping." >&2
+            exit 1
+          fi
+
+          if [ -n "${IOS_BUILD_NUMBER:-}" ] && [ "${IOS_BUILD_NUMBER}" = "${CURRENT_BUILD_NUMBER}" ]; then
+            echo "ERROR: IOS_BUILD_NUMBER (${IOS_BUILD_NUMBER}) matches current CURRENT_PROJECT_VERSION. Bump it before shipping." >&2
+            exit 1
+          fi
       - name: Create .npmrc file
         run: |
           echo "$NPM_RC" > .npmrc
