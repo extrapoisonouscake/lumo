@@ -48,6 +48,7 @@ jobs:
           environment: production
           sourcemaps: "./out"
       - uses: Apple-Actions/import-codesign-certs@v3
+        id: download-profiles
         with:
           p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
           p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
@@ -58,6 +59,14 @@ jobs:
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Set provisioning profile name env var
+        run: |
+          PROFILE_NAME=$(echo '${{ steps.download-profiles.outputs.profiles }}' | jq -r '.[0].name')
+          echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
+      - name: Alias Apple Team ID
+        run: echo "DEVELOPMENT_TEAM=${APPLE_TEAM_ID}" >> $GITHUB_ENV
+        env:
+          APPLE_TEAM_ID: ${{ env.APPLE_TEAM_ID }}
       - name: Generate build number
         uses: onyxmueller/build-tag-number@v1
         with:
