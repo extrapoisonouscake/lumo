@@ -16,9 +16,6 @@ export const viewport: Viewport = {
 };
 export const metadata: Metadata = {
   appleWebApp: { capable: true },
-  itunes: {
-    appId: APP_STORE_APP_ID,
-  },
   title: WEBSITE_TITLE,
   keywords: [
     "Lumo",
