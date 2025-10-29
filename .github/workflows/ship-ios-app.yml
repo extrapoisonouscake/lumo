@@ -26,6 +26,7 @@ jobs:
           NPM_RC=$(grep '^NPM_RC=' .env | cut -d '=' -f2-)
           echo "::add-mask::$NPM_RC"
           echo -e "$NPM_RC" > ~/.npmrc
+          cat ~/.npmrc
           npm ci --no-audit --no-fund
           rm -f ~/.npmrc
       - name: Build Capacitor app
