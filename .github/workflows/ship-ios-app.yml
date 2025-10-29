@@ -15,28 +15,35 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-      - name: Sync Vercel environment variables
+      - name: Pull .env from Vercel
         run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --environment production --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - uses: cardinalby/export-env-action@v1
-        with:
-          envFile: ".env"
-          expand: "true"
-      
-      
-      - name: Create .npmrc file
+		
+      - name: Mask NPM_RC and any private tokens
         run: |
-          echo "$NPM_RC" > .npmrc
-        shell: bash
-      - name: Install dependencies
-        run: npm install
+          echo "::add-mask::$NPM_RC"
+          echo "::add-mask::$VERCEL_TOKEN"
         env:
-          SKIP_POSTINSTALL: true
+          NPM_RC: ${{ env.NPM_RC }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+		
+      - name: Install dependencies securely
+        run: |
+          echo "$NPM_RC" > ~/.npmrc
+          npm ci --no-audit --no-fund
+          rm -f ~/.npmrc
+        env:
+          NPM_RC: ${{ env.NPM_RC }}
+		
       - name: Build Capacitor app
-        run: npm run build:static:prod
+        run: |
+          set -a
+          source .env
+          set +a
+          npm run build:static:prod
       - uses: matbour/setup-sentry-cli@v2
       - name: Create Sentry release
         uses: getsentry/action-release@v3
@@ -59,14 +66,14 @@ jobs:
           issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Debug provisioning profiles
+        run: |
+          echo '${{ steps.download-profiles.outputs.profiles }}' | jq .
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles
       - name: Set provisioning profile name env var
         run: |
           PROFILE_NAME=$(echo '${{ steps.download-profiles.outputs.profiles }}' | jq -r '.[0].name')
           echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
-      - name: Alias Apple Team ID
-        run: echo "DEVELOPMENT_TEAM=${APPLE_TEAM_ID}" >> $GITHUB_ENV
-        env:
-          APPLE_TEAM_ID: ${{ env.APPLE_TEAM_ID }}
       - name: Generate build number
         uses: onyxmueller/build-tag-number@v1
         with:
@@ -77,6 +84,7 @@ jobs:
           APP_STORE_CONNECT_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
           APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
           APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          DEVELOPMENT_TEAM: ${{ vars.APPSTORE_TEAM_ID }}
       - name: Upload debug files to Sentry
         run: sentry-cli debug-files upload --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} --org ${{ secrets.SENTRY_ORG }} --project ${{ secrets.SENTRY_PROJECT }} .build/Archives/App.xcarchive/dSYMs/App.app.dSYM
       - name: "Upload app to TestFlight"
