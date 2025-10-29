@@ -21,20 +21,13 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - name: Mask NPM_RC and any private tokens
+      - name: Create temporary .npmrc and install dependencies
         run: |
+          NPM_RC=$(grep '^NPM_RC=' .env | cut -d '=' -f2-)
           echo "::add-mask::$NPM_RC"
-          echo "::add-mask::$VERCEL_TOKEN"
-        env:
-          NPM_RC: ${{ env.NPM_RC }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      - name: Install dependencies securely
-        run: |
           echo "$NPM_RC" > ~/.npmrc
           npm ci --no-audit --no-fund
           rm -f ~/.npmrc
-        env:
-          NPM_RC: ${{ env.NPM_RC }}
       - name: Build Capacitor app
         run: |
           set -a
