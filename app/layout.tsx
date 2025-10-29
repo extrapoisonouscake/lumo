@@ -3,7 +3,6 @@ import {
   USER_SETTINGS_DEFAULT_VALUES,
   USER_THEME_COLOR_COOKIE_PREFIX,
 } from "@/constants/core";
-import { isMobileApp } from "@/constants/ui";
 import { APP_STORE_APP_ID, WEBSITE_TITLE } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import "@/views/globals.css";
@@ -39,7 +38,7 @@ export default async function RootLayout({
 }) {
   let theme,
     themeColor = USER_SETTINGS_DEFAULT_VALUES.themeColor;
-  if (!isMobileApp) {
+  if (process.env.NEXT_PUBLIC_IS_MOBILE !== "true") {
     const store = await cookies();
     const isLoggedIn = store.get(IS_LOGGED_IN_COOKIE_NAME)?.value === "true";
 

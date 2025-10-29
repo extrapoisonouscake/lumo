@@ -5,14 +5,13 @@ import { pgTable as table } from "drizzle-orm/pg-core";
 import { createSelectSchema } from "drizzle-zod";
 export const users = table("users", {
   id: t.text("id").primaryKey(), //hashed student id
-createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  createdAt: t.timestamp("created_at").defaultNow().notNull(),
   lastLoggedInAt: t.timestamp("last_logged_in_at").defaultNow().notNull(),
 });
 export const usersRelations = relations(users, ({ many, one }) => ({
   notifications_subscriptions: many(notifications_subscriptions),
   tracked_school_data: one(tracked_school_data),
   user_settings: one(user_settings),
-  notifications_settings: one(notifications_settings),
 }));
 export const user_settings = table("user_settings", {
   id: t.uuid().defaultRandom().primaryKey(),
@@ -51,15 +50,6 @@ export const user_settings = table("user_settings", {
 });
 
 export type UserSettingsSelectModel = InferSelectModel<typeof user_settings>;
-export const notifications_settings = table("notifications_settings", {
-  id: t.uuid().defaultRandom().primaryKey(),
-  userId: t
-    .text("user_id")
-    .references(() => users.id, { onDelete: "cascade" })
-    .notNull()
-    .unique(),
-  newAssignments: t.boolean("new_assignments").notNull().default(true),
-});
 
 export const notifications_subscriptions = table(
   "notifications_subscriptions",
@@ -106,12 +96,18 @@ export type NotificationsSubscriptionSelectModel = InferSelectModel<
 export const notificationSubscriptionSchema = createSelectSchema(
   notifications_subscriptions
 );
-export type TrackedSubject = {
+export interface TrackedSubject {
   assignments: Array<{
     id: string;
-    score?: number;
+    updatedAt?: Date; //if undefined, the date is impossible to determine
+    score: number | null;
   }>;
-};
+}
+export interface SubjectGoal {
+  value: number;
+  categoryId: string;
+  minimumScore: number;
+}
 export const tracked_school_data = table("tracked_school_data", {
   id: t.uuid().defaultRandom().primaryKey(),
 
@@ -123,8 +119,15 @@ export const tracked_school_data = table("tracked_school_data", {
     .unique(),
 
   /** Format: { [subjectId: string]: TrackedSubject } } */
-  subjectsWithAssignments: t.jsonb("subjects_with_assignments"),
-  subjectsGoals: t.jsonb("subjects_goals"),
+  subjectsWithAssignments: t
+    .jsonb("subjects_with_assignments")
+    .notNull()
+    .default(sql`'{}'::jsonb`),
+  /** Format: { [subjectId: string]: SubjectGoal } */
+  subjectsGoals: t
+    .jsonb("subjects_goals")
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   subjectsListOrder: t
     .text("subjects_list_order")
     .array()

@@ -73,7 +73,18 @@ function RecentGradesWidget(
   const recentGradedAssignments = useMemo(() => {
     return assignments.data
       .filter((assignment) => typeof assignment.score === "number")
-      .toSorted((a, b) => b.dueAt.getTime() - a.dueAt.getTime())
+      .toSorted((a, b) => {
+        // If both have updatedAt, sort by updatedAt
+        if (a.updatedAt && b.updatedAt) {
+          return b.updatedAt.getTime() - a.updatedAt.getTime();
+        }
+        // If neither has updatedAt, sort by dueAt
+        if (!a.updatedAt && !b.updatedAt) {
+          return b.dueAt.getTime() - a.dueAt.getTime();
+        }
+        // If only one has updatedAt, prioritize it (treat as more recent)
+        return a.updatedAt ? -1 : 1;
+      })
       .slice(0, maxItems);
   }, [assignments.data, maxItems]);
 

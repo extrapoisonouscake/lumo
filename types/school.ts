@@ -125,6 +125,7 @@ export type Assignment = {
   name: string;
   dueAt: Date;
   assignedAt: Date;
+  updatedAt?: Date; //if undefined, the date is impossible to determine
   weight?: number;
   feedback: string | null;
   classAverage: number | null;

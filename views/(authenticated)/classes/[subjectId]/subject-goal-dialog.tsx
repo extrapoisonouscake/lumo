@@ -14,12 +14,10 @@ import {
   ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SubjectGoal } from "@/db/schema";
 import { cn } from "@/helpers/cn";
 import { useFormValidation } from "@/hooks/use-form-validation";
-import {
-  GetSubjectInfoResponse,
-  SubjectGoal,
-} from "@/lib/trpc/routes/myed/subjects";
+import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
 import {
   SubjectGoalSchema,
   getSubjectGoalSchema,

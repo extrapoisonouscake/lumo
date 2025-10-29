@@ -17,8 +17,8 @@
     "db:update": "drizzle-kit push",
     "prepare": "husky",
     "build:static": "rm -rf .next && mkdir temp && mv ./app/api ./temp/api && mv ./app/.well-known ./temp/.well-known && NEXT_PUBLIC_IS_MOBILE=true next build ; mv ./temp/api ./app/api && mv ./temp/.well-known ./app/.well-known && rm -rf temp",
-    "build:static:prod": "npm run build:static && NODE_ENV=production npx cap sync",
-    "build:static:dev": "npm run build:static && NODE_ENV=development npx cap sync",
+    "build:static:prod": "NEXT_PUBLIC_HTTP_NODE_ENV_OVERRIDE=production npm run build:static && NODE_ENV=production npx cap sync",
+    "build:static:dev": "NEXT_PUBLIC_HTTP_NODE_ENV_OVERRIDE=development npm run build:static && NODE_ENV=development npx cap sync",
     "ios:dev": "ionic cap run ios -l --external"
   },
   "dependencies": {
@@ -66,7 +66,9 @@
     "@react-input/mask": "^2.0.4",
     "@react-router/node": "^7.9.1",
     "@react-router/serve": "^7.9.1",
-    "@sentry/nextjs": "^10.19.0",
+    "@sentry/capacitor": "^2.4.0",
+    "@sentry/nextjs": "9.46.0",
+    "@sentry/react": "9.46.0",
     "@tailwindcss/postcss": "^4.1.13",
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-query": "^5.90.5",

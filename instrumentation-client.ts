@@ -2,12 +2,16 @@
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from "@sentry/capacitor";
+import * as SentryReact from "@sentry/react";
 import { isProduction } from "./constants/core";
 
-Sentry.init({
-  dsn: "https://044f7cfed8d518021870324fa7e59d7e@o4509261052641280.ingest.us.sentry.io/4509261053493248",
 
+Sentry.init({
+ 
+              dsn: "https://c6ccf7cc17d5709e02d1c069313fb6d0@o4508129189363712.ingest.de.sentry.io/4508129193689168",
+              sendDefaultPii: true,
+             
   enabled: isProduction,
   // Add optional integrations for additional features
   integrations: [Sentry.replayIntegration()],
@@ -27,6 +31,6 @@ Sentry.init({
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
-});
+},SentryReact.init);
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+

@@ -1,3 +1,5 @@
+import { isMobileApp } from "@/constants/ui";
+import { StatusBar, Style as StatusBarStyle } from "@capacitor/status-bar";
 import { createContext, useContext, useEffect, useState } from "react";
 import { THEME_STORAGE_KEY_NAME } from "./constants";
 
@@ -20,7 +22,37 @@ const initialState: ThemeProviderState = {
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+const handleThemeChange = (theme:Theme) => {
+  
+  const root = window.document.documentElement;
 
+    root.classList.remove("light", "dark");
+
+    if (theme === "system") {
+      const mediaQuery=window.matchMedia("(prefers-color-scheme: dark)")
+      const systemTheme = mediaQuery.matches ? "dark" : "light";
+       
+
+      root.classList.add(systemTheme);
+      
+    }else{    
+    root.classList.add(theme);
+    }
+  if(isMobileApp){
+  let isDark;
+  if(theme==='system'){
+    isDark= window.matchMedia("(prefers-color-scheme: dark)")
+    .matches
+  
+  } else {
+    isDark=theme==='dark'
+  }
+  
+  Promise.all([StatusBar.setStyle({
+    style: isDark ? StatusBarStyle.Dark : StatusBarStyle.Light,
+  }),StatusBar.setBackgroundColor({color:isDark ? "#000000" : "#FFFFFF"})]).catch(() => {});
+}
+};
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -32,28 +64,26 @@ export function ThemeProvider({
   );
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    handleThemeChange(theme);
+    if(theme==='system'){
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      
+      
+      const handler = (e: MediaQueryListEvent) => handleThemeChange(e.matches ? "dark" : "light");
+      mediaQuery.addEventListener("change", handler);
 
-    root.classList.remove("light", "dark");
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemTheme);
-      return;
+      return () => {
+        mediaQuery.removeEventListener("change", handler);
+      };
     }
-
-    root.classList.add(theme);
   }, [theme]);
-
+ 
   const value = {
     theme,
     setTheme: (theme: Theme) => {
       localStorage.setItem(storageKey, theme);
       document.cookie = `${storageKey}=${theme}; path=/`;
+      handleThemeChange(theme);
       setTheme(theme);
     },
   };

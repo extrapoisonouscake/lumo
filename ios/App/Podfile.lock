@@ -16,6 +16,10 @@ PODS:
     - Capacitor
   - CapacitorStatusBar (7.0.3):
     - Capacitor
+  - Sentry/HybridSDK (8.56.2)
+  - SentryCapacitor (2.4.0):
+    - Capacitor
+    - Sentry/HybridSDK (= 8.56.2)
 
 DEPENDENCIES:
   - "AparajitaCapacitorIosSilentNotifications (from `../../node_modules/@aparajita/capacitor-ios-silent-notifications`)"
@@ -27,6 +31,11 @@ DEPENDENCIES:
   - "CapacitorPreferences (from `../../node_modules/@capacitor/preferences`)"
   - "CapacitorPushNotifications (from `../../node_modules/@capacitor/push-notifications`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
+  - "SentryCapacitor (from `../../node_modules/@sentry/capacitor`)"
+
+SPEC REPOS:
+  trunk:
+    - Sentry
 
 EXTERNAL SOURCES:
   AparajitaCapacitorIosSilentNotifications:
@@ -47,6 +56,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/push-notifications"
   CapacitorStatusBar:
     :path: "../../node_modules/@capacitor/status-bar"
+  SentryCapacitor:
+    :path: "../../node_modules/@sentry/capacitor"
 
 SPEC CHECKSUMS:
   AparajitaCapacitorIosSilentNotifications: 5b11f0b74bd451ef866488939bf7606c4a414cca
@@ -58,7 +69,9 @@ SPEC CHECKSUMS:
   CapacitorPreferences: 65107ed7437d96ee72583df5763985e3c0ff2bc2
   CapacitorPushNotifications: bdd621fbd562be34a41f4a7b1750efa000447d5a
   CapacitorStatusBar: 0659ddc7b1713764a05831463d215b177a15d054
+  Sentry: b53951377b78e21a734f5dc8318e333dbfc682d7
+  SentryCapacitor: 2d8a3a6ed63df2b7aceabad353b0d8556ed24035
 
-PODFILE CHECKSUM: b53db1753437b13aa4b36896e889de0e0a38ad62
+PODFILE CHECKSUM: 94a574c57d3108f8cc35756c9f5a4c1a88282e0a
 
 COCOAPODS: 1.16.2

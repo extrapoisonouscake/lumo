@@ -1,4 +1,3 @@
-import { isProduction } from "./core";
 
 export const WEBSITE_TITLE = "Lumo";
 
@@ -44,9 +43,10 @@ export const websitePagesWithStaticPaths: Record<string, WebsitePage> = {
 export const VISIBLE_DATE_FORMAT = "MM/DD/YYYY";
 export const VISIBLE_TIME_FORMAT = "h:mm A";
 export const APP_STORE_APP_ID = "6752838080";
-export const DEFAULT_DOMAIN = isProduction ? "lumobc.ca" : "localhost";
+const isProductionOverride = process.env.NEXT_PUBLIC_HTTP_NODE_ENV_OVERRIDE === "production";
+export const DEFAULT_DOMAIN = isProductionOverride ? "lumobc.ca" : "localhost";
 const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
   process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
-export const WEBSITE_ROOT = isProduction
+export const WEBSITE_ROOT = isProductionOverride
   ? `https://${NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL || DEFAULT_DOMAIN}`
   : `http://${DEFAULT_DOMAIN}:3000`;

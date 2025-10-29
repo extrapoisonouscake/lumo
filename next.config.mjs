@@ -31,6 +31,7 @@ let config = {
 };
 if (isMobileApp) {
   config.output = "export";
+  config.productionBrowserSourceMaps = true;
 } else {
   config.rewrites = async () => {
     return [

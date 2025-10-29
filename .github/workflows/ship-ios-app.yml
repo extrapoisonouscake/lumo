@@ -1,0 +1,63 @@
+name: Ship iOS App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macOS-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Sync Vercel environment variables
+        run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --environment production --yes
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      - name: Install dependencies
+        run: npm install
+        env:
+          SKIP_POSTINSTALL: true
+      - name: Build Capacitor app
+        run: npm run build:static:prod
+      - uses: matbour/setup-sentry-cli@v2
+      - name: Create Sentry release
+        uses: getsentry/action-release@v3
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          sourcemaps: "./out"
+      - name: Upload debug files to Sentry
+        run: sentry-cli debug-files upload --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} --org ${{ secrets.SENTRY_ORG }} --project ${{ secrets.SENTRY_PROJECT }} ./ios/build/App.dSYM
+      - uses: Apple-Actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
+      - uses: Apple-Actions/download-provisioning-profiles@v4
+        with:
+          bundle-id: ${{ vars.APPSTORE_BUNDLE_ID }}
+          profile-type: "IOS_APP_STORE"
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+      - name: Generate build number
+        uses: onyxmueller/build-tag-number@v1
+        with:
+          token: ${{secrets.github_token}}
+      - name: Build archive
+        run: ./ios/Build
+      - name: "Upload app to TestFlight"
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: "./ios/build/App.ipa"
+          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}

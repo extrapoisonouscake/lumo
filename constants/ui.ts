@@ -14,4 +14,4 @@ export const isIOS =
   (userAgent.includes("Mac") && "ontouchend" in document);
 
 export const isIOSApp = Capacitor.getPlatform() === "ios";
-export const isMobileApp = process.env.NEXT_PUBLIC_IS_MOBILE === "true";
+export const isMobileApp = Capacitor.isNativePlatform();

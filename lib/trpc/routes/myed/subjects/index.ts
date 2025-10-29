@@ -1,9 +1,8 @@
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { db } from "@/db";
 
-import { tracked_school_data } from "@/db/schema";
+import { SubjectGoal, tracked_school_data } from "@/db/schema";
 import { getTrackedSchoolData } from "@/helpers/customizations";
-import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { submitUnknownSubjectsNames } from "@/parsing/myed/helpers";
 import {
   Subject,
@@ -12,7 +11,7 @@ import {
   SubjectYear,
   TermEntry,
 } from "@/types/school";
-import { sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { after } from "next/server";
 import { z } from "zod";
 import { router } from "../../../base";
@@ -32,11 +31,7 @@ interface GetSubjectsResponse {
     hiddenSubjects: string[];
   };
 }
-export type SubjectGoal = {
-  value: number;
-  categoryId: string;
-  minimumScore: number;
-};
+
 export interface GetSubjectInfoResponse extends SubjectSummary {
   goal?: SubjectGoal;
 }
@@ -101,19 +96,12 @@ export const subjectsRouter = router({
     )
     .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
       await db
-        .insert(tracked_school_data)
-        .values({
-          userId: studentDatabaseId,
+        .update(tracked_school_data)
+        .set({
           subjectsListOrder: input.subjectsListOrder,
           hiddenSubjects: input.hiddenSubjects,
         })
-        .onConflictDoUpdate({
-          target: tracked_school_data.userId,
-          set: {
-            subjectsListOrder: input.subjectsListOrder,
-            hiddenSubjects: input.hiddenSubjects,
-          },
-        });
+        .where(eq(tracked_school_data.userId, studentDatabaseId));
     }),
   getSubjectInfo: authenticatedProcedure
     .input(
@@ -129,11 +117,7 @@ export const subjectsRouter = router({
       ]);
       return {
         ...result,
-        goal: (
-          trackedSchoolData?.subjectsGoals as
-            | Record<string, GetSubjectInfoResponse["goal"]>
-            | undefined
-        )?.[input.id],
+        goal: trackedSchoolData?.subjectsGoals?.[input.id],
       };
     }),
   setSubjectGoal: authenticatedProcedure
@@ -145,32 +129,26 @@ export const subjectsRouter = router({
     )
     .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
       await db
-        .insert(tracked_school_data)
-        .values({
-          userId: studentDatabaseId,
-          subjectsGoals: {
-            [input.subjectId]: input.goal,
-          },
-        })
-        .onConflictDoUpdate({
-          target: tracked_school_data.userId,
-          set: {
+        .update(tracked_school_data)
+        .set({
+          
             subjectsGoals:
               input.goal === undefined
                 ? sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) - ${input.subjectId}`
                 : sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) || ${JSON.stringify({ [input.subjectId]: input.goal })}::jsonb`,
-          },
-        });
+          
+        })
+        .where(eq(tracked_school_data.userId, studentDatabaseId));
     }),
   getSubjectAssignments: authenticatedProcedure
     .input(
       z
         .object({
-          term: z.nativeEnum(SubjectTerm).optional(),
+          term: z.enum(SubjectTerm).optional(),
           termId: z.string().optional(),
         })
         .partial()
-        .merge(z.object({ id: z.string() }))
+        .extend({ id: z.string() })
         .refine(
           (data) => !!data.term || !!data.termId,
           "Either term or termId should be filled in."
@@ -181,11 +159,33 @@ export const subjectsRouter = router({
         input: { id, termId, term },
         ctx: { getMyEd, studentDatabaseId },
       }) => {
-        const response = await getMyEd("subjectAssignments", {
-          id,
-          termId,
-          term,
-        });
+        const [response, trackedSchoolData] = await Promise.all([
+          getMyEd("subjectAssignments", {
+            id,
+            termId,
+            term,
+          }),
+          getTrackedSchoolData(studentDatabaseId),
+        ]);
+        const trackedAssignments =
+          trackedSchoolData?.subjectsWithAssignments?.[id]?.assignments;
+          const assignmentsWithUpdatedDates=response.assignments.map((assignment)=>{
+            const previousAssignment=trackedAssignments?.find((a)=>a.id===assignment.id);
+            let assignmentToPrepare=assignment
+            if(previousAssignment){
+              if(previousAssignment.score!==assignment.score){
+                assignmentToPrepare.updatedAt=new Date();
+              }else{
+              assignmentToPrepare.updatedAt=previousAssignment.updatedAt;
+              }
+            } else{
+              if(!!trackedAssignments){//this means the data has been saved before and we can compare the dates safely
+              assignmentToPrepare.updatedAt=new Date();
+              }
+            }
+
+            return assignmentToPrepare
+        })
         if (
           term ||
           (response.currentTermIndex &&
@@ -193,13 +193,22 @@ export const subjectsRouter = router({
         ) {
           after(
             updateSubjectLastAssignments(
-              studentDatabaseId,
-              id,
-              response.assignments.map(prepareAssignmentForDBStorage)
+              {userId:studentDatabaseId,
+              subjectId:id,
+              newAssignments:assignmentsWithUpdatedDates,
+            
+            }
             )
           );
         }
-        return response;
+        
+        if (!trackedAssignments) {
+          return response;
+        }
+        return {
+          ...response,
+          assignments: assignmentsWithUpdatedDates
+        };
       }
     ),
   getSubjectAssignment: authenticatedProcedure

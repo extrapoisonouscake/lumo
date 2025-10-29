@@ -18,7 +18,7 @@ import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
 import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectId]/(assignments)/helpers";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { after } from "next/server";
 
 export async function POST() {
@@ -51,10 +51,7 @@ const sendNotificationsToUser = async ({
     }),
     getTrackedSchoolData(hashedId),
   ]);
-  const trackedSubjectsWithAssignments =
-    trackedData?.subjectsWithAssignments as
-      | Record<string, TrackedSubject>
-      | undefined;
+  const trackedSubjectsWithAssignments = trackedData?.subjectsWithAssignments;
   const subjectsSavedAssignments = trackedSubjectsWithAssignments
     ? Object.fromEntries(
         Object.entries(trackedSubjectsWithAssignments).map(
@@ -90,6 +87,12 @@ const sendNotificationsToUser = async ({
     assignment: Assignment;
   }> = [];
   const unsavedSubjects = [];
+  const assignmentsToUpdateDateMap = Object.fromEntries(
+    Object.entries(subjectsWithAssignments).map(([subjectId, subject]) => [
+      subjectId,
+      new Set<string>(),
+    ])
+  );
   if (subjectsSavedAssignments) {
     for (const subject of subjectsWithAssignments) {
       const savedAssignments = subjectsSavedAssignments[subject.id];
@@ -98,28 +101,31 @@ const sendNotificationsToUser = async ({
           const savedAssignment = savedAssignments[assignment.id];
           if (savedAssignment) {
             const isScoreDifferent =
-              typeof assignment.score === "number" &&
+              assignment.score !== null &&
               savedAssignment.score !== assignment.score;
             if (isScoreDifferent) {
               notifications.push({
                 type:
-                  typeof savedAssignment.score === "number"
+                  savedAssignment.score !== null
                     ? NotificationType.GradeUpdated
                     : NotificationType.NewGrade,
                 subject,
                 assignment,
               });
+
+              assignmentsToUpdateDateMap[subject.id]!.add(assignment.id);
             }
           } else {
-            const notificationType =
-              typeof assignment.score === "number"
-                ? NotificationType.NewGrade
-                : NotificationType.NewAssignment;
             notifications.push({
-              type: notificationType,
+              type:
+                assignment.score !== null
+                  ? NotificationType.NewGrade
+                  : NotificationType.NewAssignment,
               subject,
               assignment,
             });
+
+            assignmentsToUpdateDateMap[subject.id]!.add(assignment.id);
           }
         }
       } else {
@@ -137,28 +143,33 @@ const sendNotificationsToUser = async ({
   if (!subjectsSavedAssignments || notifications.length > 0) {
     promises.push(
       db
-        .insert(tracked_school_data)
-        .values({
-          userId: hashString(studentId),
+        .update(tracked_school_data)
+        .set({
           subjectsWithAssignments: Object.fromEntries(
             subjectsWithAssignments.map((subject) => [
               subject.id,
               {
-                assignments: subject.assignments.map(
-                  prepareAssignmentForDBStorage
+                assignments: (
+                  trackedSubjectsWithAssignments?.[subject.id]?.assignments ??
+                  subject.assignments
+                ).map((assignment) =>
+                  prepareAssignmentForDBStorage({
+                    ...assignment,
+                    updatedAt:
+                      "updatedAt" in assignment
+                        ? assignment.updatedAt
+                        : assignmentsToUpdateDateMap[subject.id]!.has(
+                              assignment.id
+                            )
+                          ? new Date()
+                          : undefined,
+                  })
                 ),
               } satisfies TrackedSubject,
             ])
           ),
         })
-        .onConflictDoUpdate({
-          target: tracked_school_data.userId,
-          set: {
-            subjectsWithAssignments: sql.raw(
-              `excluded.${tracked_school_data.subjectsWithAssignments}`
-            ),
-          },
-        })
+        .where(eq(tracked_school_data.userId, hashString(studentId)))
     );
   }
   await Promise.all(promises);

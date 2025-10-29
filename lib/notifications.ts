@@ -1,6 +1,11 @@
-import { Assignment } from "@/types/school";
+import { TrackedSubject } from "@/db/schema";
 
-export const prepareAssignmentForDBStorage = (assignment: Assignment) => ({
-  id: assignment.id,
-  score: typeof assignment.score === "number" ? assignment.score : undefined,
+export const prepareAssignmentForDBStorage = ({
+  id,
+  score,
+  updatedAt,
+}: TrackedSubject["assignments"][number]) => ({
+  id,
+  score,
+  updatedAt,
 });

@@ -32,12 +32,11 @@ export function useCachedQuery<
     ttlKey?: ClientCacheTTLKey;
   } = {}
 ): UseQueryResult<TData, TError> {
-  const { isOffline } = useNetworkStatus();
   const query = useQuery(options);
   const [cachedResponse, setCachedResponse] = useState<TData | undefined>(
     undefined
   );
-
+  const { isOffline } = useNetworkStatus();
   const cacheKey = getCacheKey(options.queryKey);
 
   // Load cached response on mount
@@ -59,7 +58,7 @@ export function useCachedQuery<
     }
   }, [query.data]);
 
-  if (cachedResponse && (query.isPending || isOffline)) {
+  if (cachedResponse && !query.data && (!query.isError||isOffline)) {
     return getReactQueryMockSuccessResponse(
       query,
       cachedResponse

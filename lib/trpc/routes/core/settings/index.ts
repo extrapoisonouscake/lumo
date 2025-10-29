@@ -1,7 +1,6 @@
 import { TRPCContext } from "@/lib/trpc/context";
 
 import {
-  notifications_settings,
   notifications_subscriptions,
   NotificationsSubscriptionSelectModel,
 } from "@/db/schema";
@@ -132,14 +131,9 @@ const getNotificationsSubscriptionByDeviceId = async (deviceId: string) => {
   });
 };
 const getGenericUserSettings = async (studentDatabaseId: string) => {
-  const [settings, notificationsSettings] = await Promise.all([
-    db.query.user_settings.findFirst({
-      where: eq(user_settings.userId, studentDatabaseId),
-    }),
-    db.query.notifications_settings.findFirst({
-      where: eq(notifications_settings.userId, studentDatabaseId),
-    }),
-  ]);
+  const settings = await db.query.user_settings.findFirst({
+    where: eq(user_settings.userId, studentDatabaseId),
+  });
   let settingsToReturn;
   if (settings) {
     const { id, userId, updatedAt, ...rest } = settings;
@@ -147,10 +141,7 @@ const getGenericUserSettings = async (studentDatabaseId: string) => {
   } else {
     settingsToReturn = USER_SETTINGS_DEFAULT_VALUES;
   }
-  return {
-    ...(settingsToReturn as PartialUserSettings),
-    notifications: notificationsSettings,
-  };
+  return settingsToReturn as PartialUserSettings;
 };
 export const getUserSettings = async (ctx: TRPCContext) => {
   const promises: Promise<any>[] = [

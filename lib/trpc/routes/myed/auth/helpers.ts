@@ -26,7 +26,7 @@ import {
   WidgetsConfiguration,
 } from "@/constants/core";
 import { KNOWN_SCHOOL_MYED_NAME_TO_ID } from "@/constants/schools";
-import { user_settings, users } from "@/db/schema";
+import { tracked_school_data, user_settings, users } from "@/db/schema";
 import { convertObjectToCookieString } from "@/helpers/convertObjectToCookieString";
 import { hashString } from "@/helpers/hashString";
 import { DEVICE_ID_COOKIE_NAME } from "@/helpers/notifications";
@@ -77,12 +77,17 @@ const initStudentFirstLogin = async ({
       height: 1,
     });
   }
-  await db.insert(user_settings).values({
-    ...USER_SETTINGS_DEFAULT_VALUES,
-    widgetsConfiguration: widgetsConfiguration,
-    userId: studentDatabaseId,
-    schoolId: knownSchool,
-  });
+  await Promise.all([
+    db.insert(user_settings).values({
+      ...USER_SETTINGS_DEFAULT_VALUES,
+      widgetsConfiguration: widgetsConfiguration,
+      userId: studentDatabaseId,
+      schoolId: knownSchool,
+    }),
+    db.insert(tracked_school_data).values({
+      userId: studentDatabaseId,
+    }),
+  ]);
 };
 export async function performLogin(
   formData: LoginSchema,

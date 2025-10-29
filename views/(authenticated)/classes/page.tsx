@@ -235,13 +235,13 @@ function LoadedContent({
         queryKey,
         newSubjectsData
       );
-      console.log(queryKey);
+      
       const termSpecificQueryKeys = queryClient.getQueryCache().findAll({
         predicate: (query) =>
           (query.queryKey[0] as string[]).join(",") ===
           (queryKey[0] as string[]).join(","),
       });
-      console.log(termSpecificQueryKeys);
+      
       termSpecificQueryKeys.forEach((query) => {
         queryClient.removeQueries({ queryKey: query.queryKey });
         storage.delete(getCacheKey(query.queryKey));
