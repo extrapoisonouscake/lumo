@@ -1,5 +1,3 @@
 const fs = require("fs");
 const path = require("path");
-
-console.log(process.env.NPM_RC, process.env, __dirname);
-fs.writeFileSync(path.join(__dirname, ".npmrc"), process.env.NPM_RC);
+fs.writeFileSync(path.join(process.cwd(), ".npmrc"), process.env.NPM_RC);
