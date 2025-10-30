@@ -23,8 +23,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Create temporary .npmrc and install dependencies
         run: |
-          npm install --no-package-lock --no-save dotenv@17.2.3
-          node utils/generate-npmrc.js
+          node --env-file=.env utils/generate-npmrc.js
           npm ci --no-audit --no-fund
           rm -f .npmrc
       - name: Build Capacitor app
