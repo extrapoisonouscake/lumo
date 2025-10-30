@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "web:dev": "next dev",
-    "build": "next build && node build-sw.js",
+    "build": "next build && node utils/build-sw.js",
     "start": "next start",
     "lint": "next lint",
     "test": "echo \"No tests configured\"",
@@ -146,6 +146,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/web-push": "^3.6.4",
+    "dotenv": "^17.2.3",
     "eslint": "^8",
     "eslint-config-next": "^15.2.4",
     "husky": "^9.1.7",

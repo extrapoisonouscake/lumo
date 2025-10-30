@@ -28,16 +28,14 @@ jobs:
       - name: Pull .env from Vercel
         run: npx vercel env pull .env --token ${{ secrets.VERCEL_TOKEN }} --environment production --yes
         env:
-            VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-            VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-            VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Create temporary .npmrc and install dependencies
         run: |
-          NPM_RC=$(grep '^NPM_RC=' .env | cut -d '=' -f2-)
-          echo "::add-mask::$NPM_RC"
-          echo "$NPM_RC" > ~/.npmrc
+          node utils/npmrc.js
           npm install --no-audit --no-fund
-          rm -f ~/.npmrc
+          rm -f .npmrc
         env:
           SKIP_POSTINSTALL: true
       - name: 🚀 Deploy Trigger.dev
