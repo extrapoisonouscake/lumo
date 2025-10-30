@@ -68,7 +68,7 @@ export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
                   className={cn(
                     "w-2 h-2 rounded-full",
                     newAnnouncementsCount > 0
-                      ? "bg-red-500"
+                      ? "bg-red-400"
                       : "bg-muted-foreground"
                   )}
                 />
