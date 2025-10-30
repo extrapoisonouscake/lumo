@@ -7,7 +7,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>webcredentials:lumobc.ca</string>
-		<string>applinks:lumobc.ca</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

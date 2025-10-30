@@ -44,40 +44,17 @@ jobs:
         with:
           environment: production
           sourcemaps: "./out"
-      - uses: Apple-Actions/import-codesign-certs@v3
-        id: download-profiles
-        with:
-          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
-          p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
-      - name: Install certificate
-        run: |
-          echo "${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}" | base64 --decode > ./cert.p12
-          security create-keychain -p "" build.keychain
-          security import ./cert.p12 -k build.keychain -P "${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}" -A
-          security list-keychains -d user -s build.keychain
-          security default-keychain -d user -s build.keychain
-          security unlock-keychain -p "" build.keychain
-      - name: Install provisioning profile
-        run: |
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "${{ secrets.APPSTORE_PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-      - name: Generate build number
-        uses: onyxmueller/build-tag-number@v1
-        with:
-          token: ${{secrets.github_token}}
-      - name: Build archive
-        run: ./ios/Build
+      - name: Install dependencies
+        run: bundle install --gemfile ios/App/Gemfile
+      - run: cd ios/App
+      - name: Install CocoaPods
+        run: bundle exec pod install
+      - run: bundle exec fastlane release
         env:
-          APP_STORE_CONNECT_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
-          APP_STORE_CONNECT_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-          DEVELOPMENT_TEAM: ${{ vars.APPSTORE_TEAM_ID }}
-      - name: Upload debug files to Sentry
-        run: sentry-cli debug-files upload --auth-token ${{ secrets.SENTRY_AUTH_TOKEN }} --org ${{ secrets.SENTRY_ORG }} --project ${{ secrets.SENTRY_PROJECT }} .build/Archives/App.xcarchive/dSYMs/App.app.dSYM
-      - name: "Upload app to TestFlight"
-        uses: apple-actions/upload-testflight-build@v3
-        with:
-          app-path: "./ios/build/App.ipa"
-          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPSTORE_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
+          APPSTORE_API_KEY_ID: ${{ vars.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG_SLUG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT_SLUG: ${{ secrets.SENTRY_PROJECT }}
