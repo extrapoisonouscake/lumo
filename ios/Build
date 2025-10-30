@@ -21,7 +21,13 @@ RESULT_BUNDLE_PATH="${ARTIFACT_PATH}/${SCHEME}.xcresult"
 ARCHIVE_PATH=${ARCHIVE_PATH:-${BUILD_DIR}/Archives/${SCHEME}.xcarchive}
 DERIVED_DATA_PATH=${DERIVED_DATA_PATH:-${BUILD_DIR}/DerivedData}
 CURRENT_PROJECT_VERSION=${BUILD_NUMBER:-0}
-PROVISIONING_PROFILE_NAME="profile"
+# Automatically locate provisioning profile
+PROFILE_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+mkdir -p "$PROFILE_DIR"
+PROFILE_PATH=$(ls -t "$PROFILE_DIR"/*.mobileprovision | head -n 1)
+PROVISIONING_PROFILE_NAME=$(basename "$PROFILE_PATH" .mobileprovision)
+echo "Using provisioning profile: $PROVISIONING_PROFILE_NAME"
+
 
 rm -rf "${RESULT_BUNDLE_PATH}"
 xcrun xcodebuild \
@@ -40,6 +46,7 @@ xcrun xcodebuild \
     CODE_SIGN_IDENTITY="Apple Distribution" \
     PROVISIONING_PROFILE_SPECIFIER="${PROVISIONING_PROFILE_NAME}" \
     DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}" \
+    -target "${SCHEME}" \
     archive
 
 echo "ARCHIVE_PATH: ${ARCHIVE_PATH}"
