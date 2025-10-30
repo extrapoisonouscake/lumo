@@ -24,8 +24,10 @@ jobs:
       - name: Create temporary .npmrc and install dependencies
         run: |
           node --env-file=.env utils/generate-npmrc.js
-          npm ci --no-audit --no-fund
+          npm install --no-audit --no-fund
           rm -f .npmrc
+        env:
+          SKIP_POSTINSTALL: true
       - name: Build Capacitor app
         run: |
           set -a
@@ -47,21 +49,17 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}
           p12-password: ${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}
-      - uses: Apple-Actions/download-provisioning-profiles@v4
-        with:
-          bundle-id: ${{ vars.APPSTORE_BUNDLE_ID }}
-          profile-type: "IOS_APP_STORE"
-          issuer-id: ${{ vars.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ vars.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
-      - name: Debug provisioning profiles
+      - name: Install certificate
         run: |
-          echo '${{ steps.download-profiles.outputs.profiles }}' | jq .
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles
-      - name: Set provisioning profile name env var
+          echo "${{ secrets.APPSTORE_CERTIFICATES_FILE_BASE64 }}" | base64 --decode > ./cert.p12
+          security create-keychain -p "" build.keychain
+          security import ./cert.p12 -k build.keychain -P "${{ secrets.APPSTORE_CERTIFICATES_PASSWORD }}" -A
+          security list-keychains -d user -s build.keychain
+          security default-keychain -d user -s build.keychain
+          security unlock-keychain -p "" build.keychain
+      - name: Install provisioning profile
         run: |
-          PROFILE_NAME=$(echo '${{ steps.download-profiles.outputs.profiles }}' | jq -r '.[0].name')
-          echo "PROVISIONING_PROFILE_NAME=$PROFILE_NAME" >> $GITHUB_ENV
+          echo "${{ secrets.APPSTORE_PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
       - name: Generate build number
         uses: onyxmueller/build-tag-number@v1
         with:
