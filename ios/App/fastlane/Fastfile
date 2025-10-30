@@ -28,6 +28,6 @@ platform :ios do
     increment_build_number(xcodeproj: "App.xcodeproj")
     build_app(workspace: "App.xcworkspace", scheme: "App")
     sentry_debug_files_upload
-    upload_to_app_store
+    upload_to_app_store(force: true)
   end
 end
