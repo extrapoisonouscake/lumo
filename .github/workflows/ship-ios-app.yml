@@ -45,11 +45,13 @@ jobs:
           environment: production
           sourcemaps: "./out"
       - name: Install dependencies
-        run: bundle install --gemfile ios/App/Gemfile
-      - run: cd ios/App
+        run: bundle Install
+        working-directory: ios/App
       - name: Install CocoaPods
         run: bundle exec pod install
+        working-directory: ios/App
       - run: bundle exec fastlane release
+        working-directory: ios/App
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_ISSUER_ID: ${{ vars.APPSTORE_ISSUER_ID }}
