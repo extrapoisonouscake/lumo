@@ -6,23 +6,41 @@ import { ThemeProvider } from "../../views/theme-provider";
 import { queryClient } from "../../views/trpc";
 import { NetworkStatusProvider } from "./network-status-provider";
 
+import { isProduction } from "@/constants/core";
+import * as Sentry from "@sentry/react";
 import { isMobileApp } from "../../constants/ui";
+const sentryConfig = {
+  dsn: "https://044f7cfed8d518021870324fa7e59d7e@o4509261052641280.ingest.us.sentry.io/4509261053493248",
+  sendDefaultPii: true,
+
+  enabled: isProduction,
+  // Add optional integrations for additional features
+  integrations: [Sentry.replayIntegration()],
+
+  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
+  tracesSampleRate: 1,
+  // Enable logs to be sent to Sentry
+  enableLogs: true,
+
+  // Define how likely Replay events are sampled.
+  // This sets the sample rate to be 10%. You may want this to be 100% while
+  // in development and sample at a lower rate in production
+  replaysSessionSampleRate: 0.1,
+
+  // Define how likely Replay events are sampled when an error occurs.
+  replaysOnErrorSampleRate: 1.0,
+
+  // Setting this option to true will print useful information to the console while you're setting up Sentry.
+  debug: false,
+};
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isMobileApp) {
-      Promise.all([import("@sentry/capacitor"), import("@sentry/react")]).then(
-        ([Sentry, SentryReact]) => {
-          Sentry.init(
-            {
-              dsn: "https://c6ccf7cc17d5709e02d1c069313fb6d0@o4508129189363712.ingest.de.sentry.io/4508129193689168",
-              sendDefaultPii: true,
-              release: `lumo@${process.env.IOS_MARKETING_VERSION}`,
-              dist: process.env.IOS_BUILD_NUMBER,
-            },
-            SentryReact.init
-          );
-        }
-      );
+      import("@sentry/capacitor").then((SentryCapacitor) => {
+        SentryCapacitor.init(sentryConfig, Sentry.init);
+      });
+    } else {
+      Sentry.init(sentryConfig);
     }
   }, []);
   return (
