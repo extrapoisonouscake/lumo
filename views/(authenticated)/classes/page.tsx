@@ -105,11 +105,12 @@ function Content({
   currentTermIndex?: number;
   subjectSummaries?: Record<string, SubjectSummary>;
 }) {
+  const shouldShowDynamicView =
+    (!term || term === MYED_ALL_GRADE_TERMS_SELECTOR) && year === "current";
   return (
     <div>
       {response ? (
-        (!term || term === MYED_ALL_GRADE_TERMS_SELECTOR) &&
-        year === "current" ? (
+        shouldShowDynamicView ? (
           <LoadedContent
             currentTerm={term}
             year={year}
@@ -128,7 +129,16 @@ function Content({
             />
 
             <SubjectsTable
-              data={response.subjects.main}
+              data={response.subjects.main.map((subject) => {
+                const summary = subjectSummaries?.[subject.id];
+                if (!summary) return subject;
+                return {
+                  ...subject,
+                  average:
+                    summary.academics.posted.overall ??
+                    summary.academics.running.overall,
+                };
+              })}
               isLoading={false}
               year={year}
             />
@@ -143,7 +153,11 @@ function Content({
         </div>
       )}
       {response?.subjects.teacherAdvisory && (
-        <div className="flex flex-col gap-2">
+        <div
+          className={cn("flex flex-col gap-2", {
+            "mt-3": !response || !shouldShowDynamicView,
+          })}
+        >
           <h3 className="text-sm font-medium">Teacher Advisory</h3>
           <SubjectsTable
             year={year}
@@ -235,13 +249,13 @@ function LoadedContent({
         queryKey,
         newSubjectsData
       );
-      
+
       const termSpecificQueryKeys = queryClient.getQueryCache().findAll({
         predicate: (query) =>
           (query.queryKey[0] as string[]).join(",") ===
           (queryKey[0] as string[]).join(","),
       });
-      
+
       termSpecificQueryKeys.forEach((query) => {
         queryClient.removeQueries({ queryKey: query.queryKey });
         storage.delete(getCacheKey(query.queryKey));
@@ -278,12 +292,13 @@ function LoadedContent({
                 setIsHiddenSubjectsOpen(!isEditing);
               }}
             >
-              <HugeiconsIcon
-                icon={isEditing ? Tick02StrokeRounded : Edit03StrokeRounded}
-              />
               <span className="hidden sm:block">
                 {isEditing ? "Save" : "Edit"}
               </span>
+
+              <HugeiconsIcon
+                icon={isEditing ? Tick02StrokeRounded : Edit03StrokeRounded}
+              />
             </Button>
           }
         />
