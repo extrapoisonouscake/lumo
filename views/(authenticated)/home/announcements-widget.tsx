@@ -44,13 +44,13 @@ export function AnnouncementsWidgetComponent(widget: WidgetComponentProps) {
       sections.reduce((acc, section) => acc + section.content.length, 0) +
       personalSection.length;
     const hasPersonalAnnouncements = personalSection.length > 0;
-    const hasNewAnnouncements = ![
+    const hasNewAnnouncements = [
       ...sections,
       { type: "list", content: personalSection },
     ].some(
       (section) =>
         section.type === "list" &&
-        section.content.some((item) => typeof item.isNew === "undefined")
+        section.content.some((item) => item.isNew)
     );
     contentClassName = "pb-1";
     content = (
