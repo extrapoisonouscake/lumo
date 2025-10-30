@@ -45,7 +45,7 @@ jobs:
           environment: production
           sourcemaps: "./out"
       - name: Install dependencies
-        run: bundle Install
+        run: bundle install
         working-directory: ios/App
       - name: Install CocoaPods
         run: bundle exec pod install
