@@ -59,6 +59,7 @@ jobs:
           security unlock-keychain -p "" build.keychain
       - name: Install provisioning profile
         run: |
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           echo "${{ secrets.APPSTORE_PROVISIONING_PROFILE }}" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
       - name: Generate build number
         uses: onyxmueller/build-tag-number@v1
