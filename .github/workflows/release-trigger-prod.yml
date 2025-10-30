@@ -33,6 +33,7 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       - name: Create temporary .npmrc and install dependencies
         run: |
+          npm install -D dotenv
           node utils/generate-npmrc.js
           npm install --no-audit --no-fund
           rm -f .npmrc
