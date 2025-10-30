@@ -1,10 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { generateSW } from "workbox-build";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const isMobileApp = process.env.NEXT_PUBLIC_IS_MOBILE === "true";
 
@@ -12,7 +8,8 @@ if (isMobileApp) {
   console.log("Skipping service worker generation for mobile app build");
   process.exit(0);
 }
-const SW_DIR = path.resolve(__dirname, "public/sw");
+const rootDir = process.cwd();
+const SW_DIR = path.resolve(rootDir, "public/sw");
 fs.rmSync(SW_DIR, { recursive: true, force: true });
 const SW_PATH = path.join(SW_DIR, "sw.js");
 
@@ -31,7 +28,7 @@ function getAssetsFiles(dir, baseDir = dir, files = []) {
   return files;
 }
 
-const ASSETS_DIR = path.resolve(__dirname, "public/assets");
+const ASSETS_DIR = path.resolve(rootDir, "public/assets");
 const assetFiles = getAssetsFiles(ASSETS_DIR).map((file) => ({
   url: `/assets/${file.replace(/\\/g, "/")}`,
   revision: fs.statSync(path.join(ASSETS_DIR, file)).mtime.getTime().toString(),
