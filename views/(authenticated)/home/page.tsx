@@ -726,6 +726,8 @@ function AddWidgetButton({
         <HugeiconsIcon
           icon={DragDropStrokeRounded}
           className="text-muted-foreground"
+          strokeWidth={3}
+          data-auto-stroke-width
         />
       </div>
     </Button>

@@ -26,6 +26,7 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
       assignmentId,
     })
   );
+  console.log({ query });
   return (
     <QueryWrapper query={query}>
       {(data) => {

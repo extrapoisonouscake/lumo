@@ -1,6 +1,8 @@
 "use client";
+import { Haptics } from "@capacitor/haptics";
+import NumberFlow, { continuous } from "@number-flow/react";
+
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
@@ -11,32 +13,33 @@ import {
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
-  ResponsiveDialogTrigger,
 } from "@/components/ui/responsive-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SubjectGoal } from "@/db/schema";
 import { cn } from "@/helpers/cn";
+import { getGradeInfo } from "@/helpers/grades";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
 import {
-  SubjectGoalSchema,
   getSubjectGoalSchema,
+  SubjectGoalSchema,
 } from "@/lib/trpc/routes/myed/subjects/public";
-import { Assignment, AssignmentStatus, SubjectSummary } from "@/types/school";
+import { Assignment, SubjectSummary } from "@/types/school";
 import { queryClient, trpc } from "@/views/trpc";
 import {
   Alert02StrokeRounded,
   PercentStrokeRounded,
-  PlusSignStrokeRounded,
   Target02StrokeRounded,
   Tick02StrokeRounded,
-  ViewStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
-import { ArrowRight02StrokeStandard } from "@hugeicons-pro/core-stroke-standard";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo } from "react";
+import CircularSlider from "react-circular-slider-svg";
+import { Controller } from "react-hook-form";
 import { z } from "zod";
+import { computeGoalStatus, Outcome } from "./helpers";
 const getOptionalNumberString = (minValue = 0) =>
   z
     .string()
@@ -53,12 +56,9 @@ const getOptionalNumberString = (minValue = 0) =>
         ),
       ])
     );
-enum Outcome {
-  Achievable = "achievable",
-  AlreadyAchieved = "already-achieved",
-  ValuesOutOfRange = "values-out-of-range",
-  Unknown = "unknown",
-}
+
+const MotionHugeiconsIcon = motion.create(HugeiconsIcon);
+
 export function SubjectGoalDialog({
   isOpen,
   onOpenChange,
@@ -82,91 +82,56 @@ export function SubjectGoalDialog({
   const schema = useMemo(
     () =>
       getSubjectGoalSchema(currentAverage).extend({
-        value: getOptionalNumberString(currentAverage),
         minimumScore: getOptionalNumberString(0),
       }),
     [currentAverage]
   );
-  const methods = useFormValidation(schema, {
-    defaultValues: {
-      value: initialGoal?.value?.toString() ?? "",
-      minimumScore: initialGoal?.minimumScore?.toString() ?? "",
-      categoryId: initialGoal?.categoryId ?? categories[0]!.id,
-    },
-  });
+  const defaultValues = useMemo(() => {
+    const categoryId = initialGoal?.categoryId ?? categories[0]!.id;
+    return {
+      desiredAverage: initialGoal?.desiredAverage ?? currentAverage,
+      minimumScore: (initialGoal?.minimumScore ?? 85).toString(),
+      categoryId: categoryId,
+    };
+  }, [initialGoal, categories, currentAverage]);
+  const methods = useFormValidation(schema, { defaultValues });
 
   const {
-    value: desiredAverageString,
+    desiredAverage,
     minimumScore: minimumScoreString,
     categoryId,
   } = methods.watch();
+
   const resetForm = () => {
     methods.reset({
       //@ts-ignore
-      value: "",
+      desiredAverage: currentAverage,
       //@ts-ignore
-      minimumScore: "",
+      minimumScore: "85",
       categoryId: categories[0]!.id,
     });
   };
-  const result = useMemo(() => {
-    if (!desiredAverageString || !minimumScoreString || !categoryId)
-      return { outcome: Outcome.Unknown };
+  const { isCalculated, isAchievable, ...result } = useMemo(() => {
+    if (!minimumScoreString || !categoryId)
+      return {
+        isCalculated: false,
+        isAchievable: false,
+        outcome: Outcome.Unknown,
+        neededAssignmentsCount: undefined,
+      };
 
     // Convert string values to numbers for calculations
-    const desiredAverage = Number(desiredAverageString);
     const minimumScore = Number(minimumScoreString);
+    return computeGoalStatus({
+      assignments,
+      categories,
+      currentAverage,
+      desiredAverage,
+      minimumScore,
+      categoryId,
+    });
+  }, [assignments, desiredAverage, minimumScoreString, categoryId]);
 
-    const categoryAssignmentsCount = assignments.filter(
-      (assignment) =>
-        assignment.status === AssignmentStatus.Graded &&
-        assignment.categoryId === categoryId
-    ).length;
-    const category = categories.find((cat) => cat.id === categoryId);
-    if (!category) return { outcome: Outcome.Unknown };
-    const categoryWeight = category.derivedWeight;
-    if (!categoryWeight) return { outcome: Outcome.Unknown };
-    const categoryWeightPercentage = categoryWeight / 100;
-    const categoryAverage = category.average?.mark ?? 100;
-    const numerator =
-      (categoryAssignmentsCount * (currentAverage - desiredAverage)) /
-      categoryWeightPercentage;
-    const denominator =
-      categoryAverage -
-      minimumScore +
-      (desiredAverage - currentAverage) / categoryWeightPercentage;
-    if (numerator > 0) return { outcome: Outcome.AlreadyAchieved };
-    if (denominator > 0) {
-      return { outcome: Outcome.ValuesOutOfRange };
-    }
-    const minimumThreshold =
-      categoryAverage +
-      (desiredAverage - currentAverage) / categoryWeightPercentage;
-
-    // Maximum achievable total average if all future assignments are 100%
-    const maxAchievable =
-      currentAverage + categoryWeightPercentage * (100 - categoryAverage);
-    if (desiredAverage > maxAchievable || minimumScore < minimumThreshold)
-      return { outcome: Outcome.ValuesOutOfRange };
-    const neededAssignmentsCount = Math.ceil(numerator / denominator);
-
-    if (neededAssignmentsCount > 10)
-      return { outcome: Outcome.ValuesOutOfRange };
-    return {
-      outcome: Outcome.Achievable,
-      neededAssignmentsCount: Math.ceil(neededAssignmentsCount),
-    };
-  }, [assignments, desiredAverageString, minimumScoreString, categoryId]);
-  const [isBreakdownShown, setIsBreakdownShown] = useState(!!initialGoal);
-
-  const isCalculated =
-    methods.formState.isValid && !!desiredAverageString && !!minimumScoreString;
-  const isAchievable = isCalculated && result.outcome === Outcome.Achievable;
-  const isAchieved = useMemo(
-    () => result.outcome === Outcome.AlreadyAchieved,
-    [initialGoal]
-  );
-  const shouldShowFinalLayout = isBreakdownShown && isCalculated && isAchieved;
   const onSave = async (data: z.infer<typeof schema> | undefined) => {
     if (typeof data === "object") {
       const isValid = await methods.trigger(undefined, { shouldFocus: true });
@@ -176,8 +141,8 @@ export function SubjectGoalDialog({
       }
 
       // Ensure required fields are present before converting to API format
-      if (!data.value) {
-        methods.setError("value", {
+      if (!data.desiredAverage) {
+        methods.setError("desiredAverage", {
           type: "manual",
           message: "Goal is required",
         });
@@ -201,28 +166,20 @@ export function SubjectGoalDialog({
     const goalData: SubjectGoalSchema | undefined = data
       ? {
           categoryId: data.categoryId,
-          value: Number(data.value!),
+          desiredAverage: data.desiredAverage,
           minimumScore: Number(data.minimumScore!),
         }
       : undefined;
     const oldData = queryClient.getQueryData<GetSubjectInfoResponse>(key);
-
-    if (isBreakdownShown) {
-      if (!shouldShowFinalLayout) {
-        onOpenChange(false);
-      }
-    } else {
-      setIsBreakdownShown(true);
-      return;
-    }
     if (data === undefined) {
       resetForm();
-      setIsBreakdownShown(false);
     }
+
     queryClient.setQueryData<GetSubjectInfoResponse>(key, (oldData) => ({
       ...oldData!,
       goal: goalData,
     }));
+    onOpenChange(false);
     try {
       await setSubjectGoalMutation.mutateAsync({
         subjectId,
@@ -235,189 +192,167 @@ export function SubjectGoalDialog({
   };
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={onOpenChange}>
-      <ResponsiveDialogTrigger asChild>
-        <Button
-          size="smallIcon"
-          className={cn(
-            "size-6 absolute z-10 -top-2 -right-4.5 text-muted-foreground/60 group-hover:text-accent-foreground",
-            { "text-muted-foreground": !!isBreakdownShown },
-            isCalculated &&
-              !isAchievable &&
-              "text-red-500/80 group-hover:text-red-500/90"
-          )}
-          variant="ghost"
-        >
-          <HugeiconsIcon
-            icon={
-              isCalculated && !isAchievable
-                ? Alert02StrokeRounded
-                : Target02StrokeRounded
-            }
-          />
-        </Button>
-      </ResponsiveDialogTrigger>
-      <ResponsiveDialogContent>
+      <ResponsiveDialogContent className="gap-0">
         <ResponsiveDialogHeader className="pb-2">
-          <ResponsiveDialogTitle>Goal</ResponsiveDialogTitle>
+          <ResponsiveDialogTitle>Set Goal</ResponsiveDialogTitle>
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody className="gap-5">
-          {isBreakdownShown && (
-            <Card
-              className={cn(
-                "px-5 py-4 rounded-2xl gap-2 justify-center items-center relative overflow-hidden transition-colors",
+          <Form className="gap-4" {...methods} onSubmit={onSave}>
+            <Controller
+              control={methods.control}
+              name="desiredAverage"
+              render={({ field: { onChange, value } }) => (
+                <div
+                  className="z-10 relative [&_path]:transition-[fill] flex justify-center items-center -mb-19 -mt-4"
+                  onTouchStart={() => Haptics.selectionStart()}
+                >
+                  <div className="absolute flex flex-col justify-center items-center -z-[1] p-12 rounded-full overflow-hidden top-[calc(50%-7px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <NumberFlow
+                      className={cn(
+                        "[&_]:leading-none text-5xl font-semibold tabular-nums transition-[font-size]"
+                      )}
+                      plugins={[continuous]}
+                      value={value}
+                      format={{
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }}
+                      style={{
+                        //@ts-ignore
 
-                { "border-red-500/20 bg-red-500/5": !isAchievable },
+                        "--number-flow-char-height": "0.8em",
+                      }}
+                    />
+                    <span className="text-muted-foreground leading-none text-lg">
+                      / 100
+                    </span>
+                  </div>
+                  <div data-vaul-no-drag>
+                    <CircularSlider
+                      size={230}
+                      trackWidth={14}
+                      minValue={0}
+                      maxValue={100}
+                      outerShadow
+                      startAngle={70}
+                      handleSize={16}
+                      endAngle={290}
+                      angleType={{
+                        direction: "cw",
+                        axis: "-y",
+                      }}
+                      onControlFinished={() => Haptics.selectionEnd()}
+                      handle1={{
+                        value,
+                        onChange: (value) => {
+                          Haptics.selectionChanged();
+                          onChange(+value.toFixed(1));
+                        },
+                      }}
+                      arcColor={getGradeInfo(value)!.plainColor}
+                      arcBackgroundColor="var(--color-zinc-200)"
+                    />
+                  </div>
+                </div>
+              )}
+            />
+
+            <motion.div
+              className={cn(
+                "z-20 relative text-muted-foreground justify-center w-full flex items-center font- gap-2 text-sm transition-colors",
                 {
-                  "border-muted-foreground/20 bg-muted-foreground/[3%]":
-                    isAchievable && !isAchieved,
-                },
-                {
-                  "border-green-600/20 bg-green-600/5":
-                    isAchievable && isAchieved,
+                  "text-red-500": isCalculated && !isAchievable,
+                  "text-green-600": isCalculated && isAchievable,
                 }
               )}
+              key={`${result.outcome}-${isCalculated}`} // Important: Use a key to force re-render and trigger animation on text change
+              initial={{ opacity: 0, transform: "translateY(10px)" }}
+              animate={{ opacity: 1, transform: "translateY(0)" }}
+              exit={{ opacity: 0, transform: "translateY(10px)" }} // For animating out
+              transition={{ duration: 0.5 }}
             >
-              <div className="flex flex-col gap-1 items-center w-full">
-                <div className="flex gap-3 items-center">
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-xs text-muted-foreground">
-                      Current
-                    </span>
-                    <p className="text-2xl font-semibold tabular-nums">
-                      {currentAverage}%
-                    </p>
-                  </div>
-                  <HugeiconsIcon
-                    icon={ArrowRight02StrokeStandard}
-                    data-auto-stroke-width
-                    strokeWidth={2.5}
-                    className={cn(
-                      "size-7 transition-colors translate-y-2",
-                      !isAchievable ? "text-red-500" : "text-green-600"
-                    )}
-                  />
-                  <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-xs text-muted-foreground">Goal</span>
-                    <p
-                      className={cn(
-                        "text-3xl font-bold tabular-nums transition-colors",
-                        !isAchievable ? "text-red-500" : "text-green-600"
-                      )}
-                    >
-                      {desiredAverageString
-                        ? Math.min(100, Number(desiredAverageString))
-                        : "??"}
-                      %
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <MotionHugeiconsIcon
+                icon={
+                  isCalculated && !isAchievable
+                    ? Alert02StrokeRounded
+                    : Target02StrokeRounded
+                }
+                layout
+                initial={false}
+                className="size-4 min-w-4"
+              />
 
-              {isCalculated && (
-                <div
-                  className={cn(
-                    "flex items-center font-medium gap-2.5 text-sm",
-                    !isAchievable ? "text-red-500" : "text-green-600"
-                  )}
-                >
-                  <HugeiconsIcon
-                    icon={
-                      !isAchievable
-                        ? Alert02StrokeRounded
-                        : Target02StrokeRounded
-                    }
-                    className="size-4 min-w-4"
-                  />
-                  <span>
-                    {!isAchievable
-                      ? "Goal cannot be reached, adjust desired average or minimum score"
-                      : isAchieved
-                        ? "Goal achieved!"
-                        : `Need ${result.neededAssignmentsCount} more grade${result.neededAssignmentsCount === 1 ? "" : "s"} of at least ${minimumScoreString}%`}
-                  </span>
-                </div>
-              )}
-            </Card>
-          )}
-          <Form className="gap-4" {...methods} onSubmit={onSave}>
-            {!shouldShowFinalLayout && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormSelect
-                  formItemClassName="sm:col-span-2"
-                  label="Category"
-                  name="categoryId"
-                  options={categories.map((category) => ({
-                    label: `${category.name}${category.derivedWeight ? ` (${category.derivedWeight}%)` : ``}`,
-                    value: category.id,
-                  }))}
-                />
-                <FormInput
-                  leftIcon={
-                    <HugeiconsIcon
-                      className={cn({
-                        "text-red-500!": methods.formState.errors.value,
-                      })}
-                      icon={Target02StrokeRounded}
-                    />
-                  }
-                  label="Goal Average"
-                  description="The total average you would like to achieve."
-                  name="value"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                  placeholder="e.g., 85"
-                />
-
-                <FormInput
-                  leftIcon={<HugeiconsIcon icon={PercentStrokeRounded} />}
-                  label="Minimum Score"
-                  description="Minimum grade per assignment needed to reach your goal average."
-                  name="minimumScore"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="1"
-                  placeholder="e.g., 80"
-                />
+              <div className="h-[21px]">
+                {desiredAverage !== currentAverage ? (
+                  result.outcome == Outcome.Unknown ? (
+                    <p>Enter a minimum score for the category.</p>
+                  ) : !isAchievable ? (
+                    <p>Too many grades needed.</p>
+                  ) : result.outcome === Outcome.AlreadyAchieved ? (
+                    <p>Goal already achieved.</p>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <AnimatePresence initial={false}>
+                        <motion.span key="need" layout="position">
+                          Need{" "}
+                        </motion.span>
+                        <NumberFlow
+                          key="number"
+                          value={result.neededAssignmentsCount!}
+                        />
+                        <motion.span key="more" layout="position">
+                          {" "}
+                          more grade
+                          {result.neededAssignmentsCount === 1 ? "" : "s"} of at
+                          least {minimumScoreString}%.
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  )
+                ) : (
+                  <p>Start dragging the slider to set your goal average.</p>
+                )}
               </div>
-            )}
+            </motion.div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FormSelect
+                formItemClassName="sm:col-span-2"
+                label="Category"
+                name="categoryId"
+                options={categories.map((category) => ({
+                  label: `${category.name}${category.derivedWeight ? ` (${category.derivedWeight}%)` : ``}`,
+                  value: category.id,
+                }))}
+              />
+
+              <FormInput
+                leftIcon={<HugeiconsIcon icon={PercentStrokeRounded} />}
+                label="Minimum Score"
+                description="Minimum grade per assignment needed to reach your goal average."
+                name="minimumScore"
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                placeholder="e.g., 80"
+              />
+            </div>
 
             <ResponsiveDialogFooter className="p-0 sm:flex-row-reverse">
-              {!shouldShowFinalLayout ? (
-                <Button
-                  leftIcon={
-                    isBreakdownShown ? (
-                      <HugeiconsIcon icon={Tick02StrokeRounded} />
-                    ) : (
-                      <HugeiconsIcon icon={ViewStrokeRounded} />
-                    )
-                  }
-                  type="submit"
-                  className="w-full sm:w-auto min-h-10"
-                >
-                  {isBreakdownShown ? "Save Goal" : "Preview"}
-                </Button>
-              ) : (
-                <Button
-                  leftIcon={<HugeiconsIcon icon={PlusSignStrokeRounded} />}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onSave(undefined);
-                  }}
-                  className="w-full sm:w-auto min-h-10"
-                >
-                  Create a new goal
-                </Button>
-              )}
+              <Button
+                leftIcon={<HugeiconsIcon icon={Tick02StrokeRounded} />}
+                type="submit"
+                className="w-full sm:w-auto min-h-10"
+              >
+                Save
+              </Button>
 
               <Button
                 variant="outline"
                 className="w-full sm:w-auto min-h-10"
-                onClick={() => {
-                  if (isBreakdownShown) {
+                onClick={(e) => {
+                  if (initialGoal) {
                     onSave(undefined);
                   } else {
                     resetForm();
@@ -425,7 +360,7 @@ export function SubjectGoalDialog({
                   onOpenChange(false);
                 }}
               >
-                {isBreakdownShown ? "Reset" : "Cancel"}
+                {initialGoal ? "Reset" : "Cancel"}
               </Button>
             </ResponsiveDialogFooter>
           </Form>
@@ -434,6 +369,7 @@ export function SubjectGoalDialog({
     </ResponsiveDialog>
   );
 }
+
 export function SubjectGoalButtonSkeleton() {
   return (
     <Skeleton className="size-4 rounded-full absolute z-10 -top-1 -right-3.5" />

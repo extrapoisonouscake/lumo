@@ -277,31 +277,30 @@ export function ScheduleTable({
     !isLoading && weekday !== timezonedDayJS(date).format("dddd");
   return (
     <div className="flex flex-col gap-2">
-      {shouldShowTimer ||
-        (shouldShowWeekday && (
-          <div className="flex gap-2 justify-between items-center">
-            {shouldShowTimer &&
-              (isLoading || typeof timeToNextSubject === "undefined" ? (
-                <CountdownTimerSkeleton />
-              ) : (
-                <CountdownTimer
-                  timeToNextSubject={timeToNextSubject}
-                  isBreak={
-                    !!(
-                      typeof currentRowIndex === "number" &&
-                      (data[currentRowIndex]!.type !== "subject" ||
-                        isTeacherAdvisory(data[currentRowIndex]!.name.actual))
-                    )
-                  }
-                />
-              ))}
-            {shouldShowWeekday && (
-              <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
-                Same as <span className="font-semibold">{weekday}</span>
-              </h3>
-            )}
-          </div>
-        ))}
+      {(shouldShowTimer || shouldShowWeekday) && (
+        <div className="flex gap-2 justify-between items-center">
+          {shouldShowTimer &&
+            (isLoading || typeof timeToNextSubject === "undefined" ? (
+              <CountdownTimerSkeleton />
+            ) : (
+              <CountdownTimer
+                timeToNextSubject={timeToNextSubject}
+                isBreak={
+                  !!(
+                    typeof currentRowIndex === "number" &&
+                    (data[currentRowIndex]!.type !== "subject" ||
+                      isTeacherAdvisory(data[currentRowIndex]!.name.actual))
+                  )
+                }
+              />
+            ))}
+          {shouldShowWeekday && (
+            <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
+              Same as <span className="font-semibold">{weekday}</span>
+            </h3>
+          )}
+        </div>
+      )}
       <TableRenderer
         key={currentRowIndex}
         tableContainerClassName="overflow-clip"

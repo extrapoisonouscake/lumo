@@ -28,8 +28,11 @@ import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
 import { UserSettings } from "@/types/core";
 import { Assignment, type SubjectSummary, SubjectTerm } from "@/types/school";
 import {
+  AddCircleStrokeRounded,
+  Alert02StrokeRounded,
   Door01StrokeRounded,
   InformationCircleStrokeRounded,
+  Target02StrokeRounded,
   Tick02StrokeRounded,
   UserStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
@@ -38,6 +41,7 @@ import { useState } from "react";
 import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
 import { SubjectTermAverages } from "./averages";
+import { computeGoalStatus } from "./helpers";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 import {
   SubjectGoalButtonSkeleton,
@@ -74,6 +78,29 @@ export function SubjectSummary({
     shouldShowLetterGrade
   );
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const shouldShowGoalDialog =
+    !!assignments &&
+    !!academics.running.overall &&
+    academics.categories.length > 0 &&
+    !wasGradePosted;
+
+  // Compute goal status for the floating button icon without moving form logic here
+  const currentRunningAverage = academics.running.overall?.mark;
+  const { isCalculated, isAchievable } =
+    shouldShowGoalDialog && summary.goal && currentRunningAverage !== undefined
+      ? computeGoalStatus({
+          assignments: assignments!,
+          categories: academics.categories,
+          currentAverage: currentRunningAverage,
+          desiredAverage: summary.goal.desiredAverage,
+          minimumScore: summary.goal.minimumScore,
+          categoryId: summary.goal.categoryId,
+        })
+      : {
+          isCalculated: false,
+          isAchievable: false,
+        };
+
   return (
     <Card className="flex flex-col gap-4 pt-6 relative items-center">
       <InfoDialog {...summary} />
@@ -98,34 +125,69 @@ export function SubjectSummary({
         </CardHeader>
 
         <CardContent className="flex flex-1 items-center gap-1 px-6 pb-0">
-          <div className="relative">
-            {assignments ? (
-              academics.running.overall &&
-              academics.categories.length > 0 && (
-                <SubjectGoalDialog
-                  isOpen={isGoalDialogOpen}
-                  onOpenChange={setIsGoalDialogOpen}
-                  assignments={assignments}
-                  categories={academics.categories}
-                  currentAverage={academics.running.overall.mark}
-                  initialGoal={summary.goal}
-                  subjectId={id}
-                />
-              )
-            ) : (
-              <SubjectGoalButtonSkeleton />
-            )}
-            <div
-              className={cn(
-                "flex flex-col cursor-pointer group gap-1 items-center",
-                { clickable: !!assignments }
-              )}
-              onClick={() => setIsGoalDialogOpen(true)}
-            >
+          {shouldShowGoalDialog && (
+            <SubjectGoalDialog
+              isOpen={isGoalDialogOpen}
+              onOpenChange={setIsGoalDialogOpen}
+              assignments={assignments}
+              categories={academics.categories}
+              currentAverage={academics.running.overall!.mark}
+              initialGoal={summary.goal}
+              subjectId={id}
+            />
+          )}
+          <div
+            className={cn("relative group", {
+              clickable: shouldShowGoalDialog,
+            })}
+            onClick={(e) => {
+              if (shouldShowGoalDialog) {
+                setIsGoalDialogOpen(true);
+              }
+            }}
+          >
+            {!wasGradePosted &&
+              (assignments ? (
+                shouldShowGoalDialog && (
+                  <Button
+                    size="smallIcon"
+                    className={cn(
+                      "size-6 absolute z-10 -top-2 -right-4.5",
+                      {
+                        "text-muted-foreground group-hover:text-accent-foreground/90":
+                          isCalculated && isAchievable,
+                      },
+                      {
+                        "text-red-500/80 group-hover:text-red-500/90":
+                          isCalculated && !isAchievable,
+                      },
+                      {
+                        "text-muted-foreground/70 group-hover:text-muted-foreground":
+                          !isCalculated,
+                      }
+                    )}
+                    variant="ghost"
+                  >
+                    <HugeiconsIcon
+                      icon={
+                        isCalculated
+                          ? isAchievable
+                            ? Target02StrokeRounded
+                            : Alert02StrokeRounded
+                          : AddCircleStrokeRounded
+                      }
+                    />
+                  </Button>
+                )
+              ) : (
+                <SubjectGoalButtonSkeleton />
+              ))}
+
+            <div className="flex flex-col cursor-pointer group gap-1 items-center">
               <HalfDonutTextChart
                 height={isLetterGradeShown ? 45 : 50}
                 value={gradeObject?.mark || 0}
-                secondaryValue={summary.goal?.value}
+                secondaryValue={summary.goal?.desiredAverage}
                 secondaryFillClassName="fill-zinc-400/65 dark:fill-zinc-500/80"
                 fillClassName={gradeInfo?.fillClassName ?? "fill-zinc-200"}
                 topRightContent={

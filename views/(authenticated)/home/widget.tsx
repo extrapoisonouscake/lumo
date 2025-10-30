@@ -135,6 +135,8 @@ export function Widget({
             <HugeiconsIcon
               icon={DragDropVerticalStrokeRounded}
               className="text-muted-foreground"
+              strokeWidth={3}
+              data-auto-stroke-width
             />
           </Button>
         </div>

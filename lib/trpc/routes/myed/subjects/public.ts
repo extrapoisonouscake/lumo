@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const getSubjectGoalSchema = (currentAverage?: number) =>
   z.object({
-    value: z.coerce
+    desiredAverage: z
       .number()
       .min(
         currentAverage ? currentAverage + 1 : 0,

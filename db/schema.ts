@@ -104,7 +104,7 @@ export interface TrackedSubject {
   }>;
 }
 export interface SubjectGoal {
-  value: number;
+  desiredAverage: number;
   categoryId: string;
   minimumScore: number;
 }

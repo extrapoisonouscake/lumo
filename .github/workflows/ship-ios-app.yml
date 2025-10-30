@@ -8,6 +8,7 @@ jobs:
     runs-on: macOS-latest
     permissions:
       contents: write
+      pull-requests: write
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -58,3 +59,4 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG_SLUG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT_SLUG: ${{ secrets.SENTRY_PROJECT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

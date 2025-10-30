@@ -77,7 +77,7 @@ export function AssignmentCard({
     />
   );
 }
-function ScoreIcon({
+export function AssignmentScoreIcon({
   classAverage,
   score,
   status,
@@ -168,7 +168,7 @@ export function AssignmentScoreDisplay({
       >
         {formatAssignmentScore(shouldShowPercentages)(assignment)}
       </p>
-      <ScoreIcon
+      <AssignmentScoreIcon
         classAverage={assignment.classAverage}
         score={assignment.score}
         status={assignment.status}

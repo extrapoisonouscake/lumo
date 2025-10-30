@@ -8,6 +8,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     secondaryTextClassName: string;
     backgroundClassName: string;
     fillClassName: string;
+    plainColor: string;
   }
 > = {
   A: {
@@ -16,6 +17,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     secondaryTextClassName: "text-green-500",
     backgroundClassName: "bg-green-500",
     fillClassName: "fill-green-500",
+    plainColor: "var(--color-green-500)",
   },
   B: {
     threshold: 73,
@@ -23,6 +25,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     secondaryTextClassName: "text-green-500",
     backgroundClassName: "bg-green-500",
     fillClassName: "fill-green-500",
+    plainColor: "var(--color-green-500)",
   },
   "C+": {
     threshold: 67,
@@ -30,6 +33,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     secondaryTextClassName: "text-yellow-400",
     backgroundClassName: "bg-yellow-400",
     fillClassName: "fill-yellow-400",
+    plainColor: "var(--color-yellow-400)",
   },
   C: {
     threshold: 60,
@@ -37,6 +41,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     textClassName: "text-amber-500",
     backgroundClassName: "bg-amber-500",
     fillClassName: "fill-amber-500",
+    plainColor: "var(--color-amber-500)",
   },
   "C-": {
     threshold: 50,
@@ -44,6 +49,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     textClassName: "text-orange-500",
     backgroundClassName: "bg-orange-500",
     fillClassName: "fill-orange-500",
+    plainColor: "var(--color-orange-500)",
   },
   F: {
     threshold: 0,
@@ -51,6 +57,7 @@ export const GRADES_VISUAL_CONFIG: Record<
     textClassName: "text-red-500",
     backgroundClassName: "bg-red-500",
     fillClassName: "fill-red-500",
+    plainColor: "var(--color-red-500)",
   },
 };
 const getGradeInfoByMark = (mark: number) => {

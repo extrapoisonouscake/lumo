@@ -22,6 +22,7 @@ import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
+import { AssignmentScoreIcon } from "../classes/[subjectId]/(assignments)/assignment-card";
 import {
   getAssignmentURL,
   getPercentageString,
@@ -163,15 +164,22 @@ function RecentGradedAssignmentCard({
         )}
       >
         <div className="flex items-center justify-between">
-          <p className="font-semibold text-lg leading-none">
-            {assignment.score} / {assignment.maxScore}
-            {shouldShowPercentages && (
-              <span className="text-xs font-medium">
-                &nbsp;
-                {getPercentageString(assignment.score!, assignment.maxScore)}
-              </span>
-            )}
-          </p>
+          <div className="flex items-end gap-1">
+            <p className="font-semibold text-lg leading-none">
+              {assignment.score} / {assignment.maxScore}
+              {shouldShowPercentages && (
+                <span className="text-xs font-medium">
+                  &nbsp;
+                  {getPercentageString(assignment.score!, assignment.maxScore)}
+                </span>
+              )}
+            </p>
+            <AssignmentScoreIcon
+              classAverage={assignment.classAverage}
+              score={assignment.score}
+              status={assignment.status}
+            />
+          </div>
 
           <CircularProgress
             className={cn({
