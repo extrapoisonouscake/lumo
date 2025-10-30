@@ -25,6 +25,10 @@ platform :ios do
       key_content: ENV['APPSTORE_API_PRIVATE_KEY']
     )
     match(type: 'appstore')
+    increment_version_number(
+      bump_type: "minor",
+      xcodeproj: "App.xcodeproj"
+    )
     increment_build_number(xcodeproj: "App.xcodeproj")
     build_app(workspace: "App.xcworkspace", scheme: "App")
     sentry_debug_files_upload
