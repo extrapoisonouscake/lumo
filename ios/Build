@@ -35,18 +35,13 @@ xcrun xcodebuild \
     -scheme "${SCHEME}" \
     -configuration "${CONFIGURATION}" \
     -sdk "${SDK}" \
-    -parallelizeTargets \
-    -showBuildTimingSummary \
-    -disableAutomaticPackageResolution \
-    -derivedDataPath "${DERIVED_DATA_PATH}" \
     -archivePath "${ARCHIVE_PATH}" \
+    -derivedDataPath "${DERIVED_DATA_PATH}" \
     -resultBundlePath "${RESULT_BUNDLE_PATH}" \
     CURRENT_PROJECT_VERSION="${CURRENT_PROJECT_VERSION}" \
-    CODE_SIGN_STYLE=Manual \
-    CODE_SIGN_IDENTITY="Apple Distribution" \
-    PROVISIONING_PROFILE_SPECIFIER="${PROVISIONING_PROFILE_NAME}" \
+    CODE_SIGN_STYLE=Automatic \
     DEVELOPMENT_TEAM="${DEVELOPMENT_TEAM}" \
-    -target "${SCHEME}" \
+    -allowProvisioningUpdates \
     archive
 
 echo "ARCHIVE_PATH: ${ARCHIVE_PATH}"
