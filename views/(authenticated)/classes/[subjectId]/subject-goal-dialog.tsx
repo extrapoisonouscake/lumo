@@ -21,8 +21,8 @@ import { getGradeInfo } from "@/helpers/grades";
 import { useFormValidation } from "@/hooks/use-form-validation";
 import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
 import {
-  getSubjectGoalSchema,
   SubjectGoalSchema,
+  subjectGoalSchema,
 } from "@/lib/trpc/routes/myed/subjects/public";
 import { Assignment, SubjectSummary } from "@/types/school";
 import { queryClient, trpc } from "@/views/trpc";
@@ -81,7 +81,7 @@ export function SubjectGoalDialog({
   );
   const schema = useMemo(
     () =>
-      getSubjectGoalSchema(currentAverage).extend({
+      subjectGoalSchema.extend({
         minimumScore: getOptionalNumberString(0),
       }),
     [currentAverage]
@@ -190,6 +190,7 @@ export function SubjectGoalDialog({
       throw error;
     }
   };
+
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="gap-0">
@@ -233,7 +234,6 @@ export function SubjectGoalDialog({
                       trackWidth={14}
                       minValue={0}
                       maxValue={100}
-                      outerShadow
                       startAngle={70}
                       handleSize={16}
                       endAngle={290}
@@ -351,7 +351,7 @@ export function SubjectGoalDialog({
               <Button
                 variant="outline"
                 className="w-full sm:w-auto min-h-10"
-                onClick={(e) => {
+                onClick={() => {
                   if (initialGoal) {
                     onSave(undefined);
                   } else {

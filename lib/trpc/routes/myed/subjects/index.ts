@@ -17,7 +17,8 @@ import { z } from "zod";
 import { router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import { updateSubjectLastAssignments } from "../../core/settings/helpers";
-import { getSubjectGoalSchema } from "./public";
+import { subjectGoalSchema } from "./public";
+
 const subjectYearEnum = z.enum([
   "current",
   "previous",
@@ -124,19 +125,17 @@ export const subjectsRouter = router({
     .input(
       z.object({
         subjectId: z.string(),
-        goal: z.union([getSubjectGoalSchema(), z.undefined()]),
+        goal: z.union([subjectGoalSchema, z.undefined()]),
       })
     )
     .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
       await db
         .update(tracked_school_data)
         .set({
-          
-            subjectsGoals:
-              input.goal === undefined
-                ? sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) - ${input.subjectId}`
-                : sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) || ${JSON.stringify({ [input.subjectId]: input.goal })}::jsonb`,
-          
+          subjectsGoals:
+            input.goal === undefined
+              ? sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) - ${input.subjectId}`
+              : sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) || ${JSON.stringify({ [input.subjectId]: input.goal })}::jsonb`,
         })
         .where(eq(tracked_school_data.userId, studentDatabaseId));
     }),
@@ -169,45 +168,48 @@ export const subjectsRouter = router({
         ]);
         const trackedAssignments =
           trackedSchoolData?.subjectsWithAssignments?.[id]?.assignments;
-          const assignmentsWithUpdatedDates=response.assignments.map((assignment)=>{
-            const previousAssignment=trackedAssignments?.find((a)=>a.id===assignment.id);
-            let assignmentToPrepare=assignment
-            if(previousAssignment){
-              if(previousAssignment.score!==assignment.score){
-                assignmentToPrepare.updatedAt=new Date();
-              }else{
-              assignmentToPrepare.updatedAt=previousAssignment.updatedAt;
+        const assignmentsWithUpdatedDates = response.assignments.map(
+          (assignment) => {
+            const previousAssignment = trackedAssignments?.find(
+              (a) => a.id === assignment.id
+            );
+            let assignmentToPrepare = assignment;
+            if (previousAssignment) {
+              if (previousAssignment.score !== assignment.score) {
+                assignmentToPrepare.updatedAt = new Date();
+              } else {
+                assignmentToPrepare.updatedAt = previousAssignment.updatedAt;
               }
-            } else{
-              if(!!trackedAssignments){//this means the data has been saved before and we can compare the dates safely
-              assignmentToPrepare.updatedAt=new Date();
+            } else {
+              if (!!trackedAssignments) {
+                //this means the data has been saved before and we can compare the dates safely
+                assignmentToPrepare.updatedAt = new Date();
               }
             }
 
-            return assignmentToPrepare
-        })
+            return assignmentToPrepare;
+          }
+        );
         if (
           term ||
           (response.currentTermIndex &&
             termId === response.terms![response.currentTermIndex]?.id)
         ) {
           after(
-            updateSubjectLastAssignments(
-              {userId:studentDatabaseId,
-              subjectId:id,
-              newAssignments:assignmentsWithUpdatedDates,
-            
-            }
-            )
+            updateSubjectLastAssignments({
+              userId: studentDatabaseId,
+              subjectId: id,
+              newAssignments: assignmentsWithUpdatedDates,
+            })
           );
         }
-        
+
         if (!trackedAssignments) {
           return response;
         }
         return {
           ...response,
-          assignments: assignmentsWithUpdatedDates
+          assignments: assignmentsWithUpdatedDates,
         };
       }
     ),
