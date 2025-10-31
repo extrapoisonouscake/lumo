@@ -30,6 +30,7 @@ import { queryClient, trpc } from "@/views/trpc";
 import {
   Alert02StrokeRounded,
   Cancel01StrokeRounded,
+  Drag02StrokeRounded,
   DragDropStrokeRounded,
   PercentStrokeRounded,
   StarStrokeRounded,
@@ -338,9 +339,11 @@ export function SubjectGoalDialog({
             >
               <MotionHugeiconsIcon
                 icon={
-                  isCalculated && !isAchievable
-                    ? Alert02StrokeRounded
-                    : Target02StrokeRounded
+                  desiredAverage === currentAverage
+                    ? Drag02StrokeRounded
+                    : isCalculated && !isAchievable
+                      ? Alert02StrokeRounded
+                      : Target02StrokeRounded
                 }
                 layout
                 initial={false}
