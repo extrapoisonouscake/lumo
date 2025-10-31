@@ -1,12 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
-import {
-  ArrowLeft01StrokeStandard,
-  ArrowRight01StrokeStandard,
-} from "@hugeicons-pro/core-stroke-standard";
-import { HugeiconsIcon } from "@hugeicons/react";
 import useEmblaCarousel from "embla-carousel-react";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -108,94 +102,66 @@ export function WeekdaySlider({
   // Loading slide component
 
   return (
-    <div className="flex gap-2 items-center">
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={() => {
-          emblaApi?.scrollPrev();
-        }}
-        className="p-0 h-full w-fit group"
-      >
-        <HugeiconsIcon
-          icon={ArrowLeft01StrokeStandard}
-          className="text-muted-foreground/80 group-hover:text-foreground transition-colors"
-        />
-      </Button>
-      <div className="overflow-hidden rounded-[18px] flex-1" ref={emblaRef}>
-        <div className="flex">
-          {slides.map((days, slideIndex) => (
-            <div
-              key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
-              className="flex-[0_0_100%] flex justify-center"
-            >
-              <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
-                {days ? (
-                  days.map((dayObject) => {
-                    const isCurrent = dayObject.date.isSame(currentDate, "day");
-                    const isToday = dayObject.date.isSame(new Date(), "day");
-                    return (
-                      <div
-                        key={dayObject.date.format("YYYY-MM-DD")}
+    <div className="overflow-hidden" ref={emblaRef}>
+      <div className="flex">
+        {slides.map((days, slideIndex) => (
+          <div
+            key={`week-${weekOffset + slideIndex - 1}`} // -1 because first slide is loading
+            className="flex-[0_0_100%] flex justify-center"
+          >
+            <div className="flex gap-2 justify-between flex-1 max-w-[470px]">
+              {days ? (
+                days.map((dayObject) => {
+                  const isCurrent = dayObject.date.isSame(currentDate, "day");
+                  const isToday = dayObject.date.isSame(new Date(), "day");
+                  return (
+                    <div
+                      key={dayObject.date.format("YYYY-MM-DD")}
+                      className={cn(
+                        "flex flex-col items-center gap-1 cursor-pointer"
+                      )}
+                      onClick={() => {
+                        // Ensure consistent timezone handling by using startOf('day')
+                        const clickedDate = dayObject.date
+                          .startOf("day")
+                          .toDate();
+                        setDate(clickedDate);
+                      }}
+                    >
+                      <p
                         className={cn(
-                          "flex flex-col items-center gap-1 cursor-pointer"
+                          "text-sm transition-colors duration-200",
+                          isCurrent
+                            ? "text-brand font-medium"
+                            : "text-muted-foreground"
                         )}
-                        onClick={() => {
-                          // Ensure consistent timezone handling by using startOf('day')
-                          const clickedDate = dayObject.date
-                            .startOf("day")
-                            .toDate();
-                          setDate(clickedDate);
-                        }}
                       >
-                        <p
-                          className={cn(
-                            "text-sm transition-colors duration-200",
-                            isCurrent
-                              ? "text-brand font-medium"
-                              : "text-muted-foreground"
-                          )}
-                        >
-                          {dayObject.name}
-                        </p>
-                        <div
-                          className={cn(
-                            "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-secondary",
-                            {
-                              "bg-brand text-white shadow-sm hover:bg-brand":
-                                isCurrent,
-                            },
-                            {
-                              "bg-secondary": isToday && !isCurrent,
-                            }
-                          )}
-                        >
-                          {dayObject.day}
-                        </div>
+                        {dayObject.name}
+                      </p>
+                      <div
+                        className={cn(
+                          "p-1.5 leading-tight size-9 flex items-center justify-center rounded-full transition-all duration-200 text-foreground hover:bg-secondary",
+                          {
+                            "bg-brand text-white shadow-sm hover:bg-brand":
+                              isCurrent,
+                          },
+                          {
+                            "bg-secondary": isToday && !isCurrent,
+                          }
+                        )}
+                      >
+                        {dayObject.day}
                       </div>
-                    );
-                  })
-                ) : (
-                  <WeekdaysSkeleton />
-                )}
-              </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <WeekdaysSkeleton />
+              )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={() => {
-          emblaApi?.scrollNext();
-        }}
-        className="p-0 h-full w-fit group"
-      >
-        <HugeiconsIcon
-          icon={ArrowRight01StrokeStandard}
-          className="text-muted-foreground/80 group-hover:text-foreground transition-colors"
-        />
-      </Button>
     </div>
   );
 }

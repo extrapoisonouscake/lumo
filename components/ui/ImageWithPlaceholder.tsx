@@ -1,14 +1,17 @@
-import Image, { ImageProps } from "next/image";
-import { useState } from "react";
+import { ImgHTMLAttributes, useState } from "react";
 import { Skeleton } from "./skeleton";
 
-export function ImageWithPlaceholder({ width, height, ...props }: ImageProps) {
+export function ImageWithPlaceholder({
+  width,
+  height,
+  ...props
+}: ImgHTMLAttributes<HTMLImageElement>) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <>
       <Skeleton isLoading={!isLoaded}>
-        <Image
+        <img
           onLoad={() => setIsLoaded(true)}
           {...props}
           width={width}

@@ -241,7 +241,7 @@ function AssignmentHeaderSkeleton() {
         <Skeleton shouldShrink={false} className="text-xl">
           NameNameName
         </Skeleton>
-        <Skeleton className="text-sm">Subjectss 10</Skeleton>
+        <Skeleton className="text-sm w-fit">Subjectss 10</Skeleton>
       </div>
       <div className="flex items-center gap-2">
         <Skeleton className="rounded-full h-[26px] w-20"></Skeleton>

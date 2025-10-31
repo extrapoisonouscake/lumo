@@ -120,7 +120,7 @@ function Content({
             subjectSummaries={subjectSummaries}
           />
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-4">
             <TermSelectsRow
               year={year}
               response={response}
@@ -273,7 +273,7 @@ function LoadedContent({
         "mb-4": isHiddenSubjectsOpen || hiddenSubjects.length === 0,
       })}
     >
-      <div className="flex flex-col gap-2.5">
+      <div className="flex flex-col gap-4">
         <TermSelectsRow
           year={year}
           response={response}
@@ -357,7 +357,7 @@ function TermSelectsRow({
 }) {
   return (
     <div className="flex items-end justify-between flex-wrap gap-x-4 gap-y-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         <TermSelects
           terms={response.terms}
           initialYear={year}

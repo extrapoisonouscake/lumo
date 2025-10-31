@@ -30,6 +30,7 @@ import { queryClient, trpc } from "@/views/trpc";
 import {
   Alert02StrokeRounded,
   Cancel01StrokeRounded,
+  DragDropStrokeRounded,
   PercentStrokeRounded,
   StarStrokeRounded,
   Target02StrokeRounded,
@@ -38,7 +39,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 
 import CircularSlider from "@/components/ui/charts/circular-slider";
 import { Controller } from "react-hook-form";
@@ -80,10 +81,6 @@ export function SubjectGoalDialog({
   initialGoal?: SubjectGoal;
   subjectId: string;
 }) {
-  const numberInnerRef = useRef<HTMLElement | null>(null);
-  const sliderContainerRef = useRef<HTMLDivElement | null>(null);
-  const savedNumberFlowElements = useRef<HTMLElement[]>([]);
-  const [rerendererNonce, setRerendererNonce] = useState(0);
   const setSubjectGoalMutation = useMutation(
     trpc.myed.subjects.setSubjectGoal.mutationOptions()
   );
@@ -202,13 +199,13 @@ export function SubjectGoalDialog({
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="gap-0">
-        <ResponsiveDialogHeader className="pb-4">
+        <ResponsiveDialogHeader className="pb-3">
           <ResponsiveDialogTitle>Set Goal</ResponsiveDialogTitle>
           <ResponsiveDialogDescription>
             Calculate how many grades you need to reach your desired average.
           </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
-        <ResponsiveDialogBody className="gap-5">
+        <ResponsiveDialogBody className="gap-4 pb-0">
           <Form className="gap-4" {...methods} onSubmit={onSave}>
             <Controller
               control={methods.control}
@@ -223,36 +220,6 @@ export function SubjectGoalDialog({
                       className={cn(
                         "[&_]:leading-none text-6xl font-semibold tabular-nums transition-[font-size]"
                       )}
-                      key={rerendererNonce}
-                      ref={(e) => {
-                        const inner = e?.shadowRoot?.querySelector(
-                          ".number__inner"
-                        ) as HTMLElement | null;
-
-                        if (inner) {
-                          numberInnerRef.current = inner;
-                          inner.addEventListener("blur", () => {
-                            if (savedNumberFlowElements.current.length === 0)
-                              return;
-                            inner.removeAttribute("contenteditable");
-                            methods.setValue(
-                              "desiredAverage",
-                              +inner.innerText || currentAverage
-                            );
-                            inner.innerText = "";
-
-                            inner.style.removeProperty("line-height");
-                            inner.style.removeProperty("outline");
-                            savedNumberFlowElements.current.forEach(
-                              (element) => {
-                                inner.appendChild(element);
-                              }
-                            );
-                            savedNumberFlowElements.current = [];
-                            setRerendererNonce((nonce) => nonce + 1);
-                          });
-                        }
-                      }}
                       plugins={[continuous]}
                       value={value}
                       style={{
@@ -264,64 +231,7 @@ export function SubjectGoalDialog({
                       / 100
                     </span>
                   </div>
-                  <div
-                    data-vaul-no-drag
-                    ref={sliderContainerRef}
-                    onPointerDownCapture={(ev) => {
-                      const svg = sliderContainerRef.current?.querySelector(
-                        "svg"
-                      ) as SVGSVGElement | null;
-                      if (!svg) return;
-                      const rect = svg.getBoundingClientRect();
-                      const cx = rect.left + rect.width / 2;
-                      const cy = rect.top + rect.height / 2;
-                      const dx = ev.clientX - cx;
-                      const dy = ev.clientY - cy;
-                      const r = Math.hypot(dx, dy);
-
-                      const SIZE = 205;
-                      const TRACK_WIDTH = 14;
-                      const SHADOW_WIDTH = 20; // matches CircularSlider
-                      const INNER_RADIUS =
-                        SIZE / 2 - TRACK_WIDTH - SHADOW_WIDTH;
-
-                      if (r < INNER_RADIUS - 2) {
-                        ev.stopPropagation();
-                        ev.preventDefault();
-                        const inner = numberInnerRef.current;
-                        if (inner) {
-                          const tempContainer = document.createElement("div");
-                          tempContainer.className = "number__temp";
-                          tempContainer.style.display = "none";
-                          sliderContainerRef.current!.appendChild(
-                            tempContainer
-                          );
-
-                          for (const child of inner.childNodes) {
-                            savedNumberFlowElements.current.push(
-                              child.cloneNode(true) as HTMLElement
-                            );
-                          }
-
-                          inner.innerHTML = desiredAverage.toString();
-                          inner.style.lineHeight =
-                            "calc(var(--number-flow-char-height) + 7.5px * 2)";
-                          inner.style.outline = "none";
-                          inner.setAttribute("contenteditable", "true");
-
-                          const selection = window.getSelection()!;
-                          const range = document.createRange();
-                          selection.removeAllRanges();
-                          range.selectNodeContents(inner);
-                          range.collapse(false);
-                          selection.addRange(range);
-                          inner.focus();
-
-                          inner.focus({ preventScroll: true });
-                        }
-                      }
-                    }}
-                  >
+                  <div data-vaul-no-drag>
                     <CircularSlider
                       size={230}
                       trackWidth={14}
@@ -329,6 +239,35 @@ export function SubjectGoalDialog({
                       maxValue={100}
                       startAngle={70}
                       handleSize={16}
+                      handleRenderer={({ position }) => {
+                        const SIZE = 32;
+                        const SHADOW_PADDING = 10; // Padding to accommodate shadow blur
+                        const FOREIGN_OBJECT_SIZE = SIZE + SHADOW_PADDING * 2;
+                        return (
+                          <foreignObject
+                            width={FOREIGN_OBJECT_SIZE}
+                            height={FOREIGN_OBJECT_SIZE}
+                            x={position.x - FOREIGN_OBJECT_SIZE / 2}
+                            y={position.y - FOREIGN_OBJECT_SIZE / 2}
+                          >
+                            <button
+                              type="button"
+                              className="clickable rounded-full group bg-background flex items-center justify-center"
+                              style={{
+                                width: SIZE,
+                                height: SIZE,
+                                margin: SHADOW_PADDING,
+                                boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+                              }}
+                            >
+                              <HugeiconsIcon
+                                icon={DragDropStrokeRounded}
+                                className="size-5 [&>path]:stroke-[3]! transition-opacity group-hover:opacity-50"
+                              />
+                            </button>
+                          </foreignObject>
+                        );
+                      }}
                       secondaryHandleRenderer={({ position }) => {
                         const SIZE = 24;
                         return (
@@ -351,7 +290,7 @@ export function SubjectGoalDialog({
                             >
                               <HugeiconsIcon
                                 icon={StarStrokeRounded}
-                                className="size-3 [&>path]:stroke-[2.5]! transition-opacity group-hover:opacity-50"
+                                className="size-3 [&>path]:stroke-[2.5]! transition-opacity group-hover:opacity-70 text-muted-foreground"
                                 data-auto-stroke-width="true"
                               />
                             </div>
@@ -439,7 +378,7 @@ export function SubjectGoalDialog({
               )}
             </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 z-30 relative">
               <FormSelect
                 formItemClassName="sm:col-span-2"
                 label="Category"
@@ -462,38 +401,37 @@ export function SubjectGoalDialog({
                 placeholder="e.g., 80"
               />
             </div>
-
-            <ResponsiveDialogFooter className="p-0 sm:flex-row-reverse">
-              <Button
-                leftIcon={<HugeiconsIcon icon={Tick02StrokeRounded} />}
-                type="submit"
-                className="w-full sm:w-auto min-h-10"
-              >
-                Save
-              </Button>
-
-              <Button
-                variant="outline"
-                className="w-full sm:w-auto min-h-10"
-                onClick={() => {
-                  if (initialGoal) {
-                    onSave(undefined);
-                  } else {
-                    resetForm();
-                  }
-                  onOpenChange(false);
-                }}
-                leftIcon={
-                  initialGoal ? (
-                    <HugeiconsIcon icon={Cancel01StrokeRounded} />
-                  ) : undefined
-                }
-              >
-                {initialGoal ? "Reset" : "Cancel"}
-              </Button>
-            </ResponsiveDialogFooter>
           </Form>
         </ResponsiveDialogBody>
+        <ResponsiveDialogFooter className="sm:flex-row-reverse">
+          <Button
+            leftIcon={<HugeiconsIcon icon={Tick02StrokeRounded} />}
+            onClick={() => methods.handleSubmit(onSave)()}
+            className="w-full sm:w-auto min-h-10"
+          >
+            Save
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto min-h-10"
+            onClick={() => {
+              if (initialGoal) {
+                onSave(undefined);
+              } else {
+                resetForm();
+              }
+              onOpenChange(false);
+            }}
+            leftIcon={
+              initialGoal ? (
+                <HugeiconsIcon icon={Cancel01StrokeRounded} />
+              ) : undefined
+            }
+          >
+            {initialGoal ? "Reset" : "Cancel"}
+          </Button>
+        </ResponsiveDialogFooter>
       </ResponsiveDialogContent>
     </ResponsiveDialog>
   );

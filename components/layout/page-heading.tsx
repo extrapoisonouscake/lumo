@@ -42,12 +42,12 @@ export function PageHeading({
       <div className="w-fit flex gap-2.5 items-center">
         {rightContent ?? (!isMobile ? dynamicContent : null)}
         <div className="w-fit flex sm:hidden gap-3 items-center">
+          <ThemeToggle isInSidebar={false} shouldShowText={false} />
           <Link to="/settings">
             <Button variant="ghost" size="smallIcon" className="w-fit">
               <HugeiconsIcon icon={Settings02StrokeRounded} />
             </Button>
           </Link>
-          <ThemeToggle isInSidebar={false} shouldShowText={false} />
 
           <UserHeader className="w-fit" />
         </div>

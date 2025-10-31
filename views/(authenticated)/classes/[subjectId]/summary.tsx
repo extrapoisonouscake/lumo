@@ -183,7 +183,7 @@ export function SubjectSummary({
                 <SubjectGoalButtonSkeleton />
               ))}
 
-            <div className="flex flex-col cursor-pointer group gap-1 items-center">
+            <div className="flex flex-col group gap-1 items-center">
               <HalfDonutTextChart
                 height={isLetterGradeShown ? 45 : 50}
                 value={gradeObject?.mark || 0}

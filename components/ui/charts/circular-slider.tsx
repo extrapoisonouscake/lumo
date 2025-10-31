@@ -1,6 +1,10 @@
 //Author: https://github.com/mnkhouri/react-circular-slider
 import * as React from "react";
-
+type Renderer = ({
+  position,
+}: {
+  position: { x: number; y: number };
+}) => React.ReactNode;
 type Props = {
   size: number;
   trackWidth: number;
@@ -10,12 +14,8 @@ type Props = {
   endAngle: number; // 0 - 360 degrees
   angleType: AngleDescription;
   handleSize: number;
-
-  secondaryHandleRenderer?: ({
-    position,
-  }: {
-    position: { x: number; y: number };
-  }) => React.ReactNode;
+  handleRenderer?: Renderer;
+  secondaryHandleRenderer?: Renderer;
   handle1: {
     value: number;
     onChange?: (value: number) => void;
@@ -187,6 +187,7 @@ export class CircularSlider extends React.Component<
       handle1,
       handle2,
       handleSize,
+      handleRenderer,
       secondaryHandleRenderer,
       maxValue,
       minValue,
@@ -310,7 +311,9 @@ export class CircularSlider extends React.Component<
         }
         {
           /* Handle 1 */
-          controllable && (
+          controllable && handleRenderer ? (
+            handleRenderer({ position: handle1Position })
+          ) : (
             <React.Fragment>
               <filter
                 id="handleShadow"

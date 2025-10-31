@@ -394,7 +394,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             variant="outline"
             size="sm"
             onClick={handlePrint}
-            className="no-print h-8"
+            className="hidden sm:block no-print h-8"
             leftIcon={<HugeiconsIcon icon={PrinterStrokeRounded} />}
           >
             Print
@@ -421,7 +421,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             </div>
           }
           mobileHeader={
-            <div className="flex gap-3 no-print">
+            <div className="flex gap-2 no-print">
               <TableFilterSearchBar
                 id="subject-search-mobile"
                 table={table}
