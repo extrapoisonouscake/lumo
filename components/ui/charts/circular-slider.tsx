@@ -10,6 +10,12 @@ type Props = {
   endAngle: number; // 0 - 360 degrees
   angleType: AngleDescription;
   handleSize: number;
+
+  secondaryHandleRenderer?: ({
+    position,
+  }: {
+    position: { x: number; y: number };
+  }) => React.ReactNode;
   handle1: {
     value: number;
     onChange?: (value: number) => void;
@@ -17,7 +23,6 @@ type Props = {
   };
   handle2?: {
     value: number;
-    onChange: (value: number) => void;
     color?: string;
   };
   onControlFinished?: () => void;
@@ -171,16 +176,7 @@ export class CircularSlider extends React.Component<
     }
 
     if (!disabled) {
-      if (
-        handle2 &&
-        handle2.onChange &&
-        // make sure we're closer to handle 2 -- i.e. controlling handle2
-        Math.abs(value - handle2.value) < Math.abs(value - handle1.value)
-      ) {
-        handle2.onChange(value);
-      } else {
-        handle1.onChange(value);
-      }
+      handle1.onChange(value);
     }
   };
 
@@ -191,6 +187,7 @@ export class CircularSlider extends React.Component<
       handle1,
       handle2,
       handleSize,
+      secondaryHandleRenderer,
       maxValue,
       minValue,
       startAngle,
@@ -276,84 +273,41 @@ export class CircularSlider extends React.Component<
           )
         }
 
-        {handle2Angle === undefined ? (
-          /* One-handle mode */
-          <React.Fragment>
-            {/* Arc Background  */}
-            <path
-              d={arcPathWithRoundedEnds({
-                startAngle: handle1Angle,
-                endAngle,
-                angleType,
-                innerRadius: trackInnerRadius,
-                thickness: trackWidth,
-                svgSize: size,
-                direction: angleType.direction,
-              })}
-              fill={arcBackgroundColor}
-              className={arcBackgroundClassName}
-            />
-            {/* Arc (render after background so it overlays it) */}
-            <path
-              d={arcPathWithRoundedEnds({
-                startAngle,
-                endAngle: handle1Angle,
-                angleType,
-                innerRadius: trackInnerRadius,
-                thickness: trackWidth,
-                svgSize: size,
-                direction: angleType.direction,
-              })}
-              fill={arcColor}
-            />
-          </React.Fragment>
-        ) : (
-          /* Two-handle mode */
-          <React.Fragment>
-            {/* Arc Background Part 1  */}
-            <path
-              d={arcPathWithRoundedEnds({
-                startAngle,
-                endAngle: handle1Angle,
-                angleType,
-                innerRadius: trackInnerRadius,
-                thickness: trackWidth,
-                svgSize: size,
-                direction: angleType.direction,
-              })}
-              fill={arcBackgroundColor}
-              className={arcBackgroundClassName}
-            />
-            {/* Arc Background Part 2  */}
-            <path
-              d={arcPathWithRoundedEnds({
-                startAngle: handle2Angle,
-                endAngle,
-                angleType,
-                innerRadius: trackInnerRadius,
-                thickness: trackWidth,
-                svgSize: size,
-                direction: angleType.direction,
-              })}
-              fill={arcBackgroundColor}
-              className={arcBackgroundClassName}
-            />
-            {/* Arc (render after background so it overlays it) */}
-            <path
-              d={arcPathWithRoundedEnds({
-                startAngle: handle1Angle,
-                endAngle: handle2Angle,
-                angleType,
-                innerRadius: trackInnerRadius,
-                thickness: trackWidth,
-                svgSize: size,
-                direction: angleType.direction,
-              })}
-              fill={arcColor}
-            />
-          </React.Fragment>
-        )}
-
+        {/* Arc Background  */}
+        <path
+          d={arcPathWithRoundedEnds({
+            startAngle: handle1Angle,
+            endAngle,
+            angleType,
+            innerRadius: trackInnerRadius,
+            thickness: trackWidth,
+            svgSize: size,
+            direction: angleType.direction,
+          })}
+          fill={arcBackgroundColor}
+          className={arcBackgroundClassName}
+        />
+        {/* Arc (render after background so it overlays it) */}
+        <path
+          d={arcPathWithRoundedEnds({
+            startAngle,
+            endAngle: handle1Angle,
+            angleType,
+            innerRadius: trackInnerRadius,
+            thickness: trackWidth,
+            svgSize: size,
+            direction: angleType.direction,
+          })}
+          fill={arcColor}
+        />
+        {
+          /* Handle 2 */
+          handle2Position && secondaryHandleRenderer && (
+            <React.Fragment>
+              {secondaryHandleRenderer({ position: handle2Position })}
+            </React.Fragment>
+          )
+        }
         {
           /* Handle 1 */
           controllable && (
@@ -385,61 +339,12 @@ export class CircularSlider extends React.Component<
                 cy={handle1Position.y}
                 fill={handle1.color ?? "#ffffff"}
                 filter="url(#handleShadow)"
-                className="cursor-pointer"
-              />
-            </React.Fragment>
-          )
-        }
-
-        {
-          /* Handle 2 */
-          handle2Position && (
-            <React.Fragment>
-              <circle
-                r={handleSize}
-                cx={handle2Position.x}
-                cy={handle2Position.y}
-                fill={handle2.color ?? "#ffffff"}
-                filter="url(#handleShadow)"
+                className="cursor-move"
               />
             </React.Fragment>
           )
         }
       </svg>
-    );
-  }
-}
-
-export class CircularSliderWithChildren extends React.Component<
-  React.PropsWithChildren<Props>
-> {
-  static defaultProps = CircularSlider.defaultProps;
-  render() {
-    const { size } = this.props;
-    return (
-      <div
-        style={{
-          width: size,
-          height: size,
-          position: "relative",
-        }}
-      >
-        <CircularSlider {...this.props} />
-        <div
-          style={{
-            position: "absolute",
-            top: "25%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {this.props.children}
-        </div>
-      </div>
     );
   }
 }

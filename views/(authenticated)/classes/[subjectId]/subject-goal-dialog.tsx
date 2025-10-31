@@ -10,6 +10,7 @@ import {
   ResponsiveDialog,
   ResponsiveDialogBody,
   ResponsiveDialogContent,
+  ResponsiveDialogDescription,
   ResponsiveDialogFooter,
   ResponsiveDialogHeader,
   ResponsiveDialogTitle,
@@ -30,13 +31,14 @@ import {
   Alert02StrokeRounded,
   Cancel01StrokeRounded,
   PercentStrokeRounded,
+  StarStrokeRounded,
   Target02StrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import CircularSlider from "@/components/ui/charts/circular-slider";
 import { Controller } from "react-hook-form";
@@ -78,6 +80,10 @@ export function SubjectGoalDialog({
   initialGoal?: SubjectGoal;
   subjectId: string;
 }) {
+  const numberInnerRef = useRef<HTMLElement | null>(null);
+  const sliderContainerRef = useRef<HTMLDivElement | null>(null);
+  const savedNumberFlowElements = useRef<HTMLElement[]>([]);
+  const [rerendererNonce, setRerendererNonce] = useState(0);
   const setSubjectGoalMutation = useMutation(
     trpc.myed.subjects.setSubjectGoal.mutationOptions()
   );
@@ -196,8 +202,11 @@ export function SubjectGoalDialog({
   return (
     <ResponsiveDialog open={isOpen} onOpenChange={onOpenChange}>
       <ResponsiveDialogContent className="gap-0">
-        <ResponsiveDialogHeader className="pb-2">
+        <ResponsiveDialogHeader className="pb-4">
           <ResponsiveDialogTitle>Set Goal</ResponsiveDialogTitle>
+          <ResponsiveDialogDescription>
+            Calculate how many grades you need to reach your desired average.
+          </ResponsiveDialogDescription>
         </ResponsiveDialogHeader>
         <ResponsiveDialogBody className="gap-5">
           <Form className="gap-4" {...methods} onSubmit={onSave}>
@@ -209,16 +218,45 @@ export function SubjectGoalDialog({
                   className="z-10 relative [&_path]:transition-[fill] flex justify-center items-center -mb-19 -mt-4"
                   onTouchStart={() => Haptics.selectionStart()}
                 >
-                  <div className="absolute flex flex-col justify-center items-center -z-[1] p-12 rounded-full overflow-hidden top-[calc(50%-7px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <div className="absolute flex flex-col justify-center items-center -z-[1] top-[calc(50%-7px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <NumberFlow
                       className={cn(
                         "[&_]:leading-none text-6xl font-semibold tabular-nums transition-[font-size]"
                       )}
+                      key={rerendererNonce}
+                      ref={(e) => {
+                        const inner = e?.shadowRoot?.querySelector(
+                          ".number__inner"
+                        ) as HTMLElement | null;
+
+                        if (inner) {
+                          numberInnerRef.current = inner;
+                          inner.addEventListener("blur", () => {
+                            if (savedNumberFlowElements.current.length === 0)
+                              return;
+                            inner.removeAttribute("contenteditable");
+                            methods.setValue(
+                              "desiredAverage",
+                              +inner.innerText || currentAverage
+                            );
+                            inner.innerText = "";
+
+                            inner.style.removeProperty("line-height");
+                            inner.style.removeProperty("outline");
+                            savedNumberFlowElements.current.forEach(
+                              (element) => {
+                                inner.appendChild(element);
+                              }
+                            );
+                            savedNumberFlowElements.current = [];
+                            setRerendererNonce((nonce) => nonce + 1);
+                          });
+                        }
+                      }}
                       plugins={[continuous]}
                       value={value}
                       style={{
                         //@ts-ignore
-
                         "--number-flow-char-height": "0.8em",
                       }}
                     />
@@ -226,7 +264,64 @@ export function SubjectGoalDialog({
                       / 100
                     </span>
                   </div>
-                  <div data-vaul-no-drag>
+                  <div
+                    data-vaul-no-drag
+                    ref={sliderContainerRef}
+                    onPointerDownCapture={(ev) => {
+                      const svg = sliderContainerRef.current?.querySelector(
+                        "svg"
+                      ) as SVGSVGElement | null;
+                      if (!svg) return;
+                      const rect = svg.getBoundingClientRect();
+                      const cx = rect.left + rect.width / 2;
+                      const cy = rect.top + rect.height / 2;
+                      const dx = ev.clientX - cx;
+                      const dy = ev.clientY - cy;
+                      const r = Math.hypot(dx, dy);
+
+                      const SIZE = 205;
+                      const TRACK_WIDTH = 14;
+                      const SHADOW_WIDTH = 20; // matches CircularSlider
+                      const INNER_RADIUS =
+                        SIZE / 2 - TRACK_WIDTH - SHADOW_WIDTH;
+
+                      if (r < INNER_RADIUS - 2) {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                        const inner = numberInnerRef.current;
+                        if (inner) {
+                          const tempContainer = document.createElement("div");
+                          tempContainer.className = "number__temp";
+                          tempContainer.style.display = "none";
+                          sliderContainerRef.current!.appendChild(
+                            tempContainer
+                          );
+
+                          for (const child of inner.childNodes) {
+                            savedNumberFlowElements.current.push(
+                              child.cloneNode(true) as HTMLElement
+                            );
+                          }
+
+                          inner.innerHTML = desiredAverage.toString();
+                          inner.style.lineHeight =
+                            "calc(var(--number-flow-char-height) + 7.5px * 2)";
+                          inner.style.outline = "none";
+                          inner.setAttribute("contenteditable", "true");
+
+                          const selection = window.getSelection()!;
+                          const range = document.createRange();
+                          selection.removeAllRanges();
+                          range.selectNodeContents(inner);
+                          range.collapse(false);
+                          selection.addRange(range);
+                          inner.focus();
+
+                          inner.focus({ preventScroll: true });
+                        }
+                      }
+                    }}
+                  >
                     <CircularSlider
                       size={230}
                       trackWidth={14}
@@ -234,6 +329,35 @@ export function SubjectGoalDialog({
                       maxValue={100}
                       startAngle={70}
                       handleSize={16}
+                      secondaryHandleRenderer={({ position }) => {
+                        const SIZE = 24;
+                        return (
+                          <foreignObject
+                            width={SIZE}
+                            height={SIZE}
+                            x={position.x - SIZE / 2}
+                            y={position.y - SIZE / 2}
+                          >
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                methods.setValue(
+                                  "desiredAverage",
+                                  currentAverage
+                                );
+                              }}
+                              style={{ width: SIZE, height: SIZE }}
+                              className="clickable rounded-full group bg-background border-[1.5px] flex items-center justify-center"
+                            >
+                              <HugeiconsIcon
+                                icon={StarStrokeRounded}
+                                className="size-3 [&>path]:stroke-[2.5]! transition-opacity group-hover:opacity-50"
+                                data-auto-stroke-width="true"
+                              />
+                            </div>
+                          </foreignObject>
+                        );
+                      }}
                       endAngle={290}
                       angleType={{
                         direction: "cw",
@@ -242,11 +366,15 @@ export function SubjectGoalDialog({
                       onControlFinished={() => Haptics.selectionEnd()}
                       handle1={{
                         value,
-                        onChange: (value) => {
-                          Haptics.selectionChanged();
-                          onChange(Math.round(value));
+                        onChange: (newValue) => {
+                          const roundedValue = Math.round(newValue);
+                          if (roundedValue !== newValue) {
+                            Haptics.selectionChanged();
+                            onChange(roundedValue);
+                          }
                         },
                       }}
+                      handle2={{ value: currentAverage }}
                       arcColor={getGradeInfo(value)!.plainColor}
                       arcBackgroundClassName="fill-zinc-200 dark:fill-zinc-800"
                     />
