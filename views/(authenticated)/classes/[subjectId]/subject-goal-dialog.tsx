@@ -210,14 +210,11 @@ export function SubjectGoalDialog({
                   <div className="absolute flex flex-col justify-center items-center -z-[1] p-12 rounded-full overflow-hidden top-[calc(50%-7px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <NumberFlow
                       className={cn(
-                        "[&_]:leading-none text-5xl font-semibold tabular-nums transition-[font-size]"
+                        "[&_]:leading-none text-6xl font-semibold tabular-nums transition-[font-size]"
                       )}
                       plugins={[continuous]}
                       value={value}
-                      format={{
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }}
+                      
                       style={{
                         //@ts-ignore
 
@@ -246,7 +243,7 @@ export function SubjectGoalDialog({
                         value,
                         onChange: (value) => {
                           Haptics.selectionChanged();
-                          onChange(+value.toFixed(1));
+                          onChange(Math.round(value));
                         },
                       }}
                       arcColor={getGradeInfo(value)!.plainColor}
@@ -259,7 +256,7 @@ export function SubjectGoalDialog({
 
             <motion.div
               className={cn(
-                "z-20 relative text-muted-foreground justify-center w-full flex items-center font- gap-2 text-sm transition-colors",
+                "z-20 relative h-[21px] text-muted-foreground justify-center w-full flex items-center gap-2 text-sm transition-colors",
                 {
                   "text-red-500": isCalculated && !isAchievable,
                   "text-green-600": isCalculated && isAchievable,
@@ -282,7 +279,7 @@ export function SubjectGoalDialog({
                 className="size-4 min-w-4"
               />
 
-              <div className="h-[21px]">
+              
                 {desiredAverage !== currentAverage ? (
                   result.outcome == Outcome.Unknown ? (
                     <p>Enter a minimum score for the category.</p>
@@ -312,7 +309,7 @@ export function SubjectGoalDialog({
                 ) : (
                   <p>Start dragging the slider to set your goal average.</p>
                 )}
-              </div>
+              
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
