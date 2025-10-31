@@ -259,7 +259,7 @@ export function SubjectGoalDialog({
 
             <motion.div
               className={cn(
-                "z-20 relative text-muted-foreground justify-center w-full flex items-center font- gap-2 text-sm transition-colors",
+                "z-20 relative h-[21px] text-muted-foreground justify-center w-full flex items-center gap-2 text-sm transition-colors",
                 {
                   "text-red-500": isCalculated && !isAchievable,
                   "text-green-600": isCalculated && isAchievable,
@@ -282,7 +282,7 @@ export function SubjectGoalDialog({
                 className="size-4 min-w-4"
               />
 
-              <div className="h-[21px]">
+              
                 {desiredAverage !== currentAverage ? (
                   result.outcome == Outcome.Unknown ? (
                     <p>Enter a minimum score for the category.</p>
@@ -312,7 +312,7 @@ export function SubjectGoalDialog({
                 ) : (
                   <p>Start dragging the slider to set your goal average.</p>
                 )}
-              </div>
+              
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
