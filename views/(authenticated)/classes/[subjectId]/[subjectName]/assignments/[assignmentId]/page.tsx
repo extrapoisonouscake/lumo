@@ -50,6 +50,7 @@ export default function AssignmentPage() {
   const settings = useUserSettings();
   //* this response is not used to get absences, year doesn't matter
   const { data: subject } = useSubjectSummary(subjectId, "current");
+
   return (
     <>
       <TitleManager>
@@ -100,7 +101,6 @@ export default function AssignmentPage() {
                       categories={subject?.academics?.categories}
                       categoryId={categoryId}
                     />
-                    <SubjectRow />
                   </AssignmentSectionCard>
 
                   {/* Dates Information */}
@@ -201,6 +201,8 @@ function AssignmentHeader({
   status: AssignmentStatus;
   dueAt: Date;
 }) {
+  const params = useParams() as { subjectName: string };
+  const subjectName = params.subjectName.replace(/_/g, " ");
   const Icon = ASSIGNMENT_STATUS_TO_ICON[status];
   let className;
   if (status === AssignmentStatus.Ungraded) {
@@ -213,8 +215,11 @@ function AssignmentHeader({
     className = BADGE_CLASSNAMES_BY_STATUS[status];
   }
   return (
-    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap">
-      <CardTitle className="text-xl">{name}</CardTitle>
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 justify-between flex-wrap">
+      <div className="flex flex-col gap-0.5">
+        <CardTitle className="text-xl">{name}</CardTitle>
+        <p className="text-muted-foreground text-sm">{subjectName}</p>
+      </div>
       <div className="flex items-center gap-2">
         <Badge
           className={cn(
@@ -231,10 +236,13 @@ function AssignmentHeader({
 }
 function AssignmentHeaderSkeleton() {
   return (
-    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap">
-      <Skeleton shouldShrink={false}>
-        <CardTitle className="text-xl">NameNameName</CardTitle>
-      </Skeleton>
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap justify-between">
+      <div className="flex flex-col gap-0.5">
+        <Skeleton shouldShrink={false} className="text-xl">
+          NameNameName
+        </Skeleton>
+        <Skeleton className="text-sm">Subjectss 10</Skeleton>
+      </div>
       <div className="flex items-center gap-2">
         <Skeleton className="rounded-full h-[26px] w-20"></Skeleton>
       </div>
@@ -427,15 +435,6 @@ function GradeRow({
           mainContent
         )
       }
-    />
-  );
-}
-function SubjectRow() {
-  const { subjectName } = useParams() as { subjectName: string };
-  return (
-    <AssignmentPropertyRow
-      label="Class"
-      value={subjectName.replace(/_/g, " ")}
     />
   );
 }

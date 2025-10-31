@@ -12,6 +12,7 @@ interface QueryWrapperProps<TData, TError> {
   skeleton?: ReactNode;
   onError?: ReactNode;
   onPaused?: ReactNode;
+  showStaleData?: boolean;
 }
 const OfflineError = () => {
   return <ErrorCard message="You are offline." emoji="🔌" />;
@@ -22,9 +23,10 @@ export function QueryWrapper<TData, TError>({
   skeleton,
   onError,
   onPaused,
+  showStaleData = false,
 }: QueryWrapperProps<TData, TError>) {
   const { isOffline } = useNetworkStatus();
-  if (query.isFetching) {
+  if (query.isFetching && !showStaleData) {
     return <>{skeleton}</>;
   }
 

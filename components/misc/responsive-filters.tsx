@@ -1,7 +1,7 @@
 import { cn } from "@/helpers/cn";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
-  SlidersHorizontalStrokeRounded,
+  FilterStrokeRounded,
   Tick02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -44,7 +44,7 @@ export function ResponsiveFilters<T>({
     <ResponsiveDialog>
       <ResponsiveDialogTrigger asChild>
         <Button
-          leftIcon={<HugeiconsIcon icon={SlidersHorizontalStrokeRounded} />}
+          leftIcon={<HugeiconsIcon icon={FilterStrokeRounded} />}
           variant="outline"
           className={cn("w-fit relative", triggerClassName)}
         >

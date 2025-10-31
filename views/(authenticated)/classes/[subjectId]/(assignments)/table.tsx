@@ -76,8 +76,8 @@ const getColumns = ({
         return (
           <div className="flex items-center gap-1.5">
             {nameNode}
-            {row.original.feedback && <TeacherCommentBadge size="sm" />}
-            {row.original.hasSubmission && <SubmissionBadge size="sm" />}
+            {row.original.feedback && <TeacherCommentBadge />}
+            {row.original.hasSubmission && <SubmissionBadge />}
           </div>
         );
       } else {

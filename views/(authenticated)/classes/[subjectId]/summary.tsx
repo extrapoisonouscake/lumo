@@ -188,7 +188,7 @@ export function SubjectSummary({
                 height={isLetterGradeShown ? 45 : 50}
                 value={gradeObject?.mark || 0}
                 secondaryValue={summary.goal?.desiredAverage}
-                secondaryFillClassName="fill-zinc-400/65 dark:fill-zinc-500/80"
+                secondaryFillClassName="fill-zinc-400/55 dark:fill-zinc-500/70"
                 fillClassName={gradeInfo?.fillClassName ?? "fill-zinc-200"}
                 topRightContent={
                   wasGradePosted && (

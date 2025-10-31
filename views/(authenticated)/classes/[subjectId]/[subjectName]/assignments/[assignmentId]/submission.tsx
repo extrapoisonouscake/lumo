@@ -9,9 +9,9 @@ import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import {
+  AttachmentStrokeRounded,
   Delete02StrokeRounded,
   Download01StrokeRounded,
-  File02StrokeRounded,
   Upload01StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -26,15 +26,15 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
       assignmentId,
     })
   );
-  console.log({ query });
+
   return (
-    <QueryWrapper query={query}>
+    <QueryWrapper query={query} showStaleData>
       {(data) => {
         if (!data.isAllowed) return null;
         return (
           <AssignmentSectionCard
             title="Submission"
-            icon={File02StrokeRounded}
+            icon={AttachmentStrokeRounded}
             contentClassName="gap-4 flex-col sm:flex-row justify-between items-start sm:items-center"
             headerClassName="pb-3"
           >
@@ -42,10 +42,12 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
               <>
                 <div className="flex flex-col gap-2 min-w-0">
                   <div className="text-muted-foreground text-sm truncate flex items-center gap-1">
-                    Name:
-                    <span className="text-primary font-medium">
-                      {data.file.name}
-                    </span>
+                    <p>
+                      Name:{" "}
+                      <span className="text-primary font-medium">
+                        {data.file.name}
+                      </span>
+                    </p>
                     <FileTypeIcon
                       className="inline-block"
                       fileName={data.file.name}
@@ -83,7 +85,10 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
                 </div>
               </>
             ) : (
-              <UploadSubmission assignmentId={assignmentId} />
+              <UploadSubmission
+                assignmentId={assignmentId}
+                isRefetching={query.isFetching}
+              />
             )}
           </AssignmentSectionCard>
         );
@@ -116,7 +121,13 @@ function DeleteSubmissionButton({ assignmentId }: { assignmentId: string }) {
     </Button>
   );
 }
-function UploadSubmission({ assignmentId }: { assignmentId: string }) {
+function UploadSubmission({
+  assignmentId,
+  isRefetching,
+}: {
+  assignmentId: string;
+  isRefetching: boolean;
+}) {
   const [file, setFile] = useState<File | null>(null);
 
   const mutation = useMutation({
@@ -129,8 +140,8 @@ function UploadSubmission({ assignmentId }: { assignmentId: string }) {
         body: formData,
       });
     },
-    onSuccess: () => {
-      queryClient.refetchQueries(
+    onSuccess: async () => {
+      await queryClient.refetchQueries(
         getTRPCQueryOptions(trpc.myed.subjects.getAssignmentSubmissionState)({
           assignmentId,
         })
@@ -140,10 +151,15 @@ function UploadSubmission({ assignmentId }: { assignmentId: string }) {
 
   return (
     <div className="flex flex-col gap-4 w-full">
-      <FileUpload onFileSelect={setFile} selectedFile={file} />
+      <FileUpload
+        onFileSelect={setFile}
+        selectedFile={file}
+        disableControls={mutation.isPending}
+      />
       <Button
         shouldShowChildrenOnLoading
         disabled={!file}
+        isLoading={mutation.isPending || isRefetching}
         variant="brand"
         leftIcon={<HugeiconsIcon icon={Upload01StrokeRounded} />}
         onClick={() => mutation.mutateAsync()}

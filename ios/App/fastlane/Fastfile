@@ -25,13 +25,13 @@ platform :ios do
       key_content: ENV['APPSTORE_API_PRIVATE_KEY']
     )
     match(type: 'appstore')
-    increment_version_number(
-      bump_type: "minor",
+    increment_version_number_in_xcodeproj(
+      bump_type: 'minor'
     )
     increment_build_number
     build_app(workspace: "App.xcworkspace", scheme: "App")
     sentry_debug_files_upload
-    new_version = get_version_number
+    new_version = get_version_number_from_xcodeproj
     commit_version_bump(message: "chore: bump version to #{new_version}")
     push_to_git_remote
     upload_to_app_store(

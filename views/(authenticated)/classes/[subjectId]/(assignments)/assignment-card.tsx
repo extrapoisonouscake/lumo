@@ -185,7 +185,7 @@ export function TeacherCommentBadge(props: BadgeProps) {
 }
 export function SubmissionBadge(props: BadgeProps) {
   return (
-    <Badge variant="secondary">
+    <Badge variant="outline" {...props}>
       <HugeiconsIcon icon={AttachmentStrokeRounded} /> Submitted
     </Badge>
   );

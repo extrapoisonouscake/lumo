@@ -14,7 +14,7 @@ import {
   Upload01StrokeRounded,
   Video02StrokeRounded as VideoIcon,
 } from "@hugeicons-pro/core-stroke-rounded";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { HugeiconsIcon, HugeiconsIconProps } from "@hugeicons/react";
 import { useCallback, useState } from "react";
 
 interface FileUploadProps {
@@ -23,6 +23,7 @@ interface FileUploadProps {
   accept?: string;
   maxSize?: number; // in MB
   className?: string;
+  disableControls?: boolean;
 }
 const extensionToIcon = {
   jpg: ImageIcon,
@@ -94,8 +95,9 @@ export function FileUpload({
   onFileSelect,
   selectedFile,
   accept,
-  maxSize = 10, // 10MB default
+  maxSize = 4.5,
   className,
+  disableControls = false,
 }: FileUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -184,7 +186,7 @@ export function FileUpload({
     <div className={cn("w-full flex flex-col gap-2", className)}>
       <div
         className={cn(
-          "relative border border-dashed rounded-xl p-6 transition-colors w-full",
+          "relative clickable border border-dashed rounded-xl p-6 transition-[colors,scale] w-full",
           "hover:border-primary/30",
           selectedFile && "p-4",
           isDragOver && "border-primary bg-primary/5",
@@ -206,7 +208,12 @@ export function FileUpload({
                   />
                 </div>
               ) : (
-                <FileTypeIcon fileName={selectedFile.name} className="size-6" />
+                <FileTypeIcon
+                  fileName={selectedFile.name}
+                  className="size-6"
+                  data-auto-stroke-width
+                  strokeWidth={1.5}
+                />
               )}
               <div className="flex flex-col">
                 <span className="font-medium text-sm">{selectedFile.name}</span>
@@ -221,6 +228,7 @@ export function FileUpload({
               size="smallIcon"
               onClick={handleRemoveFile}
               className="hover:bg-destructive/10 hover:text-destructive"
+              disabled={disableControls}
             >
               <HugeiconsIcon icon={Cancel01StrokeRounded} />
             </Button>
@@ -239,8 +247,7 @@ export function FileUpload({
                 className="size-6 text-muted-foreground mb-2"
               />
               <p className="text-sm font-medium mb-1">
-                Drop your file here, or{" "}
-                <span className="text-primary">browse</span>
+                Click or drop your file here
               </p>
               <p className="text-xs text-muted-foreground">
                 Max size: {maxSize}MB
@@ -257,12 +264,17 @@ export function FileUpload({
 export function FileTypeIcon({
   fileName,
   className,
+  ...props
 }: {
   fileName: string;
   className?: string;
-}) {
+} & Omit<HugeiconsIconProps, "icon">) {
   const icon = getFileTypeIcon(fileName);
   return (
-    <HugeiconsIcon icon={icon} className={cn("size-4 text-brand", className)} />
+    <HugeiconsIcon
+      icon={icon}
+      className={cn("size-4 text-brand", className)}
+      {...props}
+    />
   );
 }

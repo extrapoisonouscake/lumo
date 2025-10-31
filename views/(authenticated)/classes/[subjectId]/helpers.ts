@@ -55,7 +55,7 @@ function computeGoalStatusResult({
     return { outcome: Outcome.ValuesOutOfRange };
   const neededAssignmentsCount = Math.ceil(numerator / denominator);
 
-  if (neededAssignmentsCount > 10) return { outcome: Outcome.ValuesOutOfRange };
+  if (neededAssignmentsCount > 15) return { outcome: Outcome.ValuesOutOfRange };
   return {
     outcome: Outcome.Achievable,
     neededAssignmentsCount: neededAssignmentsCount,

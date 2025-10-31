@@ -28,6 +28,7 @@ import { Assignment, SubjectSummary } from "@/types/school";
 import { queryClient, trpc } from "@/views/trpc";
 import {
   Alert02StrokeRounded,
+  Cancel01StrokeRounded,
   PercentStrokeRounded,
   Target02StrokeRounded,
   Tick02StrokeRounded,
@@ -36,7 +37,8 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useMutation } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
-import CircularSlider from "react-circular-slider-svg";
+
+import CircularSlider from "@/components/ui/charts/circular-slider";
 import { Controller } from "react-hook-form";
 import { z } from "zod";
 import { computeGoalStatus, Outcome } from "./helpers";
@@ -214,7 +216,6 @@ export function SubjectGoalDialog({
                       )}
                       plugins={[continuous]}
                       value={value}
-                      
                       style={{
                         //@ts-ignore
 
@@ -247,7 +248,7 @@ export function SubjectGoalDialog({
                         },
                       }}
                       arcColor={getGradeInfo(value)!.plainColor}
-                      arcBackgroundColor="var(--color-zinc-200)"
+                      arcBackgroundClassName="fill-zinc-200 dark:fill-zinc-800"
                     />
                   </div>
                 </div>
@@ -279,37 +280,35 @@ export function SubjectGoalDialog({
                 className="size-4 min-w-4"
               />
 
-              
-                {desiredAverage !== currentAverage ? (
-                  result.outcome == Outcome.Unknown ? (
-                    <p>Enter a minimum score for the category.</p>
-                  ) : !isAchievable ? (
-                    <p>Too many grades needed.</p>
-                  ) : result.outcome === Outcome.AlreadyAchieved ? (
-                    <p>Goal already achieved.</p>
-                  ) : (
-                    <div className="flex items-center gap-1">
-                      <AnimatePresence initial={false}>
-                        <motion.span key="need" layout="position">
-                          Need{" "}
-                        </motion.span>
-                        <NumberFlow
-                          key="number"
-                          value={result.neededAssignmentsCount!}
-                        />
-                        <motion.span key="more" layout="position">
-                          {" "}
-                          more grade
-                          {result.neededAssignmentsCount === 1 ? "" : "s"} of at
-                          least {minimumScoreString}%.
-                        </motion.span>
-                      </AnimatePresence>
-                    </div>
-                  )
+              {desiredAverage !== currentAverage ? (
+                result.outcome == Outcome.Unknown ? (
+                  <p>Enter a minimum score for the category.</p>
+                ) : !isAchievable ? (
+                  <p>Too many grades needed.</p>
+                ) : result.outcome === Outcome.AlreadyAchieved ? (
+                  <p>Goal already achieved.</p>
                 ) : (
-                  <p>Start dragging the slider to set your goal average.</p>
-                )}
-              
+                  <div className="flex items-center gap-1">
+                    <AnimatePresence initial={false}>
+                      <motion.span key="need" layout="position">
+                        Need{" "}
+                      </motion.span>
+                      <NumberFlow
+                        key="number"
+                        value={result.neededAssignmentsCount!}
+                      />
+                      <motion.span key="more" layout="position">
+                        {" "}
+                        more grade
+                        {result.neededAssignmentsCount === 1 ? "" : "s"} of at
+                        least {minimumScoreString}%.
+                      </motion.span>
+                    </AnimatePresence>
+                  </div>
+                )
+              ) : (
+                <p>Start dragging the slider to set your goal average.</p>
+              )}
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -356,6 +355,11 @@ export function SubjectGoalDialog({
                   }
                   onOpenChange(false);
                 }}
+                leftIcon={
+                  initialGoal ? (
+                    <HugeiconsIcon icon={Cancel01StrokeRounded} />
+                  ) : undefined
+                }
               >
                 {initialGoal ? "Reset" : "Cancel"}
               </Button>
