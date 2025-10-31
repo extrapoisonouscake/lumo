@@ -33,10 +33,10 @@ platform :ios do
     sentry_debug_files_upload
     new_version = get_version_number_from_xcodeproj
     commit_version_bump(message: "chore: bump version to #{new_version}")
-    push_to_git_remote
     upload_to_app_store(
       force: true,
       precheck_include_in_app_purchases: false
-    )
+      )
+    push_to_git_remote
   end
 end

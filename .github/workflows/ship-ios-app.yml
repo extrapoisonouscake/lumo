@@ -47,9 +47,9 @@ jobs:
           sourcemaps: "./out"
       - name: Install dependencies
         run: bundle install
-        working-directory: ios/App
-      - run: bundle exec fastlane release
-        working-directory: ios/App
+        working-directory: ./ios/App/fastlane
+      - run: bundle exec fastlane ios release
+        working-directory: ./ios/App/fastlane
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
