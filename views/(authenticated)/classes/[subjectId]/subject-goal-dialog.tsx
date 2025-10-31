@@ -213,10 +213,7 @@ export function SubjectGoalDialog({
                       )}
                       plugins={[continuous]}
                       value={value}
-                      format={{
-                        minimumFractionDigits: 1,
-                        maximumFractionDigits: 1,
-                      }}
+                      
                       style={{
                         //@ts-ignore
 
@@ -246,7 +243,7 @@ export function SubjectGoalDialog({
                         value,
                         onChange: (value) => {
                           Haptics.selectionChanged();
-                          onChange(+value.toFixed(1));
+                          onChange(Math.round(value));
                         },
                       }}
                       arcColor={getGradeInfo(value)!.plainColor}
