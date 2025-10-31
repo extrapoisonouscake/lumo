@@ -209,7 +209,7 @@ export function SubjectGoalDialog({
                   <div className="absolute flex flex-col justify-center items-center -z-[1] p-12 rounded-full overflow-hidden top-[calc(50%-7px)] left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <NumberFlow
                       className={cn(
-                        "[&_]:leading-none text-5xl font-semibold tabular-nums transition-[font-size]"
+                        "[&_]:leading-none text-6xl font-semibold tabular-nums transition-[font-size]"
                       )}
                       plugins={[continuous]}
                       value={value}
