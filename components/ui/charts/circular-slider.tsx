@@ -63,6 +63,11 @@ export class CircularSlider extends React.Component<
     arcBackgroundColor: "#aaa",
   };
   svgRef = React.createRef<SVGSVGElement>();
+  currentAnimatedAngle: number | null = null;
+  animationFrameId: number | null = null;
+  isDragging: boolean = false;
+  mouseDownPosition: { x: number; y: number } | null = null;
+  dragThreshold: number = 5; // pixels
 
   onMouseEnter = (ev: React.MouseEvent<SVGSVGElement>) => {
     if (ev.buttons === 1) {
@@ -72,6 +77,8 @@ export class CircularSlider extends React.Component<
   };
 
   onMouseDown = (ev: React.MouseEvent<SVGSVGElement>) => {
+    this.mouseDownPosition = { x: ev.clientX, y: ev.clientY };
+    this.isDragging = false;
     const svgRef = this.svgRef.current;
     if (svgRef) {
       svgRef.addEventListener("mousemove", this.handleMousePosition);
@@ -82,6 +89,8 @@ export class CircularSlider extends React.Component<
   };
 
   removeMouseListeners = () => {
+    this.isDragging = false;
+    this.mouseDownPosition = null;
     const svgRef = this.svgRef.current;
     if (svgRef) {
       svgRef.removeEventListener("mousemove", this.handleMousePosition);
@@ -96,6 +105,18 @@ export class CircularSlider extends React.Component<
   handleMousePosition = (ev: React.MouseEvent<SVGSVGElement> | MouseEvent) => {
     const x = ev.clientX;
     const y = ev.clientY;
+
+    // Check if we've moved beyond the threshold to consider it a drag
+    if (!this.isDragging && this.mouseDownPosition) {
+      const deltaX = x - this.mouseDownPosition.x;
+      const deltaY = y - this.mouseDownPosition.y;
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+      if (distance > this.dragThreshold) {
+        this.isDragging = true;
+      }
+    }
+
     this.processSelection(x, y);
   };
 
@@ -124,10 +145,30 @@ export class CircularSlider extends React.Component<
     }
     const x = touch.clientX;
     const y = touch.clientY;
+
+    // Handle touch start
+    if (ev.type === "touchstart") {
+      this.mouseDownPosition = { x, y };
+      this.isDragging = false;
+    } else if (ev.type === "touchmove") {
+      // Check if we've moved beyond the threshold to consider it a drag
+      if (!this.isDragging && this.mouseDownPosition) {
+        const deltaX = x - this.mouseDownPosition.x;
+        const deltaY = y - this.mouseDownPosition.y;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        if (distance > this.dragThreshold) {
+          this.isDragging = true;
+        }
+      }
+    }
+
     this.processSelection(x, y);
 
     // If the touch is ending, fire onControlFinished
     if (ev.type === "touchend" || ev.type === "touchcancel") {
+      this.isDragging = false;
+      this.mouseDownPosition = null;
       if (this.props.onControlFinished) {
         this.props.onControlFinished();
       }
@@ -176,8 +217,114 @@ export class CircularSlider extends React.Component<
     }
 
     if (!disabled) {
+      // If dragging, update instantly without animation
+      if (this.isDragging) {
+        // Cancel any ongoing animation
+        if (this.animationFrameId !== null) {
+          cancelAnimationFrame(this.animationFrameId);
+          this.animationFrameId = null;
+        }
+        // Convert the clamped value back to an angle to respect start/end angle limits
+        this.currentAnimatedAngle = valueToAngle({
+          value,
+          minValue,
+          maxValue,
+          startAngle,
+          endAngle,
+        });
+        this.forceUpdate();
+      }
       handle1.onChange(value);
     }
+  };
+
+  componentDidMount() {
+    // Initialize the animated angle with the current value
+    const { handle1, minValue, maxValue, startAngle, endAngle } = this.props;
+    this.currentAnimatedAngle = valueToAngle({
+      value: handle1.value,
+      minValue,
+      maxValue,
+      startAngle,
+      endAngle,
+    });
+  }
+
+  componentDidUpdate(prevProps: Props) {
+    // If value changed and we're not dragging, animate to the new position
+    if (
+      prevProps.handle1.value !== this.props.handle1.value &&
+      !this.isDragging
+    ) {
+      this.animateToValue();
+    }
+  }
+
+  componentWillUnmount() {
+    // Clean up any ongoing animation
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+
+  animateToValue = () => {
+    const { handle1, minValue, maxValue, startAngle, endAngle } = this.props;
+    const targetAngle = valueToAngle({
+      value: handle1.value,
+      minValue,
+      maxValue,
+      startAngle,
+      endAngle,
+    });
+
+    if (this.currentAnimatedAngle === null) {
+      this.currentAnimatedAngle = targetAngle;
+      this.forceUpdate();
+      return;
+    }
+
+    // Calculate the shortest path around the circle
+    let angleDiff = targetAngle - this.currentAnimatedAngle;
+
+    // Normalize the angle difference to be between -180 and 180
+    while (angleDiff > 180) angleDiff -= 360;
+    while (angleDiff < -180) angleDiff += 360;
+
+    const startAngleAnim = this.currentAnimatedAngle;
+    const startTime = performance.now();
+    const duration = 300; // 300ms animation
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      // Easing function (ease-out cubic)
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+
+      this.currentAnimatedAngle = startAngleAnim + angleDiff * easeOut;
+
+      // Normalize angle to 0-360
+      if (this.currentAnimatedAngle !== null) {
+        while (this.currentAnimatedAngle < 0) this.currentAnimatedAngle += 360;
+        while (this.currentAnimatedAngle >= 360)
+          this.currentAnimatedAngle -= 360;
+      }
+
+      this.forceUpdate();
+
+      if (progress < 1) {
+        this.animationFrameId = requestAnimationFrame(animate);
+      } else {
+        this.animationFrameId = null;
+      }
+    };
+
+    // Cancel any existing animation
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    this.animationFrameId = requestAnimationFrame(animate);
   };
 
   render() {
@@ -202,13 +349,18 @@ export class CircularSlider extends React.Component<
     } = this.props;
     const shadowWidth = 20;
     const trackInnerRadius = size / 2 - trackWidth - shadowWidth;
-    const handle1Angle = valueToAngle({
-      value: handle1.value,
-      minValue,
-      maxValue,
-      startAngle,
-      endAngle,
-    });
+
+    // Use the animated angle if available, otherwise calculate from value
+    const handle1Angle =
+      this.currentAnimatedAngle !== null
+        ? this.currentAnimatedAngle
+        : valueToAngle({
+            value: handle1.value,
+            minValue,
+            maxValue,
+            startAngle,
+            endAngle,
+          });
     const handle2Angle =
       handle2 &&
       valueToAngle({

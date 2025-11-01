@@ -96,12 +96,13 @@ export type NotificationsSubscriptionSelectModel = InferSelectModel<
 export const notificationSubscriptionSchema = createSelectSchema(
   notifications_subscriptions
 );
+export type TrackedSubjectAssignment = {
+  id: string;
+  updatedAt?: Date; //if undefined, the date is impossible to determine
+  score: number | null;
+};
 export interface TrackedSubject {
-  assignments: Array<{
-    id: string;
-    updatedAt?: Date; //if undefined, the date is impossible to determine
-    score: number | null;
-  }>;
+  assignments: Array<TrackedSubjectAssignment>;
 }
 export interface SubjectGoal {
   desiredAverage: number;

@@ -251,21 +251,28 @@ export function SubjectGoalDialog({
                             x={position.x - FOREIGN_OBJECT_SIZE / 2}
                             y={position.y - FOREIGN_OBJECT_SIZE / 2}
                           >
-                            <button
-                              type="button"
-                              className="clickable rounded-full group bg-background flex items-center justify-center"
+                            <div
                               style={{
-                                width: SIZE,
-                                height: SIZE,
-                                margin: SHADOW_PADDING,
-                                boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+                                width: FOREIGN_OBJECT_SIZE,
+                                height: FOREIGN_OBJECT_SIZE,
+                                padding: SHADOW_PADDING,
+                                boxSizing: "border-box",
                               }}
                             >
-                              <HugeiconsIcon
-                                icon={DragDropStrokeRounded}
-                                className="size-5 [&>path]:stroke-[3]! transition-opacity group-hover:opacity-50"
-                              />
-                            </button>
+                              <button
+                                type="button"
+                                className="shadow-[0_0_10px_rgba(0,0,0,0.2)]! dark:shadow-[0_0_10px_rgba(255,255,255,0.2)]! clickable rounded-full group bg-background flex items-center justify-center"
+                                style={{
+                                  width: SIZE,
+                                  height: SIZE,
+                                }}
+                              >
+                                <HugeiconsIcon
+                                  icon={DragDropStrokeRounded}
+                                  className="size-5 [&>path]:stroke-[3]! transition-opacity group-hover:opacity-50"
+                                />
+                              </button>
+                            </div>
                           </foreignObject>
                         );
                       }}
@@ -308,7 +315,7 @@ export function SubjectGoalDialog({
                         value,
                         onChange: (newValue) => {
                           const roundedValue = Math.round(newValue);
-                          if (roundedValue !== newValue) {
+                          if (roundedValue !== value) {
                             Haptics.selectionChanged();
                             onChange(roundedValue);
                           }
