@@ -1,5 +1,5 @@
 import { Assignment, AssignmentStatus, SubjectSummary } from "@/types/school";
-export enum Outcome {
+export enum AverageGoalOutcome {
   Achievable = "achievable",
   AlreadyAchieved = "already-achieved",
   ValuesOutOfRange = "values-out-of-range",
@@ -20,7 +20,8 @@ function computeGoalStatusResult({
   minimumScore: number;
   categoryId: string;
 }) {
-  // Convert string values to numbers for calculations
+  if (currentAverage >= desiredAverage)
+    return { outcome: AverageGoalOutcome.AlreadyAchieved };
 
   const categoryAssignmentsCount = assignments.filter(
     (assignment) =>
@@ -28,9 +29,9 @@ function computeGoalStatusResult({
       assignment.categoryId === categoryId
   ).length;
   const category = categories.find((cat) => cat.id === categoryId);
-  if (!category) return { outcome: Outcome.Unknown };
+  if (!category) return { outcome: AverageGoalOutcome.Unknown };
   const categoryWeight = category.derivedWeight;
-  if (!categoryWeight) return { outcome: Outcome.Unknown };
+  if (!categoryWeight) return { outcome: AverageGoalOutcome.Unknown };
   const categoryWeightPercentage = categoryWeight / 100;
   const categoryAverage = category.average?.mark ?? 100;
   const numerator =
@@ -40,10 +41,11 @@ function computeGoalStatusResult({
     categoryAverage -
     minimumScore +
     (desiredAverage - currentAverage) / categoryWeightPercentage;
-  if (numerator >= 0) return { outcome: Outcome.AlreadyAchieved };
+
   if (denominator > 0) {
-    return { outcome: Outcome.ValuesOutOfRange };
+    return { outcome: AverageGoalOutcome.ValuesOutOfRange };
   }
+  if (numerator >= 0) return { outcome: AverageGoalOutcome.AlreadyAchieved };
   const minimumThreshold =
     categoryAverage +
     (desiredAverage - currentAverage) / categoryWeightPercentage;
@@ -51,13 +53,15 @@ function computeGoalStatusResult({
   // Maximum achievable total average if all future assignments are 100%
   const maxAchievable =
     currentAverage + categoryWeightPercentage * (100 - categoryAverage);
+
   if (desiredAverage > maxAchievable || minimumScore < minimumThreshold)
-    return { outcome: Outcome.ValuesOutOfRange };
+    return { outcome: AverageGoalOutcome.ValuesOutOfRange };
   const neededAssignmentsCount = Math.ceil(numerator / denominator);
 
-  if (neededAssignmentsCount > 15) return { outcome: Outcome.ValuesOutOfRange };
+  if (neededAssignmentsCount > 15)
+    return { outcome: AverageGoalOutcome.ValuesOutOfRange };
   return {
-    outcome: Outcome.Achievable,
+    outcome: AverageGoalOutcome.Achievable,
     neededAssignmentsCount: neededAssignmentsCount,
   };
 }
@@ -78,9 +82,10 @@ export function computeGoalStatus({
     categoryId,
   });
   const isCalculated =
-    result.outcome !== Outcome.Unknown && desiredAverage !== currentAverage;
+    result.outcome !== AverageGoalOutcome.Unknown &&
+    desiredAverage !== currentAverage;
   const isAchievable =
-    isCalculated && result.outcome !== Outcome.ValuesOutOfRange;
+    isCalculated && result.outcome !== AverageGoalOutcome.ValuesOutOfRange;
   return {
     ...result,
     isCalculated,

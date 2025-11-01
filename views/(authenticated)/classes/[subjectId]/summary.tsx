@@ -22,6 +22,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { MYED_ALL_GRADE_TERMS_SELECTOR } from "@/constants/myed";
 import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { SubjectGoal } from "@/db/schema";
 import { cn } from "@/helpers/cn";
 import { useSubjectData } from "@/hooks/trpc/use-subjects-data";
 import { GetSubjectInfoResponse } from "@/lib/trpc/routes/myed/subjects";
@@ -32,6 +33,7 @@ import {
   Alert02StrokeRounded,
   Door01StrokeRounded,
   InformationCircleStrokeRounded,
+  PartyStrokeRounded,
   Target02StrokeRounded,
   Tick02StrokeRounded,
   UserStrokeRounded,
@@ -41,7 +43,7 @@ import { useState } from "react";
 import { getGradeInfo } from "../../../../helpers/grades";
 import { SubjectAttendance } from "./attendance";
 import { SubjectTermAverages } from "./averages";
-import { computeGoalStatus } from "./helpers";
+import { AverageGoalOutcome, computeGoalStatus } from "./helpers";
 import { LetterGradeSwitch } from "./letter-grade-switch";
 import {
   SubjectGoalButtonSkeleton,
@@ -78,28 +80,12 @@ export function SubjectSummary({
     shouldShowLetterGrade
   );
   const [isGoalDialogOpen, setIsGoalDialogOpen] = useState(false);
+  const currentRunningAverage = academics.running.overall?.mark;
   const shouldShowGoalDialog =
     !!assignments &&
-    !!academics.running.overall &&
+    !!currentRunningAverage &&
     academics.categories.length > 0 &&
     !wasGradePosted;
-
-  // Compute goal status for the floating button icon without moving form logic here
-  const currentRunningAverage = academics.running.overall?.mark;
-  const { isCalculated, isAchievable } =
-    shouldShowGoalDialog && summary.goal && currentRunningAverage !== undefined
-      ? computeGoalStatus({
-          assignments: assignments!,
-          categories: academics.categories,
-          currentAverage: currentRunningAverage,
-          desiredAverage: summary.goal.desiredAverage,
-          minimumScore: summary.goal.minimumScore,
-          categoryId: summary.goal.categoryId,
-        })
-      : {
-          isCalculated: false,
-          isAchievable: false,
-        };
 
   return (
     <Card className="flex flex-col gap-4 pt-6 relative items-center">
@@ -131,7 +117,7 @@ export function SubjectSummary({
               onOpenChange={setIsGoalDialogOpen}
               assignments={assignments}
               categories={academics.categories}
-              currentAverage={academics.running.overall!.mark}
+              currentAverage={currentRunningAverage}
               initialGoal={summary.goal}
               subjectId={id}
             />
@@ -149,35 +135,12 @@ export function SubjectSummary({
             {!wasGradePosted &&
               (assignments ? (
                 shouldShowGoalDialog && (
-                  <Button
-                    size="smallIcon"
-                    className={cn(
-                      "size-6 absolute z-10 -top-2 -right-4.5",
-                      {
-                        "text-muted-foreground group-hover:text-accent-foreground/90":
-                          isCalculated && isAchievable,
-                      },
-                      {
-                        "text-red-500/80 group-hover:text-red-500/90":
-                          isCalculated && !isAchievable,
-                      },
-                      {
-                        "text-muted-foreground/70 group-hover:text-muted-foreground":
-                          !isCalculated,
-                      }
-                    )}
-                    variant="ghost"
-                  >
-                    <HugeiconsIcon
-                      icon={
-                        isCalculated
-                          ? isAchievable
-                            ? Target02StrokeRounded
-                            : Alert02StrokeRounded
-                          : AddCircleStrokeRounded
-                      }
-                    />
-                  </Button>
+                  <GoalButton
+                    goal={summary.goal}
+                    currentRunningAverage={currentRunningAverage}
+                    assignments={assignments}
+                    categories={academics.categories}
+                  />
                 )
               ) : (
                 <SubjectGoalButtonSkeleton />
@@ -356,5 +319,69 @@ export function SubjectSummarySkeleton() {
         </Button>
       </div>
     </Card>
+  );
+}
+function GoalButton({
+  goal,
+  currentRunningAverage,
+  assignments,
+  categories,
+}: {
+  goal?: SubjectGoal;
+  currentRunningAverage: number;
+  assignments: Assignment[];
+  categories: SubjectSummary["academics"]["categories"];
+}) {
+  const { isCalculated, isAchievable, outcome } =
+    goal && currentRunningAverage !== undefined
+      ? computeGoalStatus({
+          assignments,
+          categories,
+          currentAverage: currentRunningAverage,
+          desiredAverage: goal.desiredAverage,
+          minimumScore: goal.minimumScore,
+          categoryId: goal.categoryId,
+        })
+      : {
+          isCalculated: false,
+          isAchievable: false,
+        };
+  let icon;
+  if (isCalculated) {
+    if (isAchievable) {
+      if (outcome === AverageGoalOutcome.Achievable) {
+        icon = Target02StrokeRounded;
+      } else {
+        icon = PartyStrokeRounded;
+      }
+    } else {
+      icon = Alert02StrokeRounded;
+    }
+  } else {
+    icon = AddCircleStrokeRounded;
+  }
+
+  return (
+    <Button
+      size="smallIcon"
+      className={cn(
+        "size-6 absolute z-10 -top-2 -right-4.5",
+        {
+          "text-muted-foreground group-hover:text-accent-foreground/90":
+            isCalculated && isAchievable,
+        },
+        {
+          "text-red-500/80 group-hover:text-red-500/90":
+            isCalculated && !isAchievable,
+        },
+        {
+          "text-muted-foreground/70 group-hover:text-muted-foreground":
+            !isCalculated,
+        }
+      )}
+      variant="ghost"
+    >
+      <HugeiconsIcon icon={icon} />
+    </Button>
   );
 }

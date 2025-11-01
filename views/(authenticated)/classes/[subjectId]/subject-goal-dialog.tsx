@@ -45,7 +45,7 @@ import { useMemo } from "react";
 import CircularSlider from "@/components/ui/charts/circular-slider";
 import { Controller } from "react-hook-form";
 import { z } from "zod";
-import { computeGoalStatus, Outcome } from "./helpers";
+import { AverageGoalOutcome, computeGoalStatus } from "./helpers";
 const getOptionalNumberString = (minValue = 0) =>
   z
     .string()
@@ -122,7 +122,7 @@ export function SubjectGoalDialog({
       return {
         isCalculated: false,
         isAchievable: false,
-        outcome: Outcome.Unknown,
+        outcome: AverageGoalOutcome.Unknown,
         neededAssignmentsCount: undefined,
       };
 
@@ -358,12 +358,12 @@ export function SubjectGoalDialog({
               />
 
               {desiredAverage !== currentAverage ? (
-                result.outcome == Outcome.Unknown ? (
+                result.outcome == AverageGoalOutcome.Unknown ? (
                   <p>Enter a minimum score for the category.</p>
                 ) : !isAchievable ? (
                   <p>Too many grades needed.</p>
-                ) : result.outcome === Outcome.AlreadyAchieved ? (
-                  <p>Goal already achieved.</p>
+                ) : result.outcome === AverageGoalOutcome.AlreadyAchieved ? (
+                  <p>Goal achieved!</p>
                 ) : (
                   <div className="flex items-center gap-1">
                     <AnimatePresence initial={false}>

@@ -394,7 +394,7 @@ function CoursesBreakdown({ data }: { data: ProgramRequirement[] }) {
             variant="outline"
             size="sm"
             onClick={handlePrint}
-            className="hidden sm:block no-print h-8"
+            className="hidden sm:flex no-print h-8"
             leftIcon={<HugeiconsIcon icon={PrinterStrokeRounded} />}
           >
             Print
