@@ -64,14 +64,12 @@
 		</dict>
 		<key>CFBundlePrimaryIcon</key>
 		<dict>
-			<key>CFBundleIconFiles</key>
-			<array>
-				<string></string>
-			</array>
-			<key>CFBundleIconName</key>
-			<string></string>
-			<key>UIPrerenderedIcon</key>
-			<false/>
+    		<key>CFBundleIconFiles</key>
+    		<array>
+        		<string>AppIcon</string>
+    		</array>
+    		<key>UIPrerenderedIcon</key>
+    		<false/>
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>

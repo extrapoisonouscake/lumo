@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { USER_SETTINGS_DEFAULT_VALUES } from "@/constants/core";
-import { isIOSApp, isMobileApp } from "@/constants/ui";
+import { isMobileApp } from "@/constants/ui";
 
 import { cn } from "@/helpers/cn";
 import { prepareThemeColor, setThemeColorCSSVariable } from "@/helpers/theme";
@@ -15,7 +15,7 @@ import { useState } from "react";
 import { capitalize } from "../../../helpers/prettifyEducationalName";
 const AVAILABLE_THEMES = {
   default: USER_SETTINGS_DEFAULT_VALUES.themeColor,
-  red: "350 72% 52%",
+  // red: "350 72% 52%",
   burgundy: "338 49% 43%",
   pink: "345 100% 78%",
   orange: "31 100% 48%",
@@ -40,7 +40,6 @@ export const reconcileMobileAppIcon = async (currentTheme: string) => {
     );
     if (currentThemeKey && currentThemeKey !== iconName) {
       const formattedName = getIOSAppIconName(currentThemeKey);
-
       await AppIcon.change({
         name: formattedName,
         suppressNotification: false,
@@ -62,22 +61,10 @@ export function ThemePicker({ initialValue }: { initialValue: string }) {
     updateThemeLocally(theme);
     const oldValue = currentTheme;
     try {
-      const promises = [];
-      promises.push(
-        updateUserSettingMutation.mutateAsync({
-          key: "themeColor",
-          value: theme,
-        })
-      );
-      if (isIOSApp) {
-        promises.push(
-          AppIcon.change({
-            name: getIOSAppIconName(key),
-            suppressNotification: false,
-          })
-        );
-      }
-      await Promise.allSettled(promises);
+      await updateUserSettingMutation.mutateAsync({
+        key: "themeColor",
+        value: theme,
+      });
     } catch (e) {
       updateThemeLocally(oldValue);
     }
