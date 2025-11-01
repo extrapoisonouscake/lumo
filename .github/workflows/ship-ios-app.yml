@@ -2,7 +2,16 @@ name: Ship iOS App
 
 on:
   workflow_dispatch:
-
+    inputs:
+      version_bump_type:
+        description: "Version bump type"
+        required: true
+        default: "minor"
+        type: choice
+        options:
+          - minor
+          - patch
+          - major
 jobs:
   build:
     runs-on: macOS-latest
@@ -60,3 +69,4 @@ jobs:
           SENTRY_ORG_SLUG: ${{ secrets.SENTRY_ORG }}
           SENTRY_PROJECT_SLUG: ${{ secrets.SENTRY_PROJECT }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION_BUMP_TYPE: ${{ inputs.version_bump_type }}
