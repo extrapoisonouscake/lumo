@@ -156,7 +156,7 @@ function Shadow({
   return (
     <div
       className={cn(
-        "w-full opacity-0 pointer-events-none absolute left-0 right-0 z-10 transition-opacity duration-200",
+        "w-full opacity-0 pointer-events-none absolute left-0 right-0 z-[100] transition-opacity duration-200",
         { "opacity-100": isVisible },
         className
       )}

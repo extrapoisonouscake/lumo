@@ -68,6 +68,22 @@ export class CircularSlider extends React.Component<
   isDragging: boolean = false;
   mouseDownPosition: { x: number; y: number } | null = null;
   dragThreshold: number = 5; // pixels
+  cachedInverseMatrix: DOMMatrix | null = null;
+  resizeObserver: ResizeObserver | null = null;
+
+  updateCachedMatrix = () => {
+    const svgRef = this.svgRef.current;
+    if (svgRef) {
+      const ctm = svgRef.getScreenCTM();
+      if (ctm) {
+        this.cachedInverseMatrix = ctm.inverse();
+      }
+    }
+  };
+
+  invalidateCachedMatrix = () => {
+    this.cachedInverseMatrix = null;
+  };
 
   onMouseEnter = (ev: React.MouseEvent<SVGSVGElement>) => {
     if (ev.buttons === 1) {
@@ -196,13 +212,20 @@ export class CircularSlider extends React.Component<
     if (!svgRef) {
       return;
     }
+
+    // Use cached inverse matrix for performance
+    if (!this.cachedInverseMatrix) {
+      this.updateCachedMatrix();
+      if (!this.cachedInverseMatrix) {
+        return;
+      }
+    }
+
     // Find the coordinates with respect to the SVG
     const svgPoint = svgRef.createSVGPoint();
     svgPoint.x = x;
     svgPoint.y = y;
-    const coordsInSvg = svgPoint.matrixTransform(
-      svgRef.getScreenCTM()?.inverse()
-    );
+    const coordsInSvg = svgPoint.matrixTransform(this.cachedInverseMatrix);
 
     const angle = positionToAngle(coordsInSvg, size, angleType);
     let value = angleToValue({
@@ -248,6 +271,17 @@ export class CircularSlider extends React.Component<
       startAngle,
       endAngle,
     });
+
+    // Cache the inverse matrix for better first-drag performance
+    this.updateCachedMatrix();
+
+    // Set up ResizeObserver to invalidate cache when SVG is resized
+    if (this.svgRef.current && typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.invalidateCachedMatrix();
+      });
+      this.resizeObserver.observe(this.svgRef.current);
+    }
   }
 
   componentDidUpdate(prevProps: Props) {
@@ -264,6 +298,12 @@ export class CircularSlider extends React.Component<
     // Clean up any ongoing animation
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
+    }
+
+    // Clean up ResizeObserver
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = null;
     }
   }
 
@@ -402,7 +442,7 @@ export class CircularSlider extends React.Component<
         onTouchEnd={this.onTouch}
         onTouchMove={this.onTouch}
         onTouchCancel={this.onTouch}
-        style={{ touchAction: "none" }}
+        style={{ touchAction: "none", willChange: "contents" }}
       >
         {
           /* Shadow */
