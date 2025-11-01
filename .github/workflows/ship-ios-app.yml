@@ -12,6 +12,7 @@ on:
           - minor
           - patch
           - major
+          - none
 jobs:
   build:
     runs-on: macOS-latest

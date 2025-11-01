@@ -25,9 +25,12 @@ platform :ios do
       key_content: ENV['APPSTORE_API_PRIVATE_KEY']
     )
     match(type: 'appstore')
-    increment_version_number_in_xcodeproj(
-      bump_type: ENV['VERSION_BUMP_TYPE']
-    )
+    bump_type = ENV['VERSION_BUMP_TYPE']
+    if bump_type != "none"
+      increment_version_number_in_xcodeproj(
+        bump_type: bump_type
+      )
+    end
     increment_build_number
     build_app(workspace: "App.xcworkspace", scheme: "App")
     sentry_debug_files_upload
@@ -36,12 +39,14 @@ platform :ios do
       precheck_include_in_app_purchases: false
     )
     clean_build_artifacts
-    new_version = get_version_number_from_xcodeproj
-    commit_version_bump(
-      message: "chore: bump version to #{new_version}",
-      xcodeproj: "App.xcodeproj",
-      force: true
-    )
-    push_to_git_remote
+    if bump_type != "none"
+      new_version = get_version_number_from_xcodeproj
+      commit_version_bump(
+        message: "chore: bump version to #{new_version}",
+        xcodeproj: "App.xcodeproj",
+        force: true
+      )
+      push_to_git_remote
+    end
   end
 end
