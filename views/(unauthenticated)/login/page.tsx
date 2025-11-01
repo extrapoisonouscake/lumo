@@ -42,23 +42,23 @@ export default function LoginPage() {
           hideDialog={() => setRegistrationResult(null)}
         />
       )}
-      <div className="flex flex-col items-center justify-center w-full max-w-[500px] h-[calc(100%-56px)] min-h-[500px] mx-auto gap-5">
+      <div className="flex flex-col items-center justify-between sm:justify-center p-3 sm:p-0 w-full max-w-[500px] h-full min-h-[500px] mx-auto gap-5">
         <div className="flex flex-col items-center gap-6 w-full">
-          <div className="flex flex-col gap-2 items-center">
+          <div className="flex flex-col gap-2 w-full">
             <div className="flex items-center">
-              <div className="size-14 p-3 rounded-full border bg-background flex items-center justify-center z-10">
+              <div className="size-13 p-2.5 rounded-full border bg-background flex items-center justify-center z-10">
                 <Logo className="size-full text-brand" />
               </div>
 
-              <div className="-ml-2.5 size-14 p-3.5 rounded-full border border-border/70 bg-backround flex items-center justify-center">
-                <MyEducationBCLogo className="opacity-70 size-full" />
+              <div className="-ml-2 size-13 p-3 rounded-full border border-border/70 bg-backround flex items-center justify-center">
+                <MyEducationBCLogo className="opacity-85 size-full" />
               </div>
             </div>
-            <div className="text-center space-y-1.5">
+            <div className="space-y-1">
               <h2 className="text-2xl font-medium">Sign In</h2>
-              <div className="space-y-0.5 text-sm text-muted-foreground text-center max-w-[450px]">
+              <div className="space-y-0.5 text-sm text-muted-foreground">
                 <p>
-                  Use your MyEducationBC username and password to sign in to
+                  Use your MyEducationBC username and password to sign in to{" "}
                   {WEBSITE_TITLE}.
                 </p>
                 <p>
@@ -101,32 +101,6 @@ export default function LoginPage() {
           endorsement by the Government of British Columbia.
         </p>
       </div>
-      {/* <ChangePasswordModal
-        getCredentials={() => ({
-          username: form.getValues("username"),
-          password: form.getValues("password"),
-        })}
-        isOpen={!!temporaryAuthCookies}
-        onSuccess={async () => {
-          if (!temporaryAuthCookies) {
-            throw new Error("No temporary auth cookies");
-          }
-          form.handleSubmit(async (data) => {
-            await forceLoginMutation.mutateAsync({
-              authCookies: temporaryAuthCookies,
-              credentials: {
-                username: data.username,
-                password: data.password,
-              },
-            });
-            initClientLogin(router.push);
-          })();
-        }}
-        onClose={() => {
-          setTemporaryAuthCookies(undefined);
-        }}
-        authCookies={temporaryAuthCookies}
-      /> */}
     </>
   );
 }

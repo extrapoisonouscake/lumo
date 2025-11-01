@@ -24,7 +24,7 @@ import {
   BookOpen01StrokeRounded,
   Calendar02StrokeRounded,
   Home03StrokeRounded,
-  Logout05StrokeRounded,
+  Logout01StrokeRounded,
   SchoolReportCardStrokeRounded,
   Settings02StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
@@ -151,7 +151,7 @@ function LogOutButton() {
       {logOutMutation.isPending ? (
         <Spinner />
       ) : (
-        <HugeiconsIcon icon={Logout05StrokeRounded} />
+        <HugeiconsIcon icon={Logout01StrokeRounded} />
       )}
       Sign Out
     </SidebarMenuButton>

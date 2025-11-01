@@ -19,6 +19,8 @@ import { setThemeColorCSSVariable } from "@/helpers/theme";
 import { useLogIn } from "@/hooks/trpc/use-log-in";
 import { isTRPCError } from "@/lib/trpc/helpers";
 import { trpc, trpcClient } from "@/views/trpc";
+import { Login01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useNavigate } from "react-router";
 import { initClientLogin } from "../helpers";
 function getFullErrorMessage(
@@ -102,7 +104,10 @@ export function LoginForm({
           autoComplete="username"
         />
         <FormPasswordInput name="password" autoComplete="current-password" />
-        <SubmitButton isLoading={form.formState.isSubmitting}>
+        <SubmitButton
+          leftIcon={<HugeiconsIcon icon={Login01StrokeRounded} />}
+          isLoading={form.formState.isSubmitting}
+        >
           Sign In
         </SubmitButton>
       </Form>
