@@ -31,11 +31,11 @@ platform :ios do
     increment_build_number
     build_app(workspace: "App.xcworkspace", scheme: "App")
     sentry_debug_files_upload
+    clean_build_artifacts
     new_version = get_version_number_from_xcodeproj
     commit_version_bump(
       message: "chore: bump version to #{new_version}",
-      xcodeproj: "App.xcodeproj",
-      force: true
+      xcodeproj: "App.xcodeproj"
     )
     upload_to_app_store(
       force: true,
