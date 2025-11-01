@@ -13,4 +13,4 @@ App/App/capacitor.config.json
 App/App/config.xml
 *.ipa
 *.zip
-fastlane/report.xml
+App/fastlane/report.xml

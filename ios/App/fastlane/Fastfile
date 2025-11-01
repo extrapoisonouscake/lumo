@@ -34,7 +34,7 @@ platform :ios do
     new_version = get_version_number_from_xcodeproj
     commit_version_bump(
       message: "chore: bump version to #{new_version}",
-      xcodeproj: "../App.xcodeproj"
+      xcodeproj: "App.xcodeproj"
     )
     upload_to_app_store(
       force: true,
