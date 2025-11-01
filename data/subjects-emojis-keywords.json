@@ -4,8 +4,8 @@
   "chemistry": "🧪",
   "computer": "💻",
   "AP english": "📚",
-  "fashion":"👗",
-  "child":"🧒",
+  "fashion": "👗",
+  "child": "🧒",
   "english": "📖",
   "creative writing": "📚",
   "emergency care": "🩺",
@@ -37,7 +37,7 @@
   "WE": "💼",
   "composition": "📝",
   "humanities": "🧑‍🎓",
-  "sport":"🏅",
+  "sport": "🏅",
   "drama": "🎭",
   "health career": "🩺",
   "psychology": "🧠",
@@ -93,5 +93,7 @@
   "guitar": "🎸",
   "PHE": "🏃",
   "language": "🗣️",
-  "money": "💰"
+  "money": "💰",
+  "crimin": "👮‍♀️",
+  "tutor": "🧑‍🏫"
 }

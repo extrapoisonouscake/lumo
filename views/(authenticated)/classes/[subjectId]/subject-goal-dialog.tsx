@@ -96,7 +96,7 @@ export function SubjectGoalDialog({
     const categoryId = initialGoal?.categoryId ?? categories[0]!.id;
     return {
       desiredAverage: initialGoal?.desiredAverage ?? currentAverage,
-      minimumScore: (initialGoal?.minimumScore ?? 85).toString(),
+      minimumScore: Math.round(initialGoal?.minimumScore ?? 85).toString(),
       categoryId: categoryId,
     };
   }, [initialGoal, categories, currentAverage]);

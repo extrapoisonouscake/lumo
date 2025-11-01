@@ -26,7 +26,8 @@ platform :ios do
     )
     match(type: 'appstore')
     bump_type = ENV['VERSION_BUMP_TYPE']
-    if bump_type != "none"
+    should_bump_version = bump_type != "none"
+    if should_bump_version
       increment_version_number_in_xcodeproj(
         bump_type: bump_type
       )
@@ -39,7 +40,7 @@ platform :ios do
       precheck_include_in_app_purchases: false
     )
     clean_build_artifacts
-    if bump_type != "none"
+    if should_bump_version
       new_version = get_version_number_from_xcodeproj
       commit_version_bump(
         message: "chore: bump version to #{new_version}",

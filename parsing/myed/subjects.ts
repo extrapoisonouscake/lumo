@@ -21,7 +21,7 @@ const convertStringToGradeObject = (string?: string | null) => {
   if (!string) return null;
   const [mark, ...letter] = string.split(" ");
   if (!mark || isNaN(+mark)) return null; //TODO handle edge cases
-  const markAsNumber = +mark;
+  const markAsNumber = +(+mark).toFixed(1);
   const existingLetter = letter.join("").trim();
 
   return {
