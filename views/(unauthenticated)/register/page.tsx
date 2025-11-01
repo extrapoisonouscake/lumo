@@ -7,8 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import ip3country from "ip3country";
 
 import { APIProvider } from "@vis.gl/react-google-maps";
-import { LoginSuggestionText } from "./login-suggestion-text";
 import { RegistrationForm } from "./form";
+import { LoginSuggestionText } from "./login-suggestion-text";
 
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 if (!GOOGLE_MAPS_API_KEY) throw new Error("No Google Maps API key provided");
@@ -20,25 +20,27 @@ export default function SettingsPage() {
     <>
       <TitleManager>Register</TitleManager>
       <APIProvider apiKey={GOOGLE_MAPS_API_KEY!}>
-        <QueryWrapper
-          query={query}
-          onError={<RegistrationInitError />}
-          skeleton={
-            <div className="flex justify-center items-center w-full">
-              <Spinner />
-            </div>
-          }
-        >
-          {(data) => (
-            <RegistrationForm
-              passwordRequirements={data.passwordRequirements}
-              securityQuestionRequirements={data.securityQuestionRequirements}
-              schoolDistricts={data.schoolDistricts}
-              defaultCountry={ip3country.lookupStr(data.ip)}
-              securityQuestionOptions={data.securityQuestions}
-            />
-          )}
-        </QueryWrapper>
+        <div className="flex flex-col items-center justify-start sm:justify-center p-3 sm:p-0 w-full max-w-[500px] h-full mx-auto">
+          <QueryWrapper
+            query={query}
+            onError={<RegistrationInitError />}
+            skeleton={
+              <div className="flex justify-center items-center w-full">
+                <Spinner />
+              </div>
+            }
+          >
+            {(data) => (
+              <RegistrationForm
+                passwordRequirements={data.passwordRequirements}
+                securityQuestionRequirements={data.securityQuestionRequirements}
+                schoolDistricts={data.schoolDistricts}
+                defaultCountry={ip3country.lookupStr(data.ip)}
+                securityQuestionOptions={data.securityQuestions}
+              />
+            )}
+          </QueryWrapper>
+        </div>
       </APIProvider>
     </>
   );

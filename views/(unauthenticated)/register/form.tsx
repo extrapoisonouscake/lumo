@@ -417,7 +417,7 @@ export function RegistrationForm({
     [type, form, country, ...Object.values(props)]
   );
   return (
-    <div className="flex flex-col gap-3 items-center justify-center w-full max-w-[500px] mx-auto">
+    <div className="flex flex-col gap-4 items-center w-full">
       <RegistrationStepsBar
         currentStep={currentStep}
         setCurrentStep={setCurrentStep}
@@ -426,14 +426,14 @@ export function RegistrationForm({
       <Form
         onSubmit={onSubmit}
         {...form}
-        className="flex flex-col gap-3 w-full"
+        className="flex flex-col gap-4 w-full"
       >
         {errorMessageNode}
 
         {Object.entries(fields).map(([step, fields]) => (
           <div
             key={step}
-            className={cn("flex flex-col gap-3", {
+            className={cn("flex flex-col gap-4", {
               hidden: currentStep !== +step,
             })}
           >
