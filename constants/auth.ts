@@ -7,7 +7,8 @@ export const COOKIE_MAX_AGE = 34560000;
 export const SESSION_TTL_IN_SECONDS = 3600;
 export const AUTH_COOKIES_NAMES = {
   credentials: "credentials",
-  studentId: "studentId",
+  user: "user",
+  targetId: "targetId",
   tokens: "tokens",
   tokensExpireAt: "tokensExpireAt",
 } as const;

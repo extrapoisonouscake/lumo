@@ -47,10 +47,10 @@ export const subjectsRouter = router({
         .optional()
         .default({ isPreviousYear: false })
     )
-    .query(async ({ input, ctx: { getMyEd, studentDatabaseId } }) => {
+    .query(async ({ input, ctx: { getMyEd, userId } }) => {
       const [response, trackedSchoolData] = await Promise.all([
         getMyEd("subjects", input),
-        getTrackedSchoolData(studentDatabaseId),
+        getTrackedSchoolData(userId),
       ]);
       let result: GetSubjectsResponse;
       if (response.subjects.main.length === 0) {
@@ -95,14 +95,14 @@ export const subjectsRouter = router({
         hiddenSubjects: z.array(z.string()),
       })
     )
-    .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
+    .mutation(async ({ input, ctx: { userId } }) => {
       await db
         .update(tracked_school_data)
         .set({
           subjectsListOrder: input.subjectsListOrder,
           hiddenSubjects: input.hiddenSubjects,
         })
-        .where(eq(tracked_school_data.userId, studentDatabaseId));
+        .where(eq(tracked_school_data.userId, userId));
     }),
   getSubjectInfo: authenticatedProcedure
     .input(
@@ -111,10 +111,10 @@ export const subjectsRouter = router({
         year: subjectYearEnum,
       })
     )
-    .query(async ({ input, ctx: { getMyEd, studentDatabaseId } }) => {
+    .query(async ({ input, ctx: { getMyEd, userId } }) => {
       const [result, trackedSchoolData] = await Promise.all([
         getMyEd("subjectSummary", input),
-        getTrackedSchoolData(studentDatabaseId),
+        getTrackedSchoolData(userId),
       ]);
       return {
         ...result,
@@ -128,7 +128,7 @@ export const subjectsRouter = router({
         goal: z.union([subjectGoalSchema, z.undefined()]),
       })
     )
-    .mutation(async ({ input, ctx: { studentDatabaseId } }) => {
+    .mutation(async ({ input, ctx: { userId } }) => {
       await db
         .update(tracked_school_data)
         .set({
@@ -137,7 +137,7 @@ export const subjectsRouter = router({
               ? sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) - ${input.subjectId}`
               : sql`COALESCE(${tracked_school_data.subjectsGoals}, '{}'::jsonb) || ${JSON.stringify({ [input.subjectId]: input.goal })}::jsonb`,
         })
-        .where(eq(tracked_school_data.userId, studentDatabaseId));
+        .where(eq(tracked_school_data.userId, userId));
     }),
   getSubjectAssignments: authenticatedProcedure
     .input(
@@ -154,17 +154,14 @@ export const subjectsRouter = router({
         )
     )
     .query(
-      async ({
-        input: { id, termId, term },
-        ctx: { getMyEd, studentDatabaseId },
-      }) => {
+      async ({ input: { id, termId, term }, ctx: { getMyEd, userId } }) => {
         const [response, trackedSchoolData] = await Promise.all([
           getMyEd("subjectAssignments", {
             id,
             termId,
             term,
           }),
-          getTrackedSchoolData(studentDatabaseId),
+          getTrackedSchoolData(userId),
         ]);
         const trackedAssignments =
           trackedSchoolData?.subjectsWithAssignments?.[id]?.assignments;
@@ -197,7 +194,7 @@ export const subjectsRouter = router({
         ) {
           after(
             updateSubjectLastAssignments({
-              userId: studentDatabaseId,
+              userId,
               subjectId: id,
               newAssignments: assignmentsWithUpdatedDates,
             })

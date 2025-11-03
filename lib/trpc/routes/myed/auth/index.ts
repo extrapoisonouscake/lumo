@@ -7,14 +7,12 @@ import { publicProcedure, router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import {
   deleteSession,
-  fetchStudentId,
+  fetchAuthCookies,
   getFreshAuthCookies,
   performLogin,
-  setUpLogin,
   setUpSessionTokens,
 } from "./helpers";
 import {
-  authCookiesSchema,
   isKnownLoginError,
   LoginErrors,
   loginSchema,
@@ -31,7 +29,6 @@ import { TRPCError } from "@trpc/server";
 import dayjs from "dayjs";
 import { eq } from "drizzle-orm";
 import { after } from "next/server";
-import { fetchAuthCookiesAndStudentId } from "./helpers";
 
 const registrationFieldsByType: Record<
   RegistrationType,
@@ -171,18 +168,6 @@ export const authRouter = router({
       throw new TRPCError({ code: "BAD_GATEWAY", message: safeErrorMessage });
     }
   }),
-  forceLogin: publicProcedure
-    .input(
-      z.object({ authCookies: authCookiesSchema, credentials: loginSchema })
-    )
-    .mutation(async ({ input: { authCookies, credentials } }) => {
-      const studentId = await fetchStudentId(authCookies);
-      await setUpLogin({
-        tokens: authCookies,
-        credentials,
-        studentId,
-      });
-    }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
     const response = await fetchMyEd<{
       cities: string[];
@@ -233,7 +218,7 @@ export const authRouter = router({
         }
       }
       try {
-        const { tokens } = await fetchAuthCookiesAndStudentId(
+        const tokens = await fetchAuthCookies(
           ctx.credentials.username,
           ctx.credentials.password
         );
@@ -245,7 +230,7 @@ export const authRouter = router({
             await db
               .update(users)
               .set({ lastLoggedInAt: new Date() })
-              .where(eq(users.id, ctx.studentDatabaseId));
+              .where(eq(users.id, ctx.myedUser.id));
           });
         }
       } catch {

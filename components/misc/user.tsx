@@ -1,5 +1,4 @@
 import { cn } from "@/helpers/cn";
-import { PersonalDetails } from "@/types/school";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function UserAvatar({
@@ -7,7 +6,11 @@ export function UserAvatar({
   lastName,
   photoURL,
   className,
-}: Pick<PersonalDetails, "firstName" | "lastName" | "photoURL"> & {
+}: {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  photoURL?: string;
   className?: string;
 }) {
   return (
@@ -35,6 +38,10 @@ export function formatUserFullName({
   firstName,
   middleName,
   lastName,
-}: Pick<PersonalDetails, "firstName" | "middleName" | "lastName">) {
+}: {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+}) {
   return `${firstName} ${middleName ? `${middleName[0]}. ` : ""} ${lastName}`;
 }

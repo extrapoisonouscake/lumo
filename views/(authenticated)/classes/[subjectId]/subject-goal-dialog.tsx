@@ -388,9 +388,8 @@ export function SubjectGoalDialog({
               )}
             </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 z-30 relative">
+            <div className="flex flex-col gap-4 z-30 relative">
               <FormSelect
-                formItemClassName="sm:col-span-2"
                 label="Category"
                 name="categoryId"
                 options={categories.map((category) => ({

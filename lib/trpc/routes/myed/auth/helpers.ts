@@ -9,7 +9,11 @@ import {
   parseHTMLToken,
 } from "@/constants/myed";
 import { db } from "@/db";
-import { AuthCookies, getAuthCookies } from "@/helpers/getAuthCookies";
+import {
+  AuthCookies,
+  CookieMyEdUser,
+  getAuthCookies,
+} from "@/helpers/getAuthCookies";
 import { LoginErrors, LoginSchema } from "./public";
 
 import {
@@ -34,6 +38,7 @@ import { fetchMyEd, MyEdBaseURLs } from "@/instances/fetchMyEd";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { FlatRouteStep } from "@/parsing/myed/routes";
 import { OpenAPI200JSONResponse } from "@/parsing/myed/types";
+import { UserRole } from "@/types/school";
 import dayjs from "dayjs";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
@@ -49,43 +54,52 @@ export class LoginError extends Error {
   }
 }
 
-const initStudentFirstLogin = async ({
+const initFirstLogin = async ({
   tokens,
-  studentId,
+  myedUser,
+  targetId,
 }: {
   tokens: AuthCookies;
-  studentId: string;
+  myedUser: CookieMyEdUser;
+  targetId?: string;
 }) => {
-  const studentDatabaseId = hashString(studentId);
+  const userId = hashString(myedUser.id);
   const existingUser = await db.query.users.findFirst({
-    where: eq(users.id, studentDatabaseId),
+    where: eq(users.id, userId),
   });
   if (existingUser) return;
-  const personalInfo = await getMyEd({ authCookies: tokens, studentId })(
-    "personalDetails"
-  );
-  const knownSchool = KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName];
-  await db.insert(users).values({ id: studentDatabaseId });
+
+  await db.insert(users).values({ id: userId });
   const widgetsConfiguration: WidgetsConfiguration = [
     ...USER_SETTINGS_DEFAULT_VALUES.widgetsConfiguration,
   ];
-  if (knownSchool) {
-    widgetsConfiguration.push({
-      id: "announcements-1",
-      type: Widgets.ANNOUNCEMENTS,
-      width: 1,
-      height: 1,
-    });
+  let knownSchool: string | undefined;
+  if (targetId) {
+    const personalInfo = await getMyEd({
+      authCookies: tokens,
+      myedUser,
+      targetId,
+    })("studentDetails");
+    knownSchool = KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName];
+
+    if (knownSchool) {
+      widgetsConfiguration.push({
+        id: "announcements-1",
+        type: Widgets.ANNOUNCEMENTS,
+        width: 1,
+        height: 1,
+      });
+    }
   }
   await Promise.all([
     db.insert(user_settings).values({
       ...USER_SETTINGS_DEFAULT_VALUES,
       widgetsConfiguration: widgetsConfiguration,
-      userId: studentDatabaseId,
+      userId,
       schoolId: knownSchool,
     }),
     db.insert(tracked_school_data).values({
-      userId: studentDatabaseId,
+      userId,
     }),
   ]);
 };
@@ -99,15 +113,17 @@ export async function performLogin(
   for (const name of MYED_AUTHENTICATION_COOKIES_NAMES) {
     cookieStore.delete(name);
   }
-  const { studentId, tokens } = await fetchAuthCookiesAndStudentId(
-    username,
-    password
-  );
-
+  const tokens = await fetchAuthCookies(username, password);
+  const user = await fetchCurrentUser(tokens);
+  let targetId: string | undefined;
+  if ([UserRole.Parent, UserRole.Student].includes(user.role)) {
+    targetId = await fetchFirstStudentId(tokens);
+  }
   await setUpLogin({
     tokens,
-    studentId,
+    myedUser: user,
     credentials: formData,
+    targetId,
     store,
   });
 }
@@ -133,21 +149,26 @@ export async function setUpSessionTokens({
 }
 export async function setUpLogin({
   tokens,
-  studentId,
+  myedUser,
   credentials,
   store: externalStore,
+  targetId,
 }: {
   tokens: AuthCookies;
-  studentId: string;
+  myedUser: CookieMyEdUser;
   credentials?: LoginSchema;
   store?: PlainCookieStore;
+  targetId?: string;
 }) {
   const store = externalStore ?? (await cookies());
   const cookieStore = await MyEdCookieStore.create(store);
 
   await setUpSessionTokens({ tokens, store });
 
-  cookieStore.set(AUTH_COOKIES_NAMES.studentId, studentId);
+  cookieStore.set(AUTH_COOKIES_NAMES.user, JSON.stringify(myedUser));
+  if (targetId) {
+    cookieStore.set(AUTH_COOKIES_NAMES.targetId, targetId);
+  }
   if (credentials) {
     const credentialsString =
       encodeURIComponent(credentials.username) +
@@ -159,7 +180,7 @@ export async function setUpLogin({
     ...cookieDefaultOptions,
     httpOnly: false,
   });
-  await initStudentFirstLogin({ tokens, studentId });
+  await initFirstLogin({ tokens, myedUser });
 }
 
 export async function parseHTMLTokenFromResponse(response: Response) {
@@ -201,10 +222,7 @@ const rawLoginErrorMessageToIDMap: Record<string, LoginErrors> = {
   "Invalid login.": LoginErrors.invalidAuth,
 };
 
-export async function fetchAuthCookiesAndStudentId(
-  username: string,
-  password: string
-) {
+export async function fetchAuthCookies(username: string, password: string) {
   const loginParams = new URLSearchParams({
     username,
     password,
@@ -259,14 +277,30 @@ export async function fetchAuthCookiesAndStudentId(
       rawLoginErrorMessageToIDMap[response.message] ?? response.message;
     throw new LoginError(errorMessage);
   }
+  return cookies;
+}
 
-  const studentId = await fetchStudentId(cookies);
+export const MYED_USER_TYPE_TO_ROLE_MAP: Record<
+  OpenAPI200JSONResponse<"/aspen/rest/users/currentUser">["userType"],
+  UserRole
+> = {
+  STUDENT: UserRole.Student,
+  STAFF: UserRole.Teacher,
+  FAMILY: UserRole.Parent,
+};
+
+export async function fetchCurrentUser(cookies: AuthCookies) {
+  const userData = await fetchMyEd<
+    OpenAPI200JSONResponse<"/aspen/rest/users/currentUser">
+  >("/rest/users/currentUser", {
+    headers: { Cookie: convertObjectToCookieString(cookies) },
+  }).then((response) => response.json());
   return {
-    tokens: cookies,
-    studentId,
+    id: userData.personOid,
+    role: MYED_USER_TYPE_TO_ROLE_MAP[userData.userType],
   };
 }
-export async function fetchStudentId(cookies: AuthCookies) {
+export async function fetchFirstStudentId(cookies: AuthCookies) {
   const studentsData = await fetchMyEd<
     OpenAPI200JSONResponse<"/app/rest/students">
   >(
@@ -276,9 +310,9 @@ export async function fetchStudentId(cookies: AuthCookies) {
     },
     MyEdBaseURLs.NEW
   ).then((response) => response.json());
-
+  console.log(studentsData);
   const studentId = studentsData[0]!.studentOid;
-  if (!studentId) throw new LoginError(LoginErrors.invalidAuth);
+  if (!studentId) throw new LoginError(LoginErrors.unexpectedError);
   return studentId;
 }
 
@@ -301,17 +335,17 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
       })
     );
     const deviceId = cookiePlainStore.get(DEVICE_ID_COOKIE_NAME)?.value;
-    const studentId = cookieStore.get(AUTH_COOKIES_NAMES.studentId)?.value;
-    if (deviceId && studentId) {
-      const studentDatabaseId = hashString(studentId);
-      after(() =>
-        runNotificationUnsubscriptionDBCalls(studentDatabaseId, deviceId)
-      );
+    const myedUserString = cookieStore.get(AUTH_COOKIES_NAMES.user)?.value;
+    const myedUser = myedUserString ? JSON.parse(myedUserString) : undefined;
+    if (deviceId && myedUser) {
+      const userId = hashString(myedUser.id);
+      after(() => runNotificationUnsubscriptionDBCalls(userId, deviceId));
       cookiePlainStore.delete(DEVICE_ID_COOKIE_NAME);
     }
     cookieStore.delete(AUTH_COOKIES_NAMES.tokens);
   }
   cookieStore.delete(AUTH_COOKIES_NAMES.credentials);
-  cookieStore.delete(AUTH_COOKIES_NAMES.studentId);
+  cookieStore.delete(AUTH_COOKIES_NAMES.user);
+  cookieStore.delete(AUTH_COOKIES_NAMES.targetId);
   cookiePlainStore.delete(IS_LOGGED_IN_COOKIE_NAME);
 }

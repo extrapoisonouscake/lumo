@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "web:dev": "next dev",
+    "dev:web": "next dev",
     "build": "next build && node utils/build-sw.js",
     "start": "next start",
     "lint": "next lint",

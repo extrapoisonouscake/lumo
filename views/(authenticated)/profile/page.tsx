@@ -9,7 +9,7 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
-import { PersonalDetails } from "@/types/school";
+import { Gender, StudentDetails } from "@/types/school";
 
 import { IconSvgObject } from "@/types/ui";
 import {
@@ -30,6 +30,7 @@ import {
   UserStrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
+import dayjs from "dayjs";
 import { useState } from "react";
 import { toast } from "sonner";
 import styles from "./styles.module.css";
@@ -67,19 +68,25 @@ export default function ProfilePage() {
                     icon={UserStrokeRounded}
                     className="[grid-area:a]"
                   >
-                    <UserProperty
-                      label="Student Number"
-                      value={studentNumber}
-                      icon={GridStrokeRounded}
-                      isCopyable
-                    />
-                    <UserProperty
-                      label="PEN (Personal Education Number)"
-                      value={personalEducationNumber}
-                      icon={GridStrokeRounded}
-                      isCopyable
-                    />
+                    <div
+                      className="group grid grid-cols-1 md:grid-cols-2"
+                      data-multifield="true"
+                    >
+                      <UserProperty
+                        label="Student Number"
+                        value={studentNumber}
+                        icon={GridStrokeRounded}
+                        isCopyable
+                      />
+                      <UserProperty
+                        label="Personal Edu. Number"
+                        value={personalEducationNumber}
+                        icon={GridStrokeRounded}
+                        isCopyable
+                      />
+                    </div>
 
+                    <ParentViewSpecificFields {...data} />
                     <AddressList {...addresses} />
                   </SectionCard>
                   <SectionCard
@@ -148,7 +155,7 @@ export default function ProfilePage() {
     </>
   );
 }
-function ProfileCard(data: PersonalDetails) {
+function ProfileCard(data: StudentDetails) {
   return (
     <Card className="gap-3 md:gap-4 p-5 items-center md:flex-row mt-5 md:mt-0">
       <UserAvatar
@@ -259,7 +266,7 @@ function UserProperty({
   isCopyable?: boolean;
 }) {
   return (
-    <div className="flex gap-3 py-4 px-5 border-b last:border-b-0 items-center">
+    <div className="flex gap-3 py-4 px-5 border-b not-group-data-[multifield=true]:last:border-b-0 items-center">
       <div className="rounded-full p-2 bg-brand/10 text-brand">
         <HugeiconsIcon icon={Icon} className="size-5" />
       </div>
@@ -317,7 +324,7 @@ function UserPropertySkeleton() {
   );
 }
 const addressLabelsVisualData: Record<
-  keyof PersonalDetails["addresses"],
+  keyof StudentDetails["addresses"],
   { label: string; icon: IconSvgObject }
 > = {
   physical: { label: "Physical Address", icon: Location01StrokeRounded },
@@ -332,12 +339,12 @@ const addressLabelsVisualData: Record<
 function AddressList({
   custom,
   ...otherAddresses
-}: PersonalDetails["addresses"]) {
+}: StudentDetails["addresses"]) {
   return (
     <>
       {Object.entries(otherAddresses).map(([key, value]) => {
         const data =
-          addressLabelsVisualData[key as keyof PersonalDetails["addresses"]];
+          addressLabelsVisualData[key as keyof StudentDetails["addresses"]];
         return <UserProperty key={key} value={value} {...data} />;
       })}
       {Object.entries(custom).map(([key, value]) => (
@@ -349,5 +356,31 @@ function AddressList({
         />
       ))}
     </>
+  );
+}
+const genderMap: Record<Gender, string> = {
+  F: "Female",
+  M: "Male",
+  X: "Other",
+};
+function ParentViewSpecificFields({ gender, birthDate }: StudentDetails) {
+  if (!gender && !birthDate) return null;
+
+  return (
+    <div
+      className="group grid grid-cols-1 sm:grid-cols-2"
+      data-multifield="true"
+    >
+      <UserProperty
+        label="Birthday"
+        value={dayjs(birthDate).format("MM/DD/YYYY")}
+        icon={Calendar03StrokeRounded}
+      />
+      <UserProperty
+        label="Gender"
+        value={genderMap[gender!]}
+        icon={UserStrokeRounded}
+      />
+    </div>
   );
 }

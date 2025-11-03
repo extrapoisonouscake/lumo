@@ -1,4 +1,4 @@
-import { AuthCookies } from "@/helpers/getAuthCookies";
+import { AuthCookies, CookieMyEdUser } from "@/helpers/getAuthCookies";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
 import "server-only";
@@ -15,7 +15,7 @@ import {
   parseSubjectAssignment,
   parseSubjectAssignments,
 } from "./assignments";
-import { parsePersonalDetails } from "./profile";
+import { parsePersonalDetails, parseStudentDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
 import { parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
@@ -32,6 +32,7 @@ const endpointToParsingFunction = {
   subjects: parseSubjects,
   schedule: parseSchedule,
   subjectAssignments: parseSubjectAssignments,
+  studentDetails: parseStudentDetails,
   personalDetails: parsePersonalDetails,
   registrationFields: parseRegistrationFields,
   subjectAssignment: parseSubjectAssignment,
@@ -39,7 +40,6 @@ const endpointToParsingFunction = {
   subjectIdByName: parseSubjectIdByName,
   subjectAttendance: parseSubjectAttendance,
   transcriptEntries: parseTranscriptEntries,
-
   graduationSummary: parseGraduationSummary,
   assignmentFileSubmissionState: parseAssignmentFileSubmissionState,
   uploadAssignmentFile: voidFunction,
@@ -64,7 +64,8 @@ const processResponse = async (response: Response, value: FlatRouteStep) => {
 };
 export const getMyEd = (props?: {
   authCookies: AuthCookies;
-  studentId: string;
+  myedUser: CookieMyEdUser;
+  targetId: string | undefined;
 }) =>
   async function <Endpoint extends MyEdEndpoint>(
     endpoint: Endpoint,
@@ -72,8 +73,11 @@ export const getMyEd = (props?: {
   ) {
     const route = ENDPOINTS[endpoint];
 
-    //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
-    const steps = route(props?.studentId, ...rest); //!
+    const steps = route(
+      //@ts-expect-error Spreading rest is intentional as endpoint functions expect tuple parameters
+      { targetId: props?.targetId, myedUser: props?.myedUser },
+      ...rest
+    ); //!
     for (const step of steps) {
       const value = step.value;
       try {
@@ -109,7 +113,8 @@ export const getMyEd = (props?: {
         steps.addResponse(isArray ? responses : responses[0]);
       } catch (e) {
         if (e instanceof Response) {
-          const $ = cheerio.load(await e.text());
+          const htmlText = await e.text();
+          const $ = cheerio.load(htmlText);
           const isMaintenance = checkForMaintenance($);
           if (isMaintenance) {
             throw new Error(MAINTENANCE_MODE_ERROR_MESSAGE);

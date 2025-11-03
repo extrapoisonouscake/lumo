@@ -1,5 +1,7 @@
 import { cn } from "@/helpers/cn";
+import { usePersonalDetails } from "@/hooks/trpc/use-personal-details";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
+import { PersonalDetails, StudentDetails, UserRole } from "@/types/school";
 import { usePathname } from "next/navigation";
 import { Link } from "react-router";
 import { AppleEmoji } from "../misc/apple-emoji";
@@ -25,50 +27,84 @@ function MinifiedErrorCard({
     </div>
   );
 }
+
+const getQueryWrapperDefaultOptions = ({
+  className,
+}: {
+  className?: string;
+}) => ({
+  onError: <MinifiedErrorCard emoji="‼️" message="Something went wrong." />,
+  onPaused: <MinifiedErrorCard emoji="🔌" message="You are offline." />,
+  skeleton: <UserHeaderSkeleton className={className} />,
+});
+
 export function UserHeader({ className }: { className?: string }) {
-  const query = useStudentDetails();
+  const personalDetailsQuery = usePersonalDetails();
+  const studentDetailsQuery = useStudentDetails();
 
   return (
     <Link to="/profile" className={className}>
-      <UserButton>
-        <QueryWrapper
-          query={query}
-          onError={
-            <MinifiedErrorCard emoji="‼️" message="Something went wrong." />
-          }
-          onPaused={<MinifiedErrorCard emoji="🔌" message="You are offline." />}
-          skeleton={<UserHeaderSkeleton className={className} />}
-        >
-          {(data) => {
-            const { firstName, middleName, lastName, grade, photoURL } = data;
-
-            return (
-              <>
-                <UserAvatar
-                  firstName={firstName}
-                  lastName={lastName}
-                  photoURL={photoURL}
-                />
-                <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-foreground">
-                    {formatUserFullName({ firstName, middleName, lastName })}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    Grade {grade}
-                  </span>
-                </div>
-              </>
-            );
-          }}
-        </QueryWrapper>
-      </UserButton>
+      <QueryWrapper
+        {...getQueryWrapperDefaultOptions({ className })}
+        query={personalDetailsQuery}
+      >
+        {(personalDetails) => {
+          const isParent = personalDetails.role === UserRole.Parent;
+          return (
+            <>
+              {isParent && <ParentCard {...personalDetails} />}
+              <QueryWrapper
+                {...getQueryWrapperDefaultOptions({ className })}
+                query={studentDetailsQuery}
+              >
+                {(data) => <StudentCard {...data} />}
+              </QueryWrapper>
+            </>
+          );
+        }}
+      </QueryWrapper>
     </Link>
+  );
+}
+function ParentCard({ firstName, lastName }: PersonalDetails) {
+  return (
+    <SidebarMenuButton
+      size="default"
+      className="p-0 h-fit sm:h-12 rounded-full sm:rounded-xl group-data-[state=collapsed]:rounded-lg"
+    >
+      <UserAvatar firstName={firstName} lastName={lastName} />
+    </SidebarMenuButton>
+  );
+}
+function StudentCard({
+  photoURL,
+  firstName,
+  middleName,
+  lastName,
+  grade,
+}: StudentDetails) {
+  return (
+    <UserButton>
+      <UserAvatar
+        firstName={firstName}
+        lastName={lastName}
+        photoURL={photoURL}
+      />
+      <div className="hidden sm:grid flex-1 text-left text-sm leading-tight">
+        <span className="truncate font-semibold text-foreground">
+          {formatUserFullName({ firstName, middleName, lastName })}
+        </span>
+        <span className="truncate text-xs text-muted-foreground">
+          Grade {grade}
+        </span>
+      </div>
+    </UserButton>
   );
 }
 
 export function UserHeaderSkeleton({ className }: { className?: string }) {
   return (
-    <>
+    <UserButton>
       <Skeleton className="block min-w-8 size-8 rounded-full sm:rounded-lg" />
 
       <div className="hidden sm:grid flex-1 gap-1 text-left text-sm leading-tight">
@@ -79,7 +115,7 @@ export function UserHeaderSkeleton({ className }: { className?: string }) {
           <span className="text-xs">Grade 11</span>
         </Skeleton>
       </div>
-    </>
+    </UserButton>
   );
 }
 function UserButton({
