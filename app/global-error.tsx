@@ -30,8 +30,8 @@ export default function GlobalError({ error }: { error: Error }) {
               variant="outline"
               onClick={() => window && window.location.reload()}
             >
-              <HugeiconsIcon icon={RefreshStrokeRounded} />
               Refresh
+              <HugeiconsIcon icon={RefreshStrokeRounded} />
             </Button>
           </div>
         </main>

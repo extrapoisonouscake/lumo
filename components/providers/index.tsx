@@ -9,6 +9,7 @@ import { NetworkStatusProvider } from "./network-status-provider";
 import { isProduction } from "@/constants/core";
 import * as Sentry from "@sentry/react";
 import { isMobileApp } from "../../constants/ui";
+import { AppUpdatePromptProvider } from "./app-update-prompt-provider";
 const sentryConfig = {
   dsn: "https://044f7cfed8d518021870324fa7e59d7e@o4509261052641280.ingest.us.sentry.io/4509261053493248",
   sendDefaultPii: true,
@@ -46,7 +47,9 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
-        <NetworkStatusProvider>{children}</NetworkStatusProvider>
+        <NetworkStatusProvider>
+          <AppUpdatePromptProvider>{children}</AppUpdatePromptProvider>
+        </NetworkStatusProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

@@ -24,6 +24,7 @@
   "dependencies": {
     "@aparajita/capacitor-ios-silent-notifications": "^2.0.1",
     "@capacitor-community/app-icon": "^6.0.0",
+    "@capacitor/app": "^7.1.0",
     "@capacitor/core": "^7.4.3",
     "@capacitor/haptics": "^7.0.2",
     "@capacitor/ios": "^7.4.3",

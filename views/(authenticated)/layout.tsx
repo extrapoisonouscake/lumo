@@ -5,7 +5,6 @@ import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import { setThemeColorCSSVariable } from "@/helpers/theme";
 import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
-import { Preferences } from "@capacitor/preferences";
 import { PushNotifications } from "@capacitor/push-notifications";
 import Cookies from "js-cookie";
 import { useEffect } from "react";
@@ -45,13 +44,8 @@ export default function AuthenticatedLayout({
         }
       );
       if (!settings.notificationsEnabled) {
-        Promise.all([
-          PushNotifications.checkPermissions(),
-          Preferences.get({
-            key: HAS_PROMPTED_FOR_NOTIFICATIONS_PREFERENCE_KEY,
-          }),
-        ]).then(([{ receive }, { value: hasPromptedForNotifications }]) => {
-          if (receive === "denied" || hasPromptedForNotifications === "true") {
+        PushNotifications.checkPermissions().then(({ receive }) => {
+          if (receive === "denied") {
             return;
           }
           initPush(
@@ -67,12 +61,6 @@ export default function AuthenticatedLayout({
             })
             .catch((error) => {
               console.error("Error requesting notifications:", error);
-            })
-            .finally(() => {
-              Preferences.set({
-                key: HAS_PROMPTED_FOR_NOTIFICATIONS_PREFERENCE_KEY,
-                value: "true",
-              });
             });
         });
       }

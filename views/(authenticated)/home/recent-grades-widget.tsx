@@ -43,21 +43,25 @@ function RecentGradesWidget(
     termId: MYED_ALL_GRADE_TERMS_SELECTOR,
   });
   let customSubject;
-  let subjectsToUse=subjects.data?.subjects.main
-  if (subjectsToUse){
-if(widget.custom?.subjectId) {
-    customSubject = subjectsToUse.find(
-      (s) => s.id === widget.custom!.subjectId
-    );
-    if (customSubject) {
-      subjectsToUse = [customSubject];
-    } else {
-      subjectsToUse = undefined;
-      richError = {};
+  let subjectsToUse = subjects.data?.subjects.main;
+  if (subjects.isSuccess) {
+    if (widget.custom?.subjectId) {
+      customSubject = subjects.data.subjects.main.find(
+        (s) => s.id === widget.custom!.subjectId
+      );
+      if (customSubject) {
+        subjectsToUse = [customSubject];
+      } else {
+        subjectsToUse = undefined;
+        richError = {};
+      }
+    } else if (subjects.data.customization?.hiddenSubjects) {
+      subjectsToUse = subjects.data.subjects.main.filter(
+        (subject) =>
+          !subjects.data.customization!.hiddenSubjects.includes(subject.id)
+      );
     }
-  } else{
-subjectsToUse= subjectsToUse.filter(subject=>!subjects.data!.customization.hiddenSubjects?.includes(subject.id));
-}}
+  }
   const assignments = useRecentAssignments(subjectsToUse);
 
   // Determine number of items based on widget size

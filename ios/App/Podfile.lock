@@ -3,6 +3,8 @@ PODS:
     - Capacitor
   - Capacitor (7.4.3):
     - CapacitorCordova
+  - CapacitorApp (7.1.0):
+    - Capacitor
   - CapacitorCommunityAppIcon (6.0.0):
     - Capacitor
   - CapacitorCordova (7.4.3)
@@ -26,6 +28,7 @@ PODS:
 DEPENDENCIES:
   - "AparajitaCapacitorIosSilentNotifications (from `../../node_modules/@aparajita/capacitor-ios-silent-notifications`)"
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCommunityAppIcon (from `../../node_modules/@capacitor-community/app-icon`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
@@ -45,6 +48,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@aparajita/capacitor-ios-silent-notifications"
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
   CapacitorCommunityAppIcon:
     :path: "../../node_modules/@capacitor-community/app-icon"
   CapacitorCordova:
@@ -67,6 +72,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AparajitaCapacitorIosSilentNotifications: 5b11f0b74bd451ef866488939bf7606c4a414cca
   Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
+  CapacitorApp: 26587c2ce485d88ddb39adb21cac64f8e481afe3
   CapacitorCommunityAppIcon: a937eb756114f0f1aa2de894d23b63db02d042e6
   CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
   CapacitorHaptics: b3fb2869e72c4466e18ce9ccbeb60a3d8723b3d4
@@ -78,6 +84,6 @@ SPEC CHECKSUMS:
   Sentry: b53951377b78e21a734f5dc8318e333dbfc682d7
   SentryCapacitor: 2d8a3a6ed63df2b7aceabad353b0d8556ed24035
 
-PODFILE CHECKSUM: 0ebdad4de41f6bdeb87bc06574eb5ef0ec03c0f0
+PODFILE CHECKSUM: cc4201b549288524b7f7784fc62a8d327e890dea
 
 COCOAPODS: 1.16.2
