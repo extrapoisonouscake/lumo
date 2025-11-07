@@ -44,7 +44,8 @@ function RecentGradesWidget(
   });
   let customSubject;
   let subjectsToUse=subjects.data?.subjects.main
-  if (subjectsToUse && widget.custom?.subjectId) {
+  if (subjectsToUse){
+if(widget.custom?.subjectId) {
     customSubject = subjectsToUse.find(
       (s) => s.id === widget.custom!.subjectId
     );
@@ -56,7 +57,7 @@ function RecentGradesWidget(
     }
   } else{
 subjectsToUse= subjectsToUse.filter(subject=>!subjects.data!.customization.hiddenSubjects?.includes(subject.id));
-}
+}}
   const assignments = useRecentAssignments(subjectsToUse);
 
   // Determine number of items based on widget size
