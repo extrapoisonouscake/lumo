@@ -730,6 +730,128 @@ paths:
               schema:
                 $ref: "#/components/schemas/Student"
               #faulty endpoint, not to trust
+  /app/rest/gradeTerm:
+    get:
+      summary: Get the grade terms
+      operationId: getStudentGradeTerms
+      tags:
+        - classes
+      parameters:
+        - name: schoolYearContext
+          in: query
+          description: "year"
+          required: true
+          schema:
+            enum:
+              - "current"
+              - "previous"
+        - name: schoolOids
+          in: query
+          description: "school oid (single)"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: The grade terms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GradeTerm"
+  /app/rest/classes/{termSelector}:
+    get:
+      summary: Get the classes for a term
+      operationId: getClassesForTerm
+      tags:
+        - classes
+      parameters:
+        - name: termSelector
+          in: path
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - enum:
+                  - "current"
+                  - "all"
+        - name: studentOid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: schoolOid
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: districtContext
+          in: query
+          description: "year"
+          required: true
+          schema:
+            enum:
+              - "current"
+              - "previous"
+      responses:
+        200:
+          description: The classes for a term
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - courseName
+                    - courseNumber
+                    - displayLetterGradesOnly
+                    - endDate
+                    - gradePreference
+                    - masterScheduleOid
+                    - meetingTime
+                    - percentageValue
+                    - sectionTermAverage
+                    - startDate
+                    - studentScheduleOid
+                    - teacherEmail
+                    - teacherName
+                  properties:
+                    courseName:
+                      type: string
+                    courseNumber:
+                      type: number
+                      nullable: true
+                    displayLetterGradesOnly:
+                      type: boolean
+                    endDate:
+                      type: number
+                      format: int64
+                      nullable: true
+                    gradePreference:
+                      $ref: "#/components/schemas/NumberAsString"
+                    masterScheduleOid:
+                      type: string
+                    meetingTime:
+                      type: string
+                      nullable: true
+                    percentageValue:
+                      type: string
+                      nullable: true
+                    sectionTermAverage:
+                      type: string
+                      nullable: true
+                    startDate:
+                      type: number
+                      format: int64
+                      nullable: true
+                    studentScheduleOid:
+                      type: string
+                    teacherEmail:
+                      type: string
+                    teacherName:
+                      type: string
 components:
   schemas:
     AnyValue: {}

@@ -144,7 +144,7 @@ export function Widget({
       <Card
         data-widget-index={index}
         className={cn(
-          "flex-1 w-full sm:min-h-[200px] cursor-auto relative",
+          "flex-1 w-full rounded-2xl sm:min-h-[200px] cursor-auto relative",
           { "shadow-sm!": isBeingResized },
           className
         )}

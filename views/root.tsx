@@ -55,24 +55,20 @@ export default function Root() {
           registration.addEventListener("updatefound", () => {
             const newWorker = registration.installing;
 
-            if (newWorker) {
+            if (newWorker && navigator.serviceWorker.controller) {
               // Show toast only if there's an existing controller (not first install)
-              if (navigator.serviceWorker.controller) {
-                toast.loading("Updating app...", {
-                  description:
-                    "Please wait while we update to the latest version.",
-                  duration: Infinity,
-                  id: "sw-update",
-                });
-              }
+
+              toast.loading("Updating app...", {
+                description:
+                  "Please wait while we update to the latest version.",
+                duration: Infinity,
+                id: "sw-update",
+              });
 
               newWorker.addEventListener("statechange", async () => {
                 // Wait for the new worker to be activated instead of just installed
                 // This ensures precaching is complete before we reload
-                if (
-                  newWorker.state === "activated" &&
-                  navigator.serviceWorker.controller
-                ) {
+                if (newWorker.state === "activated") {
                   window.location.reload();
                 }
               });
