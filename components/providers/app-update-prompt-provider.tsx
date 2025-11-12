@@ -1,8 +1,9 @@
-import { isMobileApp } from "@/constants/ui";
 import { WEBSITE_TITLE } from "@/constants/website";
+
+import { isMobileApp } from "@/constants/ui";
 import { trpcClient } from "@/views/trpc";
 import { App } from "@capacitor/app";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { IOSAppInstallButton } from "../layout/ios-app-advertisement";
 const regExStrip0 = /(\.0+)+$/;
 function cmpVersions(a: string, b: string) {
@@ -40,10 +41,7 @@ export function AppUpdatePromptProvider({ children }: { children: ReactNode }) {
 
   if (!isMobileApp || !earliestSupportedVersion || !currentVersion)
     return children;
-  const isOutdated = useMemo(
-    () => cmpVersions(earliestSupportedVersion, currentVersion) > 0,
-    [earliestSupportedVersion, currentVersion]
-  );
+  const isOutdated = cmpVersions(earliestSupportedVersion, currentVersion) > 0;
   if (!isOutdated) return children;
   return (
     <div className="w-full p-4 h-dvh flex flex-col items-center justify-center gap-4">
