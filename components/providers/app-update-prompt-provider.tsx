@@ -2,7 +2,7 @@ import { isMobileApp } from "@/constants/ui";
 import { WEBSITE_TITLE } from "@/constants/website";
 import { trpcClient } from "@/views/trpc";
 import { App } from "@capacitor/app";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import { IOSAppInstallButton } from "../layout/ios-app-advertisement";
 const regExStrip0 = /(\.0+)+$/;
 function cmpVersions(a: string, b: string) {
@@ -40,7 +40,10 @@ export function AppUpdatePromptProvider({ children }: { children: ReactNode }) {
 
   if (!isMobileApp || !earliestSupportedVersion || !currentVersion)
     return children;
-  const isOutdated = cmpVersions(earliestSupportedVersion, currentVersion) > 0;
+  const isOutdated = useMemo(
+    () => cmpVersions(earliestSupportedVersion, currentVersion) > 0,
+    [earliestSupportedVersion, currentVersion]
+  );
   if (!isOutdated) return children;
   return (
     <div className="w-full p-4 h-dvh flex flex-col items-center justify-center gap-4">
@@ -49,7 +52,7 @@ export function AppUpdatePromptProvider({ children }: { children: ReactNode }) {
         alt={`${WEBSITE_TITLE} App Icon`}
         className="size-14"
       />
-      <div className="flex items-center flex-col gap-2">
+      <div className="flex items-center flex-col gap-1.5">
         <h1 className="text-2xl font-semibold">Update Required</h1>
         <p className="text-muted-foreground text-center">
           Please update to the latest version of the app to continue using{" "}

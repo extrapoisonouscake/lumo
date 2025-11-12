@@ -282,6 +282,7 @@ function LoadedContent({
           rightContent={
             <Button
               variant={isEditing ? "default" : "outline"}
+              id="edit-subjects-list"
               className="w-10 sm:px-4 sm:w-fit"
               onClick={() => {
                 if (isEditing) {

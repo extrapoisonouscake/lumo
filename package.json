@@ -69,6 +69,7 @@
     "@react-input/mask": "^2.0.4",
     "@react-router/node": "^7.9.1",
     "@react-router/serve": "^7.9.1",
+    "@reactour/tour": "^3.8.0",
     "@sentry/capacitor": "^2.4.0",
     "@sentry/nextjs": "9.46.0",
     "@sentry/react": "9.46.0",

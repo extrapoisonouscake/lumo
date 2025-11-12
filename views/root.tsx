@@ -93,11 +93,11 @@ export default function Root() {
         vaul-drawer-wrapper=""
       >
         <CookieRestorationProvider>
-          <Providers>
-            <Toaster />
-            <IOSAppAdvertisement />
+          <BrowserRouter>
+            <Providers>
+              <Toaster />
+              <IOSAppAdvertisement />
 
-            <BrowserRouter>
               <ScrollToTop />
               <Routes>
                 <Route element={<AuthenticatedLayout />}>
@@ -146,8 +146,8 @@ export default function Root() {
                 <Route path="index.html" element={<Navigate to="/" />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
-            </BrowserRouter>
-          </Providers>
+            </Providers>
+          </BrowserRouter>
         </CookieRestorationProvider>
         {isProduction && (
           <GoogleAnalytics

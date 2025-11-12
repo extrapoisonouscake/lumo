@@ -76,15 +76,16 @@ export default function AssignmentPage() {
               <TitleManager>
                 {name} - {subject ? subject.name.prettified : "Loading..."}
               </TitleManager>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 assignment-page-content">
                 {/* Header Card */}
                 <AssignmentHeader name={name} status={status} dueAt={dueAt} />
 
-                <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4 items-start">
                   {/* Score Information */}
                   <AssignmentSectionCard
                     title="Details"
                     icon={SealStrokeRounded}
+                    className="assignment-page-details-section"
                   >
                     <GradeRow
                       assignment={data}
@@ -174,9 +175,13 @@ function ContentSkeleton() {
       {/* Header Card */}
       <AssignmentHeaderSkeleton />
 
-      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fill,minmax(400px,1fr))] gap-4 items-start">
         {/* Score Information */}
-        <AssignmentSectionCard title="Details" icon={SealStrokeRounded}>
+        <AssignmentSectionCard
+          title="Details"
+          icon={SealStrokeRounded}
+          className="assignment-page-details-section"
+        >
           <PropertyRowSkeleton />
 
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
@@ -215,7 +220,7 @@ function AssignmentHeader({
     className = BADGE_CLASSNAMES_BY_STATUS[status];
   }
   return (
-    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 justify-between flex-wrap">
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 justify-between flex-wrap assignment-page-header">
       <div className="flex flex-col gap-0.5">
         <CardTitle className="text-xl">{name}</CardTitle>
         <p className="text-muted-foreground text-sm">{subjectName}</p>
@@ -236,12 +241,12 @@ function AssignmentHeader({
 }
 function AssignmentHeaderSkeleton() {
   return (
-    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap justify-between">
-      <div className="flex flex-col gap-0.5">
-        <Skeleton shouldShrink={false} className="text-xl">
+    <Card className="p-4 flex-row gap-x-3 gap-y-1.5 flex-wrap justify-between assignment-page-header">
+      <div className="flex flex-col gap-[9px]">
+        <Skeleton shouldShrink={false} className="text-xl h-6">
           NameNameName
         </Skeleton>
-        <Skeleton className="text-sm w-fit">Subjectss 10</Skeleton>
+        <Skeleton className="text-sm w-fit h-[17px]">Subjectss 10</Skeleton>
       </div>
       <div className="flex items-center gap-2">
         <Skeleton className="rounded-full h-[26px] w-20"></Skeleton>
@@ -369,50 +374,40 @@ function GradeRow({
   assignment: Assignment;
   shouldShowPercentages: UserSettings["shouldShowPercentages"];
 }) {
-  const getScoreComparisonIcon = () => {
-    if (
-      assignment.status !== AssignmentStatus.Graded ||
-      !assignment.classAverage ||
-      typeof assignment.score !== "number"
-    ) {
-      return null;
-    }
-    if (assignment.score > assignment.classAverage) {
-      return (
-        <HugeiconsIcon
-          icon={TradeUpStrokeRounded}
-          className="h-4 w-4 text-green-600"
-        />
-      );
-    } else if (assignment.score < assignment.classAverage) {
-      return (
-        <HugeiconsIcon
-          icon={TradeDownStrokeRounded}
-          className="h-4 w-4 text-red-500"
-        />
-      );
-    }
-    return null;
-  };
   const mainContent = (
     <span className="font-medium">
       {formatScore(shouldShowPercentages)(assignment, "score")}
     </span>
   );
-  const iconContent = getScoreComparisonIcon();
+  const shouldShowScoreComparison =
+    assignment.status === AssignmentStatus.Graded &&
+    !!assignment.classAverage &&
+    typeof assignment.score === "number";
   return (
     <AssignmentPropertyRow
       label="Score"
       value={
-        iconContent ? (
+        shouldShowScoreComparison ? (
           <TooltipProvider>
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <div className="flex items-center gap-2 cursor-help group">
                   {mainContent}
-                  <div className="group-hover:opacity-80 transition-opacity">
-                    {getScoreComparisonIcon()}
-                  </div>
+                  {assignment.score !== assignment.classAverage! && (
+                    <div className="group-hover:opacity-80 transition-opacity">
+                      {assignment.score > assignment.classAverage! ? (
+                        <HugeiconsIcon
+                          icon={TradeUpStrokeRounded}
+                          className="h-4 w-4 text-green-600"
+                        />
+                      ) : (
+                        <HugeiconsIcon
+                          icon={TradeDownStrokeRounded}
+                          className="h-4 w-4 text-red-500"
+                        />
+                      )}
+                    </div>
+                  )}
                   <HugeiconsIcon
                     icon={InformationCircleStrokeRounded}
                     className="size-3 text-muted-foreground"

@@ -1,6 +1,7 @@
 import { saveClientResponseToCache } from "@/helpers/cache";
 import { trpc } from "@/views/trpc";
 
+import { updateUserSettingState } from "@/helpers/updateUserSettingsState";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getCacheKey } from "../use-cached-query";
 
@@ -10,6 +11,7 @@ export function useUpdateGenericUserSetting() {
     mutationFn:
       trpc.core.settings.updateGenericUserSetting.mutationOptions().mutationFn,
     onMutate: async (variables) => {
+      updateUserSettingState(variables.key, variables.value);
       const queryKey = trpc.core.settings.getSettings.queryKey();
       // Cancel any outgoing refetches so they don't overwrite our optimistic update
       await queryClient.cancelQueries({

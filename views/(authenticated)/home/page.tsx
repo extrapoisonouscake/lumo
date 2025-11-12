@@ -633,7 +633,7 @@ function WidgetsGrid({
   return (
     <div
       className={cn(
-        "grid gap-4 auto-rows-min grid-flow-dense grid-cols-[repeat(var(--grid-columns),1fr)]",
+        "widgets-grid grid gap-4 auto-rows-min grid-flow-dense grid-cols-[repeat(var(--grid-columns),1fr)]",
         className
       )}
       style={

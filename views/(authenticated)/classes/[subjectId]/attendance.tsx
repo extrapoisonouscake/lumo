@@ -61,7 +61,10 @@ export function SubjectAttendance({
     <>
       <ResponsiveDialog>
         <ResponsiveDialogTrigger asChild>
-          <SubjectSummaryButton icon={Calendar03StrokeRounded}>
+          <SubjectSummaryButton
+            id="subject-attendance-button"
+            icon={Calendar03StrokeRounded}
+          >
             Attendance
           </SubjectSummaryButton>
         </ResponsiveDialogTrigger>

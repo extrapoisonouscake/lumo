@@ -12,6 +12,13 @@ const educationAbbreviations = new Set([
   "2D",
   "3D",
   "IEP",
+  "LD",
+  "WW2",
+  "WW1",
+  "WWII",
+  "WWI",
+  "FRQ",
+  "MCQ",
 ]);
 const TEACHER_ADVISORY_ABBREVIATIONS = ["ta", "teacher advisory"];
 export const isTeacherAdvisory = (name: string) =>

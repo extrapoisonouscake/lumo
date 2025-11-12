@@ -34,6 +34,7 @@ const sentryConfig = {
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
 };
+
 export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (isMobileApp) {
@@ -44,6 +45,7 @@ export function Providers({ children }: { children: ReactNode }) {
       Sentry.init(sentryConfig);
     }
   }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">

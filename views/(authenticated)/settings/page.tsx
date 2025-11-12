@@ -48,7 +48,7 @@ export default function SettingsPage() {
       <TitleManager>Settings</TitleManager>
       <PageHeading />
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 settings-page">
         {userSettings ? (
           fields.map((field) => {
             const initialValue = userSettings[field.key];

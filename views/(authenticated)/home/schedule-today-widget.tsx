@@ -138,7 +138,8 @@ function Content({
   const { currentRowIndex } = useTTNextSubject(rows);
 
   let mainContent;
-  const hasNoMoreClasses = timezonedDayJS().isAfter(rows.at(-1)!.endsAt);
+  const hasNoMoreClasses =
+    rows.length === 0 || timezonedDayJS().isAfter(rows.at(-1)!.endsAt);
   if (currentRowIndex === null) {
     const now = timezonedDayJS();
     if (hasNoMoreClasses) {

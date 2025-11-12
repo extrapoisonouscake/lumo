@@ -115,6 +115,7 @@ export const USER_SETTINGS_KEYS = [
   "shouldHighlightAveragesWithColour",
   "themeColor",
   "widgetsConfiguration",
+  "hasCompletedTour",
 ] as const satisfies Array<keyof UserSettings>;
 //TODO change type to ensure all keys are included
 export const USER_SETTINGS_DEFAULT_VALUES = {

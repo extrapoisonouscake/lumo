@@ -123,7 +123,7 @@ export function SubjectSummary({
             />
           )}
           <div
-            className={cn("relative group", {
+            className={cn("relative group subject-summary-grade", {
               clickable: shouldShowGoalDialog,
             })}
             onClick={(e) => {
@@ -278,7 +278,7 @@ export function SubjectSummarySkeleton() {
           <div className="relative">
             <SubjectGoalButtonSkeleton />
 
-            <div className="flex flex-col gap-1 items-center">
+            <div className="flex flex-col gap-1 items-center subject-summary-grade">
               <div className={cn("relative", "h-[45px]")}>
                 <div>
                   <HalfDonutProgressChart value={90} isLoading />

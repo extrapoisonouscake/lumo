@@ -47,6 +47,7 @@ export const user_settings = table("user_settings", {
     .jsonb("widgets_configuration")
     .notNull()
     .default(USER_SETTINGS_DEFAULT_VALUES.widgetsConfiguration),
+  hasCompletedTour: t.boolean("has_completed_tour").notNull().default(false),
 });
 
 export type UserSettingsSelectModel = InferSelectModel<typeof user_settings>;

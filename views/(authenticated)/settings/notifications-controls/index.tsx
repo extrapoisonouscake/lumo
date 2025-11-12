@@ -147,7 +147,7 @@ export function NotificationsControls({
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 notifications-controls">
         <AsyncSwitchField
           label="Receive notifications"
           disabled={

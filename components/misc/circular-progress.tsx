@@ -94,7 +94,12 @@ export function CircularProgress({
       </svg>
 
       {letter && (
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div
+          className={cn(
+            "absolute inset-0 flex items-center justify-center",
+            size === "small" ? "size-4" : "size-6"
+          )}
+        >
           <span className="text-xs font-bold">{letter}</span>
         </div>
       )}
