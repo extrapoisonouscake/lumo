@@ -733,7 +733,7 @@ paths:
   /app/rest/gradeTerm:
     get:
       summary: Get the grade terms
-      operationId: getStudentGradeTerms
+      operationId: getStudentGradeTermsNew
       tags:
         - classes
       parameters:
