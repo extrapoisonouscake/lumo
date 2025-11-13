@@ -9,7 +9,7 @@ export function getPercentageString(score: number, maxScore: number): string {
 }
 export const ASSIGNMENT_STATUS_LABELS = {
   [AssignmentStatus.Graded]: "Graded",
-  [AssignmentStatus.Missing]: "Missing",
+  [AssignmentStatus.Missing]: "Overdue",
   [AssignmentStatus.Exempt]: "Exempt",
   [AssignmentStatus.Ungraded]: "Ungraded",
 };
