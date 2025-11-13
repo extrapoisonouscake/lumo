@@ -273,28 +273,33 @@ export function ScheduleTable({
     columns: isLoading ? columnsSkeletons : columns,
     meta: { getRowClassName },
   });
-  const shouldShowWeekday =
+  const canShowWeekday =
     !isLoading && weekday !== timezonedDayJS(date).format("dddd");
+  const canShowTimer =
+    shouldShowTimer &&
+    typeof currentRowIndex === "number" &&
+    currentRowIndex > -1;
+
   return (
     <div className="flex flex-col gap-2">
-      {(shouldShowTimer || shouldShowWeekday) && (
+      {(canShowTimer || canShowWeekday) && (
         <div className="flex gap-2 justify-between items-center">
-          {shouldShowTimer &&
+          {canShowTimer &&
             (isLoading || typeof timeToNextSubject === "undefined" ? (
               <CountdownTimerSkeleton />
             ) : (
               <CountdownTimer
+                hasClassesStarted
                 timeToNextSubject={timeToNextSubject}
                 isBreak={
                   !!(
-                    typeof currentRowIndex === "number" &&
-                    (data[currentRowIndex]!.type !== "subject" ||
-                      isTeacherAdvisory(data[currentRowIndex]!.name.actual))
+                    data[currentRowIndex]!.type !== "subject" ||
+                    isTeacherAdvisory(data[currentRowIndex]!.name.actual)
                   )
                 }
               />
             ))}
-          {shouldShowWeekday && (
+          {canShowWeekday && (
             <h3 className="row-start-1 col-start-2 text-right text-sm [&:not(:has(+_#schedule-countdown))]:col-start-1 [&:not(:has(+_#schedule-countdown))]:text-left">
               Same as <span className="font-semibold">{weekday}</span>
             </h3>

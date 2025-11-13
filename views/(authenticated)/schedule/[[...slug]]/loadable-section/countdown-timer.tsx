@@ -1,16 +1,16 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCountdown } from "@/helpers/format-countdown";
 
-const MAX_MINUTES = 90;
 export function CountdownTimer({
   timeToNextSubject,
   isBreak,
+  hasClassesStarted,
 }: {
   timeToNextSubject: number | null;
   isBreak: boolean;
+  hasClassesStarted: boolean;
 }) {
-  if (!timeToNextSubject || timeToNextSubject > 1000 * 60 * MAX_MINUTES)
-    return null;
+  if (!timeToNextSubject || !hasClassesStarted) return null;
   const countdown = formatCountdown(timeToNextSubject);
   return (
     <p

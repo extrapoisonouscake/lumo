@@ -16,9 +16,14 @@ import { AnnouncementsNotAvailableReason } from "@/lib/trpc/routes/core/school-s
 
 import { ArrowUpRight01StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { AnnouncementsAccordions } from "./accordions";
+import { lazy } from "react";
+const AnnouncementsAccordions = lazy(() =>
+  import("./accordions").then((mod) => ({
+    default: mod.AnnouncementsAccordions,
+  }))
+);
 function AnnouncementsHeading() {
-  return <h3 className="font-medium">Announcements</h3>;
+  return <h3 className="font-medium text-sm">Announcements</h3>;
 }
 export default function AnnouncementsPage() {
   return (
@@ -34,12 +39,13 @@ export function Announcements() {
   let content;
   if (!announcements.data) {
     if (announcements.error) {
-if(typeof announcements.error==="string"){
-
-      content = <AnnouncementsNotAvailableCard reason={announcements.error} />;
-}else{
-content=<ErrorCard/>
-}
+      if (typeof announcements.error === "string") {
+        content = (
+          <AnnouncementsNotAvailableCard reason={announcements.error} />
+        );
+      } else {
+        content = <ErrorCard />;
+      }
     } else {
       content = <AnnouncementsSkeleton />;
     }

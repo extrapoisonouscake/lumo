@@ -1,5 +1,5 @@
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import * as Sentry from "@sentry/capacitor";
+import * as Sentry from "@sentry/react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useCachedQuery } from "../use-cached-query";

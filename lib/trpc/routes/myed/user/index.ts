@@ -9,6 +9,11 @@ export const userRouter = router({
     const credentials = cookieStore.get("credentials")?.value;
     return { credentials };
   }),
+  getPersonalDetails: authenticatedProcedure.query(async ({ ctx }) => {
+    const details = await ctx.getMyEd("personalDetails");
+
+    return details;
+  }),
   getStudentDetails: authenticatedProcedure.query(async ({ ctx }) => {
     const details = await ctx.getMyEd("studentDetails");
 

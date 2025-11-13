@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useStudentDetails } from "./use-student-details";
 import { useUserSettings } from "./use-user-settings";
-const gradeRegex =
+export const gradeRegex =
   /\b(?:grade|grades|gr\.?)\s*((?:\d+(?:['']?s)?|[A-Z](?:['']?s)?)(?:\s*(?:[-\/]|to|,|and|&|or)\s*(?:\d+(?:['']?s)?|[A-Z](?:['']?s)?))*)\b/gi;
 const getHasRelevantGrade = (targetGrade: number) => (text: string) => {
   const lowercasedText = text.toLowerCase();
@@ -111,7 +111,7 @@ export function useAnnouncements({
           for (const item of content) {
             const hasOneRelevant = hasRelevantGrade(item.text);
 
-            if (hasOneRelevant && item.isNew !== false) {
+            if (hasOneRelevant && item.isNew) {
               personalItems.push(item);
             } else {
               listItems.push(item);
