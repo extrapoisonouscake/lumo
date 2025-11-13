@@ -403,7 +403,7 @@ function GradeRow({
                       ) : (
                         <HugeiconsIcon
                           icon={TradeDownStrokeRounded}
-                          className="h-4 w-4 text-red-destructive"
+                          className="h-4 w-4 text-destructive"
                         />
                       )}
                     </div>
