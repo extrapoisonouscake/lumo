@@ -1,3 +1,8 @@
+export enum UserRole {
+  Student = "student",
+  Teacher = "teacher",
+  Parent = "parent",
+}
 type RichName = {
   prettified: string;
   actual: string;
@@ -80,10 +85,24 @@ export type AnnouncementSection = {
   title: string;
   emoji: string;
 } & AnnouncementSectionData;
+
 export interface PersonalDetails {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: UserRole;
+}
+export enum Gender {
+  Female = "F",
+  Male = "M",
+  Other = "X",
+}
+
+export interface StudentDetails extends ParentViewStudentDetails {
   firstName: string;
   middleName?: string;
   lastName: string;
+
   studentNumber: string;
   personalEducationNumber: string;
   taRoom?: string;
@@ -103,6 +122,11 @@ export interface PersonalDetails {
     // label -> value
     custom: Record<string, string>;
   };
+}
+interface ParentViewStudentDetails {
+  gender?: Gender;
+  birthDate?: Date;
+  enrollmentStatus?: unknown;
 }
 export enum AssignmentStatus {
   Graded,

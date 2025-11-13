@@ -4,7 +4,7 @@ import { deleteSession } from "./routes/myed/auth/helpers";
 
 export const authenticatedProcedure = publicProcedure.use(
   async ({ ctx, next }) => {
-    if (!ctx.studentId) {
+    if (!ctx.myedUser) {
       await deleteSession();
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }

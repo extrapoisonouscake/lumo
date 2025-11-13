@@ -6,7 +6,6 @@ import {
   TrackedSubject,
 } from "@/db/schema";
 import { getTrackedSchoolData } from "@/helpers/customizations";
-import { hashString } from "@/helpers/hashString";
 import { prepareAssignmentForDBStorage } from "@/lib/notifications";
 import { createCaller } from "@/lib/trpc";
 import { createTRPCContext } from "@/lib/trpc/context";
@@ -31,7 +30,7 @@ export async function POST() {
   after(async () => {
     await sendNotificationsToUser({
       getMyEdWithParameters: newContext.getMyEd,
-      studentId: context.studentId,
+      userId: context.userId,
     });
   });
   return new Response(undefined, { status: 204 });
@@ -39,17 +38,16 @@ export async function POST() {
 
 const sendNotificationsToUser = async ({
   getMyEdWithParameters,
-  studentId,
+  userId,
 }: {
   getMyEdWithParameters: ReturnType<typeof getMyEd>;
-  studentId: string;
+  userId: string;
 }) => {
-  const hashedId = hashString(studentId);
   const [subscriptions, trackedData] = await Promise.all([
     db.query.notifications_subscriptions.findMany({
-      where: eq(notifications_subscriptions.userId, hashedId),
+      where: eq(notifications_subscriptions.userId, userId),
     }),
-    getTrackedSchoolData(hashedId),
+    getTrackedSchoolData(userId),
   ]);
   const trackedSubjectsWithAssignments = trackedData?.subjectsWithAssignments;
   const subjectsSavedAssignments = trackedSubjectsWithAssignments
@@ -169,7 +167,7 @@ const sendNotificationsToUser = async ({
             ])
           ),
         })
-        .where(eq(tracked_school_data.userId, hashString(studentId)))
+        .where(eq(tracked_school_data.userId, userId))
     );
   }
   await Promise.all(promises);

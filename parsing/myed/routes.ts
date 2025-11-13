@@ -6,9 +6,10 @@ import {
 } from "@/constants/myed";
 import "server-only";
 
+import { CookieMyEdUser } from "@/helpers/getAuthCookies";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { paths } from "@/types/myed-rest";
-import { Subject, SubjectTerm, SubjectYear } from "@/types/school";
+import { Subject, SubjectTerm, SubjectYear, UserRole } from "@/types/school";
 import CallableInstance from "callable-instance";
 import * as cheerio from "cheerio";
 import { $getGenericContentTableBody } from "./helpers";
@@ -43,7 +44,8 @@ type RouteResolverParams<Params extends RouteParams> = {
   responses: RouteResponse[];
   params: Params;
   metadata: Record<string, any>;
-  studentId: string;
+  targetId: string;
+  user: CookieMyEdUser;
 };
 type MetadataResolverFunction<Params extends RouteParams> = (
   props: RouteResolverParams<Params>
@@ -93,7 +95,8 @@ const processStep = <Params extends RouteParams>(
 };
 
 class ResolvedRoute<Params extends RouteParams> {
-  studentId?: string;
+  targetId?: string;
+  myedUser?: CookieMyEdUser;
   params: Params;
   steps: Array<RouteStep<Params> | MetadataResolver<Params>> = [];
   resolvedSteps: Array<FlatRouteStep | FlatRouteStep[]> = [];
@@ -104,18 +107,21 @@ class ResolvedRoute<Params extends RouteParams> {
   constructor({
     steps,
     predicates,
-    studentId,
+    targetId,
     params,
     requiresAuth,
+    myedUser,
   }: {
-    studentId?: string;
+    myedUser?: CookieMyEdUser;
+    targetId?: string;
     params: Params;
     steps: Array<RouteStep<Params> | MetadataResolver<Params>>;
     predicates: Record<number, RouteStepPredicate<Params>>;
     requiresAuth: boolean;
   }) {
-    if (requiresAuth && !studentId) throw new Error("route requires auth");
-    this.studentId = studentId;
+    if (requiresAuth && !targetId) throw new Error("route requires auth");
+    this.myedUser = myedUser;
+    this.targetId = targetId;
     this.requiresAuth = requiresAuth;
     this.params = params;
     this.steps = steps;
@@ -145,7 +151,8 @@ class ResolvedRoute<Params extends RouteParams> {
           responses: this.responses,
           params: this.params,
           metadata: this.metadata,
-          studentId: this.studentId as string,
+          targetId: this.targetId as string,
+          user: this.myedUser as CookieMyEdUser,
         });
         continue;
       } else if (typeof nextStep === "function") {
@@ -153,7 +160,8 @@ class ResolvedRoute<Params extends RouteParams> {
           responses: this.responses,
           params: this.params,
           metadata: this.metadata,
-          studentId: this.studentId as string,
+          targetId: this.targetId as string,
+          user: this.myedUser as CookieMyEdUser,
         });
       }
       if (Array.isArray(nextStep)) {
@@ -213,9 +221,15 @@ export class Route<
     if (predicate) this.predicates[this.steps.length - 1] = predicate;
     return this;
   }
-  call(...[studentId, params]: [string, Params]) {
+  call(
+    ...[{ targetId, myedUser }, params]: [
+      { targetId: string; myedUser: CookieMyEdUser },
+      Params,
+    ]
+  ) {
     return new ResolvedRoute({
-      studentId,
+      targetId,
+      myedUser,
       params,
       steps: this.steps,
       predicates: this.predicates,
@@ -225,16 +239,16 @@ export class Route<
 }
 const generateAssignmentFileSubmissionStateParams = ({
   assignmentId,
-  studentId,
+  targetId,
 }: {
   assignmentId: string;
-  studentId: string;
+  targetId: string;
 }) => {
   const params = new URLSearchParams({
     prefix: assignmentId.slice(0, 3),
     oid: assignmentId,
     context: "academics.classes.list.gcd.detail",
-    studentId: studentId,
+    studentId: targetId,
     deploymentId: "aspen",
   });
   return {
@@ -292,32 +306,55 @@ export const myEdParsingRoutes = {
         return today !== day;
       }
     ),
-  personalDetails: new Route()
-    .step({
+
+  studentDetails: new Route()
+    .step(({ user: { role } }) => ({
       method: "GET",
-      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
+      path:
+        role === UserRole.Student
+          ? "/portalStudentDetail.do?navkey=myInfo.details.detail"
+          : "/genericDetail.do?navkey=family.std.list.detail",
       expect: "html",
-    })
-    .step({
+    }))
+    .step(({ user: { role } }) => ({
       method: "POST",
-      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
+      path:
+        role === UserRole.Student
+          ? "/portalStudentDetail.do?navkey=myInfo.details.detail"
+          : "/genericDetail.do?navkey=family.std.list.detail",
+      body: {
+        userEvent: "2030",
+        userParam: "0",
+      },
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    }))
+    .step(({ user: { role } }) => ({
+      method: "POST",
+      path:
+        role === UserRole.Student
+          ? "/portalStudentDetail.do?navkey=myInfo.details.detail"
+          : "/genericDetail.do?navkey=family.std.list.detail",
       body: {
         userEvent: "2030",
         userParam: "1",
       },
       contentType: "application/x-www-form-urlencoded",
       expect: "html",
-    })
-    .step({
+    }))
+    .step(({ user: { role } }) => ({
       method: "POST",
-      path: "/portalStudentDetail.do?navkey=myInfo.details.detail",
+      path:
+        role === UserRole.Student
+          ? "/portalStudentDetail.do?navkey=myInfo.details.detail"
+          : "/genericDetail.do?navkey=family.std.list.detail",
       body: {
         userEvent: "2030",
         userParam: "2",
       },
       contentType: "application/x-www-form-urlencoded",
       expect: "html",
-    }),
+    })),
   registrationFields: new Route(false).step({
     method: "GET",
     path: "/accountCreation.do",
@@ -469,24 +506,24 @@ export const myEdParsingRoutes = {
       }) => areAlreadyCountedEntriesHidden || !areExcessCoursesSeparated
     ),
   assignmentFileSubmissionState: new Route<{ assignmentId: string }>().step(
-    ({ params: { assignmentId }, studentId }) => {
+    ({ params: { assignmentId }, targetId }) => {
       return generateAssignmentFileSubmissionStateParams({
         assignmentId,
-        studentId,
+        targetId,
       });
     }
   ),
   uploadAssignmentFile: new Route<{ assignmentId: string; file: File }>()
-    .step(({ studentId, params: { assignmentId } }) =>
-      generateAssignmentFileSubmissionStateParams({ assignmentId, studentId })
+    .step(({ targetId, params: { assignmentId } }) =>
+      generateAssignmentFileSubmissionStateParams({ assignmentId, targetId })
     )
-    .step(({ studentId, params: { assignmentId, file } }) => ({
+    .step(({ targetId, params: { assignmentId, file } }) => ({
       method: "POST",
       path: "/assignmentUpload.do",
       body: {
         formFile: file,
         assignmentOid: assignmentId,
-        studentOid: studentId,
+        studentOid: targetId,
         userEvent: "970",
       },
       contentType: "multipart/form-data",
@@ -511,7 +548,7 @@ export type MyEdParsingRoute = keyof MyEdParsingRoutes;
 export type MyEdRestEndpointURL = keyof paths;
 
 const generateSubjectsListStepParams = (
-  studentId: string,
+  targetId: string,
   params?: {
     isPreviousYear?: boolean;
     termId?: string;
@@ -525,7 +562,7 @@ const generateSubjectsListStepParams = (
     method: "GET" as const,
     path: `/aspen/rest/lists/academics.classes.list`,
     body: {
-      selectedStudent: studentId,
+      selectedStudent: targetId,
       fieldSetOid: "fsnX2Cls",
       customParams: customParams.join(";"),
     },
@@ -604,6 +641,12 @@ const subjectAssignmentsRoute = new Route<
   });
 
 export const myEdRestEndpoints = {
+  personalDetails: new Route().step({
+    method: "GET",
+    path: `/aspen/rest/users/currentUser`,
+
+    expect: "json",
+  }),
   subjects: new Route<{
     isPreviousYear?: boolean;
     termId?: string;
@@ -617,8 +660,8 @@ export const myEdRestEndpoints = {
       },
       expect: "json",
     }))
-    .step(({ studentId, params: { isPreviousYear, termId } }) => {
-      return generateSubjectsListStepParams(studentId, {
+    .step(({ targetId, params: { isPreviousYear, termId } }) => {
+      return generateSubjectsListStepParams(targetId, {
         isPreviousYear,
         termId,
       });
@@ -639,8 +682,8 @@ export const myEdRestEndpoints = {
   subjectIdByName: new Route<{
     name: string;
   }>()
-    .step(({ studentId }) =>
-      generateSubjectsListStepParams(studentId, {
+    .step(({ targetId }) =>
+      generateSubjectsListStepParams(targetId, {
         termId: MYED_ALL_GRADE_TERMS_SELECTOR,
       })
     )
@@ -652,8 +695,8 @@ export const myEdRestEndpoints = {
       }
     })
     .step(
-      ({ studentId }) =>
-        generateSubjectsListStepParams(studentId, {
+      ({ targetId }) =>
+        generateSubjectsListStepParams(targetId, {
           isPreviousYear: true,
           termId: MYED_ALL_GRADE_TERMS_SELECTOR,
         }),
@@ -679,9 +722,9 @@ export const myEdRestEndpoints = {
   subjectAssignments: subjectAssignmentsRoute,
   subjectAssignment: new Route<{
     assignmentId: string;
-  }>().step(({ studentId, params: { assignmentId } }) => ({
+  }>().step(({ targetId, params: { assignmentId } }) => ({
     method: "GET",
-    path: `/aspen/rest/students/${studentId}/assignments/${assignmentId}`,
+    path: `/aspen/rest/students/${targetId}/assignments/${assignmentId}`,
     expect: "json",
   })),
 };

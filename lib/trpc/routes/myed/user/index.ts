@@ -10,7 +10,7 @@ export const userRouter = router({
     return { credentials };
   }),
   getStudentDetails: authenticatedProcedure.query(async ({ ctx }) => {
-    const details = await ctx.getMyEd("personalDetails");
+    const details = await ctx.getMyEd("studentDetails");
 
     return details;
   }),

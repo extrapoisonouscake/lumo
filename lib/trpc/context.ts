@@ -1,26 +1,38 @@
-import { getAuthCookies } from "@/helpers/getAuthCookies";
+import { CookieMyEdUser, getAuthCookies } from "@/helpers/getAuthCookies";
 import { hashString } from "@/helpers/hashString";
 import { MyEdCookieStore } from "@/helpers/MyEdCookieStore";
 import { getMyEd } from "@/parsing/myed/getMyEd";
+import { UserRole } from "@/types/school";
 import { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { cookies, headers } from "next/headers";
 type AuthenticatedTRPCContext = {
-  studentId: string;
-  studentDatabaseId: string;
+  myedUser: CookieMyEdUser;
+  userId: string;
+
   credentials: { username: string; password: string };
   tokens?: string;
-};
+} & (
+  | {
+      role: Exclude<UserRole, UserRole.Parent>;
+      targetId?: never;
+    }
+  | {
+      role: UserRole.Parent;
+      targetId: string;
+    }
+);
 export const createTRPCContext = async () => {
   const store = await cookies();
 
   const cookieStore = await MyEdCookieStore.create(store);
 
-  let studentDatabaseId, username, password, tokens, studentId;
+  let userId, username, password, tokens, myedUser, targetId;
   try {
-    studentId = cookieStore.get("studentId")?.value;
-
-    if (studentId) {
-      studentDatabaseId = hashString(studentId);
+    const myedUserString = cookieStore.get("user")?.value;
+    myedUser = myedUserString ? JSON.parse(myedUserString) : undefined;
+    if (myedUser) {
+      userId = hashString(myedUser.id);
+      targetId = cookieStore.get("targetId")?.value;
     }
     const credentials = cookieStore.get("credentials")?.value;
     [username, password] =
@@ -36,13 +48,15 @@ export const createTRPCContext = async () => {
     tokens
       ? {
           authCookies: getAuthCookies(cookieStore),
-          studentId: studentId!,
+          myedUser,
+          targetId,
         }
       : undefined
   );
   return {
-    studentId,
-    studentDatabaseId,
+    myedUser,
+    userId,
+    targetId,
     credentials: { username, password },
     tokens,
     ip,
@@ -61,5 +75,5 @@ export type TRPCContext = Awaited<ReturnType<typeof createTRPCContext>>;
 export function isAuthenticatedContext(
   ctx: TRPCContext
 ): ctx is TRPCContext & AuthenticatedTRPCContext {
-  return !!ctx.studentId;
+  return !!ctx.myedUser;
 }

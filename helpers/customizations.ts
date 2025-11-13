@@ -6,9 +6,9 @@ import {
   TrackedSubjectAssignment,
 } from "@/db/schema";
 import { eq } from "drizzle-orm";
-export const getTrackedSchoolData = async (studentDatabaseId: string) => {
+export const getTrackedSchoolData = async (userId: string) => {
   const result = await db.query.tracked_school_data.findFirst({
-    where: eq(tracked_school_data.userId, studentDatabaseId),
+    where: eq(tracked_school_data.userId, userId),
   });
   if (!result) return undefined;
   return {

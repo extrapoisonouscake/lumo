@@ -18,8 +18,8 @@ import { useStudentDetails } from "@/hooks/trpc/use-student-details";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useSubjectSummaries } from "@/hooks/trpc/use-subjects-summaries";
 import {
-  PersonalDetails,
   ProgramRequirementEntry,
+  StudentDetails,
   TranscriptEntry,
 } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
@@ -109,7 +109,7 @@ function Content({
   pendingEntries,
 }: {
   completedEntries: InferredTranscriptEntry[];
-  currentGrade: PersonalDetails["grade"];
+  currentGrade: StudentDetails["grade"];
   pendingEntries: InferredTranscriptEntry[];
 }) {
   const data = useMemo(() => {
