@@ -274,7 +274,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
       className={cn(
         "gap-1 p-3 justify-between flex-row bg-muted/25 items-center",
         {
-          clickable: isSubject,
+          clickable: isSubject && !isTeacherAdvisorySubject,
         }
       )}
     >
