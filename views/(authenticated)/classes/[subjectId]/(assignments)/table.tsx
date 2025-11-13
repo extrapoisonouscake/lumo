@@ -111,6 +111,7 @@ const getColumns = ({
     },
   }),
   columnHelper.accessor("categoryId", {
+    id: "categoryId",
     filterFn: "equalsString",
     header: "Category",
     cell: ({ cell }) => {
@@ -135,6 +136,7 @@ const columnsSkeletons = makeTableColumnsSkeletons(
     dueAt: 10,
     maxScore: 2,
     score: 6,
+    categoryId: 10,
   }
 );
 const mockAssignments = (length: number) =>
@@ -190,20 +192,19 @@ export function SubjectAssignmentsTable({
           }),
     [settings.shouldShowPercentages]
   );
+  const shouldShowCategoryColumn = categories.length > 1;
   const columnVisibility = useMemo(
     () =>
       Object.fromEntries(
         columns.map((column) => {
           let isVisible = true;
-          if (column.id === "weight") {
-            isVisible = assignments.some(
-              (assignment) => "weight" in assignment
-            );
+          if (column.id === "categoryId") {
+            isVisible = categories.length > 1;
           }
           return [column.id, isVisible];
         })
       ),
-    [assignments]
+    [shouldShowCategoryColumn]
   );
 
   const getRowClassName = useMemo(
@@ -262,7 +263,6 @@ export function SubjectAssignmentsTable({
       </TableRow>
     );
   };
-
   const table = useTable(assignments, columns, {
     meta: {
       getRowClassName,
@@ -292,7 +292,7 @@ export function SubjectAssignmentsTable({
       shouldShowYearSelect={false}
     />
   ) : null;
-  const categorySelect = (
+  const categorySelect = shouldShowCategoryColumn ? (
     <TableFilterSelect
       label="Category"
       id="category-filter"
@@ -303,7 +303,7 @@ export function SubjectAssignmentsTable({
       column={table.getColumn("categoryId")!}
       placeholder="Select a category..."
     />
-  );
+  ) : null;
   const statusSelect = (
     <TableFilterSelect
       label="Status"
