@@ -53,11 +53,11 @@ export const GRADES_VISUAL_CONFIG: Record<
   },
   F: {
     threshold: 0,
-    secondaryTextClassName: "text-red-500",
-    textClassName: "text-red-500",
-    backgroundClassName: "bg-red-500",
-    fillClassName: "fill-red-500",
-    plainColor: "var(--color-red-500)",
+    secondaryTextClassName: "text-destructive",
+    textClassName: "text-destructive",
+    backgroundClassName: "bg-destructive",
+    fillClassName: "fill-destructive",
+    plainColor: "var(--color-destructive)",
   },
 };
 const getGradeInfoByMark = (mark: number) => {

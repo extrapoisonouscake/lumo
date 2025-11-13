@@ -35,13 +35,15 @@ export function AssignmentCard({
   const { name, dueAt, status, weight, feedback, hasSubmission } = assignment;
   const isMissing = status === AssignmentStatus.Missing;
   const shouldShowBadges = !!feedback || hasSubmission;
+  const isMissingHighlighted = shouldHighlightIfMissing && isMissing;
   return (
     <ContentCard
       onClick={onClick}
       data-clickable-hover={true}
-      className={cn("cursor-pointer gap-2 hover:bg-muted/50 clickable", {
-        "border-red-500/30 dark:border-red-500/20":
-          shouldHighlightIfMissing && isMissing,
+      data-highlight-missing={isMissingHighlighted}
+      className={cn("group cursor-pointer gap-2 hover:bg-muted/50 clickable", {
+        "text-destructive border-destructive/30 dark:border-destructive/25":
+          isMissingHighlighted,
       })}
       shouldShowArrow={true}
       items={[
@@ -86,7 +88,7 @@ export function AssignmentScoreIcon({
     return (
       <HugeiconsIcon
         icon={Clock05StrokeRounded}
-        className="size-4 text-red-500"
+        className="min-w-4 size-4 text-destructive"
       />
     );
   }
@@ -101,14 +103,14 @@ export function AssignmentScoreIcon({
     return (
       <HugeiconsIcon
         icon={TradeUpStrokeRounded}
-        className="size-4 text-green-600"
+        className="min-w-4 size-4 text-green-600"
       />
     );
   }
   return (
     <HugeiconsIcon
       icon={TradeDownStrokeRounded}
-      className="size-4 text-red-500"
+      className="min-w-4 size-4 text-destructive"
     />
   );
 }
@@ -158,7 +160,9 @@ export function AssignmentScoreDisplay({
     <div className="flex items-center gap-1.5">
       <p
         className={cn(
-          { "text-red-500": assignment.status === AssignmentStatus.Missing },
+          {
+            "text-destructive": assignment.status === AssignmentStatus.Missing,
+          },
           { "text-blue-500/70": assignment.status === AssignmentStatus.Exempt },
           {
             "text-muted-foreground":
@@ -178,14 +182,22 @@ export function AssignmentScoreDisplay({
 }
 export function TeacherCommentBadge(props: BadgeProps) {
   return (
-    <Badge variant="secondary" {...props}>
+    <Badge
+      variant="secondary"
+      className="group-data-[highlight-missing=true]:text-destructive group-data-[highlight-missing=true]:bg-destructive/10"
+      {...props}
+    >
       <HugeiconsIcon icon={Message01StrokeRounded} /> Comment
     </Badge>
   );
 }
 export function SubmissionBadge(props: BadgeProps) {
   return (
-    <Badge variant="outline" {...props}>
+    <Badge
+      variant="outline"
+      className="group-data-[highlight-missing=true]:text-destructive group-data-[highlight-missing=true]:bg-destructive/10"
+      {...props}
+    >
       <HugeiconsIcon icon={AttachmentStrokeRounded} /> Submitted
     </Badge>
   );

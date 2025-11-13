@@ -19,7 +19,7 @@ const bannerData = {
   offline: {
     icon: WifiDisconnected01StrokeRounded,
     text: "You are offline.",
-    className: "bg-red-500/10 text-red-500",
+    className: "bg-destructive/10 text-destructive",
   },
   "slow-connection": {
     icon: SignalFull02StrokeRounded,

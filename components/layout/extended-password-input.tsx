@@ -36,7 +36,9 @@ export function ExtendedFormPasswordInput(
             const Icon = isValid ? Tick02StrokeRounded : Cancel01StrokeRounded;
             return (
               <li key={i} className="flex items-center gap-2">
-                <span className={isValid ? "text-green-600" : "text-red-500"}>
+                <span
+                  className={isValid ? "text-green-600" : "text-destructive"}
+                >
                   <HugeiconsIcon icon={Icon} className="size-4" />
                 </span>
                 {requirement.label}

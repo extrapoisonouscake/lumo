@@ -6,9 +6,11 @@ export function ErrorAlert({ children }: { children: React.ReactNode }) {
     <Alert variant="destructive">
       <HugeiconsIcon
         icon={Alert02StrokeRounded}
-        className="size-4 min-w-4 text-red-500!"
+        className="size-4 min-w-4 text-destructive!"
       />
-      <AlertDescription className="text-red-500">{children}</AlertDescription>
+      <AlertDescription className="text-destructive">
+        {children}
+      </AlertDescription>
     </Alert>
   );
 }

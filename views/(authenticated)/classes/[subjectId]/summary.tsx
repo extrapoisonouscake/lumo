@@ -83,7 +83,7 @@ export function SubjectSummary({
   const currentRunningAverage = academics.running.overall?.mark;
   const shouldShowGoalDialog =
     !!assignments &&
-    !!currentRunningAverage &&
+    typeof currentRunningAverage === "number" &&
     academics.categories.length > 0 &&
     !wasGradePosted;
 
@@ -371,7 +371,7 @@ function GoalButton({
             isCalculated && isAchievable,
         },
         {
-          "text-red-500/80 group-hover:text-red-500/90":
+          "text-destructive/80 group-hover:text-destructive/90":
             isCalculated && !isAchievable,
         },
         {

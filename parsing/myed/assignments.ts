@@ -41,13 +41,7 @@ function convertAssignment({
   if (scoreElement) {
     const { scoreLabel, score } = scoreElement;
 
-    if (typeof score === "number" || (score && score !== "NaN")) {
-      return {
-        ...baseAssignment,
-        status: AssignmentStatus.Graded,
-        score: +score,
-      };
-    } else if (scoreLabel) {
+    if (scoreLabel) {
       const status =
         scoreLabelToStatus[scoreLabel] ?? AssignmentStatus.Ungraded;
       return {
@@ -55,13 +49,13 @@ function convertAssignment({
         status: status as Exclude<AssignmentStatus, AssignmentStatus.Graded>,
         score: null,
       };
+    } else if (typeof score === "number" || (score && score !== "NaN")) {
+      return {
+        ...baseAssignment,
+        status: AssignmentStatus.Graded,
+        score: +score,
+      };
     }
-  } else {
-    return {
-      ...baseAssignment,
-      status: AssignmentStatus.Ungraded,
-      score: null,
-    };
   }
   return {
     ...baseAssignment,
@@ -85,7 +79,6 @@ export function parseSubjectAssignments({
       | OpenAPI200JSONResponse<"/aspen/rest/studentSchedule/{subjectOid}/categoryDetails/upcoming">
     >,
   ];
-
   const preparedAssignments = assignmentsSegments
     .flat()
     .sort((a, b) => b.dueDate - a.dueDate)

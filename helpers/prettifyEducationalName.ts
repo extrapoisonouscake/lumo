@@ -53,20 +53,29 @@ export const prettifyEducationalName = (name: string) => {
   const processedName = lowerCaseName
     .split(/(\s+|[()[\]{}–—-])/g)
     .map((word, i) => {
-      if (
-        educationAbbreviations.has(word.toUpperCase()) ||
-        /^\d+[a-zA-Z]+$/.test(word) ||
-        /^[IVXLCDM]+$/i.test(word)
-      ) {
+      if (educationAbbreviations.has(word.toUpperCase()))
         return word.toUpperCase();
-      } else if (
-        (i === 0 || !smallWords.has(word)) &&
-        !/^\d+(st|nd|rd|th)$/i.test(word)
-      ) {
-        return capitalize(word);
-      } else {
-        return word;
-      }
+      const parts = word.match(/[a-zA-Z]+|\d+|[^a-zA-Z\d]+/g) || [word];
+
+      return parts
+        .map((part, j) => {
+          if (
+            educationAbbreviations.has(part.toUpperCase()) ||
+            /^\d+[a-zA-Z]+$/.test(part) ||
+            /^[IVXLCDM]+$/i.test(part)
+          ) {
+            return part.toUpperCase();
+          } else if (
+            (i === 0 || !smallWords.has(part)) &&
+            j === 0 &&
+            !/^\d+(st|nd|rd|th)$/i.test(part)
+          ) {
+            return capitalize(part);
+          } else {
+            return part;
+          }
+        })
+        .join("");
     })
     .join("");
 

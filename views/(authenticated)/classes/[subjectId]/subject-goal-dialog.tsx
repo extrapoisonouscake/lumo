@@ -334,7 +334,7 @@ export function SubjectGoalDialog({
               className={cn(
                 "z-20 relative h-[21px] text-muted-foreground justify-center w-full flex items-center gap-2 text-sm transition-colors",
                 {
-                  "text-red-500": isCalculated && !isAchievable,
+                  "text-destructive": isCalculated && !isAchievable,
                   "text-green-600": isCalculated && isAchievable,
                 }
               )}

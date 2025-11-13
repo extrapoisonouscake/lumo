@@ -211,7 +211,7 @@ export function SubjectAssignmentsTable({
       settings.shouldHighlightMissingAssignments
         ? (row: Row<Assignment>) => {
             return cn({
-              "bg-red-100/30 dark:bg-red-100/20 hover:bg-red-100/40 dark:hover:bg-red-100/30 text-red-500":
+              "bg-red-100/30 dark:bg-red-100/20 hover:bg-red-100/40 dark:hover:bg-red-100/30 text-destructive":
                 row.original.status === AssignmentStatus.Missing,
             });
           }
@@ -227,6 +227,9 @@ export function SubjectAssignmentsTable({
   };
   const getRowRenderer: RowRendererFactory<Assignment> = (table) => (row) => {
     const cells = row.getVisibleCells();
+    const isMissing = row.original.status === AssignmentStatus.Missing;
+    const isMissingHighlighted =
+      settings.shouldHighlightMissingAssignments && isMissing;
     return (
       <TableRow
         key={row.id}
@@ -238,10 +241,11 @@ export function SubjectAssignmentsTable({
             })
           )
         }
+        data-highlight-missing={isMissingHighlighted}
         style={table.options.meta?.getRowStyles?.(row)}
         className={cn(
           table.options.meta?.getRowClassName?.(row),
-          "cursor-pointer"
+          "cursor-pointer group"
         )}
       >
         {cells.map((cell, i) => {
@@ -330,7 +334,7 @@ export function SubjectAssignmentsTable({
               id="subject-search"
               table={table}
               columnName="name"
-              placeholder="Subject Name..."
+              placeholder="Subject name..."
             />
           </div>
         </div>

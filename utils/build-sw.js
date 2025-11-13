@@ -89,7 +89,7 @@ const { count, size, warnings, manifestEntries } = await generateSW({
         cacheName: "images",
         expiration: {
           maxEntries: 60,
-          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 7 days
         },
       },
     },

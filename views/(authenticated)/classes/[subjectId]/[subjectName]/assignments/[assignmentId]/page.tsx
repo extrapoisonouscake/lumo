@@ -339,7 +339,7 @@ function DueDateRow({ value, isMissing }: { value: Date; isMissing: boolean }) {
   return (
     <AssignmentPropertyRow
       label="Due Date"
-      labelClassName={cn({ "text-red-500": isMissing })}
+      labelClassName={cn({ "text-destructive": isMissing })}
       value={
         value
           ? `${timezonedDayJS(value).format(VISIBLE_DATE_FORMAT)}${
@@ -403,7 +403,7 @@ function GradeRow({
                       ) : (
                         <HugeiconsIcon
                           icon={TradeDownStrokeRounded}
-                          className="h-4 w-4 text-red-500"
+                          className="h-4 w-4 text-red-destructive"
                         />
                       )}
                     </div>
