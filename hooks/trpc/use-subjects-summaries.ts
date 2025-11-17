@@ -65,7 +65,7 @@ export function useSubjectSummaries<TSelected = SubjectSummary>(
 
       return {
         data: Object.fromEntries(transformedData) as Record<string, TSelected>,
-        isFetching: results.some((result) => result.isFetching),
+        isLoading: results.some((result) => result.isLoading),
         isError: results.some((result) => result.isError),
         isPaused: results.some((result) => result.isPaused),
       };

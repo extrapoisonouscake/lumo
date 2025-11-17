@@ -32,7 +32,7 @@ export function useCachedQuery<
     ttlKey?: ClientCacheTTLKey;
   } = {}
 ): UseQueryResult<TData, TError> {
-  const query = useQuery(options);
+  const query = useQuery({ ...options, placeholderData: (prev) => prev });
   const [cachedResponse, setCachedResponse] = useState<TData | undefined>(
     undefined
   );
@@ -58,7 +58,7 @@ export function useCachedQuery<
     }
   }, [query.data]);
 
-  if (cachedResponse && !query.data && (!query.isError||isOffline)) {
+  if (cachedResponse && !query.data && (!query.isError || isOffline)) {
     return getReactQueryMockSuccessResponse(
       query,
       cachedResponse

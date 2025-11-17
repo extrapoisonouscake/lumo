@@ -28,7 +28,7 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
   );
 
   return (
-    <QueryWrapper query={query} showStaleData>
+    <QueryWrapper query={query}>
       {(data) => {
         if (!data.isAllowed) return null;
         return (
@@ -80,7 +80,10 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
                     </Button>
                   </Link>
                   {data.isOpen && (
-                    <DeleteSubmissionButton assignmentId={assignmentId} />
+                    <DeleteSubmissionButton
+                      submissionId={data.file.id}
+                      assignmentId={assignmentId}
+                    />
                   )}
                 </div>
               </>
@@ -96,7 +99,13 @@ export function SubmissionSection({ assignmentId }: { assignmentId: string }) {
     </QueryWrapper>
   );
 }
-function DeleteSubmissionButton({ assignmentId }: { assignmentId: string }) {
+function DeleteSubmissionButton({
+  submissionId,
+  assignmentId,
+}: {
+  submissionId: string;
+  assignmentId: string;
+}) {
   const mutation = useMutation({
     ...trpc.myed.subjects.deleteAssignmentSubmission.mutationOptions(),
     onSuccess: () => {
@@ -115,7 +124,7 @@ function DeleteSubmissionButton({ assignmentId }: { assignmentId: string }) {
     <Button
       size="icon"
       className="bg-destructive/10 rounded-xl text-destructive hover:bg-destructive/15"
-      onClick={() => mutation.mutateAsync({ assignmentId })}
+      onClick={() => mutation.mutateAsync({ submissionId })}
     >
       <HugeiconsIcon icon={Delete02StrokeRounded} />
     </Button>

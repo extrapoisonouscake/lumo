@@ -529,15 +529,15 @@ export const myEdParsingRoutes = {
       contentType: "multipart/form-data",
       expect: "html",
     })),
-  deleteAssignmentFile: new Route<{ assignmentId: string }>()
+  deleteAssignmentFile: new Route<{ submissionId: string }>()
     .step({
       method: "GET",
       path: `/home.do`,
       expect: "html",
     })
-    .step(({ params: { assignmentId } }) => ({
+    .step(({ params: { submissionId } }) => ({
       method: "POST",
-      path: `/portalAssignmentDetail.do?userEvent=2050&submissionOid=${assignmentId}`,
+      path: `/portalAssignmentDetail.do?userEvent=2050&submissionOid=${submissionId}`,
       contentType: "application/x-www-form-urlencoded",
       expect: "html",
     })),

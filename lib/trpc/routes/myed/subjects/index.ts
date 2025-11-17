@@ -243,7 +243,7 @@ export const subjectsRouter = router({
   deleteAssignmentSubmission: authenticatedProcedure
     .input(
       z.object({
-        assignmentId: z.string(),
+        submissionId: z.string(),
       })
     )
     .mutation(async ({ input, ctx: { getMyEd } }) => {

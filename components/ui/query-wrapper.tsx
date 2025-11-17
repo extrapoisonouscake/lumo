@@ -6,13 +6,12 @@ import { useNetworkStatus } from "../providers/network-status-provider";
 interface QueryWrapperProps<TData, TError> {
   query: Pick<
     QueryObserverResult<TData, TError>,
-    "isFetching" | "isError" | "data" | "isPaused"
+    "isLoading" | "isError" | "data" | "isPaused"
   >;
   children: (data: TData) => ReactNode;
   skeleton?: ReactNode;
   onError?: ReactNode;
   onPaused?: ReactNode;
-  showStaleData?: boolean;
 }
 const OfflineError = () => {
   return <ErrorCard message="You are offline." emoji="🔌" />;
@@ -23,10 +22,9 @@ export function QueryWrapper<TData, TError>({
   skeleton,
   onError,
   onPaused,
-  showStaleData = false,
 }: QueryWrapperProps<TData, TError>) {
   const { isOffline } = useNetworkStatus();
-  if (query.isFetching && !showStaleData) {
+  if (query.isLoading) {
     return <>{skeleton}</>;
   }
 

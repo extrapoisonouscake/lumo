@@ -9,6 +9,7 @@ import {
 import { clientAuthChecks } from "@/helpers/client-auth-checks";
 import type { AppRouter } from "@/lib/trpc";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
+import * as Sentry from "@sentry/react";
 import {
   defaultShouldDehydrateQuery,
   QueryClient,
@@ -93,6 +94,8 @@ export const trpcClient = createTRPCClient<AppRouter>({
         if (code === "UNAUTHORIZED") {
           clearAuthCookies();
           window.location.href = "/login";
+        } else if (code === "INTERNAL_SERVER_ERROR") {
+          Sentry.captureException(opts.error);
         }
         return false; // Never retry
       },

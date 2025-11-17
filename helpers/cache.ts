@@ -177,7 +177,7 @@ export function getReactQueryMockSuccessResponse<ResponseType, ErrorShape>(
 ) {
   return {
     ...query,
-    isFetching: false,
+    isLoading: false,
     isError: false,
     data,
     isPaused: false,

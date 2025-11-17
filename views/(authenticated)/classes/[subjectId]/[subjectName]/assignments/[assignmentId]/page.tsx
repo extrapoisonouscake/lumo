@@ -92,12 +92,6 @@ export default function AssignmentPage() {
                       shouldShowPercentages={settings?.shouldShowPercentages}
                     />
 
-                    {weight && (
-                      <AssignmentPropertyRow
-                        label="Weight"
-                        value={`${weight}%`}
-                      />
-                    )}
                     <CategoryRow
                       categories={subject?.academics?.categories}
                       categoryId={categoryId}
@@ -184,7 +178,6 @@ function ContentSkeleton() {
         >
           <PropertyRowSkeleton />
 
-          <PropertyRowSkeleton labelLength={12} valueLength={12} />
           <PropertyRowSkeleton labelLength={12} valueLength={12} />
         </AssignmentSectionCard>
 
