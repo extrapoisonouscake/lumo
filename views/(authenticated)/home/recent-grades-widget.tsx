@@ -20,6 +20,8 @@ import { getGradeInfo, GRADES_VISUAL_CONFIG } from "@/helpers/grades";
 import { useRecentAssignments } from "@/hooks/trpc/use-subjects-assignments";
 import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
+import { timezonedDayJS } from "@/instances/dayjs";
+import { AssignmentStatus } from "@/types/school";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
 import { AssignmentScoreIcon } from "../classes/[subjectId]/(assignments)/assignment-card";
@@ -32,6 +34,8 @@ import {
   WidgetCustomizationContentRenderer,
 } from "./helpers";
 import { Widget, WidgetErrorCard } from "./widget";
+
+const MAX_RECENT_GRADES_DAYS = 7;
 
 function RecentGradesWidget(
   widget: WidgetComponentProps<Widgets.RECENT_GRADES>
@@ -80,7 +84,14 @@ function RecentGradesWidget(
 
   const recentGradedAssignments = useMemo(() => {
     return assignments.data
-      .filter((assignment) => typeof assignment.score === "number")
+      .filter(
+        (assignment) =>
+          assignment.status === AssignmentStatus.Graded &&
+          timezonedDayJS().diff(
+            assignment.updatedAt ?? assignment.dueAt,
+            "days"
+          ) <= MAX_RECENT_GRADES_DAYS
+      )
       .toSorted((a, b) => {
         // If both have updatedAt, sort by updatedAt
         if (a.updatedAt && b.updatedAt) {
