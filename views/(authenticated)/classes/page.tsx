@@ -55,7 +55,6 @@ export default function SubjectsPage() {
     isPreviousYear,
     termId: isPreviousYear && !term ? MYED_ALL_GRADE_TERMS_SELECTOR : term,
   });
-
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
     year: isPreviousYear ? "previous" : "current",
@@ -105,6 +104,7 @@ function Content({
   currentTermIndex?: number;
   subjectSummaries?: Record<string, SubjectSummary>;
 }) {
+  console.log({ queryKey });
   const shouldShowDynamicView =
     (!term || term === MYED_ALL_GRADE_TERMS_SELECTOR) && year === "current";
   return (

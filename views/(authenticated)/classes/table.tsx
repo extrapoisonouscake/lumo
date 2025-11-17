@@ -315,31 +315,24 @@ function SubjectCardSkeleton() {
       items={[
         {
           label: "Average",
-          value: (
-            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
-              100.0
-            </Skeleton>
-          ),
+          className: "flex flex-col gap-1",
+          labelClassName: "leading-[16px]",
+          value: <Skeleton className="block w-fit h-5">100.0</Skeleton>,
           asChild: true,
         },
         {
           label: "Room",
-
-          value: (
-            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
-              10000
-            </Skeleton>
-          ),
+          labelClassName: "leading-[16px]",
+          className: "flex flex-col gap-1",
+          value: <Skeleton className="block w-fit h-5">10000</Skeleton>,
           asChild: true,
         },
         {
           label: "Teachers",
-          className: "col-span-2",
-          valueClassName: "mt-0.5",
+          className: "col-span-2 flex flex-col gap-1",
+          labelClassName: "leading-[16px]",
           value: (
-            <Skeleton className="block w-fit mt-0.5" shouldShrink={false}>
-              Teacher, Teacher
-            </Skeleton>
+            <Skeleton className="block w-fit h-5">Teacher, Teacher</Skeleton>
           ),
           asChild: true,
         },

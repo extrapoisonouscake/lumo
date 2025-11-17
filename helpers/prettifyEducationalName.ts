@@ -5,8 +5,6 @@ const educationAbbreviations = new Set([
   "MBA",
   "BA",
   "MA",
-  "BSc",
-  "MSc",
   "UN",
   "AP",
   "2D",
@@ -23,7 +21,7 @@ const educationAbbreviations = new Set([
 const TEACHER_ADVISORY_ABBREVIATIONS = ["ta", "teacher advisory"];
 export const isTeacherAdvisory = (name: string) =>
   TEACHER_ADVISORY_ABBREVIATIONS.includes(name.toLowerCase());
-const directReplacements: Record<string, string> = {};
+
 const smallWords = new Set([
   "a",
   "an",
@@ -45,40 +43,61 @@ const smallWords = new Set([
 export const capitalize = (word: string) => {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
+function containsBothCases(str: string) {
+  const hasUppercase = /[A-Z]/.test(str);
+  const hasLowercase = /[a-z]/.test(str);
+  return hasUppercase && hasLowercase;
+}
+const processWord = ({
+  word,
+  prevChar,
+  nextChar,
+}: {
+  word: string;
+  prevChar: string | undefined;
+  nextChar: string | undefined;
+}) => {
+  if (
+    educationAbbreviations.has(word.toUpperCase()) &&
+    !containsBothCases(word)
+  ) {
+    return word.toUpperCase();
+  } else if (smallWords.has(word.toLowerCase())) {
+    if (prevChar === " " || nextChar === " ") {
+      return word.toLowerCase();
+    } else {
+      return word;
+    }
+  } else if (/^[IVXLCDM]+$/i.test(word) && !containsBothCases(word)) {
+    return word.toUpperCase();
+  } else {
+    return capitalize(word);
+  }
+};
 export const prettifyEducationalName = (name: string) => {
-  const lowerCaseName = name.toLowerCase();
-  const replacement = directReplacements[lowerCaseName];
-  if (replacement) return replacement;
+  let processedName = "";
+  let currentWord = "";
+  for (let i = 0; i < name.length; i++) {
+    const char = name[i]!;
 
-  const processedName = lowerCaseName
-    .split(/(\s+|[()[\]{}–—-])/g)
-    .map((word, i) => {
-      if (educationAbbreviations.has(word.toUpperCase()))
-        return word.toUpperCase();
-      const parts = word.match(/[a-zA-Z]+|\d+|[^a-zA-Z\d]+/g) || [word];
-
-      return parts
-        .map((part, j) => {
-          if (
-            educationAbbreviations.has(part.toUpperCase()) ||
-            /^\d+[a-zA-Z]+$/.test(part) ||
-            /^[IVXLCDM]+$/i.test(part)
-          ) {
-            return part.toUpperCase();
-          } else if (
-            (i === 0 || !smallWords.has(part)) &&
-            j === 0 &&
-            !/^\d+(st|nd|rd|th)$/i.test(part)
-          ) {
-            return capitalize(part);
-          } else {
-            return part;
-          }
-        })
-        .join("");
-    })
-    .join("");
-
+    if (char.match(/\p{L}/u)) {
+      currentWord += char;
+    } else {
+      const prevChar = processedName.at(-1);
+      const nextChar = name[i + 1];
+      processedName += processWord({ word: currentWord, prevChar, nextChar });
+      currentWord = "";
+      processedName += char;
+    }
+  }
+  processedName += processWord({
+    word: currentWord,
+    prevChar: processedName.at(-1),
+    nextChar: undefined,
+  });
   // Remove spaces after opening brackets and before closing brackets
-  return processedName.replace(/([\(\[\{])\s+|\s+([\)\]\}])/g, "$1$2");
+  // Ensure commas are followed by a space
+  return processedName
+    .replace(/([\(\[\{])\s+|\s+([\)\]\}])/g, "$1$2")
+    .replace(/,([^\s])/g, ", $1");
 };

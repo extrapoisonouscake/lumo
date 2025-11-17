@@ -32,14 +32,17 @@ export function useCachedQuery<
     ttlKey?: ClientCacheTTLKey;
   } = {}
 ): UseQueryResult<TData, TError> {
-  const query = useQuery({ ...options, placeholderData: (prev) => prev });
+  const query = useQuery({
+    ...options,
+    placeholderData: (prevData, prevQuery) =>
+      prevQuery?.queryKey === options.queryKey ? prevData : undefined,
+  });
   const [cachedResponse, setCachedResponse] = useState<TData | undefined>(
     undefined
   );
   const { isOffline } = useNetworkStatus();
   const cacheKey = getCacheKey(options.queryKey);
 
-  // Load cached response on mount
   useEffect(() => {
     setCachedResponse(undefined);
     setIsLoaded(false);
