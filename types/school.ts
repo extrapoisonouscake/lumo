@@ -16,8 +16,16 @@ export interface Subject {
 
   term?: SubjectTerm;
 }
+//?name
+export type ScheduleMeaningfulSubject = Omit<
+  Subject,
+  "average" | "id" | "term"
+> & { isSpareBlock: false };
 //? name?
-export type ScheduleSubject = Omit<Subject, "average" | "id" | "term"> & {
+export type ScheduleSubject = (
+  | ScheduleMeaningfulSubject
+  | { isSpareBlock: true }
+) & {
   startsAt: Date;
   endsAt: Date;
 };
@@ -54,7 +62,7 @@ export interface SubjectSummary {
       id: string;
       name: string;
       average: SubjectGrade | null;
-      derivedWeight: number | null;
+      weight: number | null;
       terms: {
         name: string;
         weight: number | null;

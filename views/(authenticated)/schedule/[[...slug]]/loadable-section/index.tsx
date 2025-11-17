@@ -197,7 +197,9 @@ function Content({
       weekday={schedule.weekday}
       data={schedule.subjects.map((subject) => ({
         ...subject,
-        id: subjects?.find((s) => s.name.actual === subject.name.actual)?.id,
+        id: subject.isSpareBlock
+          ? undefined
+          : subjects?.find((s) => s.name.actual === subject.name.actual)?.id,
       }))}
     />
   );

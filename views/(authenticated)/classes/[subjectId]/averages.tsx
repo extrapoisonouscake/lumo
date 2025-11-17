@@ -288,8 +288,8 @@ function CategoryCard({
       <div className="p-4 flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <span className="font-medium text-sm">{category.name}</span>
-          {category.derivedWeight !== null && (
-            <WeightBadge>{category.derivedWeight}%</WeightBadge>
+          {category.weight !== null && (
+            <WeightBadge>{category.weight}%</WeightBadge>
           )}
         </div>
 
@@ -322,10 +322,9 @@ function CategoryCard({
                   <span className="text-sm text-muted-foreground">
                     {term.name}
                   </span>
-                  {term.weight !== null &&
-                    category.derivedWeight !== term.weight && (
-                      <WeightBadge>{term.weight}%</WeightBadge>
-                    )}
+                  {term.weight !== null && category.weight !== term.weight && (
+                    <WeightBadge>{term.weight}%</WeightBadge>
+                  )}
                 </div>
                 {term.average && (
                   <div className="flex items-baseline gap-1">

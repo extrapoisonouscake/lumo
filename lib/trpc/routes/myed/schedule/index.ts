@@ -16,7 +16,9 @@ export const scheduleRouter = router({
       after(async () => {
         if (!("knownError" in response)) {
           await submitUnknownSubjectsNames(
-            response.subjects.map((subject) => subject.name.actual)
+            response.subjects
+              .filter((subject) => !subject.isSpareBlock)
+              .map((subject) => subject.name.actual)
           );
         }
       });

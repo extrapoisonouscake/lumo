@@ -22,6 +22,7 @@ import { pluralize } from "@/instances/intl";
 import { ScheduleSubject } from "@/types/school";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 
+import { SPARE_BLOCK_NAME } from "@/constants/ui";
 import {
   ArrowRight01StrokeRounded,
   ArrowUpRight01StrokeRounded,
@@ -127,13 +128,16 @@ function Content({
       addBreaksToSchedule(
         subjects.map((subject) => ({
           ...subject,
-          id: nameToIdMap?.[subject.name.actual],
+          id: subject.isSpareBlock
+            ? undefined
+            : nameToIdMap?.[subject.name.actual],
         }))
       ),
     [subjects, nameToIdMap]
   );
-  const subjectsWithoutTA = subjects.filter(
-    (subject) => !isTeacherAdvisory(subject.name.actual)
+  const meaningfulSubjects = subjects.filter(
+    (subject) =>
+      !subject.isSpareBlock && !isTeacherAdvisory(subject.name.actual)
   );
   const { currentRowIndex } = useTTNextSubject(rows);
 
@@ -164,22 +168,24 @@ function Content({
     );
   }
   const subjectsPassed = hasNoMoreClasses
-    ? subjectsWithoutTA.length
+    ? meaningfulSubjects.length
     : currentRowIndex === null
       ? 0
       : rows
           .slice(0, currentRowIndex + 1)
           .filter(
             (row) =>
-              row.type === "subject" && !isTeacherAdvisory(row.name.actual)
+              row.type === "subject" &&
+              !row.isSpareBlock &&
+              !isTeacherAdvisory(row.name.actual)
           ).length;
   return (
     <div className="flex flex-col gap-3 flex-1">
       <div className="flex gap-2 items-center justify-between">
         <p className="text-xs font-medium text-muted-foreground">
           {!!subjectsPassed && `${subjectsPassed}/`}
-          {subjectsWithoutTA.length}{" "}
-          {pluralize(classesPluralForms)(subjectsWithoutTA.length)}
+          {meaningfulSubjects.length}{" "}
+          {pluralize(classesPluralForms)(meaningfulSubjects.length)}
         </p>
         <CircularProgress
           values={[
@@ -188,9 +194,9 @@ function Content({
                 ((typeof currentRowIndex === "number"
                   ? subjectsPassed
                   : hasNoMoreClasses
-                    ? subjectsWithoutTA.length
+                    ? meaningfulSubjects.length
                     : 0) /
-                  subjectsWithoutTA.length) *
+                  meaningfulSubjects.length) *
                 100,
               className: "text-brand",
             },
@@ -203,23 +209,33 @@ function Content({
     </div>
   );
 }
-function NextSubjectPreview({ id, name }: ScheduleRowSubject) {
+function NextSubjectPreview(subject: ScheduleRowSubject) {
   const span = (
     <span className="font-medium text-foreground clickable">
-      {name.prettified}
-      {name.emoji && <InlineSubjectEmoji emoji={name.emoji} />}
+      {subject.isSpareBlock ? (
+        SPARE_BLOCK_NAME
+      ) : (
+        <>
+          {subject.name.prettified}
+          {subject.name.emoji && (
+            <InlineSubjectEmoji emoji={subject.name.emoji} />
+          )}
+        </>
+      )}
     </span>
   );
   return (
     <p className="text-sm text-muted-foreground">
       Next class:{" "}
-      {isTeacherAdvisory(name.actual) ? (
+      {subject.isSpareBlock ? (
+        SPARE_BLOCK_NAME
+      ) : isTeacherAdvisory(subject.name.actual) ? (
         span
       ) : (
         <Link
           to={getSubjectPageURL("current")({
-            id: id!,
-            name: name,
+            id: subject.id!,
+            name: subject.name,
           })}
         >
           {span}
@@ -267,29 +283,35 @@ function ScheduleCardsSkeleton() {
 }
 function ScheduleElementCard({ element }: { element: ScheduleRow }) {
   const isSubject = element.type === "subject";
-  const isTeacherAdvisorySubject =
-    isSubject && isTeacherAdvisory(element.name.actual);
+  const isClickable =
+    isSubject &&
+    !element.isSpareBlock &&
+    !isTeacherAdvisory(element.name.actual);
   const content = (
     <Card
       className={cn(
         "gap-1 p-3 justify-between flex-row bg-muted/25 items-center",
         {
-          clickable: isSubject && !isTeacherAdvisorySubject,
+          clickable: isClickable,
         }
       )}
     >
       <div className="flex flex-col flex-1 min-w-0">
         <div className="font-medium truncate">
           {isSubject ? (
-            <>
-              {element.name.prettified}
-              {element.name.emoji && (
-                <InlineSubjectEmoji
-                  emoji={element.name.emoji}
-                  whitespaceCount={1}
-                />
-              )}
-            </>
+            element.isSpareBlock ? (
+              SPARE_BLOCK_NAME
+            ) : (
+              <>
+                {element.name.prettified}
+                {element.name.emoji && (
+                  <InlineSubjectEmoji
+                    emoji={element.name.emoji}
+                    whitespaceCount={1}
+                  />
+                )}
+              </>
+            )
           ) : (
             <ScheduleBreak type={element.type} />
           )}
@@ -299,7 +321,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
           {timezonedDayJS(element.endsAt).format("h:mm")}
         </p>
       </div>
-      {isSubject && !isTeacherAdvisorySubject && (
+      {isClickable && (
         <HugeiconsIcon
           icon={ArrowRight01StrokeRounded}
           className="size-5 text-muted-foreground group-hover/card:text-foreground transition-colors"
@@ -308,7 +330,7 @@ function ScheduleElementCard({ element }: { element: ScheduleRow }) {
     </Card>
   );
 
-  if (isSubject && !isTeacherAdvisorySubject) {
+  if (isClickable) {
     return (
       <Link
         to={getSubjectPageURL("current")({
@@ -371,13 +393,21 @@ function ClassesNotYetStartedCard({ subjects }: { subjects: ScheduleRow[] }) {
   );
 }
 function FirstSubjectLink(subject: ScheduleRowSubject) {
-  const content = (
+  const content = subject.isSpareBlock ? (
+    SPARE_BLOCK_NAME
+  ) : (
     <>
       {subject.name.prettified}
       {subject.name.emoji && <InlineSubjectEmoji emoji={subject.name.emoji} />}
     </>
   );
-  if (isTeacherAdvisory(subject.name.actual)) {
+  if (subject.isSpareBlock) {
+    return (
+      <span className="font-medium text-muted-foreground italic line-through">
+        {SPARE_BLOCK_NAME}
+      </span>
+    );
+  } else if (isTeacherAdvisory(subject.name.actual)) {
     return <span className="font-medium text-foreground">{content}</span>;
   } else {
     return (

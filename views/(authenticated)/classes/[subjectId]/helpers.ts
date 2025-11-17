@@ -30,7 +30,7 @@ function computeGoalStatusResult({
   ).length;
   const category = categories.find((cat) => cat.id === categoryId);
   if (!category) return { outcome: AverageGoalOutcome.Unknown };
-  const categoryWeight = category.derivedWeight;
+  const categoryWeight = category.weight;
   if (!categoryWeight) return { outcome: AverageGoalOutcome.Unknown };
   const categoryWeightPercentage = categoryWeight / 100;
   const categoryAverage = category.average?.mark ?? 100;

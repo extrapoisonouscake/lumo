@@ -38,11 +38,12 @@ export function parseSchedule({
   if ($tableBody.find(".listNoRecordsText").length > 0)
     throw new Error("No records");
 
-  const subjects = $tableBody
+  const subjects: ScheduleSubject[] = [];
+  $tableBody
     .children("tr")
     .not(MYED_TABLE_HEADER_SELECTOR)
     .toArray()
-    .map((row) => {
+    .forEach((row, i) => {
       const [timeTd, contentTd] = $(row).children("td").toArray();
 
       const timeString = removeLineBreaks($(timeTd).find("td").text());
@@ -50,32 +51,37 @@ export function parseSchedule({
       const getDateFromSubjectTimeStringWithDay = getDateFromSubjectTimeString(
         locallyTimezonedDayJS(initialParams.day).startOf("minute")
       );
-
+      const baseSubject = {
+        startsAt: getDateFromSubjectTimeStringWithDay(startsAt!),
+        endsAt: getDateFromSubjectTimeStringWithDay(endsAt!),
+      };
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
-      if (!contentCellHTML) return;
-      const [subjectId, name, teachersString, room] =
+
+      if (!contentCellHTML) {
+        if (subjects[i - 1]?.isSpareBlock) return;
+        subjects.push({ ...baseSubject, isSpareBlock: true });
+        return;
+      }
+      const [code, name, teachersString, room] =
         removeLineBreaks(contentCellHTML).split("<br>");
 
       // Decode HTML entities in the name (e.g., &amp; becomes &)
-      const decodedName = name ? decodeHtmlEntities(name) : name;
+      const decodedName = decodeHtmlEntities(name!);
+
       const subject = {
-        startsAt: getDateFromSubjectTimeStringWithDay(startsAt!),
-        endsAt: getDateFromSubjectTimeStringWithDay(endsAt!),
+        ...baseSubject,
         name: {
           prettified: prettifyEducationalName(decodedName!),
-          actual: decodedName,
+          actual: decodedName!,
           emoji: getSubjectEmoji(decodedName!),
         },
         teachers: teachersString!.split("; "),
         room: room ? prettifyEducationalName(room) : null,
+        isSpareBlock: false,
       };
-      if (!subject.name) return;
-      return subject;
-    })
-    .filter(Boolean) as ScheduleSubject[] satisfies (
-    | ScheduleSubject
-    | undefined
-  )[];
+
+      subjects.push(subject);
+    });
 
   const weekday = getWeekday($tableBody);
 

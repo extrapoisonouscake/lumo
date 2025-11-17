@@ -393,7 +393,7 @@ export function SubjectGoalDialog({
                 label="Category"
                 name="categoryId"
                 options={categories.map((category) => ({
-                  label: `${category.name}${category.derivedWeight ? ` (${category.derivedWeight}%)` : ``}`,
+                  label: `${category.name}${category.weight ? ` (${category.weight}%)` : ``}`,
                   value: category.id,
                 }))}
               />

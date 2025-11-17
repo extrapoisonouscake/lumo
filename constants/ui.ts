@@ -15,3 +15,4 @@ export const isIOS =
 
 export const isIOSApp = Capacitor.getPlatform() === "ios";
 export const isMobileApp = Capacitor.isNativePlatform();
+export const SPARE_BLOCK_NAME = "Spare Block";

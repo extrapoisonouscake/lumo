@@ -170,13 +170,15 @@ const convertAcademicCategory = (
       };
     }),
   };
-  const derivedWeight =
+  const weight =
     new Set(
-      result.terms.map((term) => term.weight).filter((term) => term !== null)
+      result.terms
+        .map((term) => typeof term.weight === "number")
+        .filter((term) => term !== null)
     ).size === 1
       ? result.terms[0]!.weight
       : null;
-  return { ...result, derivedWeight };
+  return { ...result, weight };
 };
 const GRADES_SUMMARY_ITEM_STATIC_KEYS = [
   "category",

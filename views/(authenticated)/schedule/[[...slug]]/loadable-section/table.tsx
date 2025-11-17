@@ -20,14 +20,14 @@ import {
   RowRendererFactory,
   TableRenderer,
 } from "@/components/ui/table-renderer";
-import { NULL_VALUE_DISPLAY_FALLBACK } from "@/constants/ui";
+import { NULL_VALUE_DISPLAY_FALLBACK, SPARE_BLOCK_NAME } from "@/constants/ui";
 import { cn } from "@/helpers/cn";
 import { getSubjectPageURL } from "@/helpers/getSubjectPageURL";
 import { makeTableColumnsSkeletons } from "@/helpers/makeTableColumnsSkeletons";
 import { isTeacherAdvisory } from "@/helpers/prettifyEducationalName";
 import { renderTableCell } from "@/helpers/tables";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { ScheduleSubject } from "@/types/school";
+import { ScheduleMeaningfulSubject } from "@/types/school";
 
 import { InlineSubjectEmoji } from "@/components/misc/apple-emoji/inline-subject-emoji";
 import { Link } from "@/components/ui/link";
@@ -62,16 +62,27 @@ const columns = [
     header: "Time",
     id: "time",
     cell: ({ row }) => {
-      return `${timezonedDayJS(row.original.startsAt).format(
-        HOURS_FORMAT
-      )} - ${timezonedDayJS(row.original.endsAt).format(HOURS_FORMAT)}`;
+      return (
+        <span className="whitespace-nowrap">
+          {timezonedDayJS(row.original.startsAt).format(HOURS_FORMAT)} -{" "}
+          {timezonedDayJS(row.original.endsAt).format(HOURS_FORMAT)}
+        </span>
+      );
     },
   }),
   columnHelper.accessor("name", {
     header: "Name",
+    id: "name",
     cell: ({ row, cell }) => {
       if (row.original.type !== "subject") {
         return <ScheduleBreak type={row.original.type} />;
+      }
+      if (row.original.isSpareBlock) {
+        return (
+          <span className="text-muted-foreground italic">
+            {SPARE_BLOCK_NAME}
+          </span>
+        );
       }
       const value = row.original.name;
       return value ? (
@@ -114,7 +125,9 @@ const columns = [
     cell: ({ cell }) => {
       const value = cell.getValue();
       return value
-        ? (value as NonNullable<ScheduleSubject["teachers"]>).join("; ")
+        ? (value as NonNullable<ScheduleMeaningfulSubject["teachers"]>).join(
+            "; "
+          )
         : NULL_VALUE_DISPLAY_FALLBACK;
     },
   }),
@@ -139,7 +152,8 @@ export const mockScheduleSubjects = (length: number) => {
       name: { prettified: "1", actual: "1", emoji: null },
       room: "",
       type: "subject" as const,
-    } satisfies ScheduleRowSubject);
+      isSpareBlock: false,
+    } satisfies ScheduleRowSubject & { isSpareBlock: false });
     if (i < length - 1) {
       rows.push({
         startsAt: new Date(),
@@ -186,17 +200,21 @@ export function ScheduleTable({
   const navigate = useNavigate();
   const getRowRenderer: RowRendererFactory<ScheduleRow> = (table) => (row) => {
     const cells = row.getVisibleCells();
+    console.log(cells);
     const rowOriginal = row.original;
     const isSubject = isRowScheduleSubject(rowOriginal);
     let nameCell, timeCell;
-    if (!isSubject) {
+    if (!isSubject || rowOriginal.isSpareBlock) {
       //!optimize?
       timeCell = cells.find((cell) => cell.column.id === "time");
       nameCell = cells.find((cell) => cell.column.id === "name");
     }
-    const isTeacherAdvisoryRow =
-      isSubject && isTeacherAdvisory(rowOriginal.name.actual);
-    const shouldRedirect = isSubject && !isTeacherAdvisoryRow && rowOriginal.id;
+
+    const isMeaningfulSubject =
+      isSubject &&
+      !rowOriginal.isSpareBlock &&
+      !isTeacherAdvisory(rowOriginal.name.actual);
+    const shouldRedirect = isMeaningfulSubject && rowOriginal.id;
     return (
       <TableRow
         onClick={
@@ -216,7 +234,7 @@ export function ScheduleTable({
         style={table.options.meta?.getRowStyles?.(row)}
         className={table.options.meta?.getRowClassName?.(row)}
       >
-        {isSubject ? (
+        {isSubject && !rowOriginal.isSpareBlock ? (
           cells.map((cell, i) => {
             const content = renderTableCell(cell);
             const showArrow = shouldRedirect && i === cells.length - 1;
@@ -243,10 +261,11 @@ export function ScheduleTable({
   };
   const getRowClassName = useMemo(
     () => (row: Row<ScheduleRow>) => {
-      const isSubjectRow =
+      const isMeaningfulSubjectRow =
         row.original.type === "subject" &&
+        !row.original.isSpareBlock &&
         !isTeacherAdvisory(row.original.name.actual);
-      const shouldBeClickable = !isLoading && isSubjectRow;
+      const shouldBeClickable = !isLoading && isMeaningfulSubjectRow;
       return cn({
         "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a] sticky [&:not(:last-child)>td]:border-b [&+tr>td]:border-t-0 top-0 bottom-(--mobile-menu-height) bg-background shadow-[0_-1px_0_#000,0_1px_0_var(hsl(--border-color))] [&>td:first-child]:relative [&>td:first-child]:overflow-hidden [&>td:first-child]:after:w-1 [&>td:first-child]:after:h-full [&>td:first-child]:after:bg-brand [&>td:first-child]:after:absolute [&>td:first-child]:after:left-0 [&>td:first-child]:after:top-0":
           timezonedDayJS().isBetween(
@@ -254,7 +273,7 @@ export function ScheduleTable({
             row.original.endsAt
           ),
         "cursor-pointer": shouldBeClickable,
-        "[&>td]:py-2.5": !isSubjectRow,
+        "[&>td]:py-2.5": !isMeaningfulSubjectRow,
       });
     },
 
@@ -294,6 +313,7 @@ export function ScheduleTable({
                 isBreak={
                   !!(
                     data[currentRowIndex]!.type !== "subject" ||
+                    data[currentRowIndex]!.isSpareBlock ||
                     isTeacherAdvisory(data[currentRowIndex]!.name.actual)
                   )
                 }
@@ -339,19 +359,20 @@ export function ScheduleBreak({
 }
 function ScheduleMobileRow(row: ScheduleRow) {
   const isSubject = row.type === "subject";
-  const isTeacherAdvisoryRow = isSubject && isTeacherAdvisory(row.name.actual);
-  const isCurrent = timezonedDayJS().isBetween(row.startsAt, row.endsAt);
+  const isMeaningfulSubject =
+    isSubject && !row.isSpareBlock && !isTeacherAdvisory(row.name.actual);
+  const isCurrent =
+    timezonedDayJS().isBetween(row.startsAt, row.endsAt) && isSubject;
   const content = (
     <Card
       data-is-subject={isSubject}
       className={cn(
         "p-4 group relative flex-row gap-2 justify-between items-start",
         {
-          "bg-background border-brand/65 shadow-[0_0_45px_hsl(var(--background))]! overflow-hidden":
+          "bg-background border-brand/65 shadow-[0_0_45px_hsl(var(--background))]! overflow-hidden hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]":
             isCurrent,
-          "hover:bg-[#f9f9fa] dark:hover:bg-[#18181a]": isCurrent && isSubject,
           "border-none py-2.5 rounded-md items-center": !isSubject,
-          clickable: isSubject && !isTeacherAdvisoryRow,
+          clickable: isMeaningfulSubject,
         }
       )}
     >
@@ -366,29 +387,35 @@ function ScheduleMobileRow(row: ScheduleRow) {
         </p>
 
         {isSubject ? (
-          <p className="font-medium">
-            {row.name.prettified}
-            {row.name.emoji && <InlineSubjectEmoji emoji={row.name.emoji} />}
-          </p>
+          row.isSpareBlock ? (
+            <p className="text-muted-foreground italic font-medium">
+              {SPARE_BLOCK_NAME}
+            </p>
+          ) : (
+            <p className="font-medium">
+              {row.name.prettified}
+              {row.name.emoji && <InlineSubjectEmoji emoji={row.name.emoji} />}
+            </p>
+          )
         ) : (
           <ScheduleBreak
             className="text-muted-foreground text-sm whitespace-nowrap"
             type={row.type}
           />
         )}
-        {isSubject && (
+        {isSubject && !row.isSpareBlock && (
           <p className="text-sm text-muted-foreground">
             {row.teachers.join("; ")}
           </p>
         )}
       </div>
-      {isSubject && row.room && (
+      {isSubject && !row.isSpareBlock && row.room && (
         <div className="flex gap-1 items-center text-muted-foreground text-sm">
           <HugeiconsIcon icon={Door01StrokeRounded} className="size-4" />
           <p>{row.room}</p>
         </div>
       )}
-      {isSubject && !isTeacherAdvisoryRow && (
+      {isMeaningfulSubject && (
         <HugeiconsIcon
           icon={ArrowRight01StrokeStandard}
           className={cn(
@@ -409,7 +436,7 @@ function ScheduleMobileRow(row: ScheduleRow) {
     ),
   };
 
-  if (isSubject && !isTeacherAdvisoryRow) {
+  if (isMeaningfulSubject) {
     return (
       <Link
         to={getSubjectPageURLWithDefinedYear({
