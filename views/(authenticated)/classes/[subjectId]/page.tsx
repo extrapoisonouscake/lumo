@@ -8,7 +8,7 @@ import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { SubjectYear } from "@/types/school";
 
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useParams, useSearchParams } from "react-router";
 import {
   SubjectAssignmentsTable,
@@ -21,7 +21,7 @@ export default function SubjectPage() {
   const params = useParams();
   const subjectId = params.subjectId as string;
   const termId = searchParams.get("term") ?? undefined;
-  const year = searchParams.get("year") ?? "current";
+  const year = (searchParams.get("year") ?? "current") as SubjectYear;
   const category = searchParams.get("category") ?? "all";
   const settings = useUserSettings();
   const summary = useSubjectSummary(subjectId, year as SubjectYear);
@@ -31,6 +31,13 @@ export default function SubjectPage() {
     term: summary.data?.term,
     termId,
   });
+  //prioritizing attendance over submission statuses
+  useQuery(
+    getTRPCQueryOptions(trpc.myed.subjects.getSubjectAttendance)({
+      subjectId,
+      year,
+    })
+  );
   const assignmentsSubmissionStatuses = useQueries({
     queries:
       assignments.data?.assignments.map((assignment) =>

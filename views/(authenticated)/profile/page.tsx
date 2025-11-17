@@ -9,8 +9,9 @@ import { QueryWrapper } from "@/components/ui/query-wrapper";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/helpers/cn";
 import { useStudentDetails } from "@/hooks/trpc/use-student-details";
-import { Gender, StudentDetails } from "@/types/school";
+import { Gender, StudentDetails, UserRole } from "@/types/school";
 
+import { usePersonalDetails } from "@/hooks/trpc/use-personal-details";
 import { IconSvgObject } from "@/types/ui";
 import {
   Asterisk02StrokeRounded,
@@ -36,120 +37,128 @@ import { toast } from "sonner";
 import styles from "./styles.module.css";
 
 export default function ProfilePage() {
+  const profile = usePersonalDetails();
   const query = useStudentDetails();
   return (
     <>
       <TitleManager>Profile</TitleManager>
       <div className="flex flex-col gap-4">
         <PageHeading />
-        <QueryWrapper query={query} skeleton={<ProfileContentSkeleton />}>
-          {(data) => {
-            const {
-              studentNumber,
-              personalEducationNumber,
-              taRoom,
-              locker,
-              schoolName,
-              nextSchoolName,
-              graduationYear,
-              parkingSpaceNumber,
-              licensePlateNumber,
-              addresses,
-            } = data;
-            const shouldShowParking = !!(
-              parkingSpaceNumber || licensePlateNumber
-            );
-            return (
-              <>
-                <ProfileCard {...data} />
-                <Sections shouldShowParking={shouldShowParking}>
-                  <SectionCard
-                    title="Personal Details"
-                    icon={UserStrokeRounded}
-                    className="[grid-area:a]"
-                  >
-                    <div
-                      className="group grid grid-cols-1 md:grid-cols-2"
-                      data-multifield="true"
-                    >
-                      <UserProperty
-                        label="Student Number"
-                        value={studentNumber}
-                        icon={GridStrokeRounded}
-                        isCopyable
-                      />
-                      <UserProperty
-                        label="Personal Edu. Number"
-                        value={personalEducationNumber}
-                        icon={GridStrokeRounded}
-                        isCopyable
-                      />
-                    </div>
+        <QueryWrapper query={profile} skeleton={<ProfileContentSkeleton />}>
+          {(user) => (
+            <QueryWrapper query={query} skeleton={<ProfileContentSkeleton />}>
+              {(data) => {
+                const isParent = user.role === UserRole.Parent;
+                const {
+                  studentNumber,
+                  personalEducationNumber,
+                  taRoom,
+                  locker,
+                  schoolName,
+                  nextSchoolName,
+                  graduationYear,
+                  parkingSpaceNumber,
+                  licensePlateNumber,
+                  addresses,
+                } = data;
+                const shouldShowParking = !!(
+                  parkingSpaceNumber || licensePlateNumber
+                );
+                return (
+                  <>
+                    <ProfileCard {...data} />
+                    <Sections shouldShowParking={shouldShowParking}>
+                      <SectionCard
+                        title="Personal Details"
+                        icon={UserStrokeRounded}
+                        className="[grid-area:a]"
+                      >
+                        <div
+                          className={cn("group", {
+                            "grid grid-cols-1 md:grid-cols-2": isParent,
+                          })}
+                          data-multifield={isParent ? "true" : "false"}
+                        >
+                          <UserProperty
+                            label="Student Number"
+                            value={studentNumber}
+                            icon={GridStrokeRounded}
+                            isCopyable
+                          />
+                          <UserProperty
+                            label="Personal Edu. Number"
+                            value={personalEducationNumber}
+                            icon={GridStrokeRounded}
+                            isCopyable
+                          />
+                        </div>
 
-                    <ParentViewSpecificFields {...data} />
-                    <AddressList {...addresses} />
-                  </SectionCard>
-                  <SectionCard
-                    title="School"
-                    icon={SchoolStrokeRounded}
-                    className="[grid-area:b]"
-                  >
-                    <UserProperty
-                      label="Name"
-                      value={schoolName}
-                      icon={SchoolStrokeRounded}
-                    />
-                    {nextSchoolName && nextSchoolName !== schoolName && (
-                      <UserProperty
-                        label="Next School Name"
-                        value={nextSchoolName}
+                        <ParentViewSpecificFields {...data} />
+                        <AddressList {...addresses} />
+                      </SectionCard>
+                      <SectionCard
+                        title="School"
                         icon={SchoolStrokeRounded}
-                      />
-                    )}
-                    <UserProperty
-                      label="Graduation Year"
-                      value={graduationYear}
-                      icon={Calendar03StrokeRounded}
-                    />
-                    {taRoom && (
-                      <UserProperty
-                        label="TA Room"
-                        value={taRoom}
-                        icon={Door01StrokeRounded}
-                      />
-                    )}
-                    <UserProperty
-                      label="Locker"
-                      value={locker}
-                      icon={CircleLock01StrokeRounded}
-                    />
-                  </SectionCard>
-                  {shouldShowParking && (
-                    <SectionCard
-                      title="Parking"
-                      icon={ParkingAreaSquareStrokeRounded}
-                      className="[grid-area:c]"
-                    >
-                      {parkingSpaceNumber && (
+                        className="[grid-area:b]"
+                      >
                         <UserProperty
-                          label="Parking Space Number"
-                          value={parkingSpaceNumber}
+                          label="Name"
+                          value={schoolName}
+                          icon={SchoolStrokeRounded}
+                        />
+                        {nextSchoolName && nextSchoolName !== schoolName && (
+                          <UserProperty
+                            label="Next School Name"
+                            value={nextSchoolName}
+                            icon={SchoolStrokeRounded}
+                          />
+                        )}
+                        <UserProperty
+                          label="Graduation Year"
+                          value={graduationYear}
+                          icon={Calendar03StrokeRounded}
+                        />
+                        {taRoom && (
+                          <UserProperty
+                            label="TA Room"
+                            value={taRoom}
+                            icon={Door01StrokeRounded}
+                          />
+                        )}
+                        <UserProperty
+                          label="Locker"
+                          value={locker}
+                          icon={CircleLock01StrokeRounded}
+                        />
+                      </SectionCard>
+                      {shouldShowParking && (
+                        <SectionCard
+                          title="Parking"
                           icon={ParkingAreaSquareStrokeRounded}
-                        />
+                          className="[grid-area:c]"
+                        >
+                          {parkingSpaceNumber && (
+                            <UserProperty
+                              label="Parking Space Number"
+                              value={parkingSpaceNumber}
+                              icon={ParkingAreaSquareStrokeRounded}
+                            />
+                          )}
+                          {licensePlateNumber && (
+                            <UserProperty
+                              label="License Plate Number"
+                              value={licensePlateNumber}
+                              icon={Car04StrokeRounded}
+                            />
+                          )}
+                        </SectionCard>
                       )}
-                      {licensePlateNumber && (
-                        <UserProperty
-                          label="License Plate Number"
-                          value={licensePlateNumber}
-                          icon={Car04StrokeRounded}
-                        />
-                      )}
-                    </SectionCard>
-                  )}
-                </Sections>
-              </>
-            );
-          }}
+                    </Sections>
+                  </>
+                );
+              }}
+            </QueryWrapper>
+          )}
         </QueryWrapper>
       </div>
     </>

@@ -133,7 +133,8 @@
     "use-debounce": "^10.0.4",
     "vaul": "^1.1.2",
     "web-push": "^3.6.7",
-    "zod": "^4.1.5"
+    "zod": "^4.1.5",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",

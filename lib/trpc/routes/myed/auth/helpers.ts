@@ -55,13 +55,13 @@ export class LoginError extends Error {
 }
 
 const initFirstLogin = async ({
-  tokens,
   myedUser,
   targetId,
+  requestMyEd,
 }: {
-  tokens: AuthCookies;
+  requestMyEd: ReturnType<typeof getMyEd>;
   myedUser: CookieMyEdUser;
-  targetId?: string;
+  targetId: string | undefined;
 }) => {
   const userId = hashString(myedUser.id);
   const existingUser = await db.query.users.findFirst({
@@ -75,11 +75,7 @@ const initFirstLogin = async ({
   ];
   let knownSchool: string | undefined;
   if (targetId) {
-    const personalInfo = await getMyEd({
-      authCookies: tokens,
-      myedUser,
-      targetId,
-    })("studentDetails");
+    const personalInfo = await requestMyEd("studentDetails");
     knownSchool = KNOWN_SCHOOL_MYED_NAME_TO_ID[personalInfo.schoolName];
 
     if (knownSchool) {
@@ -158,7 +154,7 @@ export async function setUpLogin({
   myedUser: CookieMyEdUser;
   credentials?: LoginSchema;
   store?: PlainCookieStore;
-  targetId?: string;
+  targetId: string | undefined;
 }) {
   const store = externalStore ?? (await cookies());
   const cookieStore = await MyEdCookieStore.create(store);
@@ -180,7 +176,13 @@ export async function setUpLogin({
     ...cookieDefaultOptions,
     httpOnly: false,
   });
-  await initFirstLogin({ tokens, myedUser });
+  const requestMyEd = getMyEd({
+    authCookies: tokens,
+    myedUser,
+    targetId,
+  });
+  await requestMyEd("normalizeInternalLanguage");
+  await initFirstLogin({ requestMyEd, myedUser, targetId });
 }
 
 export async function parseHTMLTokenFromResponse(response: Response) {
@@ -310,7 +312,7 @@ export async function fetchFirstStudentId(cookies: AuthCookies) {
     },
     MyEdBaseURLs.NEW
   ).then((response) => response.json());
-  console.log(studentsData);
+
   const studentId = studentsData[0]!.studentOid;
   if (!studentId) throw new LoginError(LoginErrors.unexpectedError);
   return studentId;

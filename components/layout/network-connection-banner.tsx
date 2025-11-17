@@ -16,7 +16,7 @@ const bannerData = {
   },
   "slow-connection": {
     icon: SignalFull02StrokeRounded,
-    text: "You are on a slow connection.",
+    text: "MyEdBC is responding slowly.",
     className: "bg-yellow-100 text-yellow-800",
   },
 };

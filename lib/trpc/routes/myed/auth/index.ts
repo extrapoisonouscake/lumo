@@ -24,6 +24,7 @@ import {
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
 import { users } from "@/db/schema";
+import { getMyEd } from "@/parsing/myed/getMyEd";
 import { PasswordRequirements } from "@/types/auth";
 import { TRPCError } from "@trpc/server";
 import dayjs from "dayjs";
@@ -223,7 +224,14 @@ export const authRouter = router({
           ctx.credentials.password
         );
 
-        await setUpSessionTokens({ tokens, store: ctx.authCookieStore });
+        await Promise.all([
+          getMyEd({
+            authCookies: tokens,
+            myedUser: ctx.myedUser,
+            targetId: ctx.targetId,
+          })("normalizeInternalLanguage"),
+          setUpSessionTokens({ tokens, store: ctx.authCookieStore }),
+        ]);
 
         if (!input?.isInBackground) {
           after(async () => {

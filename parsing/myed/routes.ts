@@ -259,6 +259,22 @@ const generateAssignmentFileSubmissionStateParams = ({
 };
 //TODO: divide steps into "required" and the ones that make request independent of state
 export const myEdParsingRoutes = {
+  normalizeInternalLanguage: new Route()
+    .step({
+      method: "GET",
+      path: `/userPreferences.do`,
+      expect: "html",
+    })
+    .step({
+      method: "POST",
+      path: "/userPreferences.do",
+      body: {
+        userEvent: "140",
+        "inputValue(default_locale)": "en_US",
+      },
+      contentType: "application/x-www-form-urlencoded",
+      expect: "html",
+    }),
   //* query parameters mandatory for parsing to work
   schedule: new Route<{ day?: string }>()
     .step({

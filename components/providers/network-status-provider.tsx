@@ -1,42 +1,32 @@
 import { WEBSITE_ROOT } from "@/constants/website";
 import { ConnectionStatus, Network } from "@capacitor/network";
+import { useShallow } from "zustand/shallow";
 
-import {
-  SignalFull02StrokeRounded,
-  WifiDisconnected01StrokeRounded,
-} from "@hugeicons-pro/core-stroke-rounded";
-import {
-  createContext,
-  ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect } from "react";
+import { create } from "zustand";
 
-const THRESHOLD_MS = 3000;
-const bannerData = {
-  offline: {
-    icon: WifiDisconnected01StrokeRounded,
-    text: "You are offline.",
-    className: "bg-destructive/10 text-destructive",
-  },
-  "slow-connection": {
-    icon: SignalFull02StrokeRounded,
-    text: "You are on a slow connection.",
-    className: "bg-yellow-100 text-yellow-800",
-  },
-};
-const NetworkStatusContext = createContext<{
+export const SLOW_CONNECTION_THRESHOLD_MS = 5000;
+
+export const useNetworkStatusStore = create<{
   isOffline: boolean;
   isSlowConnection: boolean;
-}>({
+  setIsOffline: (isOffline: boolean) => void;
+  setIsSlowConnection: (isSlowConnection: boolean) => void;
+}>((set) => ({
   isOffline: false,
   isSlowConnection: false,
-});
+  setIsOffline: (isOffline: boolean) => set({ isOffline }),
+  setIsSlowConnection: (isSlowConnection: boolean) => set({ isSlowConnection }),
+}));
 export function NetworkStatusProvider({ children }: { children: ReactNode }) {
-  const [isOffline, setIsOffline] = useState(false);
-  const [isSlowConnection, setIsSlowConnection] = useState(false);
+  const [setIsOffline, isSlowConnection, setIsSlowConnection] =
+    useNetworkStatusStore(
+      useShallow((state) => [
+        state.setIsOffline,
+        state.isSlowConnection,
+        state.setIsSlowConnection,
+      ])
+    );
   const detectSlowConnection = useCallback(
     () => async () => {
       const startTime = performance.now();
@@ -48,7 +38,7 @@ export function NetworkStatusProvider({ children }: { children: ReactNode }) {
 
         const endTime = performance.now();
         const duration = endTime - startTime;
-        if (duration > THRESHOLD_MS) {
+        if (duration > SLOW_CONNECTION_THRESHOLD_MS) {
           setIsSlowConnection(true);
           setTimeout(() => {
             detectSlowConnection();
@@ -66,20 +56,17 @@ export function NetworkStatusProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     Network.getStatus().then(setOffline);
     Network.addListener("networkStatusChange", setOffline);
-    detectSlowConnection();
   }, []);
-  return (
-    <NetworkStatusContext.Provider value={{ isOffline, isSlowConnection }}>
-      {children}
-    </NetworkStatusContext.Provider>
-  );
+  useEffect(() => {
+    if (isSlowConnection) {
+      setTimeout(() => {
+        detectSlowConnection();
+      }, 5000);
+    }
+  }, [isSlowConnection]);
+  return children;
 }
 export function useNetworkStatus() {
-  const context = useContext(NetworkStatusContext);
-  if (!context) {
-    throw new Error(
-      "useNetworkStatus must be used within a NetworkStatusProvider"
-    );
-  }
-  return context;
+  const { isOffline, isSlowConnection } = useNetworkStatusStore();
+  return { isOffline, isSlowConnection };
 }

@@ -231,7 +231,6 @@ function PopoverContent({
 }: PopoverContentProps & { steps: Step[] }) {
   const { setIsOpen, setSteps } = useTour();
 
-  console.log("steps", steps);
   const [currentStep, setCurrentStep] = useState(props.currentStep);
   const step = steps[currentStep]!;
 
@@ -247,10 +246,6 @@ function PopoverContent({
         )?.click();
       }
     };
-    console.log(
-      new URL(step.pathname, window.location.origin).pathname,
-      window.location.pathname
-    );
     if (
       window.location.pathname ===
       new URL(step.pathname, window.location.origin).pathname

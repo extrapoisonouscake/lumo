@@ -38,11 +38,7 @@ let refreshPromise: Promise<void> | null = null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
 
 const TRPC_URL = `${WEBSITE_ROOT}/api/trpc`;
-const SECONDARY_ROUTES = [
-  "user.getStudentDetails",
-  "subjects.getSubjects",
-  "subjects.getSubjectAttendance",
-];
+const SECONDARY_ROUTES = ["user.getStudentDetails", "subjects.getSubjects"];
 const queue = new PrioritizedRequestQueue();
 
 type RequestInitWithDefinedHeaders = Omit<RequestInit, "headers"> & {
@@ -73,7 +69,15 @@ const fetchWithQueue: (
 
   return queue.enqueue(
     async () => {
+      const startTime = performance.now();
       const response = await fetch(input, init);
+      const endTime = performance.now();
+      const duration = endTime - startTime;
+
+      // useNetworkStatusStore.setState({
+      //   isSlowConnection: duration > SLOW_CONNECTION_THRESHOLD_MS,
+      // });
+
       if (response.status === 503) {
         window.location.href = "/maintenance";
       }

@@ -16,7 +16,7 @@ import { VISIBLE_DATE_FORMAT } from "@/constants/website";
 import { cn } from "@/helpers/cn";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { RichSubjectAttendance, Subject, SubjectSummary } from "@/types/school";
-import { getTRPCQueryOptions, queryClient, trpc } from "@/views/trpc";
+import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { useQuery } from "@tanstack/react-query";
 
 import {
@@ -27,7 +27,6 @@ import {
   UserRemove01StrokeRounded,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useEffect } from "react";
 import { SubjectSummaryButton } from "./subject-summary-button";
 const UPPERCASE_REGEX = /(?=[A-Z])/;
 enum AbsenceType {
@@ -49,14 +48,6 @@ export function SubjectAttendance({
   year: SubjectSummary["year"];
   tardyCount: number;
 }) {
-  useEffect(() => {
-    queryClient.prefetchQuery(
-      getTRPCQueryOptions(trpc.myed.subjects.getSubjectAttendance)({
-        subjectId: id,
-        year,
-      })
-    );
-  }, []);
   return (
     <>
       <ResponsiveDialog>

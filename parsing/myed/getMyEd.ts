@@ -44,6 +44,7 @@ const endpointToParsingFunction = {
   assignmentFileSubmissionState: parseAssignmentFileSubmissionState,
   uploadAssignmentFile: voidFunction,
   deleteAssignmentFile: voidFunction,
+  normalizeInternalLanguage: voidFunction,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>
