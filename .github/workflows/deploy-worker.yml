@@ -37,8 +37,11 @@ jobs:
         run: |
           echo '[vars]' >> wrangler.toml
           cat .env >> wrangler.toml
+      - name: Create temporary .npmrc and install dependencies
+        run: |
+          node --env-file=.env utils/generate-npmrc.js
       - name: Install dependencies
-        run: npm install --no-audit --no-fund || true
+        run: npm install --no-audit --no-fund
         env:
           SKIP_POSTINSTALL: true
       - name: Deploy Cloudflare Worker
