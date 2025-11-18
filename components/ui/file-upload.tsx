@@ -95,7 +95,7 @@ export function FileUpload({
   onFileSelect,
   selectedFile,
   accept,
-  maxSize = 4.5,
+  maxSize = 18.9,
   className,
   disableControls = false,
 }: FileUploadProps) {

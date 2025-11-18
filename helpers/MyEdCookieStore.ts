@@ -3,6 +3,7 @@ import {
   COOKIE_MAX_AGE,
   shouldSecureCookies,
 } from "@/constants/auth";
+import { DEFAULT_DOMAIN } from "@/constants/website";
 import { encryption } from "@/lib/encryption";
 import {
   ResponseCookie,
@@ -11,23 +12,35 @@ import {
 import { cookies, headers } from "next/headers";
 import "server-only";
 import { getFullCookieName } from "./getFullCookieName";
+
+// Set domain for cross-subdomain cookie sharing
+// Leading dot allows all subdomains (e.g., .lumobc.ca works for lumobc.ca, worker.lumobc.ca, etc.)
+const getCookieDomain = () => {
+  if (shouldSecureCookies && DEFAULT_DOMAIN !== "localhost") {
+    return `.${DEFAULT_DOMAIN}`;
+  }
+  return undefined; // Don't set domain for localhost
+};
+
 export const cookieDefaultOptions: Partial<ResponseCookie> = {
   secure: shouldSecureCookies,
   maxAge: COOKIE_MAX_AGE,
   httpOnly: true,
   sameSite: "strict",
+  domain: getCookieDomain(),
 };
 
-export type PlainCookieStore =
-  | Awaited<ReturnType<typeof cookies>>
-  | ResponseCookies;
+export type PlainCookieStore = Omit<
+  Awaited<ReturnType<typeof cookies>> | ResponseCookies,
+  "Symbol.iterator"
+>;
 type AuthCookieName =
   (typeof AUTH_COOKIES_NAMES)[keyof typeof AUTH_COOKIES_NAMES];
 export class MyEdCookieStore {
   private store: PlainCookieStore;
   private cookieOptions: Partial<ResponseCookie>;
 
-  private constructor(store: PlainCookieStore, isMobileApp?: boolean) {
+  constructor(store: PlainCookieStore, isMobileApp?: boolean) {
     this.store = store;
     // Set cookie options based on platform (checked once at creation)
     this.cookieOptions = {

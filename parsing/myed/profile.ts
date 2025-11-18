@@ -1,7 +1,7 @@
 import { getCORSProxyURL } from "@/helpers/getCORSProxyURL";
 import { removeLineBreaks } from "@/helpers/removeLineBreaks";
 import { timezonedDayJS } from "@/instances/dayjs";
-import { MYED_USER_TYPE_TO_ROLE_MAP } from "@/lib/trpc/routes/myed/auth/helpers";
+import { MYED_USER_TYPE_TO_ROLE_MAP } from "@/lib/trpc/routes/myed/auth/utils";
 import { PersonalDetails, StudentDetails } from "@/types/school";
 import { CheerioAPI } from "cheerio";
 import { OpenAPI200JSONResponse, ParserFunctionArguments } from "./types";

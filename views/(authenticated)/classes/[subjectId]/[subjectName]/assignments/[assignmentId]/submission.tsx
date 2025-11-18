@@ -141,13 +141,33 @@ function UploadSubmission({
 
   const mutation = useMutation({
     mutationFn: async () => {
+      // Get Cloudflare Worker URL from environment variable
+      const workerUrl = process.env.NEXT_PUBLIC_CLOUDFLARE_WORKER_URL;
+      if (!workerUrl) {
+        throw new Error("Cloudflare Worker URL not configured");
+      }
+
+      // Upload directly to Cloudflare Worker
       const formData = new FormData();
-      formData.append("assignmentId", assignmentId);
       formData.append("file", file!);
-      await fetch("/api/files/upload-assignment-file", {
+      formData.append("assignmentId", assignmentId);
+
+      const headers: HeadersInit = {};
+
+      const uploadResponse = await fetch(workerUrl, {
         method: "POST",
+        headers,
         body: formData,
+        // Include credentials for same-origin/subdomain requests
+        credentials: "include",
       });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json().catch(() => ({
+          error: `Upload failed: ${uploadResponse.status}`,
+        }));
+        throw new Error(errorData.error || "Upload failed");
+      }
     },
     onSuccess: async () => {
       await queryClient.refetchQueries(

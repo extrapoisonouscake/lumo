@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { publicProcedure } from "./base";
-import { deleteSession } from "./routes/myed/auth/helpers";
+import { deleteSession } from "./routes/myed/auth/utils";
 
 export const authenticatedProcedure = publicProcedure.use(
   async ({ ctx, next }) => {

@@ -6,13 +6,6 @@ import { z } from "zod";
 import { publicProcedure, router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import {
-  deleteSession,
-  fetchAuthCookies,
-  getFreshAuthCookies,
-  performLogin,
-  setUpSessionTokens,
-} from "./helpers";
-import {
   isKnownLoginError,
   LoginErrors,
   loginSchema,
@@ -21,6 +14,13 @@ import {
   RegistrationInternalFields,
   RegistrationType,
 } from "./public";
+import {
+  deleteSession,
+  fetchAuthCookies,
+  getFreshAuthCookies,
+  performLogin,
+  setUpSessionTokens,
+} from "./utils";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
 import { users } from "@/db/schema";
