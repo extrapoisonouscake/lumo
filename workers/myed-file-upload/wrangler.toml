@@ -3,9 +3,6 @@ main = "index.ts"
 compatibility_flags = [ "nodejs_compat" ]
 compatibility_date = "2025-10-01"
 
-# Set the maximum request body size to 100MB (Cloudflare Workers free tier limit is 100MB)
-[limits]
-cpu_ms = 50
 
 
 

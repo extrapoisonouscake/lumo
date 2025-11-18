@@ -1,8 +1,10 @@
 import CryptoJS from "crypto-js";
 const { MYED_CREDENTIALS_ENCRYPTION_KEY } = process.env;
-
+if (!MYED_CREDENTIALS_ENCRYPTION_KEY) {
+  throw new Error("MYED_CREDENTIALS_ENCRYPTION_KEY is not set");
+}
 // Define a fixed key (must be 256-bit)
-const key = CryptoJS.enc.Hex.parse(MYED_CREDENTIALS_ENCRYPTION_KEY!);
+const key = CryptoJS.enc.Hex.parse(MYED_CREDENTIALS_ENCRYPTION_KEY);
 
 // Synchronous encryption
 export const encryption = {
