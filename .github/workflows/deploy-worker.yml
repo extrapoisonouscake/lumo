@@ -38,3 +38,4 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_WORKER_API_KEY }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
