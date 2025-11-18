@@ -11,6 +11,12 @@ compatibility_date = "2025-10-01"
 command = ""
 watch_dir = "../.."
 
+[build.upload]
+format = "modules"
+
+[[build.skip_bundling]]
+package = "ua-parser-js"
+
 # Uncomment and configure when ready to deploy
 # account_id = "your-cloudflare-account-id"
 # route = { pattern = "your-worker-domain.workers.dev", zone_name = "your-domain.com" }
