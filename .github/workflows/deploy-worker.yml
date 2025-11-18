@@ -45,7 +45,7 @@ jobs:
         env:
           SKIP_POSTINSTALL: true
       - name: Deploy Cloudflare Worker
-        uses: cloudflare/wrangler-action@v3
+        uses: cloudflare/wrangler-action@v3.14
         with:
           apiToken: ${{ secrets.CLOUDFLARE_WORKER_API_KEY }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
