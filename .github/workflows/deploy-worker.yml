@@ -39,6 +39,8 @@ jobs:
           cat .env >> wrangler.toml
       - name: Install dependencies
         run: npm install --no-audit --no-fund || true
+        env:
+          SKIP_POSTINSTALL: true
       - name: Deploy Cloudflare Worker
         uses: cloudflare/wrangler-action@v3
         with:
