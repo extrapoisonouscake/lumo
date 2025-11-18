@@ -1,6 +1,6 @@
 import { MAINTENANCE_MODE_ERROR_MESSAGE } from "@/parsing/myed/getMyEd";
 import { initTRPC } from "@trpc/server";
-import "server-only";
+
 import superjson from "superjson";
 import type { TRPCContext } from "./context";
 

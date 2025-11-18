@@ -39,6 +39,8 @@ jobs:
           node --env-file=.env utils/generate-npmrc.js
       - name: Install root dependencies
         run: npm install
+        env:
+          SKIP_POSTINSTALL: true
       - name: Manually install wrangler (bug in action)
         run: |
           npm install -g wrangler@4.49.0

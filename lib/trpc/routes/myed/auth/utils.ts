@@ -43,7 +43,7 @@ import dayjs from "dayjs";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { after } from "next/server";
-import "server-only";
+
 import { runNotificationUnsubscriptionDBCalls } from "../../core/settings/helpers";
 import { parseCookiesFromSetCookieHeader } from "./helpers";
 export class LoginError extends Error {

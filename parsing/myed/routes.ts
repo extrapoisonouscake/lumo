@@ -4,7 +4,7 @@ import {
   parseHTMLToken,
   subjectTermToGradeLabelsMap,
 } from "@/constants/myed";
-import "server-only";
+
 
 import { CookieMyEdUser } from "@/helpers/getAuthCookies";
 import { timezonedDayJS } from "@/instances/dayjs";

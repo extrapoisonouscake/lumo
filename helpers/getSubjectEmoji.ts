@@ -1,5 +1,5 @@
 import subjectsEmojis from "@/data/subjects-emojis-keywords.json";
-import "server-only";
+
 
 export function getSubjectEmoji(name: string) {
   const matchedKeyword = findBestKeywordMatch(name);

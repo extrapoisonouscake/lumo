@@ -10,7 +10,7 @@ import {
   ResponseCookies,
 } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies, headers } from "next/headers";
-import "server-only";
+
 import { getFullCookieName } from "./getFullCookieName";
 
 // Set domain for cross-subdomain cookie sharing

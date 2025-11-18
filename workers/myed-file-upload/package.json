@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240222.0",
+    "@opennextjs/cloudflare": "^1.13.0",
     "openapi-typescript": "^7.5.2",
     "typescript": "^5.0.0",
     "wrangler": "^4.49.0"
