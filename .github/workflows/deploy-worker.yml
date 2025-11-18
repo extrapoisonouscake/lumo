@@ -32,10 +32,13 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
       - name: Append .env to wrangler.toml
         run: |
           echo '[vars]' >> wrangler.toml
           cat .env >> wrangler.toml
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund || true
       - name: Deploy Cloudflare Worker
         uses: cloudflare/wrangler-action@v3
         with:
