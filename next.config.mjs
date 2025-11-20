@@ -10,7 +10,6 @@ let config = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-
   reactStrictMode: false,
   outputFileTracingRoot: __dirname,
   webpack(config) {
