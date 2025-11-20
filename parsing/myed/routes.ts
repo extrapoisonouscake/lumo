@@ -5,7 +5,6 @@ import {
   subjectTermToGradeLabelsMap,
 } from "@/constants/myed";
 
-
 import { CookieMyEdUser } from "@/helpers/getAuthCookies";
 import { timezonedDayJS } from "@/instances/dayjs";
 import { paths } from "@/types/myed-rest";
@@ -545,12 +544,13 @@ export const myEdParsingRoutes = {
       contentType: "multipart/form-data",
       expect: "html",
     })),
-  deleteAssignmentFile: new Route<{ submissionId: string }>()
-    .step({
-      method: "GET",
-      path: `/home.do`,
-      expect: "html",
-    })
+  deleteAssignmentFile: new Route<{
+    submissionId: string;
+    assignmentId: string;
+  }>()
+    .step(({ targetId, params: { assignmentId } }) =>
+      generateAssignmentFileSubmissionStateParams({ assignmentId, targetId })
+    )
     .step(({ params: { submissionId } }) => ({
       method: "POST",
       path: `/portalAssignmentDetail.do?userEvent=2050&submissionOid=${submissionId}`,

@@ -244,6 +244,7 @@ export const subjectsRouter = router({
     .input(
       z.object({
         submissionId: z.string(),
+        assignmentId: z.string(),
       })
     )
     .mutation(async ({ input, ctx: { getMyEd } }) => {

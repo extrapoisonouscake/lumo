@@ -1,3 +1,4 @@
+import { SPARE_BLOCK_NAME } from "@/constants/ui";
 import { decodeHtmlEntities } from "@/helpers/decodeHtmlEntities";
 import { getSubjectEmoji } from "@/helpers/getSubjectEmoji";
 import { prettifyEducationalName } from "@/helpers/prettifyEducationalName";
@@ -59,7 +60,16 @@ export function parseSchedule({
 
       if (!contentCellHTML) {
         if (subjects[i - 1]?.isSpareBlock) return;
-        subjects.push({ ...baseSubject, isSpareBlock: true });
+        subjects.push({
+          ...baseSubject,
+          isSpareBlock: true,
+          //@ts-expect-error legacy code
+          name: {
+            prettified: SPARE_BLOCK_NAME,
+            actual: SPARE_BLOCK_NAME,
+            emoji: null,
+          },
+        });
         return;
       }
       const [code, name, teachersString, room] =

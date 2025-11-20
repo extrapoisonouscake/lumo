@@ -33,6 +33,12 @@ export const createTRPCContext = async () => {
     if (myedUser) {
       userId = hashString(myedUser.id);
       targetId = cookieStore.get("targetId")?.value;
+    } else {
+      //@ts-expect-error legacy cookie name
+      targetId = cookieStore.get("studentId")?.value;
+      if (targetId) {
+        userId = hashString(targetId);
+      }
     }
     const credentials = cookieStore.get("credentials")?.value;
     [username, password] =

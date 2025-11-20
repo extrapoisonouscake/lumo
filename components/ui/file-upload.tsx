@@ -10,18 +10,19 @@ import {
   File02StrokeRounded as FileTextIcon,
   Image02StrokeRounded as ImageIcon,
   MusicNote03StrokeRounded as MusicIcon,
+  PlusSignStrokeRounded,
   PresentationBarChart01StrokeRounded as PresentationIcon,
   Upload01StrokeRounded,
   Video02StrokeRounded as VideoIcon,
 } from "@hugeicons-pro/core-stroke-rounded";
 import { HugeiconsIcon, HugeiconsIconProps } from "@hugeicons/react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 interface FileUploadProps {
-  onFileSelect: (file: File | null) => void;
-  selectedFile: File | null;
+  onFileSelect: (files: File[]) => void;
+  selectedFiles: File[];
   accept?: string;
-  maxSize?: number; // in MB
+  maxSize?: number; // in MB (total size of all files)
   className?: string;
   disableControls?: boolean;
 }
@@ -93,7 +94,7 @@ const isImageFile = (fileName: string) => {
 
 export function FileUpload({
   onFileSelect,
-  selectedFile,
+  selectedFiles,
   accept,
   maxSize = 18.9,
   className,
@@ -101,38 +102,85 @@ export function FileUpload({
 }: FileUploadProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [filePreviews, setFilePreviews] = useState<Map<string, string>>(
+    new Map()
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const validateFile = useCallback(
-    (file: File) => {
-      if (maxSize && file.size > maxSize * 1024 * 1024) {
-        setError(`File size must be less than ${maxSize}MB`);
+  // Calculate total size of all files
+  const totalSize = useMemo(() => {
+    return selectedFiles.reduce((sum, file) => sum + file.size, 0);
+  }, [selectedFiles]);
+
+  const validateFiles = useCallback(
+    (files: File[]) => {
+      const currentTotal = totalSize;
+      const newFilesTotal = files.reduce((sum, file) => sum + file.size, 0);
+      const combinedTotal = currentTotal + newFilesTotal;
+
+      if (maxSize && combinedTotal > maxSize * 1024 * 1024) {
+        setError(
+          `Total file size must be less than ${maxSize}MB. Current total: ${formatFileSize(
+            combinedTotal
+          )}`
+        );
         return false;
       }
       setError(null);
       return true;
     },
-    [maxSize]
+    [maxSize, totalSize]
   );
 
-  const handleFileSelect = useCallback(
-    (file: File) => {
-      if (validateFile(file)) {
-        onFileSelect(file);
-
-        // Generate image preview if it's an image file
-        if (isImageFile(file.name)) {
+  const generateImagePreviews = useCallback(
+    (files: File[]) => {
+      files.forEach((file) => {
+        if (isImageFile(file.name) && !filePreviews.has(file.name)) {
           const reader = new FileReader();
           reader.onload = (e) => {
-            setImagePreview(e.target?.result as string);
+            if (e.target?.result) {
+              setFilePreviews((prev) => {
+                // Only create new Map if file doesn't exist
+                if (prev.has(file.name)) {
+                  return prev;
+                }
+                const updated = new Map(prev);
+                updated.set(file.name, e.target!.result as string);
+                return updated;
+              });
+            }
           };
           reader.readAsDataURL(file);
-        } else {
-          setImagePreview(null);
         }
+      });
+    },
+    [filePreviews]
+  );
+
+  const handleFilesSelect = useCallback(
+    (newFiles: File[]) => {
+      if (newFiles.length === 0) return;
+
+      // Filter out files that are already selected
+      const uniqueNewFiles = newFiles.filter(
+        (newFile) =>
+          !selectedFiles.some(
+            (existingFile) =>
+              existingFile.name === newFile.name &&
+              existingFile.size === newFile.size &&
+              existingFile.lastModified === newFile.lastModified
+          )
+      );
+
+      if (uniqueNewFiles.length === 0) return;
+
+      if (validateFiles(uniqueNewFiles)) {
+        const updatedFiles = [...selectedFiles, ...uniqueNewFiles];
+        onFileSelect(updatedFiles);
+        generateImagePreviews(uniqueNewFiles);
       }
     },
-    [validateFile, onFileSelect]
+    [selectedFiles, validateFiles, onFileSelect, generateImagePreviews]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -151,27 +199,59 @@ export function FileUpload({
       setIsDragOver(false);
 
       const files = Array.from(e.dataTransfer.files);
-      if (files.length > 0 && files[0]) {
-        handleFileSelect(files[0]);
+      if (files.length > 0) {
+        handleFilesSelect(files);
       }
     },
-    [handleFileSelect]
+    [handleFilesSelect]
   );
 
   const handleFileInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        handleFileSelect(file);
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) {
+        handleFilesSelect(files);
       }
+      // Reset input so same files can be selected again
+      e.target.value = "";
     },
-    [handleFileSelect]
+    [handleFilesSelect]
   );
 
-  const handleRemoveFile = useCallback(() => {
-    onFileSelect(null);
+  const handleRemoveFile = useCallback(
+    (fileToRemove: File) => {
+      const updatedFiles = selectedFiles.filter(
+        (file) =>
+          !(
+            file.name === fileToRemove.name &&
+            file.size === fileToRemove.size &&
+            file.lastModified === fileToRemove.lastModified
+          )
+      );
+      onFileSelect(updatedFiles);
+
+      // Remove preview if it exists
+      if (filePreviews.has(fileToRemove.name)) {
+        setFilePreviews((prev) => {
+          const updated = new Map(prev);
+          updated.delete(fileToRemove.name);
+          return updated;
+        });
+      }
+
+      setError(null);
+    },
+    [selectedFiles, onFileSelect, filePreviews]
+  );
+
+  const handleAddFilesClick = useCallback(() => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleResetClick = useCallback(() => {
+    onFileSelect([]);
+    setFilePreviews(new Map());
     setError(null);
-    setImagePreview(null);
   }, [onFileSelect]);
 
   const formatFileSize = (bytes: number) => {
@@ -186,9 +266,9 @@ export function FileUpload({
     <div className={cn("w-full flex flex-col gap-2", className)}>
       <div
         className={cn(
-          "relative clickable border border-dashed rounded-xl p-6 transition-[colors,scale] w-full",
+          "relative border border-dashed rounded-xl p-6 transition-colors w-full",
           "hover:border-primary/30",
-          selectedFile && "p-4",
+          selectedFiles.length > 0 && "p-4",
           isDragOver && "border-primary bg-primary/5",
           error && "border-destructive"
         )}
@@ -196,64 +276,112 @@ export function FileUpload({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {selectedFile ? (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="File preview"
-                    className="size-12 object-cover rounded-xl"
-                  />
-                </div>
-              ) : (
-                <FileTypeIcon
-                  fileName={selectedFile.name}
-                  className="size-6"
-                  data-auto-stroke-width
-                  strokeWidth={1.5}
-                />
-              )}
-              <div className="flex flex-col">
-                <span className="font-medium text-sm">{selectedFile.name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {formatFileSize(selectedFile.size)}
-                </span>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept={accept}
+          onChange={handleFileInputChange}
+          className="hidden"
+        />
+        {selectedFiles.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5 max-h-64 overflow-y-auto">
+              {selectedFiles.map((file, index) => {
+                const preview = filePreviews.get(file.name);
+                return (
+                  <div
+                    key={`${file.name}-${file.size}-${file.lastModified}-${index}`}
+                    className="flex items-center justify-between gap-4"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      {preview ? (
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={preview}
+                            alt={file.name}
+                            className="size-12 object-cover rounded-xl"
+                          />
+                        </div>
+                      ) : (
+                        <div className="bg-brand/10 rounded-xl size-12 flex justify-center items-center">
+                          <FileTypeIcon
+                            fileName={file.name}
+                            className="size-6 flex-shrink-0"
+                            data-auto-stroke-width
+                            strokeWidth={1.5}
+                          />
+                        </div>
+                      )}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="font-medium text-sm truncate">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {formatFileSize(file.size)}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="smallIcon"
+                      onClick={() => handleRemoveFile(file)}
+                      className="hover:bg-destructive/10 hover:text-destructive flex-shrink-0"
+                      disabled={disableControls}
+                    >
+                      <HugeiconsIcon icon={Cancel01StrokeRounded} />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex items-end justify-between">
+              <span className="text-xs text-muted-foreground">
+                {selectedFiles.length} file
+                {selectedFiles.length !== 1 ? "s" : ""}
+                {" · "}
+                Total: {formatFileSize(totalSize)}
+              </span>
+              <div className="flex gap-2 flex-wrap">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetClick}
+                  disabled={disableControls}
+                  leftIcon={<HugeiconsIcon icon={Cancel01StrokeRounded} />}
+                >
+                  Reset
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleAddFilesClick}
+                  disabled={disableControls}
+                  leftIcon={<HugeiconsIcon icon={PlusSignStrokeRounded} />}
+                >
+                  Add files
+                </Button>
               </div>
             </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="smallIcon"
-              onClick={handleRemoveFile}
-              className="hover:bg-destructive/10 hover:text-destructive"
-              disabled={disableControls}
-            >
-              <HugeiconsIcon icon={Cancel01StrokeRounded} />
-            </Button>
           </div>
         ) : (
-          <>
-            <input
-              type="file"
-              accept={accept}
-              onChange={handleFileInputChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          <div
+            onClick={handleAddFilesClick}
+            className="flex flex-col items-center justify-center text-center cursor-pointer"
+          >
+            <HugeiconsIcon
+              icon={Upload01StrokeRounded}
+              className="size-6 text-muted-foreground mb-2"
             />
-            <div className="flex flex-col items-center justify-center text-center">
-              <HugeiconsIcon
-                icon={Upload01StrokeRounded}
-                className="size-6 text-muted-foreground mb-2"
-              />
-              <p className="text-sm font-medium mb-1">
-                Click or drop your file here
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Max size: {maxSize}MB
-              </p>
-            </div>
-          </>
+            <p className="text-sm font-medium mb-1">
+              Click or drop your files here
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Max total size: {maxSize}MB
+            </p>
+          </div>
         )}
       </div>
 

@@ -104,7 +104,6 @@ function Content({
   currentTermIndex?: number;
   subjectSummaries?: Record<string, SubjectSummary>;
 }) {
-  console.log({ queryKey });
   const shouldShowDynamicView =
     (!term || term === MYED_ALL_GRADE_TERMS_SELECTOR) && year === "current";
   return (

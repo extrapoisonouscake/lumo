@@ -100,7 +100,7 @@ export function SubjectGoalDialog({
     categoryId,
   } = methods.watch();
   const [areInitialValuesSet, setAreInitialValuesSet] = useState(!!initialGoal);
-  console.log({ minimumScoreString }, methods.formState.errors);
+
   const { isCalculated, isAchievable, ...result } = useMemo(() => {
     if (!minimumScoreString || !categoryId)
       return {

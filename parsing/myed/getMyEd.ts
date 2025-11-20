@@ -1,7 +1,6 @@
 import { AuthCookies, CookieMyEdUser } from "@/helpers/getAuthCookies";
 import { MyEdEndpointsParamsAsOptional } from "@/types/myed";
 import * as cheerio from "cheerio";
-
 import {
   ENDPOINTS,
   FlatRouteStep,

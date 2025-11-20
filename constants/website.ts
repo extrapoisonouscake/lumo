@@ -50,6 +50,9 @@ const shouldUseProductionDomain = isProductionOverride || isProduction;
 export const DEFAULT_DOMAIN = shouldUseProductionDomain
   ? "lumobc.ca"
   : "localhost";
+export const CF_WORKER_URL = shouldUseProductionDomain
+  ? "https://worker.lumobc.ca"
+  : "http://localhost:8787";
 const NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL =
   process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL; //no other syntax allowed due to Vercel
 export const WEBSITE_ROOT = shouldUseProductionDomain

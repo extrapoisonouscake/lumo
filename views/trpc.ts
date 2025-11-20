@@ -34,7 +34,7 @@ export const queryClient = new QueryClient({
   },
 });
 
-let refreshPromise: Promise<void> | null = null;
+window.refreshPromise = null as Promise<void> | null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
 
 const TRPC_URL = `${WEBSITE_ROOT}/api/trpc`;
@@ -88,7 +88,36 @@ const fetchWithQueue: (
     isSecondary
   );
 };
+export const ensureValidSession = async () => {
+  const refresh = async () => {
+    // Session needs refresh
+    if (!window.refreshPromise) {
+      window.refreshPromise = trpcClient.myed.auth.ensureValidSession
+        .mutate()
+        .then(() => {
+          window.refreshPromise = null;
+          if (isMobileApp) {
+            saveAuthCookiesToPreferences();
+          }
+          refreshSessionExpiresAt();
+        });
+    }
 
+    // Wait for refresh to complete
+    await window.refreshPromise;
+  };
+  const tokensExpiry = localStorage.getItem(TOKEN_EXPIRY_LOCAL_STORAGE_KEY);
+  if (tokensExpiry) {
+    const expiryTime = parseInt(tokensExpiry);
+    const now = Date.now();
+
+    if (now >= expiryTime) {
+      await refresh();
+    }
+  } else {
+    await refresh();
+  }
+};
 export const trpcClient = createTRPCClient<AppRouter>({
   links: [
     retryLink({
@@ -130,34 +159,7 @@ export const trpcClient = createTRPCClient<AppRouter>({
         ) {
           return fetchWithQueue(input, preparedInit);
         }
-        const tokensExpiry = localStorage.getItem(
-          TOKEN_EXPIRY_LOCAL_STORAGE_KEY
-        );
-        if (tokensExpiry) {
-          const expiryTime = parseInt(tokensExpiry);
-          const now = Date.now();
-
-          if (now < expiryTime) {
-            // Session is still valid, proceed with request
-            return fetchWithQueue(input, preparedInit);
-          }
-        }
-
-        // Session needs refresh
-        if (!refreshPromise) {
-          refreshPromise = trpcClient.myed.auth.ensureValidSession
-            .mutate()
-            .then(() => {
-              refreshPromise = null;
-              if (isMobileApp) {
-                saveAuthCookiesToPreferences();
-              }
-              refreshSessionExpiresAt();
-            });
-        }
-
-        // Wait for refresh to complete
-        await refreshPromise;
+        await ensureValidSession();
 
         // Now proceed with the original request
         return fetchWithQueue(input, preparedInit);

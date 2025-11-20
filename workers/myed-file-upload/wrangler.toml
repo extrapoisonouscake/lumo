@@ -1,21 +1,13 @@
 name = "myed-file-upload"
 main = "index.ts"
-compatibility_flags = [ "nodejs_compat" ]
+compatibility_flags = [ "nodejs_compat" ,"nodejs_compat_populate_process_env"]
 compatibility_date = "2025-10-01"
-
-
 
 
 # Configure bundling to handle path aliases
 [build]
-command = ""
-watch_dir = "../.."
+command = "exit 0"
 
-[build.upload]
-format = "modules"
-
-[[build.skip_bundling]]
-package = "ua-parser-js"
 
 # Uncomment and configure when ready to deploy
 # account_id = "your-cloudflare-account-id"

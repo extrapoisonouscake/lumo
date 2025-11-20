@@ -2,11 +2,8 @@
   "name": "lumo",
   "version": "0.1.0",
   "private": true,
-  "workspaces": [
-    "workers/myed-file-upload"
-  ],
   "scripts": {
-    "dev:web": "next dev",
+    "dev": "next dev",
     "build": "next build && node utils/build-sw.js",
     "start": "next start",
     "lint": "next lint",

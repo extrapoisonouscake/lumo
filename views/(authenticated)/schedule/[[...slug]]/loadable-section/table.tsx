@@ -200,7 +200,6 @@ export function ScheduleTable({
   const navigate = useNavigate();
   const getRowRenderer: RowRendererFactory<ScheduleRow> = (table) => (row) => {
     const cells = row.getVisibleCells();
-    console.log(cells);
     const rowOriginal = row.original;
     const isSubject = isRowScheduleSubject(rowOriginal);
     let nameCell, timeCell;
