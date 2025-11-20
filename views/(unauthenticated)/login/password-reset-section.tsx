@@ -75,7 +75,7 @@ export function PasswordResetSection({
         className="text-sm text-secondary-foreground cursor-pointer"
         onClick={() => setIsOpen(true)}
       >
-        Forgot password?
+        Reset Password
       </p>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>

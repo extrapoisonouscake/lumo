@@ -6,6 +6,13 @@ import { z } from "zod";
 import { publicProcedure, router } from "../../../base";
 import { authenticatedProcedure } from "../../../procedures";
 import {
+  deleteSession,
+  fetchAuthCookies,
+  getFreshAuthCookies,
+  performLogin,
+  setUpSessionTokens,
+} from "./utils";
+import {
   isKnownLoginError,
   LoginErrors,
   loginSchema,
@@ -14,13 +21,6 @@ import {
   RegistrationInternalFields,
   RegistrationType,
 } from "./public";
-import {
-  deleteSession,
-  fetchAuthCookies,
-  getFreshAuthCookies,
-  performLogin,
-  setUpSessionTokens,
-} from "./utils";
 
 import { AUTH_COOKIES_NAMES } from "@/constants/auth";
 import { users } from "@/db/schema";
@@ -170,7 +170,12 @@ export const authRouter = router({
     }
   }),
   getRegistrationFields: publicProcedure.query(async ({ ctx }) => {
-    const response = await fetchMyEd<{
+    
+    if(true){
+        throw new TRPCError({ code: "NOT_IMPLEMENTED" });
+        
+      }
+      const response = await fetchMyEd<{
       cities: string[];
       securityQuestions: string[];
       states: string[];

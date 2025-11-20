@@ -89,7 +89,7 @@ export default function LoginPage() {
                 to="/register"
                 className="text-sm text-secondary-foreground"
               >
-                Register
+                Request Account
               </Link>
             </div>
           </div>
