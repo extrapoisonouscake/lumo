@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "dev": "wrangler dev --remote",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "typegen": "wrangler types"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240222.0",
