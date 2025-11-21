@@ -1,23 +1,35 @@
-import { MAINTENANCE_MODE_ERROR_MESSAGE } from "@/parsing/myed/getMyEd";
-import { initTRPC } from "@trpc/server";
+import {
+  MAINTENANCE_MODE_ERROR_MESSAGE,
+  UNAUTHORIZED_ERROR_MESSAGE,
+} from "@/parsing/myed/getMyEd";
+import { initTRPC, TRPCError } from "@trpc/server";
 
+import { DefaultErrorShape } from "@trpc/server/unstable-core-do-not-import";
 import superjson from "superjson";
 import type { TRPCContext } from "./context";
+const formatError = (shape: DefaultErrorShape, error: TRPCError) => {
+  const errorType =
+    error.message === MAINTENANCE_MODE_ERROR_MESSAGE
+      ? { code: "SERVICE_UNAVAILABLE", httpStatus: 503 }
+      : error.message === UNAUTHORIZED_ERROR_MESSAGE
+        ? { code: "UNAUTHORIZED", httpStatus: 401 }
+        : null;
 
+  if (!errorType) return shape;
+
+  return {
+    ...shape,
+    code: errorType.code,
+    data: {
+      ...shape.data,
+      code: errorType.code,
+      httpStatus: errorType.httpStatus,
+    },
+  };
+};
 const t = initTRPC.context<TRPCContext>().create({
   errorFormatter: (opts) => {
-    const { shape, error } = opts;
-
-    const isMaintenance = error.message === MAINTENANCE_MODE_ERROR_MESSAGE;
-    return {
-      ...shape,
-      code: isMaintenance ? "SERVICE_UNAVAILABLE" : shape.code,
-      data: {
-        ...shape.data,
-        code: isMaintenance ? "SERVICE_UNAVAILABLE" : shape.data.code,
-        httpStatus: isMaintenance ? 503 : shape.data.httpStatus,
-      },
-    };
+    return formatError(opts.shape, opts.error);
   },
   transformer: superjson,
 });

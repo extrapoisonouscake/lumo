@@ -55,7 +55,14 @@ const checkForMaintenance = ($: cheerio.CheerioAPI) => {
   const $maintenanceBox = $(".maintenanceBox");
   return $maintenanceBox.length > 0;
 };
+const checkForUnauthorized = ($: cheerio.CheerioAPI) => {
+  const $errorText = $(".systemError");
+  return (
+    $errorText.text() === "You are not logged on or your session has expired."
+  );
+};
 export const MAINTENANCE_MODE_ERROR_MESSAGE = "MAINTENANCE_MODE";
+export const UNAUTHORIZED_ERROR_MESSAGE = "UNAUTHORIZED";
 const processResponse = async (response: Response, value: FlatRouteStep) => {
   if (value.expect === "json") {
     return response.json();
@@ -120,6 +127,10 @@ export const getMyEd = (props?: {
           const isMaintenance = checkForMaintenance($);
           if (isMaintenance) {
             throw new Error(MAINTENANCE_MODE_ERROR_MESSAGE);
+          }
+          const isUnauthorized = checkForUnauthorized($);
+          if (isUnauthorized) {
+            throw new Error(UNAUTHORIZED_ERROR_MESSAGE);
           }
         }
         throw e;
