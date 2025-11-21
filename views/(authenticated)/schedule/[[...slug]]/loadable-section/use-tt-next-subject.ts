@@ -66,14 +66,15 @@ export function useTTNextSubject(data?: ScheduleRow[]) {
           visibleNextRowStartingTimestamp = nextRowStartingTimestamp;
         } else {
           nextRowStartingTimestamp = nextRow.startsAt;
-          visibleNextRowStartingTimestamp = data
-            .slice(newCurrentRowIndex + 1)
-            .find(
-              (row) =>
-                isRowScheduleSubject(row) &&
-                !row.isSpareBlock &&
-                !isTeacherAdvisory(row.name.actual)
-            )!.startsAt; //TA is never the last class, no need to check for undefined
+          visibleNextRowStartingTimestamp =
+            data
+              .slice(newCurrentRowIndex + 1)
+              .find(
+                (row) =>
+                  isRowScheduleSubject(row) &&
+                  !row.isSpareBlock &&
+                  !isTeacherAdvisory(row.name.actual)
+              )?.startsAt ?? currentRow.endsAt;
         }
         const timeToNextRow = timezonedDayJS(nextRowStartingTimestamp);
         const visibleTimeToNextRow = timezonedDayJS(

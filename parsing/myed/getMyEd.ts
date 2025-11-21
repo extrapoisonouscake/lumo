@@ -16,6 +16,7 @@ import {
 } from "./assignments";
 import { parsePersonalDetails, parseStudentDetails } from "./profile";
 import { parseRegistrationFields } from "./registration";
+import { parseReports } from "./reports";
 import { parseSchedule } from "./schedule";
 import { sendMyEdRequest } from "./sendMyEdRequest";
 import {
@@ -44,6 +45,7 @@ const endpointToParsingFunction = {
   uploadAssignmentFile: voidFunction,
   deleteAssignmentFile: voidFunction,
   normalizeInternalLanguage: voidFunction,
+  reports: parseReports,
 } satisfies {
   [K in MyEdParsingRoute | MyEdRestEndpoint]: (
     args: ParserFunctionArguments<K>

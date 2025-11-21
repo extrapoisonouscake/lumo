@@ -4,7 +4,7 @@ import { MyEdEndpointResponse } from "@/parsing/myed/getMyEd";
 import {
   TermSelects,
   TermSelectsSkeleton,
-} from "@/views/(authenticated)/classes/[subjectId]/term-selects";
+} from "@/views/(authenticated)/classes/[subjectName]/term-selects";
 import { DragDropProvider } from "@dnd-kit/react";
 import { SubjectsTable } from "./table";
 
@@ -55,6 +55,9 @@ export default function SubjectsPage() {
     isPreviousYear,
     termId: isPreviousYear && !term ? MYED_ALL_GRADE_TERMS_SELECTOR : term,
   });
+  // const reports = useCachedQuery(
+  //   getTRPCQueryOptions(trpc.myed.transcript.getReports)()
+  // );
   const subjectSummaries = useSubjectSummaries({
     ids: query.data?.subjects.main.map((subject) => subject.id),
     year: isPreviousYear ? "previous" : "current",
@@ -67,6 +70,11 @@ export default function SubjectsPage() {
   return (
     <>
       <TitleManager>Classes</TitleManager>
+      {/* <QueryWrapper query={reports}>
+        {(reports) => {
+          return <div>{reports.reports.length} reports</div>;
+        }}
+      </QueryWrapper> */}
       <QueryWrapper query={query} skeleton={<SubjectsPageSkeleton />}>
         {(response) => {
           return (

@@ -69,6 +69,8 @@ export function parseSchedule({
             actual: SPARE_BLOCK_NAME,
             emoji: null,
           },
+          teachers: [],
+          room: null,
         });
         return;
       }

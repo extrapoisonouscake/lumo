@@ -246,3 +246,11 @@ export interface TranscriptEducationPlan {
   name: string;
   isInitial: boolean;
 }
+export interface Report {
+  id: string;
+  name: string;
+  description: string;
+  createdAt: Date;
+  isOpened: boolean;
+  viewId: string;
+}

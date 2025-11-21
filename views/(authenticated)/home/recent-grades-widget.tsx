@@ -24,11 +24,11 @@ import { timezonedDayJS } from "@/instances/dayjs";
 import { AssignmentStatus } from "@/types/school";
 import { useMemo, useState } from "react";
 import { Link } from "react-router";
-import { AssignmentScoreIcon } from "../classes/[subjectId]/(assignments)/assignment-card";
+import { AssignmentScoreIcon } from "../classes/[subjectName]/(assignments)/assignment-card";
 import {
   getAssignmentURL,
   getPercentageString,
-} from "../classes/[subjectId]/(assignments)/helpers";
+} from "../classes/[subjectName]/(assignments)/helpers";
 import {
   WidgetComponentProps,
   WidgetCustomizationContentRenderer,

@@ -61,5 +61,5 @@ export function getAssignmentURL(
   assignment: Assignment,
   subject: Pick<Subject, "id"> & { name: Pick<Subject["name"], "prettified"> }
 ): string {
-  return `/classes/${subject.id}/${prepareStringForURI(subject.name.prettified)}/assignments/${assignment.id}`;
+  return `/classes/${prepareStringForURI(subject.name.prettified)}/${subject.id}/assignments/${assignment.id}`;
 }

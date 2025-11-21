@@ -38,7 +38,11 @@ window.refreshPromise = null as Promise<void> | null;
 const TOKEN_EXPIRY_LOCAL_STORAGE_KEY = "auth.tokens_expiry";
 
 const TRPC_URL = `${WEBSITE_ROOT}/api/trpc`;
-const SECONDARY_ROUTES = ["user.getStudentDetails", "subjects.getSubjects"];
+const SECONDARY_ROUTES = [
+  "user.getStudentDetails",
+  "subjects.getSubjects",
+  "transcript.getReports",
+];
 const queue = new PrioritizedRequestQueue();
 
 type RequestInitWithDefinedHeaders = Omit<RequestInit, "headers"> & {

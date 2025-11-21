@@ -852,6 +852,21 @@ paths:
                       type: string
                     teacherName:
                       type: string
+  /app/rest/files/currentUser:
+    get:
+      summary: Get the reports for the current user
+      operationId: getCurrentUserReports
+      tags:
+        - files
+      responses:
+        200:
+          description: The reports for the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Report"
 components:
   schemas:
     AnyValue: {}
@@ -1389,6 +1404,32 @@ components:
         period:
           type: string
         meetingTime:
+          type: string
+    Report:
+      type: object
+      required:
+        - created
+        - description
+        - fileOid
+        - fileType
+        - name
+        - opened
+        - reportDeliveryRecipientOid
+      properties:
+        created:
+          type: number
+          format: int64
+        description:
+          type: string
+        fileOid:
+          type: string
+        fileType:
+          type: string
+        name:
+          type: string
+        opened:
+          type: boolean
+        reportDeliveryRecipientOid:
           type: string
   responses:
     NotAuthorized:

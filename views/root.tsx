@@ -9,8 +9,8 @@ import {
   useLocation,
 } from "react-router";
 import NotFoundPage from "./(authenticated)/[...not-found]/page";
-import AssignmentPage from "./(authenticated)/classes/[subjectId]/[subjectName]/assignments/[assignmentId]/page";
-import SubjectPage from "./(authenticated)/classes/[subjectId]/[subjectName]/page";
+import AssignmentPage from "./(authenticated)/classes/[subjectName]/[subjectId]/assignments/[assignmentId]/page";
+import SubjectPage from "./(authenticated)/classes/[subjectName]/[subjectId]/page";
 import SubjectsLayout from "./(authenticated)/classes/layout";
 import SubjectsPage from "./(authenticated)/classes/page";
 import GraduationSummaryPage from "./(authenticated)/graduation-summary/page";
@@ -110,7 +110,7 @@ export default function Root() {
                       element={<SubjectPage />}
                     />
                     <Route
-                      path=":subjectId/:subjectName/assignments/:assignmentId"
+                      path=":subjectName/:subjectId/assignments/:assignmentId"
                       element={<AssignmentPage />}
                     />
                   </Route>

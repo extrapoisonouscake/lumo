@@ -4,7 +4,7 @@ import { useSubjectsData } from "@/hooks/trpc/use-subjects-data";
 import { useUpdateGenericUserSetting } from "@/hooks/trpc/use-update-generic-user-setting";
 import { useUserSettings } from "@/hooks/trpc/use-user-settings";
 import { Assignment, AssignmentStatus, Subject } from "@/types/school";
-import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectId]/(assignments)/helpers";
+import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectName]/(assignments)/helpers";
 import { getTRPCQueryOptions, trpc } from "@/views/trpc";
 import { Tick02StrokeRounded } from "@hugeicons-pro/core-stroke-rounded";
 import {

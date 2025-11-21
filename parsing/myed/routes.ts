@@ -743,6 +743,11 @@ export const myEdRestEndpoints = {
     path: `/aspen/rest/students/${targetId}/assignments/${assignmentId}`,
     expect: "json",
   })),
+  reports: new Route().step({
+    method: "GET",
+    path: `/app/rest/files/currentUser`,
+    expect: "json",
+  }),
 };
 
 export type MyEdRestEndpoints = typeof myEdRestEndpoints;

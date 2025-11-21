@@ -15,7 +15,7 @@ import {
 } from "@/lib/trpc/routes/core/settings/web-push";
 import { getMyEd } from "@/parsing/myed/getMyEd";
 import { Assignment, Subject } from "@/types/school";
-import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectId]/(assignments)/helpers";
+import { getAssignmentURL } from "@/views/(authenticated)/classes/[subjectName]/(assignments)/helpers";
 import { PrioritizedRequestQueue } from "@/views/requests-queue";
 import { eq } from "drizzle-orm";
 import { after } from "next/server";

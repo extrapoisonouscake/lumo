@@ -346,6 +346,15 @@ export function FileUpload({
               <div className="flex gap-2 flex-wrap">
                 <Button
                   type="button"
+                  size="sm"
+                  onClick={handleAddFilesClick}
+                  disabled={disableControls}
+                  leftIcon={<HugeiconsIcon icon={PlusSignStrokeRounded} />}
+                >
+                  Add files
+                </Button>
+                <Button
+                  type="button"
                   variant="outline"
                   size="sm"
                   onClick={handleResetClick}
@@ -353,15 +362,6 @@ export function FileUpload({
                   leftIcon={<HugeiconsIcon icon={Cancel01StrokeRounded} />}
                 >
                   Reset
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={handleAddFilesClick}
-                  disabled={disableControls}
-                  leftIcon={<HugeiconsIcon icon={PlusSignStrokeRounded} />}
-                >
-                  Add files
                 </Button>
               </div>
             </div>

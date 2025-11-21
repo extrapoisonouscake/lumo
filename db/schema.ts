@@ -145,6 +145,11 @@ export const tracked_school_data = table("tracked_school_data", {
     .defaultNow()
     .notNull()
     .$onUpdate(() => new Date()),
+  seenReportIds: t
+    .text("reports")
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`),
 });
 export type TrackedSchoolDataSelectModel = InferSelectModel<
   typeof tracked_school_data

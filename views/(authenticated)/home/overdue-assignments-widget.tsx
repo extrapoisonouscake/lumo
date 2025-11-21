@@ -18,7 +18,7 @@ import { Link } from "react-router";
 import {
   getAssignmentURL,
   getPercentageString,
-} from "../classes/[subjectId]/(assignments)/helpers";
+} from "../classes/[subjectName]/(assignments)/helpers";
 import {
   WidgetComponentProps,
   WidgetCustomizationContentRenderer,
