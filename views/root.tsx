@@ -29,12 +29,13 @@ import ProfilePage from "./(authenticated)/profile/page";
 import SchedulePage from "./(authenticated)/schedule/[[...slug]]/page";
 import SettingsPage from "./(authenticated)/settings/page";
 import UnauthenticatedLayout from "./(unauthenticated)/layout";
-import PrivacyPolicyPage from "./(unauthenticated)/legal/privacy-policy/page";
 import LoginPage from "./(unauthenticated)/login/page";
+import PrivacyPolicyPage from "./legal/privacy-policy/page";
+import TermsOfServicePage from "./legal/terms-of-service/page";
 
 import { isProduction } from "@/constants/core";
-import SupportPage from "./(unauthenticated)/support/page";
 import MaintenancePage from "./maintenance/page";
+import SupportPage from "./support/page";
 const RegisterPage = lazy(() => import("./(unauthenticated)/register/page"));
 
 const serviceWorkerPath = `/sw/sw.js`;
@@ -141,6 +142,10 @@ export default function Root() {
                 <Route
                   path="legal/privacy-policy"
                   element={<PrivacyPolicyPage />}
+                />
+                <Route
+                  path="legal/terms-of-service"
+                  element={<TermsOfServicePage />}
                 />
                 <Route path="support" element={<SupportPage />} />
                 <Route path="index.html" element={<Navigate to="/" />} />

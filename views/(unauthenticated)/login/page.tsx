@@ -94,12 +94,29 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground/65 text-center">
-          MyEducationBC is a trademark of the Government of British Columbia.
-          Its logo is used here solely to indicate auth integration
-          compatibility. This use does not imply any affiliation with or
-          endorsement by the Government of British Columbia.
-        </p>
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs text-muted-foreground/65 text-center">
+            MyEducationBC is a trademark of the Government of British Columbia.
+            Its logo is used here solely to indicate auth integration
+            compatibility. This use does not imply any affiliation with or
+            endorsement by the Government of British Columbia.
+          </p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground/65">
+            <Link
+              to="/legal/privacy-policy"
+              className="hover:text-foreground transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link
+              to="/legal/terms-of-service"
+              className="hover:text-foreground transition-colors"
+            >
+              Terms of Service
+            </Link>
+          </div>
+        </div>
       </div>
     </>
   );

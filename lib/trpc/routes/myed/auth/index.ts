@@ -206,7 +206,7 @@ export const authRouter = router({
   }),
   register,
 
-  logOut: authenticatedProcedure.mutation(async ({ ctx: { cookieStore } }) => {
+  logOut: publicProcedure.mutation(async ({ ctx: { cookieStore } }) => {
     await deleteSession();
   }),
 

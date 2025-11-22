@@ -1,6 +1,6 @@
 import { isProduction } from "./core";
 export const WEBSITE_TITLE = "Lumo";
-
+export const DEVELOPER_EMAIL = "i@gbrv.dev";
 export interface WebsitePage {
   name: string;
   isHiddenInSidebar?: boolean;
@@ -11,6 +11,7 @@ export const unauthenticatedPathnames = ["/login", "/register"];
 export const publicPathnames = [
   "/maintenance",
   "/legal/privacy-policy",
+  "/legal/terms-of-service",
   "/support",
 ];
 export const websitePagesWithStaticPaths: Record<string, WebsitePage> = {

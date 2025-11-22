@@ -346,5 +346,6 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
   cookiePlainStore.delete({
     name: IS_LOGGED_IN_COOKIE_NAME,
     ...cookieDefaultOptions,
+    httpOnly: false,
   });
 }
