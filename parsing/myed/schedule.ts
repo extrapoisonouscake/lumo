@@ -59,7 +59,7 @@ export function parseSchedule({
       const contentCellHTML = $(contentTd).find("td").first().prop("innerHTML");
 
       if (!contentCellHTML) {
-        if (subjects[i - 1]?.isSpareBlock) return;
+        if (subjects.at(-1)?.isSpareBlock) return;
         subjects.push({
           ...baseSubject,
           isSpareBlock: true,
