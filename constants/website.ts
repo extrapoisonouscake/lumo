@@ -48,8 +48,9 @@ export const APP_STORE_APP_ID = "6752838080";
 const isProductionOverride =
   process.env.NEXT_PUBLIC_HTTP_NODE_ENV_OVERRIDE === "production";
 const shouldUseProductionDomain = isProductionOverride || isProduction;
+export const PUBLIC_DOMAIN = "lumobc.ca";
 export const DEFAULT_DOMAIN = shouldUseProductionDomain
-  ? "lumobc.ca"
+  ? PUBLIC_DOMAIN
   : "localhost";
 export const CF_WORKER_URL = shouldUseProductionDomain
   ? "https://worker.lumobc.ca"
