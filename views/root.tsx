@@ -106,7 +106,7 @@ export default function Root() {
                   <Route element={<SubjectsLayout />} path="classes">
                     <Route index element={<SubjectsPage />} />
                     <Route
-                      path=":subjectId/:subjectName"
+                      path=":subjectName/:subjectId"
                       element={<SubjectPage />}
                     />
                     <Route
