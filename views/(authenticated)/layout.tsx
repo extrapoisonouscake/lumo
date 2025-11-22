@@ -26,9 +26,6 @@ export default function AuthenticatedLayout({
     reconcileMobileAppIcon(settings.themeColor);
   }, [settings.themeColor]);
 
-  if (!isLoggedIn) {
-    return <Navigate to="/login" />;
-  }
   useEffect(() => {
     if (isIOSApp) {
       import("@aparajita/capacitor-ios-silent-notifications").then(
@@ -66,6 +63,9 @@ export default function AuthenticatedLayout({
       }
     }
   }, []);
+  if (!isLoggedIn) {
+    return <Navigate to="/login" />;
+  }
   const sidebarState = Cookies.get("sidebar:state");
   const isSidebarExpanded = sidebarState ? sidebarState === "true" : true;
   return (

@@ -121,7 +121,10 @@ export const settingsRouter = router({
         });
       }
       await runNotificationUnsubscriptionDBCalls(userId, deviceId);
-      cookieStore.delete(DEVICE_ID_COOKIE_NAME);
+      cookieStore.delete({
+        name: DEVICE_ID_COOKIE_NAME,
+        ...cookieDefaultOptions,
+      });
     }
   ),
 });

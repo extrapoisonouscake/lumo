@@ -13,21 +13,12 @@ import { cookies, headers } from "next/headers";
 
 import { getFullCookieName } from "./getFullCookieName";
 
-// Set domain for cross-subdomain cookie sharing
-// Leading dot allows all subdomains (e.g., .lumobc.ca works for lumobc.ca, worker.lumobc.ca, etc.)
-const getCookieDomain = () => {
-  if (shouldSecureCookies && DEFAULT_DOMAIN !== "localhost") {
-    return `.${DEFAULT_DOMAIN}`;
-  }
-  return undefined; // Don't set domain for localhost
-};
-
 export const cookieDefaultOptions: Partial<ResponseCookie> = {
   secure: shouldSecureCookies,
   maxAge: COOKIE_MAX_AGE,
   httpOnly: true,
   sameSite: "strict",
-  domain: getCookieDomain(),
+  domain: shouldSecureCookies ? `.${DEFAULT_DOMAIN}` : undefined,
 };
 
 export type PlainCookieStore = Omit<
@@ -126,7 +117,10 @@ export class MyEdCookieStore {
     }
   };
   delete: PlainCookieStore["delete"] = (name: string) => {
-    return this.store.delete(getFullCookieName(name));
+    return this.store.delete({
+      name: getFullCookieName(name),
+      ...cookieDefaultOptions,
+    });
   };
   isMyEdCookieStore = true;
 }

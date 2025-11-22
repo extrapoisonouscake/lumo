@@ -333,12 +333,18 @@ export async function deleteSession(externalStore?: PlainCookieStore) {
     if (deviceId && myedUser) {
       const userId = hashString(myedUser.id);
       after(() => runNotificationUnsubscriptionDBCalls(userId, deviceId));
-      cookiePlainStore.delete(DEVICE_ID_COOKIE_NAME);
+      cookiePlainStore.delete({
+        name: DEVICE_ID_COOKIE_NAME,
+        ...cookieDefaultOptions,
+      });
     }
     cookieStore.delete(AUTH_COOKIES_NAMES.tokens);
   }
   cookieStore.delete(AUTH_COOKIES_NAMES.credentials);
   cookieStore.delete(AUTH_COOKIES_NAMES.user);
   cookieStore.delete(AUTH_COOKIES_NAMES.targetId);
-  cookiePlainStore.delete(IS_LOGGED_IN_COOKIE_NAME);
+  cookiePlainStore.delete({
+    name: IS_LOGGED_IN_COOKIE_NAME,
+    ...cookieDefaultOptions,
+  });
 }
